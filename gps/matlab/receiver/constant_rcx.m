@@ -34,7 +34,7 @@
  USE_PLL = 1;           % To use only the FLL, set USE_PLL = 0.  If you want to use the PLL, set this to 1
  INITIALIZE_PLL = 1;    % This is to run the initialization of km1 and km2 variables used in the PLL
  PLL_LOOP_ORDER = 2;    % This is the loop order to use for the PLL
- PLL_SWITCH_TIME = 0.5; % This is the time (in seconds) at which to switch over to the PLL, note this is determined empirically using the bandwidth of the FLL.
+ PLL_SWITCH_TIME = 0.8; % This is the time (in seconds) at which to switch over to the PLL, note this is determined empirically using the bandwidth of the FLL.
  PLL_BANDWIDTH = 5;    % This the PLL Bandwidth
  T = 1e-3;              % Duration of a C/A Code Period, in seconds
  USE_FFT = 0;           %To use FFT-based acquisition set this to 1

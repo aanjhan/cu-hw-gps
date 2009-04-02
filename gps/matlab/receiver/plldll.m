@@ -44,7 +44,7 @@ err_phs_k = -atan(Q_prompt_k/I_prompt_k);
 %Determine the amplitude of the peak
 amplitude = (IQearly+IQlate)/(2-CHIPS_EML);
 %Get the shift in chips necessary to re-center the triangle
-tau_prime = -(IQearly-IQlate)/2/amplitude;
+tau_prime = (IQearly-IQlate)/2/amplitude;
 %and the code phase error
 err_code_k = tau_prime*1023;
 

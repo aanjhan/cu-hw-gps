@@ -35,7 +35,7 @@ function  [doppler_frequency, code_start_time, CNR] = INITIAL_ACQUISITION(in_sig
 CONSTANT_H;
 
 %pick coherent integration time
-Tacc=3;
+Tacc=1;
 %Bring in Tacc+1 msec of input data
 in_sig_2ms = in_sig(1:ONE_MSEC_SAM*(Tacc+1));
 CAcode = digitize_ca_prompt(CAcode,Tacc);

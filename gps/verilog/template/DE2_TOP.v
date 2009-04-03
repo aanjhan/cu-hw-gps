@@ -18,7 +18,7 @@ module DE2_TOP (
     output [6:0]  HEX7,        // Seven Segment Digit 7
     // LED
     output [8:0]  LEDG,        // LED Green[8:0]
-    output [17:0] LEDR        // LED Red[17:0]
+    output [17:0] LEDR,        // LED Red[17:0]
     // UART
     output        UART_TXD,    // UART Transmitter
     input         UART_RXD,    // UART Receiver

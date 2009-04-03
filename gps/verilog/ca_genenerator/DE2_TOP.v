@@ -151,10 +151,21 @@ module DE2_TOP (
    assign GPIO_0    = 36'hzzzzzzzzz;
    assign GPIO_1    = 36'hzzzzzzzzz;*/
    
-   reg [32:0] led;
+   reg [28:0] led;
    assign LEDR[4:0] = led[28:24];
    always @(posedge CLOCK_50) begin
-      led<=led+33'd1;
+      led<=led+29'd1;
+   end
+
+   reg [15:0] clkCount;
+   reg CLOCK_1K;
+   always @(posedge CLOCK_50) begin
+      clkCount<=~KEY[3] ? 16'd0 :
+                clkCount==16'd49999 ? 16'd0 :
+                clkCount+16'd1;
+      CLOCK_1K<=~KEY[3] ? 1'b0 :
+                clkCount==16'd0 ? ~CLOCK_1K :
+                CLOCK_1K;
    end
 
    wire [9:0] codeShift;
@@ -163,7 +174,7 @@ module DE2_TOP (
    HexDriver chipDisplay0(codeShift[3:0],HEX0);
 
    wire       caBit;
-   CAGenerator cagen(.clock(~KEY[0]),
+   CAGenerator cagen(.clock(KEY[0]&CLOCK_1K),
                      .reset(~KEY[3]),
                      .prn(SW[4:0]),
                      .codeShift(codeShift),

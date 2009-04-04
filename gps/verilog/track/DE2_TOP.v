@@ -1,8 +1,8 @@
 module DE2_TOP (
     // Clock Input
-    //input         CLOCK_27,    // 27 MHz
+    input         CLOCK_27,    // 27 MHz
     input         CLOCK_50,    // 50 MHz
-    //input         EXT_CLOCK,   // External Clock
+    input         EXT_CLOCK,   // External Clock
     // Push Button
     input  [3:0]  KEY,         // Pushbutton[3:0]
     // DPDT Switch
@@ -18,8 +18,8 @@ module DE2_TOP (
     output [6:0]  HEX7,        // Seven Segment Digit 7
     // LED
     output [8:0]  LEDG,        // LED Green[8:0]
-    output [17:0] LEDR        // LED Red[17:0]
-    /*// UART
+    output [17:0] LEDR,        // LED Red[17:0]
+    // UART
     output        UART_TXD,    // UART Transmitter
     input         UART_RXD,    // UART Receiver
     // IRDA
@@ -123,11 +123,11 @@ module DE2_TOP (
     output        TD_RESET,    // TV Decoder Reset
     // GPIO
     inout  [35:0] GPIO_0,      // GPIO Connection 0
-    inout  [35:0] GPIO_1       // GPIO Connection 1*/
+    inout  [35:0] GPIO_1       // GPIO Connection 1
 );
 
-// Turn on all display
-   /*assign HEX0 = 7'h00;
+   // Turn on all display
+   assign HEX0 = 7'h00;
    assign HEX1 = 7'h00;
    assign HEX2 = 7'h00;
    assign HEX3 = 7'h00;
@@ -135,7 +135,7 @@ module DE2_TOP (
    assign HEX5 = 7'h00;
    assign HEX6 = 7'h00;
    assign HEX7 = 7'h00;
-   //assign LEDR      = 18'h3FFFF;
+   assign LEDR      = 18'h3FFFF;
    assign LEDG      = 9'h1FF;
    assign LCD_ON    = 1'b1;
    assign LCD_BLON  = 1'b1;
@@ -149,64 +149,6 @@ module DE2_TOP (
    assign SD_DAT    = 1'bz;
    assign ENET_DATA = 16'hzzzz;
    assign GPIO_0    = 36'hzzzzzzzzz;
-   assign GPIO_1    = 36'hzzzzzzzzz;*/
+   assign GPIO_1    = 36'hzzzzzzzzz;
    
-   reg [28:0] led;
-   assign LEDR[4:0] = led[28:24];
-   always @(posedge CLOCK_50) begin
-      led<=led+29'd1;
-   end
-
-   reg [15:0] clkCount;
-   reg CLOCK_1K;
-   always @(posedge CLOCK_50) begin
-      clkCount<=~KEY[3] ? 16'd0 :
-                clkCount==16'd49999 ? 16'd0 :
-                clkCount+16'd1;
-      CLOCK_1K<=~KEY[3] ? 1'b0 :
-                clkCount==16'd0 ? ~CLOCK_1K :
-                CLOCK_1K;
-   end
-
-   wire [9:0] codeShift;
-   HexDriver chipDisplay2({2'h0,codeShift[9:8]},HEX2);
-   HexDriver chipDisplay1(codeShift[7:4],HEX1);
-   HexDriver chipDisplay0(codeShift[3:0],HEX0);
-
-   wire       caBit;
-   CAGenerator cagen(.clk(KEY[0]&CLOCK_1K),
-                     .reset(~KEY[3]),
-                     .prn(SW[4:0]),
-                     .codeShift(codeShift),
-                     .out(cabit),
-                     .g1(LEDR[17:8]));
-   assign     LEDR[6]=cabit;
-   assign     LEDG[3:0]=~KEY;
-   HexDriver prn1({3'h0,SW[4]},HEX5);
-   HexDriver prn0(SW[3:0],HEX4);
-
-   assign     HEX3=7'h7F;
-   assign     HEX6=7'h7F;
-   assign     HEX7=7'h7F;
-
-    //wire reset;
-    //Reset_Delay rst(.iCLK(CLOCK_50),.oRESET(reset));
-   /*wire reset;
-   power_on_reset por(CLOCK_50,reset);
-
-   wire CLOCK_1M, CLOCK_1K, CLOCK_2;
-   clock_div cdiv(reset,
-                  CLOCK_50,
-                  CLOCK_1M,
-                  CLOCK_1K,
-                  CLOCK_2);
-
-   always @(posedge CLOCK_50) begin
-      LEDR[17:10] <= SW[17:10];
-   end
-
-   always @(posedge CLOCK_2) begin
-      LEDR[9:0] <= reset ? 10'h0 : LEDR[9:0]+10'h1;
-   end*/
-
 endmodule

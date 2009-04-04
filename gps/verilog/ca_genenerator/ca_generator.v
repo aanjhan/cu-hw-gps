@@ -1,20 +1,20 @@
 `define TAP_1 7:4
 `define TAP_2 3:0
 
-module CAGenerator(clock,reset,prn,codeShift,out,g1);
-   input            clock;
+module CAGenerator(clk,reset,prn,codeShift,out);
+   input            clk;
    input            reset;
    input      [4:0] prn;
    output reg [9:0] codeShift;
    output           out;
 
-   output reg [10:1]       g1;
+   reg [10:1]       g1;
    reg [10:1]       g2;
    reg [7:0]        taps;
    
    assign out=g1[10]^(g2[taps[`TAP_1]]^g2[taps[`TAP_2]]);
 
-   always @(posedge clock or posedge reset) begin
+   always @(posedge clk or posedge reset) begin
       codeShift<=reset ? 10'd0 :
                  codeShift==10'd1022 ? 10'd0 :
                  codeShift+10'd1;

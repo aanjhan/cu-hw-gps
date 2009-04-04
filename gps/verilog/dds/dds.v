@@ -1,4 +1,4 @@
-module dds(clk, reset, inc, out);
+module DDS(clk, reset, inc, out);
    parameter ACC_WIDTH = 1;
    parameter PHASE_INC_WIDTH = 1;
    parameter OUTPUT_WIDTH = 1;

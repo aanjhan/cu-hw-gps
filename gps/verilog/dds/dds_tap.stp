@@ -20,7 +20,7 @@
       <single attribute="setup vertical scroll position" value="0"/>
       <single attribute="setup horizontal scroll position" value="0"/>
       <single attribute="data hierarchy root" value="3"/>
-      <single attribute="data hierarchy dds:ca_clock" value="1"/>
+      <single attribute="data hierarchy DDS:ca_clock" value="1"/>
       <multi attribute="timebars" size="1" value="5"/>
     </position_info>
     <signal_set global_temp="1" name="signal_set: 2009/04/03 18:27:26  #0">
@@ -29,175 +29,175 @@
       <top_entity/>
       <signal_vec>
         <trigger_input_vec>
-          <wire name="dds:ca_clock|accumulator[0]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[10]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[11]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[12]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[13]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[14]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[15]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[16]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[17]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[18]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[19]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[1]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[20]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[21]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[22]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[23]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[24]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[2]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[3]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[4]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[5]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[6]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[7]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[8]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[9]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|out[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="dds:ca_clock|out[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="dds:ca_clock|out[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="dds:ca_clock|reset" tap_mode="classic" type="combinatorial"/>
+          <wire name="DDS:ca_clock|accumulator[0]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[10]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[11]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[12]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[13]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[14]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[15]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[16]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[17]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[18]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[19]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[1]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[20]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[21]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[22]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[23]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[24]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[2]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[3]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[4]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[5]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[6]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[7]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[8]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[9]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|out[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="DDS:ca_clock|out[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="DDS:ca_clock|out[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="DDS:ca_clock|reset" tap_mode="classic" type="combinatorial"/>
         </trigger_input_vec>
         <data_input_vec>
-          <wire name="dds:ca_clock|accumulator[0]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[10]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[11]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[12]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[13]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[14]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[15]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[16]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[17]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[18]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[19]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[1]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[20]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[21]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[22]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[23]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[24]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[2]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[3]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[4]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[5]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[6]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[7]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[8]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[9]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|out[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="dds:ca_clock|out[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="dds:ca_clock|out[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="dds:ca_clock|reset" tap_mode="classic" type="combinatorial"/>
+          <wire name="DDS:ca_clock|accumulator[0]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[10]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[11]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[12]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[13]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[14]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[15]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[16]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[17]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[18]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[19]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[1]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[20]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[21]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[22]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[23]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[24]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[2]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[3]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[4]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[5]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[6]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[7]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[8]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[9]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|out[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="DDS:ca_clock|out[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="DDS:ca_clock|out[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="DDS:ca_clock|reset" tap_mode="classic" type="combinatorial"/>
         </data_input_vec>
         <storage_qualifier_input_vec>
-          <wire name="dds:ca_clock|accumulator[0]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[10]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[11]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[12]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[13]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[14]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[15]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[16]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[17]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[18]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[19]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[1]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[20]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[21]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[22]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[23]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[24]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[2]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[3]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[4]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[5]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[6]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[7]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[8]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|accumulator[9]" tap_mode="classic" type="register"/>
-          <wire name="dds:ca_clock|out[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="dds:ca_clock|out[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="dds:ca_clock|out[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="dds:ca_clock|reset" tap_mode="classic" type="combinatorial"/>
+          <wire name="DDS:ca_clock|accumulator[0]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[10]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[11]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[12]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[13]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[14]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[15]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[16]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[17]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[18]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[19]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[1]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[20]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[21]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[22]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[23]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[24]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[2]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[3]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[4]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[5]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[6]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[7]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[8]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|accumulator[9]" tap_mode="classic" type="register"/>
+          <wire name="DDS:ca_clock|out[0]" tap_mode="classic" type="combinatorial"/>
+          <wire name="DDS:ca_clock|out[1]" tap_mode="classic" type="combinatorial"/>
+          <wire name="DDS:ca_clock|out[2]" tap_mode="classic" type="combinatorial"/>
+          <wire name="DDS:ca_clock|reset" tap_mode="classic" type="combinatorial"/>
         </storage_qualifier_input_vec>
       </signal_vec>
       <presentation>
         <data_view>
-          <bus is_signal_inverted="no" link="all" name="dds:ca_clock|out" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
-            <net is_signal_inverted="no" name="dds:ca_clock|out[0]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|out[1]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|out[2]"/>
+          <bus is_signal_inverted="no" link="all" name="DDS:ca_clock|out" order="lsb_to_msb" radix="hex" state="collapse" type="combinatorial">
+            <net is_signal_inverted="no" name="DDS:ca_clock|out[0]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|out[1]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|out[2]"/>
           </bus>
-          <net is_signal_inverted="no" name="dds:ca_clock|reset"/>
-          <bus is_signal_inverted="no" link="all" name="dds:ca_clock|accumulator" order="lsb_to_msb" radix="unsigned_dec" state="collapse" type="register">
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[0]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[1]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[2]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[3]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[4]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[5]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[6]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[7]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[8]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[9]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[10]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[11]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[12]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[13]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[14]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[15]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[16]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[17]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[18]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[19]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[20]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[21]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[22]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[23]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[24]"/>
+          <net is_signal_inverted="no" name="DDS:ca_clock|reset"/>
+          <bus is_signal_inverted="no" link="all" name="DDS:ca_clock|accumulator" order="lsb_to_msb" radix="unsigned_dec" state="collapse" type="register">
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[0]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[1]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[2]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[3]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[4]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[5]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[6]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[7]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[8]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[9]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[10]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[11]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[12]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[13]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[14]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[15]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[16]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[17]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[18]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[19]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[20]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[21]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[22]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[23]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[24]"/>
           </bus>
         </data_view>
         <setup_view>
-          <bus is_signal_inverted="no" link="all" name="dds:ca_clock|out" order="lsb_to_msb" radix="hex" state="expand" type="combinatorial">
-            <net is_signal_inverted="no" name="dds:ca_clock|out[0]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|out[1]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|out[2]"/>
+          <bus is_signal_inverted="no" link="all" name="DDS:ca_clock|out" order="lsb_to_msb" radix="hex" state="expand" type="combinatorial">
+            <net is_signal_inverted="no" name="DDS:ca_clock|out[0]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|out[1]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|out[2]"/>
           </bus>
-          <net is_signal_inverted="no" name="dds:ca_clock|reset"/>
-          <bus is_signal_inverted="no" link="all" name="dds:ca_clock|accumulator" order="lsb_to_msb" radix="unsigned_dec" state="collapse" type="register">
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[0]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[1]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[2]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[3]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[4]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[5]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[6]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[7]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[8]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[9]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[10]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[11]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[12]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[13]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[14]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[15]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[16]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[17]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[18]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[19]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[20]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[21]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[22]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[23]"/>
-            <net is_signal_inverted="no" name="dds:ca_clock|accumulator[24]"/>
+          <net is_signal_inverted="no" name="DDS:ca_clock|reset"/>
+          <bus is_signal_inverted="no" link="all" name="DDS:ca_clock|accumulator" order="lsb_to_msb" radix="unsigned_dec" state="collapse" type="register">
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[0]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[1]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[2]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[3]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[4]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[5]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[6]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[7]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[8]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[9]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[10]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[11]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[12]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[13]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[14]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[15]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[16]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[17]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[18]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[19]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[20]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[21]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[22]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[23]"/>
+            <net is_signal_inverted="no" name="DDS:ca_clock|accumulator[24]"/>
           </bus>
         </setup_view>
       </presentation>
       <trigger attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2009/04/03 18:43:56  #0" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="8" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="segmented">
         <power_up_trigger position="pre" storage_qualifier_disabled="no" trigger_in="dont_care" trigger_out="active high"/>
         <events use_custom_flow_control="no">
-          <level enabled="yes" name="condition1" type="basic">'dds:ca_clock|out[0]' == either edge
+          <level enabled="yes" name="condition1" type="basic">'DDS:ca_clock|out[0]' == either edge
             <power_up enabled="yes">
             </power_up>
             <op_node/>

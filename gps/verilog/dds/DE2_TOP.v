@@ -162,7 +162,7 @@ module DE2_TOP (
    `define CA_INC 1021613
    wire [2:0] out;
 
-   dds #(.ACC_WIDTH(24),
+   DDS #(.ACC_WIDTH(24),
          .PHASE_INC_WIDTH(20),
          .OUTPUT_WIDTH(3))
      ca_clock(.clk(ddsClk),

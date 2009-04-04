@@ -10,6 +10,7 @@
 module Track(
     input clk,
     input reset,
+    input enable, 
     input [4:0] prn,
     input [2:0] basebandInput,
     output reg [(`ACC_WIDTH-1):0] accumulator);
@@ -19,7 +20,7 @@ module Track(
    DDS #(.ACC_WIDTH(24),
          .PHASE_INC_WIDTH(20),
          .OUTPUT_WIDTH(1))
-     ca_clock_gen(.clk(clk),
+     ca_clock_gen(.clk(clk & enable),
                   .reset(reset),
                   .inc(20'd`CA_RATE_INC),
                   .out(caClk));

@@ -150,5 +150,23 @@ module DE2_TOP (
    assign ENET_DATA = 16'hzzzz;
    assign GPIO_0    = 36'hzzzzzzzzz;
    assign GPIO_1    = 36'hzzzzzzzzz;
-   
+
+   wire   clk_200;
+   wire   clk_16_8;
+   wire   pllLocked;
+   SystemClockPLL system_pll(.inclk0(CLOCK_50),
+                             .c0(clk_200),
+                             .c1(clk_16_8),
+                             .locked(pllLocked));
+
+   wire   globalReset;
+   assign globalReset = ~pllLocked | ~KEY[0];
+
+   wire [15:0] accumulator;
+   Track track(.clk(clk_16_8),
+               .reset(globalReset),
+               .enable(~KEY[4]),
+               .prn(SW[4:0]),
+               .basebandInput(3'd0),//FIXME Generate input.
+               .accumulator(accumulator));
 endmodule

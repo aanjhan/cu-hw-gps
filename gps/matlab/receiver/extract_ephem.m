@@ -22,7 +22,7 @@ function [ephem, GPS_time] = EXTRACT_EPHEM(data, sfindex, SV)
 % Initialization
 TOW=0;            %pos 3
 week_num=0;       %pos 2
-T_GD=z0;          %pos 23
+T_GD=0 ;          %pos 23
 t_oc=0;           %pos 24
 af2=0;            %pos 19
 af1=0;            %pos 20
@@ -56,9 +56,9 @@ end
 
 %have to do this here for correct data inversion
 %do parity check of first subframe available
-[data1, flag] = parity_check(data(sfindex:sfindex+300-1),data(sfindex-8-2),data(sfindex-8-1));
+[data1, flag] = parity_check(data(sfindex:sfindex+300-1),data(sfindex-2),data(sfindex-1));
 %determine the subframe ID of this data
-sfidnum = data1(sfindex+49:sfindex+51);
+sfidnum = mat2int(data1(50:52));
 
 if(flag)
     error('PARITY CHECK ERROR in subframe %d data', SV);
@@ -70,7 +70,7 @@ if sfidnum~=1
     %offset below corrects GPS time for first SF observed
     offset = (6-sfidnum)*6;
     %parity check subframe 1
-    [data1, flag] = parity_check(data(sf1_idx:sf1_idx+300-1),data(sf1_idx-8-2),data(sf1_idx-8-1));
+    [data1, flag] = parity_check(data(sf1_idx:sf1_idx+300-1),data(sf1_idx-2),data(sf1_idx-1));
 else %otherwise we have subframe 1 as the first subframe  
     sf1_idx = sfindex;
     offset = 0;
@@ -84,56 +84,56 @@ end
 %at the z-count in the current subframe and subtracting 6 seconds.  This is
 %because the z-count refers to the time of transmission of the _first_ bit
 %of the next subframe.  Also don't forget to subtract off 'offset'.
-GPS_time = mat2int(data1(sf1_idx+30:sf1_idx+46))*4-offset-6;
+GPS_time = mat2int(data1(31:47))*4*1.5-offset-6;
 
 % retrieve the relevant ephemerides
-week_num = mat2int(data1(sf1_idx+60:sf1_idx+69));
+week_num = mat2int(data1(61:70))+1024;
 TOW = GPS_time+week_num*86400*7;  %this is the formal definition of TOW,
 %the value reported here will differ from the CORS reported value because 
 %TOW is dependent on the observation time of the ephemerides, which
 %differs from receiver to receiver.  All other parameters should match to
 %an accuracy of ~10^-15 when taking the difference
-T_GD = mat2int(data1(sf1_idx+196:sf1_idx+196+8))*2^-31; 
-t_oc = mat2int(data1(sf1_idx+218:sf1_idx+218+16))*2^4;
-af2 = mat2int(data1(sf1_idx+240:sf1_idx+240+8))*2^-55;
-af1 = mat2int(data1(sf1_idx+248:sf1_idx+248+16))*2^-43;
-af0 = mat2int(data1(sf1_idx+270:sf1_idx+270+22))*2^-31;
+T_GD = twoscomp2dec(data1(197:197+7))*2^-31; 
+t_oc = mat2int(data1(219:219+15))*2^4;
+af2 = twoscomp2dec(data1(241:241+7))*2^-55;
+af1 = twoscomp2dec(data1(249:249+15))*2^-43;
+af0 = twoscomp2dec(data1(271:271+21))*2^-31;
 
 %calculate start of subframe 2
 sf2_idx = sf1_idx+300;
 
 %parity check subframe 2 data
-[data2, flag] = parity_check(data(sf2_idx:sf2_idx+300-1),data(sf2_idx-8-2),data(sf2_idx-8-1));
+[data2, flag] = parity_check(data(sf2_idx:sf2_idx+300-1),data(sf2_idx-2),data(sf2_idx-1));
 if(flag)
     error('PARITY CHECK ERROR in subframe %d data', SV);
 end
 %and retrieve the relevant ephemerides
-C_rs = mat2int(data2(sf2_idx+68:sf2_idx+68+16))*2^-5;
-delt_n = mat2int(data2(sf2_idx+90:sf2_idx+90+16))2^-43;
-M_o = mat2int([data2(sf2_idx+106:sf2_idx+106+8) data2(sf2_idx+120:sf2_idx+120+24)])2^-31;
-C_uc = mat2int(data2(sf2_idx+150:sf2_idx+150+16))2^-29;
-e_s = mat2int([data2(sf2_idx+166:sf2_idx+166+8) data2(sf2_idx+180:sf2_idx+180+24)])2^-33;
-C_us = mat2int(data2(sf2_idx+210:sf2_idx+210+16))*2^-29;
-sq_as = mat2int([data2(sf2_idx+226:sf2_idx+226+8) data2(sf2_idx+240:sf2_idx+240+24)])*2^-19;
-t_oe = mat2int(data2(sf2_idx+270:sf2_idx+270+16))*2^4;
+C_rs = twoscomp2dec(data2(69:69+15))*2^-5;
+delt_n = twoscomp2dec(data2(91:91+15))*pi*2^-43;
+M_o = twoscomp2dec([data2(107:107+7) data2(121:121+23)])*pi*2^-31;
+C_uc = twoscomp2dec(data2(151:151+15))*2^-29;
+e_s = mat2int([data2(167:167+7) data2(181:181+23)])*2^-33;
+C_us = twoscomp2dec(data2(211:211+15))*2^-29;
+sq_as = mat2int([data2(227:227+7) data2(241:241+23)])*2^-19;
+t_oe = mat2int(data2(271:271+15))*2^4;
 
 %calculate start of subframe 3
 sf3_idx = sf2_idx+300;
 
 %perform parity check
-[data3, flag] = parity_check(data(sf3_idx:sf3_idx+300-1),data(sf3_idx-8-2),data(sf3_idx-8-1));
+[data3, flag] = parity_check(data(sf3_idx:sf3_idx+300-1),data(sf3_idx-2),data(sf3_idx-1));
 if(flag)
     error('PARITY CHECK ERROR in subframe %d data', SV);
 end
 %and retrieve the ephemerides
-C_ic = mat2int(data3(sf3_idx+60:sf3_idx+60+16))2^-29;
-omega_e = mat2int([data3(sf3_idx+76:sf3_idx+76+8) data3(sf3_idx+90:sf3_idx+90+24)])*2^-31;
-C_is = mat2int(data3(sf3_idx+120:sf3_idx+120+16))*2^-29;
-i_0 = mat2int([data3(sf3_idx+136:sf3_idx+136+8) data3(sf3_idx+150:sf3_idx+150+24)])*2^-31;
-C_rc = mat2int(data3(sf3_idx+180:sf3_idx+180+16))*2^-5;
-w = mat2int([data3(sf3_idx+196:sf3_idx+196+8) data3(sf3_idx+210:sf3_idx+210+24)])*2^-31;
-omega_dot = mat2int(data3(sf3_idx+240:sf3_idx+240+24))*2^-43;
-idot = mat2int(data3(sf3_idx+278:sf3_idx+278+14))*2^-41;
+C_ic = twoscomp2dec(data3(61:61+15))*2^-29;
+omega_e = twoscomp2dec([data3(77:77+7) data3(91:91+23)])*pi*2^-31;
+C_is = twoscomp2dec(data3(121:121+15))*2^-29;
+i_0 = twoscomp2dec([data3(137:137+7) data3(151:151+23)])*pi*2^-31;
+C_rc = twoscomp2dec(data3(181:181+15))*2^-5;
+w = twoscomp2dec([data3(197:197+7) data3(211:211+23)])*pi*2^-31;
+omega_dot = twoscomp2dec(data3(241:241+23))*pi*2^-43;
+idot = twoscomp2dec(data3(279:279+13))*pi*2^-43;
 
 %now write the vector in the appropriate order for ephem.asc
 ephem=[SV week_num TOW t_oe e_s sq_as w M_o omega_e omega_dot delt_n i_0 idot C_uc C_us C_rc C_rs C_ic C_is af0 af1 af2 T_GD t_oc];

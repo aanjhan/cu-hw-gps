@@ -44,7 +44,7 @@ for ind=1:30:271
     D(30) = mod(D29+sum(data_word([3 5 6 8 9 10 11 13 15 19 22 23 24])),2);
     %does the parity check pass? compare the extracted D to the original
     %data_word
-    if(D(25:30)==data_word(25:30))
+    if(D(25:30)==data_word(25:30)')
         %the output data is data_word
         data(ind:ind+29) = data_word;
         %store D29 and D30 to check parity on the next word

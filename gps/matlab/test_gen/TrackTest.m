@@ -1,6 +1,6 @@
 function [signal,packedSignal]=TrackTest(PRN,send)
     %Signal length in C/A codes.
-    length=3;
+    length=1;
     
     caCode=cacodegn(PRN);
     signal=digitize_ca_prompt(caCode,length);
@@ -12,10 +12,9 @@ function [signal,packedSignal]=TrackTest(PRN,send)
         frame=[hex2dec('FE');
                hex2dec('ED');
                1;
-               0;
-               2;
-               hex2dec('99');
-               hex2dec('00')];
+               floor(size(packedSignal,1)/2^8);
+               mod(size(packedSignal,1),2^8);
+               packedSignal];
         
         file=fopen(sprintf('prn_%d.dat',PRN),'wb');
         if(file<0)
@@ -24,5 +23,17 @@ function [signal,packedSignal]=TrackTest(PRN,send)
         end
         fwrite(file,frame);
         fclose(file);
+        
+        if(strcmp(computer,'PCWIN'))
+            bar=waitbar(0,sprintf('Transfer progress: %dB remaining.',size(frame,1)));
+            s=serial('COM4','BaudRate',115200);
+            fopen(s);
+            for i=1:size(frame,1)
+                fwrite(s,frame(i));
+                waitbar(i/size(frame,1),bar,sprintf('Transfer progress: %dB remaining.',size(frame,1)-i));
+            end
+            close(bar);
+            fclose(s);
+        end
     end
 end

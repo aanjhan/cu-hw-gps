@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     int value;
     unsigned char c;
     struct termios options;
+    int bytes;
     
     if(argc<3)
     {
@@ -18,24 +19,27 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    port=open(argv[1],O_WRONLY|O_NOCTTY|O_NDELAY);
+    port=open(argv[1],O_RDWR|O_NOCTTY|O_NDELAY);
     if(port==-1)
     {
         printf("Unable to open device %s.\n",argv[1]);
         return 1;
     }
+    fcntl(port,F_SETFL,0);
     tcgetattr(port,&options);
-    if(cfsetispeed(&options,B115200)!=0 ||
-       cfsetospeed(&options,B115200)!=0)
+    if(cfsetispeed(&options,B38400)!=0 ||
+       cfsetospeed(&options,B38400)!=0)
     {
         printf("Unable to set baud rate.\n");
         close(port);
         return 1;
     }
     options.c_cflag|=CLOCAL;
-    options.c_cflag&=~(IXON|IXOFF|IXANY);
+    options.c_cflag&=~PARENB;
+    options.c_cflag&=~CSTOPB;
+    options.c_cflag&=~CSIZE;
+    options.c_cflag|=CS8;
     options.c_cflag&=~CRTSCTS;
-    options.c_cflag&=~(ICANON|ECHO|ECHOE|ISIG);
     if(tcsetattr(port,TCSANOW,&options)!=0)
     {
         printf("Unable to update device settings.\n");
@@ -50,7 +54,8 @@ int main(int argc, char *argv[])
         close(port);
         return 2;
     }
-
+    
+    bytes=0;
     while(!feof(file))
     {
         value=fgetc(file);
@@ -60,10 +65,15 @@ int main(int argc, char *argv[])
         {
             printf("ERROR: Failed to write byte 0x%02X. Received error %d.\n",c, errno);
         }
+        else bytes++;
     }
+
+    tcdrain(port);
 
     fclose(file);
     close(port);
+
+    printf("Wrote %d bytes to %s.\n",bytes,argv[1]);
     
     return 0;
 }

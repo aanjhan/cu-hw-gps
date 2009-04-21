@@ -105,7 +105,7 @@ save ephem.asc ephem -ascii -double
 
 %finally now determine the PR's at a sample rate as specified by the passed
 %in parameter
-[PR,time,posHIST] = PR_POS_TIME(GPS_time(1,:), cst, sfindex, svids, bit_index, PR_sam_per);
+[PR,dopp,time,posHIST] = PR_POS_TIME(GPS_time(1,:), cst, doppler, sfindex, svids, bit_index, PR_sam_per);
 
 %now create obs.asc file
 
@@ -123,5 +123,14 @@ end
 
 %save the file as obs.asc, and the posHIST of the navigation solutions
 save 'obs.asc' 'obs' -ascii -double
+
+%now add SVnum's and Dopplers associated with SV
+for x=1:length(svids)
+    obs(:,2*x+1:2*x+2) = [svids(x)*ones(length(lines),1) dopp(:,x)];
+end
+
+%save the file as obs.asc, and the posHIST of the navigation solutions
+save 'obsdopp.asc' 'obs' -ascii -double
+
 save('posHIST.mat','posHIST')
 return

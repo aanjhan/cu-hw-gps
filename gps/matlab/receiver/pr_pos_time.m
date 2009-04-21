@@ -1,4 +1,4 @@
-function [PR,time,posHIST] = PR_POS_TIME(GPS_time, cst_hist, sfindex, svids, index, PR_sam_per)
+function [PR,dopp,time,posHIST] = PR_POS_TIME(GPS_time, cst_hist, doppler, sfindex, svids, index, PR_sam_per)
 % function [PR,time] = PR_POS_TIME(GPS_time, cst_hist, sfindex, svids, index, PR_sam_per)
 %
 % Inputs          Description
@@ -31,6 +31,7 @@ function [PR,time,posHIST] = PR_POS_TIME(GPS_time, cst_hist, sfindex, svids, ind
 
 %create the PR and posHIST vector for speed
 PR = zeros(ceil((length(index)-sfindex(1,1)-1)/(PR_sam_per)-2),length(svids));
+dopp = zeros(ceil((length(index)-sfindex(1,1)-1)/(PR_sam_per)-2),length(svids));
 posHIST = zeros(ceil((length(index)-sfindex(1,1)-1)/(PR_sam_per)-2),5);
 %create a time vector for speed
 time = zeros(round((length(index)-sfindex(1,1)-1)/(PR_sam_per))-2,1);
@@ -67,7 +68,7 @@ delT = 0;
 
 %the initial receiver time is the time of the first subframe for the first 
 %satellite at first bit of the first subframe preamble
-rcx_time = ???; 
+rcx_time = GPS_time; 
 
 %initial guess (it doesn't really matter what this is)
 guess = [42.4 -76.8 220];
@@ -87,9 +88,10 @@ for sample=1:length(PR)
     for x=1:length(svids)
         %obtain the relative pseudorange by comparing the first satellite
         %to the xth satellite's arrival times of the same bit
-        Rel_PR = (cst_hist(index(sfindex(x),???),???)-???);
+        Rel_PR = (cst_hist(index(sfindex(x),x),x)-cst_hist(index(sfindex(1),1),1));
         %calculate the true PR = c*(Rel_PR+current_delr)
         PR(sample,x) = 299792458*(Rel_PR+current_delr);
+        dopp(sample,x) = doppler(index(sfindex(x),x),x);
         %and write the current PR to the obs array by concatenating 1
         %satellite and 1 pseudorange
         obs(2*x+1:2*x+2) = [svids(x) PR(sample,x)];
@@ -128,9 +130,9 @@ for sample=1:length(PR)
     %update guess - this occasionally makes a difference
     guess = posOBS(2:4);
     %Obtain the current rcx clock offset correction
-    del_delr = ???;
+    del_delr = posOBS(5);
     %correct the receiver clock offset by the above
-    current_delr = ???;
+    current_delr = current_delr+del_delr;
 
     %and calculate delT, which is added in to rcx_time and GPS_time to
     %update our estimates of the clock

@@ -1,5 +1,7 @@
 #include "mex.h"
+#ifndef OCTAVE
 #include "matrix.h"
+#endif
 
 /*
  * convertbitpack2bit1.c

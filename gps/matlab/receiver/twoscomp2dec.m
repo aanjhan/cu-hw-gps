@@ -1,4 +1,4 @@
-function decimal = TWOSCOMP2DEC(binary)
+function decimal = twoscomp2dec(binary)
 % function decimal = TWOSCOMP2DEC(binary)
 % 
 % Inputs        Description
@@ -15,9 +15,9 @@ function decimal = TWOSCOMP2DEC(binary)
 % Ithaca, NY 14853
 
 if binary(1) == 0
-    decimal = MAT2INT(binary); 
+    decimal = mat2int(binary); 
 else
-    decimal = -(MAT2INT(~binary)+1);
+    decimal = -(mat2int(~binary)+1);
 end
 
 return;

@@ -1,4 +1,4 @@
-function GPS_SW_RCX()
+function gps_sw_rcx()
 %
 % The purpose of this script is to acquire and track GPS satellite signals
 % in non-real time from a digitzed data source.  It is also capable of
@@ -40,8 +40,8 @@ function GPS_SW_RCX()
 % Ithaca, NY 14853
 
 % Call the constants
-CONSTANT_H;
-CONSTANT_RCX;
+constant_h;
+constant_rcx;
 PRN = [];
 choose = 0;
 while(choose ~= 1 && choose ~= 2 && choose ~= 3)
@@ -73,12 +73,12 @@ elseif(choose == 1)
     %skip ahead seconds in the data if desired by setting second loop arg
     % and uncommenting this loop
     %for x= 1:10
-    %    [in_sig, fid, fileNo] = LOAD_GPS_DATA(file,0,1);
+    %    [in_sig, fid, fileNo] = load_gps_data(file,0,1);
     %end
     tic
     for x=1:length(PRN)
         %load 1 sec. of data from file
-        [in_sig, fid, fileNo] = LOAD_GPS_DATA(file,0,1);
+        [in_sig, fid, fileNo] = load_gps_data(file,0,1);
         
         %generate CA code for the particular satellite, and then again for each time_offset,
         %and again at each time offset for each early and late CA code
@@ -87,22 +87,22 @@ elseif(choose == 1)
         E_CA_code = zeros(ONE_MSEC_SAM,TP/T_RES);
         L_CA_code = zeros(ONE_MSEC_SAM,TP/T_RES);
         %and obtain the CA code for this particular satellite
-        current_CA_code = sign(CACODEGN(PRN(x))-0.5);
+        current_CA_code = sign(cacodegn(PRN(x))-0.5);
         %loop through all possible offsets to gen. CA_Code w/ offset
         for time_offset = 0:T_RES:TP-T_RES       
             [SV_offset_CA_code(:,1 + round(time_offset/T_RES)) ...
                 E_CA_code(:,1 + round(time_offset/T_RES)) ...
                 L_CA_code(:,1 + round(time_offset/T_RES))] ...
-                = DIGITIZE_CA(-time_offset,current_CA_code);
+                = digitize_ca(-time_offset,current_CA_code);
         end
         
         %call FFT_ACQUISITION to estimate the doppler frequency and
         %code start time if flag set in constant
         if(USE_FFT==1)
-            [doppler_frequency, code_start_time, CNR] = FFT_ACQUISITION(in_sig,current_CA_code);
+            [doppler_frequency, code_start_time, CNR] = fft_acquisition(in_sig,current_CA_code);
         else
             %otherwise use normal acquisition routine 
-            [doppler_frequency, code_start_time, CNR] = INITIAL_ACQUISITION(in_sig,current_CA_code);
+            [doppler_frequency, code_start_time, CNR] = initial_acquisition(in_sig,current_CA_code);
         end
         
         %if the signal was not found, quit this satellite
@@ -114,7 +114,7 @@ elseif(choose == 1)
             fprintf('PRN %d Found: Doppler Frequency: %d, CNR = %04.2f\n',PRN(x), doppler_frequency, CNR);
             %perform SIGNAL_TRACKING which will track the satellite and
             %determine the bits later used for the navigation solution
-            SIGNAL_TRACKING(doppler_frequency, code_start_time, in_sig, PRN(x), SV_offset_CA_code,...
+            signal_tracking(doppler_frequency, code_start_time, in_sig, PRN(x), SV_offset_CA_code,...
                 E_CA_code, L_CA_code, fid, file, fileNo, Nfiles);
             if(fid~=-1)
                 fclose(fid);
@@ -125,7 +125,7 @@ elseif(choose == 1)
 elseif(choose == 2)
     svids = input('Please enter satellites to obtain\n navigation solution: ');
     period = input('Please enter sampling period (ie 50 gives 1 sec solutions)\n to obtain Nav Soln / PR measurements: ');
-    PSEUDO_EPHEM(svids,period)
+    pseudo_ephem(svids,period)
 end
 
 return

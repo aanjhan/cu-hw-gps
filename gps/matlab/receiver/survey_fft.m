@@ -1,4 +1,4 @@
-function  [doppler_frequency, code_start_time, CNR, I2Q2] = survey(in_sig, PRN, codeLength, startTime)
+function  [doppler_frequency, code_start_time, CNR, I2Q2] = survey_fft(in_sig, PRN, codeLength, startTime)
 %function  [doppler_frequency, code_start_time, CNR, I2Q2] = SURVEY(in_sig, PRN)
 %
 % This function will take as input:

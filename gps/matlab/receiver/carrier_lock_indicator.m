@@ -23,7 +23,7 @@ function [carrier_lock_k, theta_k] = carrier_lock_indicator(I_prompt_k, Q_prompt
 %AUTHORS:  Alex Cerruti (apc20@cornell.edu)
 %Copyright 2006, Cornell University, Electrical and Computer Engineering,
 %Ithaca, NY 14853
-CONSTANT_H;
+constant_h;
 
 %Carrier lock for FLL and PLL: determine the angle using the
 %normalized dot product

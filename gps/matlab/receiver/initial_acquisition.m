@@ -1,4 +1,4 @@
-function  [doppler_frequency, code_start_time, CNR] = INITIAL_ACQUISITION(in_sig, CAcode)
+function  [doppler_frequency, code_start_time, CNR] = initial_acquisition(in_sig, CAcode)
 %function  [doppler_frequency, code_start_time, CNR] = INITIAL_ACQUISITION(in_sig, CAcode)
 %
 % This function will take as input:
@@ -32,7 +32,7 @@ function  [doppler_frequency, code_start_time, CNR] = INITIAL_ACQUISITION(in_sig
 % AUTHORS:  Alex Cerruti (apc20@cornell.edu), Mike Muccio (mtm15@cornell.edu)
 % modified Jan. 2008 by Brady O'Hanlon (bwo1@cornell.edu)
 % Copyright 2008, Cornell University, Electrical and Computer Engineering, Ithaca, NY 14850
-CONSTANT_H;
+constant_h;
 
 %pick coherent integration time
 Tacc=1;

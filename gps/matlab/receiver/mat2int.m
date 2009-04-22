@@ -1,4 +1,4 @@
-function int = MAT2INT(mat)
+function int = mat2int(mat)
 % function int = MAT2INT(mat)
 % 
 % Inputs        Description

@@ -1,4 +1,4 @@
-function [PR,dopp,time,posHIST] = PR_POS_TIME(GPS_time, cst_hist, doppler, sfindex, svids, index, PR_sam_per)
+function [PR,dopp,time,posHIST] = pr_pos_time(GPS_time, cst_hist, doppler, sfindex, svids, index, PR_sam_per)
 % function [PR,time] = PR_POS_TIME(GPS_time, cst_hist, sfindex, svids, index, PR_sam_per)
 %
 % Inputs          Description

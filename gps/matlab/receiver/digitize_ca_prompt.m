@@ -1,4 +1,4 @@
- function [ca_code_prompt] = DIGITIZE_CA(cacode,length)
+ function [ca_code_prompt] = digitize_ca_prompt(cacode,length)
 % function  [ca_code_prompt] = DIGITIZE_CA(cacode)
 %
 % This function will take as input:

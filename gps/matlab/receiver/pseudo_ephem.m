@@ -1,4 +1,4 @@
-function PSEUDO_EPHEM(svids, PR_sam_per)
+function pseudo_ephem(svids, PR_sam_per)
 % function PSEUDO_EPHEM(svids, PR_sam_per)
 % 
 % Inputs          Description
@@ -53,25 +53,25 @@ for x=2:dim2
 end
 
 %now get bit lock and downsample the bit stream on the 1st SV
-[bit, lock, ind] = BIT_LOCK(raw_bits(:,1));
+[bit, lock, ind] = bit_lock(raw_bits(:,1));
 
 %all satellites will have the same number of bits, preinitialize vectors
 bits = zeros(length(bit),length(svids));
 bit_index = bits;
-bit_lock = zeros(1,length(svids));
+bit_lock_ind = zeros(1,length(svids));
 
 %save SV 1 data
 bits(:,1) = bit;
 bit_index(:,1) = ind;
-bit_lock(:,1) = lock;
+bit_lock_ind(:,1) = lock;
 
 %now do bit lock on the other y-1 satellites
 for y=2:length(svids)
-    [bits(:,y), bit_lock(:,y), bit_index(:,y)] = BIT_LOCK(raw_bits(:,y));
+    [bits(:,y), bit_lock_ind(:,y), bit_index(:,y)] = bit_lock(raw_bits(:,y));
 end;
 
-if(sum(bit_lock) ~= length(svids))
-    y = find(bit_lock==0);
+if(sum(bit_lock_ind) ~= length(svids))
+    y = find(bit_lock_ind==0);
     fprintf('Bit lock failed on SVs '), fprintf('%d ', svids(y));
 %    error('Unable to process data');
     display('ignoring...');

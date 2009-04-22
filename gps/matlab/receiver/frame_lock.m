@@ -1,4 +1,4 @@
-function  [sfindex, data, lock] = FRAME_LOCK(data)
+function  [sfindex, data, lock] = frame_lock(data)
 %function  [sfidnum, sfindex, data, lock] = FRAME_LOCK(data)
 %bwo1: changed 1/3/07 to not calculate sfidnum
 %

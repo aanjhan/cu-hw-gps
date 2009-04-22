@@ -1,4 +1,4 @@
-function [ephem, GPS_time] = EXTRACT_EPHEM(data, sfindex, SV)
+function [ephem, GPS_time] = extract_ephem(data, sfindex, SV)
 % function [ephem, GPS_time] = EXTRACT_EPHEM(data, sfindex, SV) 
 %
 % Inputs        Description

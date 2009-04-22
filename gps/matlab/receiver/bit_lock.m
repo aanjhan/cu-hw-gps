@@ -1,4 +1,4 @@
-function  [bit, lock, index] = BIT_LOCK(data)
+function  [bit, lock, index] = bit_lock(data)
 %function  [bit, lock, index] = BIT_LOCK(data)
 %
 % This function will take as input:
@@ -26,7 +26,7 @@ function  [bit, lock, index] = BIT_LOCK(data)
 %Ithaca, NY 14853
 
 %declare global constants
-CONSTANT_H;
+constant_h;
 
 %initialize histogram bins and indicator
 bin = zeros(1,20);

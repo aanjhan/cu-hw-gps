@@ -44,12 +44,12 @@ constant_h;
 constant_rcx;
 PRN = [];
 choose = 0;
-while(choose ~= 1 && choose ~= 2 && choose ~= 3)
-    fprintf('Would you like to:\n1) Track 1 or more satellites\n2) Obtain the navigation solution\n3) Quit\n')
+while(choose ~= 1 && choose ~= 2 && choose ~= 3 && choose ~= 4)
+    fprintf('Would you like to:\n1) Track 1 or more satellites\n2) Obtain the navigation solution\n3) Extract almanac\n4) Quit\n')
     choose = input(': ');
 end
 
-if(choose == 3)
+if(choose == 4)
     return;
 elseif(choose == 1)
     PRNflag = 1;
@@ -126,6 +126,9 @@ elseif(choose == 2)
     svids = input('Please enter satellites to obtain\n navigation solution: ');
     period = input('Please enter sampling period (ie 50 gives 1 sec solutions)\n to obtain Nav Soln / PR measurements: ');
     pseudo_ephem(svids,period)
+elseif(choose == 3)
+    svid = input('Please enter the satellite from which to obtain the almanac: ');
+    process_almanac(svid);
 end
 
 return

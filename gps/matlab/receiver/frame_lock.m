@@ -45,14 +45,14 @@ while((lock==0)&&(i<datalength-346))
             if(i>1)
                 %if D30==1, must invert data from this word
                 if(data(i+29)==1)
-                    zcount1 = mat2int(~data(i+(30:46)-1));
+                    zcount1 = mat2int(~data(i+(30:46)));
                 else %non-inverted
-                    zcount1 = mat2int(data(i+(30:46)-1));
+                    zcount1 = mat2int(data(i+(30:46)));
                 end
                 if(data(i+329)==1)
-                    zcount2 = mat2int(~data(i+(30:46)+299));
+                    zcount2 = mat2int(~data(i+(30:46)+300));
                 else
-                    zcount2 = mat2int(data(i+(30:46)+299));
+                    zcount2 = mat2int(data(i+(30:46)+300));
                 end
                 if(zcount2==zcount1+1)
                     %if so, then jump out of this while loop & the function
@@ -83,14 +83,14 @@ if(lock==0)
                 if(i>1)
                     %must invert data if D30*==1
                     if(data(i+29)==1)
-                        zcount1 = mat2int(~data(i+(30:46)-1));
+                        zcount1 = mat2int(~data(i+(30:46)));
                     else %non-inverted
-                        zcount1 = mat2int(data(i+(30:46)-1));
+                        zcount1 = mat2int(data(i+(30:46)));
                     end
                     if(data(i+329)==1)
-                        zcount2 = mat2int(~data(i+(30:46)+299));
+                        zcount2 = mat2int(~data(i+(30:46)+300));
                     else
-                        zcount2 = mat2int(data(i+(30:46)+299));
+                        zcount2 = mat2int(data(i+(30:46)+300));
                     end
                     if(zcount2==zcount1+1)
                         %if so, then jump out of this while loop & the function

@@ -116,7 +116,7 @@ for sample=1:length(PR)
     posOBS = solveposod(ephem,pseudoR,guess,rcx_time);
 
     % output the navigation solution
-    printnav(posOBS);
+%     printnav(posOBS);
 
     %store the current navigation solution
     posHIST(sample,:) = posOBS;

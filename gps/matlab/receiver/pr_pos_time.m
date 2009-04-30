@@ -68,7 +68,7 @@ delT = 0;
 
 %the initial receiver time is the time of the first subframe for the first 
 %satellite at first bit of the first subframe preamble
-rcx_time = GPS_time; 
+rcx_time = GPS_time+current_delr;
 
 %initial guess (it doesn't really matter what this is)
 guess = [42.4 -76.8 220];

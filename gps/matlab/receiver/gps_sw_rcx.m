@@ -44,12 +44,12 @@ constant_h;
 constant_rcx;
 PRN = [];
 choose = 0;
-while(choose ~= 1 && choose ~= 2 && choose ~= 3 && choose ~= 4)
-    fprintf('Would you like to:\n1) Track 1 or more satellites\n2) Obtain the navigation solution\n3) Extract almanac\n4) Quit\n')
+while(choose<1 || choose>5)
+    fprintf('Would you like to:\n1) Track 1 or more satellites\n2) Obtain the navigation solution\n3) Extract almanac\n4) Aided tracking\n5) Quit\n')
     choose = input(': ');
 end
 
-if(choose == 4)
+if(choose == 5)
     return;
 elseif(choose == 1)
     PRNflag = 1;
@@ -129,6 +129,53 @@ elseif(choose == 2)
 elseif(choose == 3)
     svid = input('Please enter the satellite from which to obtain the almanac: ');
     process_almanac(svid);
+elseif(choose == 4)
+    %the file name of the digitized data
+    file = input('\nEnter the digitized data file name: ','s');
+
+    %the number of seconds to track the signal for
+    Nfiles = input('\nEnter the number of seconds to track the signal for: ');
+    
+    %load 1 sec. of data from file
+    [in_sig, fid, fileNo] = load_gps_data(file,0,1);
+    
+    [PRN, doppler_frequency, code_start_time, CNR]=aided_acquisition(in_sig,ecef([65.116936,-147.4347125,0]),488500);
+    
+    for prn=1:length(PRN)
+        %if the signal was not found, quit this satellite
+        if(CNR(prn)<CNO_MIN || code_start_time(prn) < 0)
+            fprintf('Warning: Initial Acquisition failed: PRN %02d not found in data set\n',PRN(prn))
+            fprintf('Doppler Frequency: %d   Code Start Time: %f    CNR: %f\n',doppler_frequency(prn), code_start_time(prn), CNR(prn));
+            %otherwise track the satellite
+        else
+            %load 1 sec. of data from file
+            [in_sig, fid, fileNo] = load_gps_data(file,0,1);
+            %generate CA code for the particular satellite, and then again for each time_offset,
+            %and again at each time offset for each early and late CA code
+            %initialize arrays for speed
+            SV_offset_CA_code = zeros(ONE_MSEC_SAM,TP/T_RES);
+            E_CA_code = zeros(ONE_MSEC_SAM,TP/T_RES);
+            L_CA_code = zeros(ONE_MSEC_SAM,TP/T_RES);
+            
+            %and obtain the CA code for this particular satellite
+            current_CA_code = sign(cacodegn(PRN(prn))-0.5);
+            %loop through all possible offsets to gen. CA_Code w/ offset
+            for time_offset = 0:T_RES:TP-T_RES
+                [SV_offset_CA_code(:,1 + round(time_offset/T_RES)) ...
+                    E_CA_code(:,1 + round(time_offset/T_RES)) ...
+                    L_CA_code(:,1 + round(time_offset/T_RES))] ...
+                    = digitize_ca(-time_offset,current_CA_code);
+            end
+
+            fprintf('PRN %d Found: Doppler Frequency: %d, CNR = %04.2f, cst=%f\n',PRN(prn), doppler_frequency(prn), CNR(prn), code_start_time(prn));
+            signal_tracking(doppler_frequency(prn), code_start_time(prn), in_sig, PRN(prn), SV_offset_CA_code,...
+                E_CA_code, L_CA_code, fid, file, fileNo, Nfiles);
+            
+            if(fid~=-1)
+                fclose(fid);
+            end
+        end
+    end
 end
 
 return

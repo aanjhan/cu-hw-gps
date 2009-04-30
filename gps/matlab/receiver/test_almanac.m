@@ -56,7 +56,7 @@ function test_almanac()
                 fprintf('Doppler Frequency: %d   Code Start Time: %f    CNR: %f\n',doppler_frequency(prn), code_start_time(prn), CNR(prn));
             %otherwise track the satellite
             else 
-                fprintf('PRN %d Found: Doppler Frequency: %d, CNR = %04.2f\n',PRN(prn), doppler_frequency(prn), CNR(prn));
+                fprintf('PRN %d Found: Doppler Frequency: %d, CNR = %04.2f, cst=%f\n',PRN(prn), doppler_frequency(prn), CNR(prn), code_start_time(prn));
             end
         end
 %         

@@ -79,14 +79,12 @@ function [posOBS,iters] = solvepos(ephem,pseudoR,guess,gpsTime)
       % "close enough"; if it is, then stop the iteration by setting the
       % 'stop' flag to 1; else, set the new initial guess equal to the
       % last computed value, and iterate again
-      d=abs(obsPos(1:3) - guess);
-      d=d(1);
       if (all(abs(obsPos(1:3) - guess) < 1e-6) || iters > 10) %we might want this better than -6?
           stop = 1;
       end
       guess = obsPos(1:3);
    end
-   obsPos = [obsPos(1:3) deltaPOS(4)]; %be sure to include the Rec clock offset
+   obsPos = [obsPos(1:3) deltaPOS(4)/c]; %be sure to include the Rec clock offset
    % create the output matrix 'posOBS' and return
    posOBS(1) = gpsTime;
    posOBS(2:5) = obsPos;

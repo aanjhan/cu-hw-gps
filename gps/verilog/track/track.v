@@ -36,8 +36,8 @@ module Track(
 
    //Wipe off C/A code.
    wire [2:0] wipedInput;
-   wipedInput[2] = basebandInput[2]^~caBit;
-   wipedInput[1:0] = basebandInput[1:0];
+   assign wipedInput[2] = basebandInput[2]^~caBit;
+   assign wipedInput[1:0] = basebandInput[1:0];
 
    //Sign-extend value and convert to two's complement.
    wire [2:0] input2c;

@@ -127,21 +127,14 @@ module DE2_TOP (
 );
 
    // Turn on all display
-   assign HEX0 = 7'h00;
-   assign HEX1 = 7'h00;
-   assign HEX2 = 7'h00;
-   assign HEX3 = 7'h00;
-   assign HEX4 = 7'h00;
-   assign HEX5 = 7'h00;
-   assign HEX6 = 7'h00;
-   assign HEX7 = 7'h00;
-   assign LEDR      = 18'h3FFFF;
-   assign LEDG      = 9'h1FF;
+   assign HEX6 = 7'h7F;
+   assign HEX7 = 7'h7F;
+   assign LEDR[9:0] = 10'h3FF;
+   assign LEDG[8:1] = 8'hFF;
    assign LCD_ON    = 1'b1;
    assign LCD_BLON  = 1'b1;
    
    // All inout port turn to tri-state
-   assign DRAM_DQ   = 16'hzzzz;
    assign FL_DQ     = 8'hzz;
    assign SRAM_DQ   = 16'hzzzz;
    assign OTG_DATA  = 16'hzzzz;
@@ -152,21 +145,64 @@ module DE2_TOP (
    assign GPIO_1    = 36'hzzzzzzzzz;
 
    wire   clk_200;
+   wire   clk_50, clk_50_m3ns;
    wire   clk_16_8;
    wire   pllLocked;
-   SystemClockPLL system_pll(.inclk0(CLOCK_50),
-                             .c0(clk_200),
-                             .c1(clk_16_8),
-                             .locked(pllLocked));
+   assign clk_50 = CLOCK_50;
+   system_clock_pll system_pll(.inclk0(clk_50),
+                               .c0(clk_200),
+                               .c1(clk_16_8),
+                               .c2(clk_50_m3ns),
+                               .locked(pllLocked));
 
    wire   globalReset;
    assign globalReset = ~pllLocked | ~KEY[0];
+   assign LEDG[0] = globalReset;
+
+   wire [7:0] dout;
+   wire [7:0] gpsData;
+   data_feed_nios data_feed(.clk_0(clk_50),
+                            .reset_n(~globalReset),
+                            .out_port_from_the_gps_data(gpsData),
+                            .in_port_to_the_pio_0({7'h0,~KEY[3]}),
+                            .out_port_from_the_pio_0(dout),
+                            .zs_addr_from_the_sdram_0(DRAM_ADDR),
+                            .zs_ba_from_the_sdram_0({DRAM_BA_1,DRAM_BA_0}),
+                            .zs_cas_n_from_the_sdram_0(DRAM_CAS_N),
+                            .zs_cke_from_the_sdram_0(DRAM_CKE),
+                            .zs_cs_n_from_the_sdram_0(DRAM_CS_N),
+                            .zs_dq_to_and_from_the_sdram_0(DRAM_DQ),
+                            .zs_dqm_from_the_sdram_0({DRAM_UDQM, DRAM_LDQM}),
+                            .zs_ras_n_from_the_sdram_0(DRAM_RAS_N),
+                            .zs_we_n_from_the_sdram_0(DRAM_WE_N),
+                            .rxd_to_the_uart_1(UART_RXD),
+                            .txd_from_the_uart_1(UART_TXD));
+   assign DRAM_CLK = clk_50_m3ns;
+   
+   assign LEDR[17:10] = dout;
+   assign HEX3 = 7'h7F;
+   assign HEX2 = 7'h7F;
+   HexDriver count_display1({1'b0,dout[6:4]},HEX1);
+   HexDriver count_display0(dout[3:0],HEX0);
+   
+   HexDriver count_display5(gpsData[7:4],HEX5);
+   HexDriver count_display4(gpsData[3:0],HEX4);
+
+   reg [15:0] count;
+   always @(posedge dout[3] or posedge dout[7]) begin
+      count <= dout[7] ? 'h0 : count+'h1;
+   end
+
+   /*HexDriver count_display3(count[15:12],HEX3);
+   HexDriver count_display2(count[11:8],HEX2);
+   HexDriver count_display1(count[7:4],HEX1);
+   HexDriver count_display0(count[3:0],HEX0);*/
 
    wire [15:0] accumulator;
-   Track track(.clk(clk_16_8),
-               .reset(globalReset),
-               .enable(~KEY[4]),
+   Track track(.clk(dout[3]),
+               .reset(dout[7]),
+               .enable(1'b1),
                .prn(SW[4:0]),
-               .basebandInput(3'd0),//FIXME Generate input.
+               .basebandInput(dout[2:0]),
                .accumulator(accumulator));
 endmodule

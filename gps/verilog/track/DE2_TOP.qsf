@@ -457,11 +457,19 @@ set_location_assignment PIN_V24 -to GPIO_1[32]
 set_location_assignment PIN_V23 -to GPIO_1[33]
 set_location_assignment PIN_W25 -to GPIO_1[34]
 set_location_assignment PIN_W23 -to GPIO_1[35]
-set_global_assignment -name USE_CONFIGURATION_DEVICE ON
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
 set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_global_assignment -name VERILOG_FILE ../ca_genenerator/hex_driver.v
+set_global_assignment -name VERILOG_FILE data_feed_nios.v
+set_global_assignment -name VERILOG_FILE altpllpll_0.v
 set_global_assignment -name VERILOG_FILE ../dds/dds.v
 set_global_assignment -name VERILOG_FILE ../ca_genenerator/ca_generator.v
 set_global_assignment -name VERILOG_FILE track.v
 set_global_assignment -name VERILOG_FILE ones_extend.v
 set_global_assignment -name VERILOG_FILE DE2_TOP.v
+set_global_assignment -name QIP_FILE system_clock_pll.qip

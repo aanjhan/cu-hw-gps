@@ -14,6 +14,7 @@
 #define DATA_TICKS (alt_ticks_per_second()/10)
 
 #define GPS_DATA_CLOCK 0x08
+#define GPS_RESET      0x80
 #define GPS_DATA       0x07
 
 #define CONTROL_STATE_B0      0
@@ -86,10 +87,13 @@ alt_u32 DataTick(void* context)
     gpsDataOut^=GPS_DATA_CLOCK;
     if(gpsDataOut&GPS_DATA_CLOCK)
     {
-        gpsDataOut&=~GPS_DATA;
+        gpsDataOut&=~(GPS_RESET | GPS_DATA);
         
         ret=ReadGPSWord((GPSDataBuffer*)&gpsData,&value);
         gpsDataOut|=value;
+        
+        //Setup data before clock.
+        IOWR_ALTERA_AVALON_PIO_DATA(GPS_DATA_BASE,value);
     }
     IOWR_ALTERA_AVALON_PIO_DATA(GPS_DATA_BASE,gpsDataOut);
     
@@ -98,7 +102,9 @@ alt_u32 DataTick(void* context)
 
 void StartFeed(void *context, alt_u32 id)
 {
-    gpsDataOut&=~GPS_DATA_CLOCK;
+    gpsDataOut=GPS_RESET;
+    IOWR_ALTERA_AVALON_PIO_DATA(GPS_DATA_BASE,gpsDataOut);
+    gpsDataOut|=GPS_DATA_CLOCK;
     IOWR_ALTERA_AVALON_PIO_DATA(GPS_DATA_BASE,gpsDataOut);
     alt_alarm_start(&dataAlarm,DATA_TICKS,DataTick,0);
     IOWR_ALTERA_AVALON_PIO_EDGE_CAP(START_BASE,0x01);

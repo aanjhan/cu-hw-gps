@@ -132,7 +132,7 @@ module DE2_TOP (
    assign HEX6 = 7'hFF;
    assign HEX7 = 7'hFF;
    assign LEDR[9:0] = 10'h0;
-   assign LEDG[4:1] = 4'h0;
+   assign LEDG[3:1] = 3'h0;
    assign LCD_ON    = 1'b0;
    assign LCD_BLON  = 1'b0;
    
@@ -187,7 +187,8 @@ module DE2_TOP (
    HexDriver led_display0(leds[3:0],HEX0);
 
    assign LEDG[8:5] = gpsData[3:0];
-   assign HEX5 = {~gpsData[2],6'h3F};
-   HexDriver gps_display0({2'h0,gpsData[1:0]},HEX4);
+   assign LEDG[4] = gpsData[7];
+   assign HEX5 = gpsData[7] ? 7'h7F : {~gpsData[2],6'h3F};
+   HexDriver gps_display0(gpsData[7] ? 4'h8 : {2'h0,gpsData[1:0]},HEX4);
    
 endmodule

@@ -470,3 +470,4 @@ set_global_assignment -name VERILOG_FILE ../ca_genenerator/ca_generator.v
 set_global_assignment -name VERILOG_FILE track.v
 set_global_assignment -name VERILOG_FILE ones_extend.v
 set_global_assignment -name VERILOG_FILE DE2_TOP.v
+set_global_assignment -name QIP_FILE system_pll.qip

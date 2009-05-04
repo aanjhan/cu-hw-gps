@@ -174,7 +174,7 @@ module DE2_TOP (
                             .in_port_to_the_start(~KEY[3]));
    assign DRAM_CLK = clk_50_m3ns;
 
-   reg [7:0] count;
+   reg [15:0] count;
    always @(posedge gps_data[3]) begin
       count <= gps_data[7] ? 'h0 : count+'h1;
    end
@@ -207,11 +207,11 @@ module DE2_TOP (
    assign LEDR[4:0] = SW[4:0];
    assign LEDG = codeShift[8:0];
    HexDriver acc_display3(SW[17] ? count[7:4] :
-                          ~KEY[2] ? 'h0 :
+                          ~KEY[2] ? count[15:12] :
                           accumulator[15:12],
                           HEX3);
    HexDriver acc_display2(SW[17] ? count[3:0] :
-                          ~KEY[2] ? 'h0 :
+                          ~KEY[2] ? count[11:8] :
                           accumulator[11:8],
                           HEX2);
    HexDriver acc_display1(~SW[17] && ~KEY[2] ? count[7:4] : accumulator[7:4],HEX1);

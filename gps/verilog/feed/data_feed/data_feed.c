@@ -39,11 +39,11 @@ typedef struct
     alt_u8 *data;
     alt_u32 numWords;
     
-    alt_u8 readIndex;
+    alt_u16 readIndex;
     alt_u8 readOffset;
     alt_u32 readWord;
     
-    alt_u8 writeIndex;
+    alt_u16 writeIndex;
     alt_u8 writeOffset;
     alt_u32 writeWord;
 } GPSDataBuffer;

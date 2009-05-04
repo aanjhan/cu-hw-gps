@@ -127,10 +127,6 @@ module DE2_TOP (
 );
 
    // Turn on all display
-   assign HEX4 = 7'h7F;
-   assign HEX5 = 7'h7F;
-   assign LEDR[9:0] = 10'h3FF;
-   assign LEDG[8:1] = 8'hFF;
    assign LCD_ON    = 1'b1;
    assign LCD_BLON  = 1'b1;
    
@@ -157,7 +153,6 @@ module DE2_TOP (
 
    wire   global_reset;
    assign global_reset = ~pll_locked | ~KEY[0];
-   assign LEDG[0] = global_reset;
 
    wire [7:0] leds;
    wire [7:0] gps_data;
@@ -183,21 +178,42 @@ module DE2_TOP (
    always @(posedge gps_data[3]) begin
       count <= gps_data[7] ? 'h0 : count+'h1;
    end
-
-   HexDriver count_display1(count[7:4],HEX7);
-   HexDriver count_display0(count[3:0],HEX6);
+   
+   assign HEX7 = gps_data[7] ? 7'h7F : {~gps_data[2],6'h3F};
+   HexDriver gps_display1(gps_data[7] ? 4'h8 : {2'h0,gps_data[1:0]},HEX6);
 
    wire [15:0] accumulator;
+   wire [9:0] codeShift;
+   wire ca_bit;
+   wire ca_clk;
    Track track(.clk(gps_data[3]),
                .reset(gps_data[7]),
                .enable(1'b1),
                .prn(SW[4:0]),
                .basebandInput(gps_data[2:0]),
+               .caBit(ca_bit),
+               .caClk(ca_clk),
+               .codeShift(codeShift),
                .accumulator(accumulator));
+
+   assign HEX5 = gps_data[7] ? 7'h7F : {ca_bit,6'h3F};
+   HexDriver gps_display0(gps_data[7] ? 4'h8 : 4'h1,HEX4);
    
-   assign LEDR[17:10] = gps_data;
-   HexDriver acc_display3(accumulator[15:12],HEX3);
-   HexDriver acc_display2(accumulator[11:8],HEX2);
-   HexDriver acc_display1(accumulator[7:4],HEX1);
-   HexDriver acc_display0(accumulator[3:0],HEX0);
+   assign LEDR[17] = gps_data[7];
+   assign LEDR[16] = gps_data[3];
+   assign LEDR[15] = ca_clk;
+   assign LEDR[14:12] = gps_data[2:0];
+   assign LEDR[11:5] = 'h0;
+   assign LEDR[4:0] = SW[4:0];
+   assign LEDG = codeShift[8:0];
+   HexDriver acc_display3(SW[17] ? count[7:4] :
+                          ~KEY[2] ? 'h0 :
+                          accumulator[15:12],
+                          HEX3);
+   HexDriver acc_display2(SW[17] ? count[3:0] :
+                          ~KEY[2] ? 'h0 :
+                          accumulator[11:8],
+                          HEX2);
+   HexDriver acc_display1(~SW[17] && ~KEY[2] ? count[7:4] : accumulator[7:4],HEX1);
+   HexDriver acc_display0(~SW[17] && ~KEY[2] ? count[3:0] : accumulator[3:0],HEX0);
 endmodule

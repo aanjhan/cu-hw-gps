@@ -169,21 +169,21 @@ module DE2_TOP (
    end
 
    wire [9:0] codeShift;
-   HexDriver chipDisplay2({2'h0,codeShift[9:8]},HEX2);
-   HexDriver chipDisplay1(codeShift[7:4],HEX1);
-   HexDriver chipDisplay0(codeShift[3:0],HEX0);
+   hex_driver chipDisplay2({2'h0,codeShift[9:8]},HEX2);
+   hex_driver chipDisplay1(codeShift[7:4],HEX1);
+   hex_driver chipDisplay0(codeShift[3:0],HEX0);
 
    wire       caBit;
-   CAGenerator cagen(.clk(KEY[0]&CLOCK_1K),
-                     .reset(~KEY[3]),
-                     .prn(SW[4:0]),
-                     .codeShift(codeShift),
-                     .out(cabit),
-                     .g1(LEDR[17:8]));
+   ca_generator cagen(.clk(KEY[0]&CLOCK_1K),
+                      .reset(~KEY[3]),
+                      .prn(SW[4:0]),
+                      .code_shift(codeShift),
+                      .out(cabit),
+                      .g1(LEDR[17:8]));
    assign     LEDR[6]=cabit;
    assign     LEDG[3:0]=~KEY;
-   HexDriver prn1({3'h0,SW[4]},HEX5);
-   HexDriver prn0(SW[3:0],HEX4);
+   hex_driver prn1({3'h0,SW[4]},HEX5);
+   hex_driver prn0(SW[3:0],HEX4);
 
    assign     HEX3=7'h7F;
    assign     HEX6=7'h7F;

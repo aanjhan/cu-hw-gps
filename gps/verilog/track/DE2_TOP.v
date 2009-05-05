@@ -184,7 +184,7 @@ module DE2_TOP (
    end
    
    assign HEX7 = reset ? 7'h7F : {~gps_data[2],6'h3F};
-   HexDriver gps_display1(reset ? 4'h8 : {2'h0,gps_data[1:0]},HEX6);
+   hex_driver gps_display1(reset ? 4'h8 : {2'h0,gps_data[1:0]},HEX6);
 
    wire [14:0] code_shift;
    wire [9:0]  ca_code_shift;
@@ -205,12 +205,12 @@ module DE2_TOP (
    track track_i(.clk(clk_200),
                  .clk_sample(clk_sample),
                  .reset(reset),
-                 .basebandInput(gps_data[2:0]),
+                 .baseband_input(gps_data[2:0]),
                  .ca_bit(ca_bit),
                  .accumulator(accumulator));
 
    assign HEX5 = reset ? 7'h7F : {ca_bit,6'h3F};
-   HexDriver gps_display0(reset ? 4'h8 : 4'h1,HEX4);
+   hex_driver gps_display0(reset ? 4'h8 : 4'h1,HEX4);
    
    assign LEDR[17] = reset;
    assign LEDR[16] = clk_sample;
@@ -219,14 +219,14 @@ module DE2_TOP (
    assign LEDR[11:5] = 'h0;
    assign LEDR[4:0] = SW[4:0];
    assign LEDG = code_shift[12:4];
-   HexDriver acc_display3(SW[17] ? count[7:4] :
-                          ~KEY[2] ? count[15:12] :
-                          accumulator[15:12],
-                          HEX3);
-   HexDriver acc_display2(SW[17] ? count[3:0] :
-                          ~KEY[2] ? count[11:8] :
-                          accumulator[11:8],
-                          HEX2);
-   HexDriver acc_display1(~SW[17] && ~KEY[2] ? count[7:4] : accumulator[7:4],HEX1);
-   HexDriver acc_display0(~SW[17] && ~KEY[2] ? count[3:0] : accumulator[3:0],HEX0);
+   hex_driver acc_display3(SW[17] ? count[7:4] :
+                           ~KEY[2] ? count[15:12] :
+                           accumulator[15:12],
+                           HEX3);
+   hex_driver acc_display2(SW[17] ? count[3:0] :
+                           ~KEY[2] ? count[11:8] :
+                           accumulator[11:8],
+                           HEX2);
+   hex_driver acc_display1(~SW[17] && ~KEY[2] ? count[7:4] : accumulator[7:4],HEX1);
+   hex_driver acc_display0(~SW[17] && ~KEY[2] ? count[3:0] : accumulator[3:0],HEX0);
 endmodule

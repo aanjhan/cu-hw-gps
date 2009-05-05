@@ -183,12 +183,12 @@ module DE2_TOP (
                              .c0(DRAM_CLK));
    
    assign LEDR[17:10] = leds;
-   HexDriver led_display1(leds[7:4],HEX1);
-   HexDriver led_display0(leds[3:0],HEX0);
+   hex_driver led_display1(leds[7:4],HEX1);
+   hex_driver led_display0(leds[3:0],HEX0);
 
    assign LEDG[8:5] = gpsData[3:0];
    assign LEDG[4] = gpsData[7];
    assign HEX5 = gpsData[7] ? 7'h7F : {~gpsData[2],6'h3F};
-   HexDriver gps_display0(gpsData[7] ? 4'h8 : {2'h0,gpsData[1:0]},HEX4);
+   hex_driver gps_display0(gpsData[7] ? 4'h8 : {2'h0,gpsData[1:0]},HEX4);
    
 endmodule

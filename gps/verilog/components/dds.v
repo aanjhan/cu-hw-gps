@@ -1,13 +1,12 @@
-module DDS(clk, reset, inc, out);
+module dds(
+    input                            clk,
+    input                            reset,
+    input [(PHASE_INC_WIDTH-1):0]    inc,
+    output wire [(OUTPUT_WIDTH-1):0] out);
+   
    parameter ACC_WIDTH = 1;
    parameter PHASE_INC_WIDTH = 1;
    parameter OUTPUT_WIDTH = 1;
-
-   input     clk;
-   input     reset;
-   input [(PHASE_INC_WIDTH-1):0] inc;
-
-   output wire [(OUTPUT_WIDTH-1):0] out;
 
    reg [ACC_WIDTH:0] accumulator;
 

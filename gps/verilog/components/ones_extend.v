@@ -1,6 +1,7 @@
-module OnesExtend(
-    input [(IN_WIDTH-1):0] value,
+module ones_extend(
+    input [(IN_WIDTH-1):0]        value,
     output wire [(OUT_WIDTH-1):0] result);
+   
    parameter IN_WIDTH = 2;
    parameter OUT_WIDTH = 2;
 

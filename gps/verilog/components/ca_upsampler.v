@@ -31,7 +31,7 @@ module ca_upsampler(
    //Generate C/A code clock from reference
    //clock signal.
    wire ca_clk_n;
-   DDS #(.ACC_WIDTH(24),
+   dds #(.ACC_WIDTH(24),
          .PHASE_INC_WIDTH(20),
          .OUTPUT_WIDTH(1))
      ca_clock_gen(.clk(clk_dds),
@@ -41,9 +41,9 @@ module ca_upsampler(
    assign ca_clk = ~ca_clk_n;
 
    //Generate C/A code bit for given PRN.
-   CAGenerator ca_gen(.clk(ca_clk),
-                      .reset(reset),
-                      .prn(prn),
-                      .codeShift(ca_code_shift),
-                      .out(out));
+   ca_generator ca_gen(.clk(ca_clk),
+                       .reset(reset),
+                       .prn(prn),
+                       .code_shift(ca_code_shift),
+                       .out(out));
 endmodule

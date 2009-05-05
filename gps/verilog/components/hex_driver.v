@@ -1,6 +1,6 @@
-module HexDriver(value,display);
-    input [3:0] value;
-    output reg [6:0] display;
+module hex_driver(
+    input [3:0]      value,
+    output reg [6:0] display);
     
     always @(value) begin
         case(value)

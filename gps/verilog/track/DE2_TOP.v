@@ -174,38 +174,51 @@ module DE2_TOP (
                             .in_port_to_the_start(~KEY[3]));
    assign DRAM_CLK = clk_50_m3ns;
 
+   wire clk_sample, reset;
+   assign clk_sample = gps_data[3];
+   assign reset = gps_data[7];
+
    reg [15:0] count;
-   always @(posedge gps_data[3]) begin
-      count <= gps_data[7] ? 'h0 : count+'h1;
+   always @(posedge clk_sample) begin
+      count <= reset ? 'h0 : count+'h1;
    end
    
-   assign HEX7 = gps_data[7] ? 7'h7F : {~gps_data[2],6'h3F};
-   HexDriver gps_display1(gps_data[7] ? 4'h8 : {2'h0,gps_data[1:0]},HEX6);
+   assign HEX7 = reset ? 7'h7F : {~gps_data[2],6'h3F};
+   HexDriver gps_display1(reset ? 4'h8 : {2'h0,gps_data[1:0]},HEX6);
 
-   wire [15:0] accumulator;
-   wire [9:0] codeShift;
+   wire [14:0] code_shift;
+   wire [9:0]  ca_code_shift;
    wire ca_bit;
    wire ca_clk;
-   Track track(.clk(gps_data[3]),
-               .reset(gps_data[7]),
-               .enable(1'b1),
-               .prn(SW[4:0]),
-               .basebandInput(gps_data[2:0]),
-               .caBit(ca_bit),
-               .caClk(ca_clk),
-               .codeShift(codeShift),
-               .accumulator(accumulator));
+   ca_upsampler upsampler(.clk(clk_sample),
+                          .reset(reset),
+                          .prn(SW[4:0]),
+                          .code_shift(code_shift),
+                          .out(ca_bit),
+                          .clk_seek(clk_200),
+                          .seek_en(1'b0),
+                          .seek_target(15'h0),
+                          .ca_clk(ca_clk),
+                          .ca_code_shift(ca_code_shift));
 
-   assign HEX5 = gps_data[7] ? 7'h7F : {ca_bit,6'h3F};
-   HexDriver gps_display0(gps_data[7] ? 4'h8 : 4'h1,HEX4);
+   wire [15:0] accumulator;
+   track track_i(.clk(clk_200),
+                 .clk_sample(clk_sample),
+                 .reset(reset),
+                 .basebandInput(gps_data[2:0]),
+                 .ca_bit(ca_bit),
+                 .accumulator(accumulator));
+
+   assign HEX5 = reset ? 7'h7F : {ca_bit,6'h3F};
+   HexDriver gps_display0(reset ? 4'h8 : 4'h1,HEX4);
    
-   assign LEDR[17] = gps_data[7];
-   assign LEDR[16] = gps_data[3];
+   assign LEDR[17] = reset;
+   assign LEDR[16] = clk_sample;
    assign LEDR[15] = ca_clk;
    assign LEDR[14:12] = gps_data[2:0];
    assign LEDR[11:5] = 'h0;
    assign LEDR[4:0] = SW[4:0];
-   assign LEDG = codeShift[8:0];
+   assign LEDG = code_shift[12:4];
    HexDriver acc_display3(SW[17] ? count[7:4] :
                           ~KEY[2] ? count[15:12] :
                           accumulator[15:12],

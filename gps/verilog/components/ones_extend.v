@@ -7,7 +7,7 @@ module ones_extend(
 
    //Determine magnitude.
    wire [(IN_WIDTH-2):0] mag;
-   assign mag = value [(IN_WIDTH-2):0];
+   assign mag = value[(IN_WIDTH-2):0];
 
    wire zero;
    assign zero = mag=='h0;

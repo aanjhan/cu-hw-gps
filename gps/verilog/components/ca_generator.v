@@ -2,11 +2,12 @@
 `define TAP_2 3:0
 
 module ca_generator(
-   input            clk,
-   input            reset,
-   input      [4:0] prn,
-   output reg [9:0] code_shift,
-   output           out);
+    input            clk,
+    input            reset,
+    input            enable,
+    input [4:0]      prn,
+    output reg [9:0] code_shift,
+    output           out);
 
    reg [10:1]       g1;
    reg [10:1]       g2;
@@ -14,16 +15,17 @@ module ca_generator(
    
    assign out=g1[10]^(g2[taps[`TAP_1]]^g2[taps[`TAP_2]]);
 
-   always @(posedge clk or posedge reset) begin
+   always @(posedge clk) begin
       code_shift<=reset ? 10'd0 :
-                 code_shift==10'd1022 ? 10'd0 :
-                 code_shift+10'd1;
-      g1<=reset ?
-          10'h3FF :
+                  !enable ? code_shift :
+                  code_shift==10'd1022 ? 10'd0 :
+                  code_shift+10'd1;
+      g1<=reset ? 10'h3FF :
+          !enable ? g1 :
           g1<<1 | (g1[3]^g1[10]);
-      g2<=reset ?
-         10'h3FF :
-         g2<<1 | (g2[2]^g2[3]^g2[6]^g2[8]^g2[9]^g2[10]);
+      g2<=reset ? 10'h3FF :
+          !enable ? g2 :
+          g2<<1 | (g2[2]^g2[3]^g2[6]^g2[8]^g2[9]^g2[10]);
    end
 
    always @(prn) begin

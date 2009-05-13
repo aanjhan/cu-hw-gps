@@ -8,7 +8,7 @@ module dds(
    parameter PHASE_INC_WIDTH = 1;
    parameter OUTPUT_WIDTH = 1;
 
-   reg [ACC_WIDTH:0] accumulator;
+   reg [(ACC_WIDTH-1):0] accumulator;
 
    //Output is the top bits of the phase accumulator.
    assign out = accumulator[(ACC_WIDTH-1):(ACC_WIDTH-OUTPUT_WIDTH)];
@@ -17,6 +17,6 @@ module dds(
       //Update phase accumulator.
       accumulator <= reset ?
                      'h0 :
-                     accumulator+inc;
+                     accumulator+{{ACC_WIDTH-PHASE_INC_WIDTH{1'b0}},inc};
    end
 endmodule

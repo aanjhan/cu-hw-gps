@@ -29,33 +29,19 @@ module ca_upsampler(
 
    //Advance the clock when the system is
    //enabled (data available) or when seeking.
-   wire advance;
-   assign advance = enable | seeking;
-
-   //Preload the clock DDS for one increment
-   //after a system reset.
-   reg ca_clk_preload;
-   always @(posedge clk) begin
-      ca_clk_preload <= reset ? 1'b1 : 1'b0;
-   end
-
-   //Enable the clock generator when advancing
-   //or to preload after a reset.
    wire ca_clk_en;
-   assign ca_clk_en = advance;// | ca_clk_preload;
+   assign ca_clk_en = enable | seeking;
 
    //Pipe clock enable signal for 1 cycle
    //to meet timing requirements.
-   wire advance_km1;
    wire ca_clk_en_km1;
-   delay #(.WIDTH(2))
-     ca_clock_delay(.clk(clk),
-                    .in({ca_clk_en,advance}),
-                    .out({ca_clk_en_km1,advance_km1}));
+   delay ca_clock_delay(.clk(clk),
+                        .in(ca_clk_en),
+                        .out(ca_clk_en_km1));
    
    always @(posedge clk) begin
       code_shift <= reset ? 'h0 :
-                    !advance_km1 ? code_shift :
+                    !ca_clk_en_km1 ? code_shift :
                     code_shift=='d16799 ? 'h0 :
                     code_shift+'h1;
    end

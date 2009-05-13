@@ -8,15 +8,15 @@ elseif(nargin~=2)
 end
 
 if(dataSelect==1)
-    position=[0 0 0];
-    static=0;
+    position=ecef([65.1186,-147.4329,523.6649]);
+    static=1;
     
     %Data set measurement noise.
-    sigmaP=8;
+    sigmaP=4;
     sigmaD=100;
     
     %Data set process noise.
-    PhisVel=5.0;
+    PhisVel=0.01;
     PhisCdr=0.01;
     PhisBias=10;
 
@@ -64,7 +64,7 @@ end
     X=zeros(measurements,8+maxSatellites);
     numStates=size(X,2);
     X(1,[1 3 5])=Xraw(1,2:4);
-    X(1,7)=Xraw(1,5);
+    X(1,7)=Xraw(1,5)*c;
     P=30^2*eye(numStates);
     P(7,7)=20^2;
     P(8,8)=50^2;
@@ -178,7 +178,7 @@ end
         dPL1dcdr=-ones(satellites,1);
         dPL1dcdrdot=zeros(satellites,1);
         dPL1dbias=zeros(satellites,maxSatellites);
-        %for s=1:satellites; dPL1dbias(s,SVs(s))=1; end;
+%         for s=1:satellites; dPL1dbias(s,SVs(s))=1; end;
         
         %Dj=ft-fr=(vsat-vrec)*khat/lambda+NCO
         refTime=ephem(SVs,24);
@@ -334,15 +334,9 @@ if(static)
     ylabel('Drift (s/s)');
     xlabel('GPS Time (s)');
     
-%     subplot(rows,2,6);
-%     plot(t,X(:,9),'b');
-%     title('NCO Offset');
-%     ylabel('Offset (Hz)');
-%     xlabel('GPS Time (s)');
-    
     for sat=1:satellites
         subplot(rows,2,6+sat);
-        i=9+sat;
+        i=8+sat;
         plot(t,X(:,i),'b');
         title(sprintf('Satellite %d Bias',ephem(sat,1)));
         ylabel('Bias (m)');

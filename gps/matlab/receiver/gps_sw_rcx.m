@@ -136,10 +136,17 @@ elseif(choose == 4)
     %the number of seconds to track the signal for
     Nfiles = input('\nEnter the number of seconds to track the signal for: ');
     
+    prns = input('\nEnter the satellites to track: ');
+    
+    weak = input('\nEnable weak signal tracking (default 1): ');
+    if(isempty(weak))
+        weak=1;
+    end
+    
     %load 1 sec. of data from file
     [in_sig, fid, fileNo] = load_gps_data(file,0,1);
     
-    [PRN, doppler_frequency, code_start_time, CNR]=aided_acquisition(in_sig,ecef([65.116936,-147.4347125,0]),488500);
+    [PRN, doppler_frequency, code_start_time, CNR]=aided_acquisition(in_sig,ecef([65.116936,-147.4347125,0]),488500,weak,prns);
     
     for prn=1:length(PRN)
         %if the signal was not found, quit this satellite

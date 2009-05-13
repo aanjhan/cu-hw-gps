@@ -66,7 +66,11 @@ for s = 1:length(SVs)
     end
 
     [t,r]= cart2pol(xyvec(end,2),xyvec(end,3));
-    mmpolar(t,r,'k*','MarkerSize',10,'FontSize',16,'Font','Helvetica','RLimit',[0 1],'RTickValue',[0 1/3 2/3 1],'RTickLabel',cellstr(['  '; '60'; '30'; ' 0']),'TTickLabel',cellstr(['270'; '240'; '210';'180'; '150'; '120'; ' 90'; ' 60'; ' 30'; ' 0 '; '330'; '300']));
-    text(xyvec(end,2),xyvec(end,3)+.07, int2str(SVs(s)));
+    if(el_az(s,1)<100)
+        mmpolar(t,r,'k*','MarkerSize',10,'FontSize',16,'Font','Helvetica','RLimit',[0 1],'RTickValue',[0 1/3 2/3 1],'RTickLabel',cellstr(['  '; '60'; '30'; ' 0']),'TTickLabel',cellstr(['270'; '240'; '210';'180'; '150'; '120'; ' 90'; ' 60'; ' 30'; ' 0 '; '330'; '300']));
+        text(xyvec(end,2),xyvec(end,3)+.07, int2str(SVs(s)));
+    else
+        mmpolar(t,r,'r*','MarkerSize',10,'FontSize',16,'Font','Helvetica','RLimit',[0 1],'RTickValue',[0 1/3 2/3 1],'RTickLabel',cellstr(['  '; '60'; '30'; ' 0']),'TTickLabel',cellstr(['270'; '240'; '210';'180'; '150'; '120'; ' 90'; ' 60'; ' 30'; ' 0 '; '330'; '300']));
+    end
 end
 return;

@@ -1,4 +1,4 @@
-function  [PRN, doppler_frequency, code_start_time, CNR, codes] = aided_acquisition(in_sig, guessPosition, localTime)
+function  [PRN, doppler_frequency, code_start_time, CNR] = aided_acquisition(in_sig, guessPosition, localTime, aid, prns)
 %function  [doppler_frequency, code_start_time, CNR] = INITIAL_ACQUISITION(in_sig, CAcode)
 %
 % This function will take as input:
@@ -36,9 +36,19 @@ constant;
 constant_h;
 
 DOPPLER_OFFSET = 1000;
-DOPPLER_RANGE = 300;
 
 load almanac.asc;
+
+if(nargin<4)
+    aid=0;
+end
+
+%Restrict to supplied PRNs.
+if(nargin==5 && ~isempty(prns))
+    index=find(ismember(almanac(:,1),prns)~=0);
+    almanac=almanac(index,:);
+end
+
 %Restrict healthy satellites only.
 almanac=almanac(find(almanac(:,2)==0),:);
 ephema=ephem_from_almanac(almanac);
@@ -46,8 +56,6 @@ ephema=ephem_from_almanac(almanac);
 %Find local satellite elevations.
 [satposa,satvela]=findsat(ephema,localTime);
 elaz=elevazim(satposa,guessPosition);
-elaz=sortrows(elaz,3);
-elaz=(end:-1:1,:);
 
 %Restrict to satellites above -5 deg.
 index=find(elaz(:,3)>-5);
@@ -77,6 +85,11 @@ SV_offset_CA_code = zeros(ONE_MSEC_SAM,TP/T_RES);
 E_CA_code = zeros(ONE_MSEC_SAM,TP/T_RES);
 L_CA_code = zeros(ONE_MSEC_SAM,TP/T_RES);
 
+PRN=zeros(size(ephema,1),1);
+CNR=zeros(size(ephema,1),1);
+doppler_frequency=zeros(size(ephema,1),1);
+code_start_time=zeros(size(ephema,1),1);
+
 for s=1:size(ephema,1)
     %and obtain the CA code for this particular satellite
     current_CA_code = sign(cacodegn(ephema(s,1))-0.5);
@@ -88,79 +101,100 @@ for s=1:size(ephema,1)
             = digitize_ca(-time_offset,current_CA_code);
     end
 
-    %pick coherent integration time
+    %Decide if the satellite is strong or weak.
+    Tacc=1;
+    data_start=0;
     if(elaz(s,3)>20)
-        Tacc=1;
+        [PRN(s),doppler_frequency(s),code_start_time(s),CNR(s)]=acquire(ephema(s,1),in_sig,dopp(s),current_CA_code,Tacc,data_start);
+        
+        if(CNR(s)<36)
+            weak=1;
+        else
+            weak=0;
+        end
     else
-        Tacc=10;
+        weak=1;
     end
-
-    CAcode = digitize_ca_prompt(current_CA_code,Tacc);
     
-    %Bring in Tacc+1 msec of input data
-    in_sig_2ms = in_sig(1:ONE_MSEC_SAM*(Tacc+1));
+    %Peform weak aiding.
+    if(weak && aid)
+        Tacc=10;
+        data_start=0:2e-3:20e-3;
+    end
+    [PRN(s),doppler_frequency(s),code_start_time(s),CNR(s)]=acquire(ephema(s,1),in_sig,dopp(s),current_CA_code,Tacc,data_start);
+end
+return;
 
-    %generate time base at 175nsec spacing
-    time = [0:1:length(in_sig_2ms)-1]'.*TP;
-
-    corr_len = 2*length(in_sig_2ms)-1;
-
-    freqspace=dopp(s)-DOPPLER_RANGE:FREQ_STEP:dopp(s)+DOPPLER_RANGE;
-
-    %initialize vectors for speed
-    Icacorr = zeros(corr_len,1);
-    Qcacorr = zeros(corr_len,1);
-    I2Q2 = zeros(corr_len,length(freqspace));
-
+function [PRN, doppler_frequency, code_start_time, CNR]=acquire(prn,in_sig,dopp,CAcode,Tacc,data_start)
+    constant_h;
+    DOPPLER_RANGE = 300;
+    
     %Keep running tally of maximum values for later use
     max_val = [0 0 0];
+    
+    CAcode = digitize_ca_prompt(CAcode,Tacc);
 
-    %Cycle through all possible doppler shifts from -10kHz to +10kHz and run
-    %xcorr at each doppler shift in the I & Q channels in order to find the
-    %highest correlation peak.  The frequency bin where the highest correlation
-    %peak occurs is the doppler frequency where the satellite was found, and
-    %the index of the xcorrelation indicates the time offset from the beginning
-    %of in_sig_3ms to where the CA code is found.
-    %Step over +/- FD_SIZE in doppler shifts
-    for freq_bin=1:length(freqspace)
-        fd=freqspace(freq_bin);
+    for start=data_start
+        %Bring in Tacc+1 msec of input data
+        start_index=floor(ONE_MSEC_SAM*start*1e3);
+        in_sig_2ms = in_sig(start_index+(1:ONE_MSEC_SAM*(Tacc+1)));
 
-        %frequency argument for upmodulation
-        freq_argument = 2*pi*(FC-fd)*time;
+        %generate time base at 175nsec spacing
+        time = [0:1:length(in_sig_2ms)-1]'.*TP;
 
-        %demod at current doppler shift
-        Si = in_sig_2ms.*AMP.*cos(freq_argument);
+        corr_len = 2*length(in_sig_2ms)-1;
 
-        %and get out the I and Q factors
-        Sq = -in_sig_2ms.*AMP.*sin(freq_argument);
+        freqspace=dopp-DOPPLER_RANGE:FREQ_STEP:dopp+DOPPLER_RANGE;
 
-        %Do the cross correlations to get the values
-        Icacorr = xcorr(Si,CAcode);
-        Qcacorr = xcorr(Sq,CAcode);
+        %initialize vectors for speed
+        I2Q2 = zeros(corr_len,length(freqspace));
 
-        %determine index and power for this doppler frequency at which the
-        %maximum signal power was detected
-        I2Q2(:,freq_bin) = (Icacorr.^2 + Qcacorr.^2);
-        [y,i] = max(abs(I2Q2(:,freq_bin)));
-        %does the current maximum power exceed the running maximum power?
-        if(max_val(2)<y)
-            %if so, replace the value
-            max_val = [fd, y, i];    %these are the doppler, max power, index
+        %Cycle through all possible doppler shifts from -10kHz to +10kHz and run
+        %xcorr at each doppler shift in the I & Q channels in order to find the
+        %highest correlation peak.  The frequency bin where the highest correlation
+        %peak occurs is the doppler frequency where the satellite was found, and
+        %the index of the xcorrelation indicates the time offset from the beginning
+        %of in_sig_3ms to where the CA code is found.
+        %Step over +/- FD_SIZE in doppler shifts
+        for freq_bin=1:length(freqspace)
+            fd=freqspace(freq_bin);
+
+            %frequency argument for upmodulation
+            freq_argument = 2*pi*(FC-fd)*time;
+
+            %demod at current doppler shift
+            Si = in_sig_2ms.*AMP.*cos(freq_argument);
+
+            %and get out the I and Q factors
+            Sq = -in_sig_2ms.*AMP.*sin(freq_argument);
+
+            %Do the cross correlations to get the values
+            Icacorr = xcorr(Si,CAcode);
+            Qcacorr = xcorr(Sq,CAcode);
+
+            %determine index and power for this doppler frequency at which the
+            %maximum signal power was detected
+            I2Q2(:,freq_bin) = (Icacorr.^2 + Qcacorr.^2);
+            [y,i] = max(abs(I2Q2(:,freq_bin)));
+            %does the current maximum power exceed the running maximum power?
+            if(max_val(2)<y)
+                %if so, replace the value
+                max_val = [fd, y, i];    %these are the doppler, max power, index
+            end
         end
     end
 
     %if the CNR < CNO_MIN, set cst to invalid value
-    PRN(s)=ephema(s,1);
-    CNR(s)=10*log10(((max_val(2)/(SNR_FLOOR*(Tacc)))-1)/(.001*(Tacc)));
-    if(CNR(s)<CNO_MIN)
-        code_start_time(s) = -1;
-        doppler_frequency(s) = 0;
+    PRN=prn;
+    CNR=10*log10(((max_val(2)/(SNR_FLOOR*(Tacc)))-1)/(.001*(Tacc)));
+    if(CNR<CNO_MIN)
+        code_start_time = -1;
+        doppler_frequency = 0;
     else
-        doppler_frequency(s) = max_val(1);
+        doppler_frequency = max_val(1);
 
-        tRewind = (FSAMP_MSEC*(Tacc))/(1+doppler_frequency(s)/L1);
+        tRewind = (FSAMP_MSEC*(Tacc))/(1+doppler_frequency/L1);
         %have to account for xcorr output length and non-zero indexing
-        code_start_time(s) = (max_val(3)-tRewind)*TP;
+        code_start_time = (max_val(3)-tRewind)*TP;
     end
-end
 return;

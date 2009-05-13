@@ -152,7 +152,7 @@ module DE2_TOP (
                           .locked(pll_locked));
 
    wire   global_reset;
-   assign global_reset = ~pll_locked | ~KEY[0];
+   assign global_reset = ~pll_locked /*| ~KEY[0]*/;
 
    wire [7:0] leds;
    wire [7:0] gps_data;
@@ -190,24 +190,20 @@ module DE2_TOP (
    wire [9:0]  ca_code_shift;
    wire ca_bit;
    wire ca_clk;
-   ca_upsampler upsampler(.clk(clk_sample),
-                          .reset(reset),
-                          .prn(SW[4:0]),
-                          .code_shift(code_shift),
-                          .out(ca_bit),
-                          .clk_seek(clk_200),
-                          .seek_en(1'b0),
-                          .seek_target(15'h0),
-                          .ca_clk(ca_clk),
-                          .ca_code_shift(ca_code_shift));
-
-   wire [15:0] accumulator;
-   track track_i(.clk(clk_200),
-                 .clk_sample(clk_sample),
-                 .reset(reset),
-                 .baseband_input(gps_data[2:0]),
-                 .ca_bit(ca_bit),
-                 .accumulator(accumulator));
+   wire [18:0] accumulator;
+   subchannel sub(.clk(clk_200),
+                  .clk_sample(clk_sample),
+                  .global_reset(global_reset),
+                  .reset(reset),
+                  .prn(SW[4:0]),
+                  .data(gps_data[2:0]),
+                  .seek_en(~KEY[0]),
+                  .seek_target({7'h0,SW[15:8]}),
+                  .code_shift(code_shift),
+                  .ca_bit(ca_bit),
+                  .ca_clk(ca_clk),
+                  .ca_code_shift(ca_code_shift),
+                  .accumulator(accumulator));
 
    assign HEX5 = reset ? 7'h7F : {ca_bit,6'h3F};
    hex_driver gps_display0(reset ? 4'h8 : 4'h1,HEX4);
@@ -218,15 +214,24 @@ module DE2_TOP (
    assign LEDR[14:12] = gps_data[2:0];
    assign LEDR[11:5] = 'h0;
    assign LEDR[4:0] = SW[4:0];
-   assign LEDG = code_shift[12:4];
-   hex_driver acc_display3(SW[17] ? count[7:4] :
+   assign LEDG[8] = 1'b0;
+   assign LEDG[7:0] = ca_code_shift[7:0];
+   hex_driver acc_display3(SW[16] ? {1'b0,code_shift[14:12]} :
+                           SW[17] ? count[7:4] :
                            ~KEY[2] ? count[15:12] :
                            accumulator[15:12],
                            HEX3);
-   hex_driver acc_display2(SW[17] ? count[3:0] :
+   hex_driver acc_display2(SW[16] ? code_shift[11:8] :
+                           SW[17] ? count[3:0] :
                            ~KEY[2] ? count[11:8] :
                            accumulator[11:8],
                            HEX2);
-   hex_driver acc_display1(~SW[17] && ~KEY[2] ? count[7:4] : accumulator[7:4],HEX1);
-   hex_driver acc_display0(~SW[17] && ~KEY[2] ? count[3:0] : accumulator[3:0],HEX0);
+   hex_driver acc_display1(SW[16] ? code_shift[7:4] :
+                           ~SW[17] && ~KEY[2] ? count[7:4] :
+                           accumulator[7:4],
+                           HEX1);
+   hex_driver acc_display0(SW[16] ? code_shift[3:0] :
+                           ~SW[17] && ~KEY[2] ? count[3:0] :
+                           accumulator[3:0],
+                           HEX0);
 endmodule

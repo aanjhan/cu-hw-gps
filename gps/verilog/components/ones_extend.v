@@ -10,15 +10,15 @@ module ones_extend(
    assign mag = value[(IN_WIDTH-2):0];
 
    wire zero;
-   assign zero = mag=='h0;
+   assign zero = mag=={IN_WIDTH{1'b0}};
 
    //Determine input sign.
    wire sign;
-   assign sign = zero ? 0 : value[IN_WIDTH-1];
+   assign sign = zero ? 1'b0 : value[IN_WIDTH-1];
 
    //Convert input to two's complement.
    wire [(IN_WIDTH-1):0] value2c;
-   assign value2c = zero ? 'h0 :
+   assign value2c = zero ? {IN_WIDTH{1'b0}} :
                     sign ? -mag :
                     mag;
 

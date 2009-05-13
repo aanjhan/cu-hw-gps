@@ -11,7 +11,7 @@
 #endif
 
 #define LED_TICKS (alt_ticks_per_second()/2)
-#define DATA_TICKS (alt_ticks_per_second()/10)
+#define DATA_TICKS (alt_ticks_per_second()/50)
 
 #define GPS_DATA_CLOCK 0x08
 #define GPS_RESET      0x80
@@ -51,6 +51,7 @@ typedef struct
 volatile alt_u8 leds;
 static alt_alarm ledAlarm;
 
+volatile int running;
 volatile alt_u8 gpsDataOut;
 volatile GPSDataBuffer gpsData;
 static alt_alarm dataAlarm;
@@ -97,16 +98,31 @@ alt_u32 DataTick(void* context)
     }
     IOWR_ALTERA_AVALON_PIO_DATA(GPS_DATA_BASE,gpsDataOut);
     
+    if(!ret)running=0;
+    
     return ret ? DATA_TICKS : 0;
 }
 
 void StartFeed(void *context, alt_u32 id)
 {
-    gpsDataOut=GPS_RESET;
-    IOWR_ALTERA_AVALON_PIO_DATA(GPS_DATA_BASE,gpsDataOut);
-    gpsDataOut|=GPS_DATA_CLOCK;
-    IOWR_ALTERA_AVALON_PIO_DATA(GPS_DATA_BASE,gpsDataOut);
-    alt_alarm_start(&dataAlarm,DATA_TICKS,DataTick,0);
+    if(!running)
+    {
+        running=1;
+        gpsDataOut=GPS_RESET;
+        IOWR_ALTERA_AVALON_PIO_DATA(GPS_DATA_BASE,gpsDataOut);
+        gpsDataOut|=GPS_DATA_CLOCK;
+        IOWR_ALTERA_AVALON_PIO_DATA(GPS_DATA_BASE,gpsDataOut);
+        alt_alarm_start(&dataAlarm,DATA_TICKS,DataTick,0);
+    }
+    else
+    {
+        alt_alarm_stop(&dataAlarm);
+        gpsData.readIndex=0;
+        gpsData.readOffset=0;
+        gpsData.readWord=0;
+        running=0;
+    }
+    
     IOWR_ALTERA_AVALON_PIO_EDGE_CAP(START_BASE,0x01);
     IOWR_ALTERA_AVALON_PIO_IRQ_MASK(START_BASE,0x01);
 }
@@ -139,6 +155,7 @@ int main()
     IOWR_ALTERA_AVALON_UART_CONTROL(DATA_UART_BASE,ALTERA_AVALON_UART_CONTROL_RRDY_MSK);
     alt_irq_register(DATA_UART_IRQ,NULL,DataUART_IRQ);
     
+    running=0;
     IOWR_ALTERA_AVALON_PIO_IRQ_MASK(START_BASE,0x01);
     IOWR_ALTERA_AVALON_PIO_EDGE_CAP(START_BASE,0x01);
     alt_irq_register(START_IRQ,NULL,StartFeed);

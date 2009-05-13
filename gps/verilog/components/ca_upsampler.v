@@ -20,7 +20,7 @@ module ca_upsampler(
    //Determine the next code shift value
    //for seek termination.
    wire [14:0] next_code_shift /* synthesis keep */;
-   assign next_code_shift = code_shift=='d16799 ? 15'h0 : (code_shift+15'h1);
+   assign next_code_shift = code_shift==15'd16799 ? 15'h0 : (code_shift+15'h1);
 
    //Target is coming up if it is the next shift
    //value and the shift is enabled.
@@ -54,6 +54,11 @@ module ca_upsampler(
                     !ca_clk_en_km1 ? code_shift :
                     next_code_shift;
    end
+
+   //Reset the C/A DDS unit at code shift
+   //wrap-around to maintain code alignment.
+   wire ca_clk_reset /* synthesis keep */;
+   assign ca_clk_reset = code_shift==15'd16799;
    
    //Generate C/A code clock from reference
    //clock signal.
@@ -62,7 +67,7 @@ module ca_upsampler(
          .PHASE_INC_WIDTH(20),
          .OUTPUT_WIDTH(1))
      ca_clock_gen(.clk(clk),
-                  .reset(reset),
+                  .reset(reset | ca_clk_reset),
                   .enable(ca_clk_en_km1),
                   .inc(CA_RATE_INC),
                   .out(ca_clk_n));

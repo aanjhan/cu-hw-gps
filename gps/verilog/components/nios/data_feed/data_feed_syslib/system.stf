@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<stf>
+	<project ptf="..\data_feed_nios.ptf" target="Nios II System Library">
+	</project>
+	<cpu name="cpu_0">
+	</cpu>
+	<os_spec clean_exit="no" direct_drivers="no" exception_stack="no" instruction_emulation="no" name="none (single-threaded)" no_c_plus_plus="yes" no_exit="yes" profiling="no" small_footprint="yes" sopc_component_dir="altera_hal" stack_checking="no" stderr="jtag_uart" stdin="jtag_uart" stdout="jtag_uart">
+	<make_macros>
+<macro name="alt_sim_optimize" quote="no" value="0"/>
+</make_macros>
+<sys_defines>
+<define name="alt_max_fd" quote="no" value="4"/>
+<define name="alt_sys_clk" quote="no" value="SYSTEM_TIMER"/>
+<define name="alt_timestamp_clk" quote="no" value="none"/>
+</sys_defines>
+
+
+
+
+<ldflags>
+<flag name="-msmallc"/>
+</ldflags>
+</os_spec>
+	<link_spec auto_gen_script="yes">
+		<script name="none">
+		<section memory="onchip_memory" name=".text"/>
+<section memory="onchip_memory" name=".rodata"/>
+<section memory="onchip_memory" name=".rwdata"/>
+<section memory="onchip_memory" name=".stack"/>
+<section memory="onchip_memory" name=".heap"/>
+<section memory="onchip_memory" name=".exceptionstack" size="0x400"/>
+</script>
+	</link_spec>
+</stf>

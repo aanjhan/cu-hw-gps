@@ -24,7 +24,7 @@ module subchannel(
                      .in(data),
                      .out(data_sync));
 
-   wire data_available /* synthesis keep */;
+   wire data_available;
    strobe data_available_strobe(.clk(clk),
                                 .reset(reset),
                                 .in(clk_sample_sync),

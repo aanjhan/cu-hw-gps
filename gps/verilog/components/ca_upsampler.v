@@ -8,7 +8,7 @@ module ca_upsampler(
     //Seek control.
     input              seek_en,
     input [14:0]       seek_target,
-    output wire        seeking /* synthesis keep */,
+    output wire        seeking,
     //Debug outputs.
     output wire        ca_clk,
     output wire [9:0]  ca_code_shift);
@@ -19,18 +19,18 @@ module ca_upsampler(
 
    //Determine the next code shift value
    //for seek termination.
-   wire [14:0] next_code_shift /* synthesis keep */;
+   wire [14:0] next_code_shift;
    assign next_code_shift = code_shift==15'd16799 ? 15'h0 : (code_shift+15'h1);
 
    //Target is coming up if it is the next shift
    //value and the shift is enabled.
-   wire target_upcoming /* synthesis keep */;
+   wire target_upcoming;
    assign target_upcoming = next_code_shift==seek_target && ca_clk_en_km1;
 
    //The seek target has been reached when
    //the current code shift is equal to
    //the target value.
-   wire target_reached /* synthesis keep */;
+   wire target_reached;
    assign target_reached = code_shift==seek_target;
 
    //We are seeking when seeking has been
@@ -39,12 +39,12 @@ module ca_upsampler(
 
    //Advance the clock when the system is
    //enabled (data available) or when seeking.
-   wire ca_clk_en /* synthesis keep */;
+   wire ca_clk_en;
    assign ca_clk_en = enable | seeking;
 
    //Pipe clock enable signal for 1 cycle
    //to meet timing requirements.
-   wire ca_clk_en_km1 /* synthesis keep */;
+   wire ca_clk_en_km1;
    delay ca_clock_delay(.clk(clk),
                         .in(ca_clk_en),
                         .out(ca_clk_en_km1));
@@ -57,7 +57,7 @@ module ca_upsampler(
 
    //Reset the C/A DDS unit at code shift
    //wrap-around to maintain code alignment.
-   wire ca_clk_reset /* synthesis keep */;
+   wire ca_clk_reset;
    assign ca_clk_reset = code_shift==15'd16799;
    
    //Generate C/A code clock from reference

@@ -1,0 +1,4 @@
+Requirements:
+  Boost 1.39
+  Xerces-C++ 2.8.x
+  Xalan-C++ 1.10.x

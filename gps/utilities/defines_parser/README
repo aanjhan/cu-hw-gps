@@ -1,4 +1,5 @@
 Requirements:
-  Boost 1.39
+  Libtool
+  Boost 1.36
   Xerces-C++ 2.8.x
   Xalan-C++ 1.10.x

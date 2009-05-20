@@ -80,7 +80,8 @@ void InputParser::ParseCSV(std::istream &in, std::map<std::string,Expression*> &
         else if(!boost::regex_match(line,m,csvLine))throw LineSyntaxError(lineCount);
         
         if(vars.find(m[1])!=vars.end())cout<<"Warning: duplicate declaration of variable '"<<m[1]<<"'."<<endl;
-        vars[m[1]]=new Expression(m[2]);
+        try { vars[m[1]]=new Expression(m[2]); }
+        catch(...){ throw LineSyntaxError(lineCount); }
     }
 }
 void InputParser::ParseXML(std::istream &in, std::map<std::string,Expression*> &vars) throw(LineSyntaxError)

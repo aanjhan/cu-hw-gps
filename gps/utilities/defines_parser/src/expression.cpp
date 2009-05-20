@@ -13,7 +13,7 @@ Expression::~Expression()
     if(tree!=NULL)delete tree;
 }
 
-string Expression::Value(std::map<std::string,Expression*> &vars)
+string Expression::Value(std::map<std::string,Expression*> &vars) throw(UnknownVariable,UnknownOperation)
 {
     if(!evaluated)
     {
@@ -23,7 +23,7 @@ string Expression::Value(std::map<std::string,Expression*> &vars)
     return value;
 }
 
-std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression*> &vars)
+std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression*> &vars) throw(UnknownVariable,UnknownOperation)
 {
     //Convert left parameter to a double.
     string leftString;
@@ -75,10 +75,10 @@ std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression
         else return tree->GetValue()+"("+rightString+")";
     case TokenType::VARIABLE:
         if(tree->GetValue()[0]=='`')return tree->GetValue();
-        else if(vars.find(tree->GetValue())==vars.end())return 0;//FIXME Throw exception.
+        else if(vars.find(tree->GetValue())==vars.end())throw UnknownVariable(tree->GetValue());
         else return vars[tree->GetValue()]->Value(vars);
     case TokenType::VALUE: return ToString(EvalValue(tree->GetValue()));
-    default: return "0";//FIXME Throw exception.
+    default: throw UnknownOperation(tree->GetType());
     }
 }
 

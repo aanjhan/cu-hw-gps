@@ -71,15 +71,31 @@ int main(int argc, char *argv[])
     }
     if(out!=NULL)
     {
-        (*out)<<"//This file has been automatically generated."<<endl
-              <<"//Edit contents with extreme caution."<<endl<<endl;
+        int errorCount=0;
+
+        string output;
+        output="//This file has been automatically generated.\n";
+        output+="//Edit contents with extreme caution.\n\n";
         
         for(map<string,Expression*>::iterator i=vars.begin();
             i!=vars.end();
             i++)
         {
-            (*out)<<"`define "<<(*i).first<<" "<<(*i).second->Value(vars)<<endl;
+            try
+            {
+                output+="`define "+(*i).first
+                        +" "+(*i).second->Value(vars)+"\n";
+            }
+            catch(exception &e)
+            {
+                errorCount++;
+                cout<<e.what()<<endl;
+            }
         }
+
+        if(errorCount==1)cout<<"1 error."<<endl;
+        else if(errorCount>0)cout<<errorCount<<" errors."<<endl;
+        else (*out)<<output;
 
         if(vm.count("output"))outFile.close();
     }

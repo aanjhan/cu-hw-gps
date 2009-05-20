@@ -1,13 +1,18 @@
-function integer max_width;
+function integer log2;
    input integer value;
 
    begin
-      if(value==0)max_width=1;
+      if(value==0)log2=1;
       else begin
-         for(max_width=0;value>0;max_width=max_width+1)
+         for(log2=0;value>0;log2=log2+1)
            value=value>>1;
       end
    end
+endfunction
+
+function integer max_width;
+   input integer value;
+   max_width=log2(value);
 endfunction // max_width
 
 function integer max_value;

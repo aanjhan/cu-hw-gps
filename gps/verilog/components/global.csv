@@ -1,0 +1,6 @@
+F_S,16.8e6,Maxim MAX2741 sampling rate
+F_CA,1.023e6,C/A code chipping rate
+N_CHIPS,1023,Number of C/A chips
+T_CA_CODE,N_CHIPS/F_CA,C/A code repetition rate
+
+MAX_CODE_SHIFT,T_CA_CODE*F_S-1,Maximum upsampled code shift value

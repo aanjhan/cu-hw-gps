@@ -24,6 +24,8 @@ int Tokenizer::NextType() throw(UnknownTokenException)
 {
     boost::smatch m;
 
+    if(!HasNext())return TokenType::ILLEGAL;
+
     //Is this a number?
     if(boost::regex_search(expression,number))
     {

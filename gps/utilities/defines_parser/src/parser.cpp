@@ -21,8 +21,9 @@ TreeNode* Parser::ParseExpression()
     
         if(minus)expression=new TreeNode(TokenType::MINUS,new TreeNode(TokenType::NUMBER,"0"),expression);//Make negative
     
-        while(tokenizer.NextType()==TokenType::PLUS ||
-              tokenizer.NextType()==TokenType::MINUS)
+        while(tokenizer.HasNext() &&
+              (tokenizer.NextType()==TokenType::PLUS ||
+               tokenizer.NextType()==TokenType::MINUS))
         {
             TreeNode *t=new TreeNode(tokenizer.NextType(),NULL,NULL);
             t->SetLeft(expression);

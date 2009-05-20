@@ -1,7 +1,10 @@
 #include <iostream>
 #include <boost/program_options.hpp>
 #include <vector>
+#include <ostream>
+#include <fstream>
 #include "expression.h"
+#include "input_parser.h"
 
 namespace opt=boost::program_options;
 using namespace std;
@@ -11,7 +14,7 @@ int main(int argc, char *argv[])
     opt::options_description visibleOptions("Allowed options");
     visibleOptions.add_options()
         ("help,h","Display this help message.")
-        ("output,o",opt::value<string>()->default_value(""),"Write output to specified file.");
+        ("output,o",opt::value<string>(),"Write output to specified file.");
     opt::options_description options("All program options");
     options.add(visibleOptions);
     options.add_options()("input",opt::value<vector<string> >(),"Input...");
@@ -34,6 +37,8 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    //Parse input files.
+    map<string,Expression*> vars;
     if(vm.count("input"))
     {
         vector<string> inputFiles=vm["input"].as<vector<string> >();
@@ -41,17 +46,45 @@ int main(int argc, char *argv[])
             i!=inputFiles.end();
             i++)
         {
-            cout<<"Input file: "<<*i<<endl;
+            InputParser in(*i);
+            try{ in.Parse(vars); }
+            catch(exception &e){ cout<<e.what()<<endl; }
         }
     }
-    
-    map<string,Expression*> vars;
-    vars["A"]=new Expression("8");
-    vars["B"]=new Expression("-2*A");
-    Expression e("log2(A)+A");
-    string v=e.Value(vars);
-    cout<<"Value: "<<v<<endl;
+    else
+    {
+        InputParser in;
+        try{ in.Parse(vars); }
+        catch(exception &e){ cout<<e.what()<<endl; }
+    }
 
+    //Print output file.
+    ofstream outFile;
+    ostream *out=NULL;
+    if(!vm.count("output"))out=&cout;
+    else
+    {
+        outFile.open(vm["output"].as<string>().c_str());
+        if(outFile.good())out=&outFile;
+        else cout<<"Error: unable to open output file '"
+                 <<vm["output"].as<string>()<<"'."<<endl;
+    }
+    if(out!=NULL)
+    {
+        (*out)<<"//This file has been automatically generated."<<endl
+              <<"//Edit contents with extreme caution."<<endl<<endl;
+        
+        for(map<string,Expression*>::iterator i=vars.begin();
+            i!=vars.end();
+            i++)
+        {
+            (*out)<<"`define "<<(*i).first<<" "<<(*i).second->Value(vars)<<endl;
+        }
+
+        if(vm.count("output"))outFile.close();
+    }
+
+    //Cleanup expressions.
     for(map<string,Expression*>::iterator i=vars.begin();
         i!=vars.end();
         i++)

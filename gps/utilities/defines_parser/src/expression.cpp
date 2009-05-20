@@ -62,7 +62,7 @@ std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression
         if(haveLeftValue && haveRightValue)return ToString(leftValue-rightValue);
         else return leftString+"-"+rightString;
     case TokenType::TIMES:
-        if(haveLeftValue && haveRightValue)return ToString(leftValue/rightValue);
+        if(haveLeftValue && haveRightValue)return ToString(leftValue*rightValue);
         else return leftString+"*"+rightString;
     case TokenType::DIVIDE:
         if(haveLeftValue && haveRightValue)return ToString(leftValue/rightValue);

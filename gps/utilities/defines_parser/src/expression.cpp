@@ -52,34 +52,79 @@ std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression
             FromString(rightString,rightValue);
         }
     }
-    
+
+    bool useValue=false;
+    double value;
+    string stringValue;
     switch(tree->GetType())
     {
     case TokenType::PLUS:
-        if(haveLeftValue && haveRightValue)return ToString(leftValue+rightValue);
-        else return leftString+"+"+rightString;
+        if(haveLeftValue && haveRightValue)
+        {
+            useValue=true;
+            value=leftValue+rightValue;
+        }
+        else stringValue=leftString+"+"+rightString;
+        break;
     case TokenType::MINUS:
-        if(haveLeftValue && haveRightValue)return ToString(leftValue-rightValue);
-        else return leftString+"-"+rightString;
+        if(haveLeftValue && haveRightValue)
+        {
+            useValue=true;
+            value=leftValue-rightValue;
+        }
+        else stringValue=leftString+"-"+rightString;
+        break;
     case TokenType::TIMES:
-        if(haveLeftValue && haveRightValue)return ToString(leftValue*rightValue);
-        else return leftString+"*"+rightString;
+        if(haveLeftValue && haveRightValue)
+        {
+            useValue=true;
+            value=leftValue*rightValue;
+        }
+        else stringValue=leftString+"*"+rightString;
+        break;
     case TokenType::DIVIDE:
-        if(haveLeftValue && haveRightValue)return ToString(leftValue/rightValue);
-        else return leftString+"/"+rightString;
+        if(haveLeftValue && haveRightValue)
+        {
+            useValue=true;
+            value=leftValue/rightValue;
+        }
+        else stringValue=leftString+"/"+rightString;
+        break;
     case TokenType::CARET:
-        if(haveLeftValue && haveRightValue)return ToString(pow(leftValue,rightValue));
-        else return leftString+"^"+rightString;
+        if(haveLeftValue && haveRightValue)
+        {
+            useValue=true;
+            value=pow(leftValue,rightValue);
+        }
+        else stringValue=leftString+"^"+rightString;
+        break;
     case TokenType::FUNCTION:
-        if(haveRightValue)return ToString(EvalFunction(tree->GetValue(),rightValue));
-        else return tree->GetValue()+"("+rightString+")";
+        if(haveRightValue)
+        {
+            useValue=true;
+            value=EvalFunction(tree->GetValue(),rightValue);
+        }
+        else stringValue=tree->GetValue()+"("+rightString+")";
     case TokenType::VARIABLE:
-        if(tree->GetValue()[0]=='`')return tree->GetValue();
+        if(tree->GetValue()[0]=='`')stringValue=tree->GetValue();
         else if(vars.find(tree->GetValue())==vars.end())throw UnknownVariable(tree->GetValue());
-        else return vars[tree->GetValue()]->Value(vars);
-    case TokenType::VALUE: return ToString(EvalValue(tree->GetValue()));
+        else stringValue=vars[tree->GetValue()]->Value(vars);
+        break;
+    case TokenType::VALUE:
+        useValue=true;
+        value=EvalValue(tree->GetValue());
+        break;
     default: throw UnknownOperation(tree->GetType());
     }
+
+    if(useValue)
+    {
+        double diff;
+        diff=value-floor(value+0.5);
+        if(diff<=1e-4)return ToString((int)floor(value+0.5));
+        else return ToString(value);
+    }
+    else return stringValue;
 }
 
 double Expression::EvalValue(const std::string &valueString)

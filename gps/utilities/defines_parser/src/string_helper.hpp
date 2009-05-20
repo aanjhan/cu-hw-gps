@@ -12,7 +12,7 @@ namespace StringHelper
     inline std::string ToString(const T& value)
     {
         std::ostringstream o;
-        if(!(o<<value))return std::string("");
+        if(!(o<<std::fixed<<value))return std::string("");
         return o.str();
     }
 

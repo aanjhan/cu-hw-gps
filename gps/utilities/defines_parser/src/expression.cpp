@@ -114,6 +114,9 @@ double Expression::EvalFunction(const std::string &function, double value)
     else if(function=="ln")return log(value);
     else if(function=="log10")return log10(value);
     else if(function=="log2")return log2(value);
+    else if(function=="max_value")return pow(2,floor(value))-1;
+    else if(function=="max_width")return ceil(log2(value));
+    else if(function=="round")return floor(value+0.5);
     else if(function=="sin")return sin(value);
     else if(function=="sqrt")return sqrt(value);
     else if(function=="tan")return tan(value);

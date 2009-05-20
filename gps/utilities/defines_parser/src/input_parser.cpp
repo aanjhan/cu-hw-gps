@@ -6,9 +6,10 @@
 using namespace std;
 
 const boost::regex InputParser::fileName("^(.*)\\.(.*)$");
-const boost::regex InputParser::csvLine("^([A-Za-z_]\\w*),(.*)$");
+const boost::regex InputParser::csvLine("^([A-Za-z_]\\w*),([^,]*)(,(.*))?$");
+const boost::regex InputParser::newLine("\\\\n");
 
-void InputParser::Parse(map<string,Expression*> &vars) throw(SyntaxError,FileNotFoundException)
+void InputParser::Parse(map<string,Expression*> &vars, std::map<std::string,std::string> &comments) throw(SyntaxError,FileNotFoundException)
 {
     map<string,Expression*> tempVars;
 
@@ -38,8 +39,8 @@ void InputParser::Parse(map<string,Expression*> &vars) throw(SyntaxError,FileNot
     {
         switch(type)
         {
-        case XML: ParseXML(*in,tempVars); break;
-        default: ParseCSV(*in,tempVars); break;
+        case XML: ParseXML(*in,tempVars,comments); break;
+        default: ParseCSV(*in,tempVars,comments); break;
         }
     }
     catch(LineSyntaxError &e)
@@ -67,7 +68,9 @@ void InputParser::Parse(map<string,Expression*> &vars) throw(SyntaxError,FileNot
     copy(tempVars.begin(),tempVars.end(),inserter(vars,vars.end()));
 }
 
-void InputParser::ParseCSV(std::istream &in, std::map<std::string,Expression*> &vars) throw(LineSyntaxError)
+void InputParser::ParseCSV(std::istream &in,
+                           std::map<std::string,Expression*> &vars,
+                           std::map<std::string,std::string> &comments) throw(LineSyntaxError)
 {
     string line;
     boost::smatch m;
@@ -80,10 +83,20 @@ void InputParser::ParseCSV(std::istream &in, std::map<std::string,Expression*> &
         else if(!boost::regex_match(line,m,csvLine))throw LineSyntaxError(lineCount);
         
         if(vars.find(m[1])!=vars.end())cout<<"Warning: duplicate declaration of variable '"<<m[1]<<"'."<<endl;
-        try { vars[m[1]]=new Expression(m[2]); }
+        try
+        {
+            vars[m[1]]=new Expression(m[2]);
+            if(m[4].matched)
+            {
+                string comment=m[4];
+                comments[m[1]]=boost::regex_replace(comment,newLine,"\\n");
+            }
+        }
         catch(...){ throw LineSyntaxError(lineCount); }
     }
 }
-void InputParser::ParseXML(std::istream &in, std::map<std::string,Expression*> &vars) throw(LineSyntaxError)
+void InputParser::ParseXML(std::istream &in,
+                           std::map<std::string,Expression*> &vars,
+                           std::map<std::string,std::string> &comments) throw(LineSyntaxError)
 {
 }

@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
 
     //Parse input files.
     map<string,Expression*> vars;
+    map<string,string> comments;
     if(vm.count("input"))
     {
         vector<string> inputFiles=vm["input"].as<vector<string> >();
@@ -47,14 +48,14 @@ int main(int argc, char *argv[])
             i++)
         {
             InputParser in(*i);
-            try{ in.Parse(vars); }
+            try{ in.Parse(vars,comments); }
             catch(exception &e){ cout<<e.what()<<endl; }
         }
     }
     else
     {
         InputParser in;
-        try{ in.Parse(vars); }
+        try{ in.Parse(vars,comments); }
         catch(exception &e){ cout<<e.what()<<endl; }
     }
 
@@ -76,15 +77,22 @@ int main(int argc, char *argv[])
         string output;
         output="//This file has been automatically generated.\n";
         output+="//Edit contents with extreme caution.\n\n";
-        
+
+        boost::regex newline("\\n");
         for(map<string,Expression*>::iterator i=vars.begin();
             i!=vars.end();
             i++)
         {
             try
             {
+                if(comments.find((*i).first)!=comments.end())
+                {
+                    output+="//";
+                    output+=boost::regex_replace(comments[(*i).first],newline,"\\n//");
+                    output+="\n";
+                }
                 output+="`define "+(*i).first
-                        +" "+(*i).second->Value(vars)+"\n";
+                        +" "+(*i).second->Value(vars)+"\n\n";
             }
             catch(exception &e)
             {

@@ -49,7 +49,7 @@ public:
     InputParser() : useStdin(true), file("") {}
     InputParser(const std::string &file) : useStdin(false), file(file) {}
 
-    void Parse(std::map<std::string,Expression*> &vars) throw(SyntaxError,FileNotFoundException);
+    void Parse(std::map<std::string,Expression*> &vars, std::map<std::string,std::string> &comments) throw(SyntaxError,FileNotFoundException);
 
 private:
     bool useStdin;
@@ -59,9 +59,10 @@ private:
     
     const static boost::regex fileName;
     const static boost::regex csvLine;
+    const static boost::regex newLine;
 
-    void ParseCSV(std::istream &in, std::map<std::string,Expression*> &vars) throw(LineSyntaxError);
-    void ParseXML(std::istream &in, std::map<std::string,Expression*> &vars) throw(LineSyntaxError);
+    void ParseCSV(std::istream &in, std::map<std::string,Expression*> &vars, std::map<std::string,std::string> &comments) throw(LineSyntaxError);
+    void ParseXML(std::istream &in, std::map<std::string,Expression*> &vars, std::map<std::string,std::string> &comments) throw(LineSyntaxError);
 };
 
 #endif

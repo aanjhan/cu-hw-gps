@@ -39,7 +39,7 @@ namespace StringHelper
         std::istringstream i(str);
         int value;
         i>>value;
-        return !(i.rdstate() & std::ios_base::failbit) && str.find(".")==std::string::npos;
+        return !(i.rdstate() & std::ios_base::failbit)  && i.eof();
     }
 
     inline bool IsFloat(const std::string& str)
@@ -47,7 +47,7 @@ namespace StringHelper
         std::istringstream i(str);
         float value;
         i>>value;
-        return !(i.rdstate() & std::ios_base::failbit);
+        return !(i.rdstate() & std::ios_base::failbit) && i.eof();
     }
 
     inline bool IsDouble(const std::string& str)
@@ -55,7 +55,7 @@ namespace StringHelper
         std::istringstream i(str);
         double value;
         i>>value;
-        return !(i.rdstate() & std::ios_base::failbit);
+        return !(i.rdstate() & std::ios_base::failbit) && i.eof();
     }
 
     inline std::string ToUpper(std::string str)

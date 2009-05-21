@@ -46,7 +46,7 @@ amplitude = (IQearly+IQlate)/(2-CHIPS_EML);
 %Get the shift in chips necessary to re-center the triangle
 tau_prime = (IQearly-IQlate)/2/amplitude;
 %and the code phase error
-err_code_k = tau_prime*1023;
+err_code_k = tau_prime*NUM_CHIPS;
 
 %the next doppler shift estimate is a function of the previous estimate,
 %plus the doppler shift rate over the accumulation period, plus the angle

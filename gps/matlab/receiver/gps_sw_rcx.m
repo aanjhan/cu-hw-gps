@@ -1,4 +1,4 @@
-function gps_sw_rcx()
+function gps_sw_rcx(debug)
 %
 % The purpose of this script is to acquire and track GPS satellite signals
 % in non-real time from a digitzed data source.  It is also capable of
@@ -42,14 +42,25 @@ function gps_sw_rcx()
 % Call the constants
 constant_h;
 constant_rcx;
+
+if(nargin>1 && debug)
+    DEBUGFLAG=1;
+end
+
 PRN = [];
 choose = 0;
-while(choose<1 || choose>5)
-    fprintf('Would you like to:\n1) Track 1 or more satellites\n2) Obtain the navigation solution\n3) Extract almanac\n4) Aided tracking\n5) Quit\n')
+while(choose<1 || choose>6)
+    fprintf('Would you like to:\n');
+    fprintf('1) Track 1 or more satellites\n');
+    fprintf('2) Obtain the navigation solution\n');
+    fprintf('3) Extract almanac\n');
+    fprintf('4) Aided tracking\n');
+    fprintf('5) Track post-acquisition\n');
+    fprintf('6) Quit\n')
     choose = input(': ');
 end
 
-if(choose == 5)
+if(choose == 6)
     return;
 elseif(choose == 1)
     PRNflag = 1;
@@ -75,17 +86,18 @@ elseif(choose == 1)
     %for x= 1:10
     %    [in_sig, fid, fileNo] = load_gps_data(file,0,1);
     %end
+        
+    %generate CA code for the particular satellite, and then again for each time_offset,
+    %and again at each time offset for each early and late CA code
+    %initialize arrays for speed
+    SV_offset_CA_code = zeros(ONE_MSEC_SAM,round(TP/T_RES));
+    E_CA_code = zeros(ONE_MSEC_SAM,round(TP/T_RES));
+    L_CA_code = zeros(ONE_MSEC_SAM,round(TP/T_RES));
     tic
     for x=1:length(PRN)
         %load 1 sec. of data from file
         [in_sig, fid, fileNo] = load_gps_data(file,0,1);
         
-        %generate CA code for the particular satellite, and then again for each time_offset,
-        %and again at each time offset for each early and late CA code
-        %initialize arrays for speed
-        SV_offset_CA_code = zeros(ONE_MSEC_SAM,TP/T_RES);
-        E_CA_code = zeros(ONE_MSEC_SAM,TP/T_RES);
-        L_CA_code = zeros(ONE_MSEC_SAM,TP/T_RES);
         %and obtain the CA code for this particular satellite
         current_CA_code = sign(cacodegn(PRN(x))-0.5);
         %loop through all possible offsets to gen. CA_Code w/ offset
@@ -148,6 +160,12 @@ elseif(choose == 4)
     
     [PRN, doppler_frequency, code_start_time, CNR]=aided_acquisition(in_sig,ecef([65.116936,-147.4347125,0]),488500,weak,prns);
     
+    %generate CA code for the particular satellite, and then again for each time_offset,
+    %and again at each time offset for each early and late CA code
+    %initialize arrays for speed
+    SV_offset_CA_code = zeros(ONE_MSEC_SAM,round(TP/T_RES));
+    E_CA_code = zeros(ONE_MSEC_SAM,round(TP/T_RES));
+    L_CA_code = zeros(ONE_MSEC_SAM,round(TP/T_RES));
     for prn=1:length(PRN)
         %if the signal was not found, quit this satellite
         if(CNR(prn)<CNO_MIN || code_start_time(prn) < 0)
@@ -157,12 +175,6 @@ elseif(choose == 4)
         else
             %load 1 sec. of data from file
             [in_sig, fid, fileNo] = load_gps_data(file,0,1);
-            %generate CA code for the particular satellite, and then again for each time_offset,
-            %and again at each time offset for each early and late CA code
-            %initialize arrays for speed
-            SV_offset_CA_code = zeros(ONE_MSEC_SAM,TP/T_RES);
-            E_CA_code = zeros(ONE_MSEC_SAM,TP/T_RES);
-            L_CA_code = zeros(ONE_MSEC_SAM,TP/T_RES);
             
             %and obtain the CA code for this particular satellite
             current_CA_code = sign(cacodegn(PRN(prn))-0.5);
@@ -182,6 +194,43 @@ elseif(choose == 4)
                 fclose(fid);
             end
         end
+    end
+elseif(choose == 5)
+    %the file name of the digitized data
+    file = input('\nEnter the digitized data file name: ','s');
+    
+    survey_file = input('\nEnter the survey output file name: ','s');
+    load(survey_file);
+    
+    Nfiles = input('\nEnter the number of seconds to track the signal for: ');
+    
+    %generate CA code for the particular satellite, and then again for each time_offset,
+    %and again at each time offset for each early and late CA code
+    %initialize arrays for speed
+    SV_offset_CA_code = zeros(ONE_MSEC_SAM,round(TP/T_RES));
+    E_CA_code = zeros(ONE_MSEC_SAM,round(TP/T_RES));
+    L_CA_code = zeros(ONE_MSEC_SAM,round(TP/T_RES));
+    for prn=1:length(PRN)
+            %load 1 sec. of data from file
+            [in_sig, fid, fileNo] = load_gps_data(file,0,1);
+            
+            %and obtain the CA code for this particular satellite
+            current_CA_code = sign(cacodegn(PRN(prn))-0.5);
+            %loop through all possible offsets to gen. CA_Code w/ offset
+            for time_offset = 0:T_RES:TP-T_RES
+                [SV_offset_CA_code(:,1 + round(time_offset/T_RES)) ...
+                    E_CA_code(:,1 + round(time_offset/T_RES)) ...
+                    L_CA_code(:,1 + round(time_offset/T_RES))] ...
+                    = digitize_ca(-time_offset,current_CA_code);
+            end
+
+            fprintf('Tracking PRN %d: f_dopp = %d, CNR = %04.2f, cst=%f\n',PRN(prn), doppler_frequency(prn), CNR(prn), code_start_time(prn));
+            signal_tracking(doppler_frequency(prn), code_start_time(prn), in_sig, PRN(prn), SV_offset_CA_code,...
+                E_CA_code, L_CA_code, fid, file, fileNo, Nfiles);
+            
+            if(fid~=-1)
+                fclose(fid);
+            end
     end
 end
 

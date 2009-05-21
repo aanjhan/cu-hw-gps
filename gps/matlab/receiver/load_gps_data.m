@@ -19,7 +19,7 @@ function [in_sig, fid, fileNo] = load_gps_data(file, fid, fileNo)
 % AUTHORS:  Alex Cerruti (apc20@cornell.edu)
 % Copyright 2006, Cornell University, Electrical and Computer Engineering,
 % Ithaca, NY 14853
-
+constant_h;
 
 type = file(end-2:end);
 %check to be sure that the file extension is valid
@@ -39,7 +39,7 @@ if(strcmpi(type,'dat')||strcmpi(type,'bin'))
     end
     
     % read in data from a a file
-    N=357143;  % 1 second worth of 32-bit unsigned integers
+    N=ceil(FS*2/32);  % 1 second worth of 32-bit unsigned integers
     x=fread(fid,N,'*uint32');
     % convert this binary data into +-1, +-3 format
     in_sig=zeros(16*N,1);

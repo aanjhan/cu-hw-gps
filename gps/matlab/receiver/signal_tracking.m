@@ -40,7 +40,7 @@ h = waitbar(0,sprintf('Tracking PRN %02d, second #%d',PRN,1));
 % Now initialize variables for parameters and histories       %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Create storage vectors here, preinitialize for speed
-max_index = floor(length(in_sig)/5714);
+max_index = floor(length(in_sig)/FSAMP_MSEC);
 
 %the following seven *_hist are perpetual variables that are required to 
 %determine the navigation solution.  They are stored as
@@ -107,12 +107,12 @@ w_df_dot_kp1 = 0;
 
 %fire up the chipping rates
 %this chipping rate is carrier aided by the w_df_k/(2*pi*L1) term which adds in the doppler
-chip_rate_k = 1.023e6*(1 + w_df_k/(2*pi*L1)); 
+chip_rate_k = CA_FREQ*(1 + w_df_k/(2*pi*L1)); 
 %since w_df_kp1 = w_df_k, then chip_rate_kp1 will be equal to chip_rate_k;
 chip_rate_kp1 = chip_rate_k; 
 
 %fire up tau, which is the CA code period (nominally 1 msec)
-tau_k = 1023/chip_rate_k;
+tau_k = NUM_CHIPS/chip_rate_k;
 
 %and prepare the next code_start_time, which is the current code_start_time
 %plus the current CA code period
@@ -201,7 +201,7 @@ while(fileNo-1 < Nfiles)
         stop = floor(length(in_sig)-2*FSAMP_MSEC)*TP + t0;
 
         %re-initialize history vectors for this file
-        max_index = floor(length(in_sig)/5714);
+        max_index = floor(length(in_sig)/FSAMP_MSEC);
 
         %clear past histories (makes matlab run a little bit better)
         if(DEBUGFLAG)
@@ -290,13 +290,10 @@ while(fileNo-1 < Nfiles)
         end 
 
         %now compute carrier lock
-%         [carrier_lock_k, theta_k] = carrier_lock_indicator(I_prompt_k, Q_prompt_k, I_prompt_km1, Q_prompt_km1, CNo_k, CNo_km1);
-        carrier_lock_k=0;
-        theta_k=atan2(Q_prompt_k,I_prompt_k)-atan2(Q_prompt_km1,I_prompt_km1);
+        [carrier_lock_k, theta_k] = carrier_lock_indicator(I_prompt_k, Q_prompt_k, I_prompt_km1, Q_prompt_km1, CNo_k, CNo_km1);
 
         %now determine what the bit is for the current iteration
-%         bit_k = extract_bit(theta_k, bit_km1);
-        bit_k=0;
+        bit_k = extract_bit(theta_k, bit_km1);
 
         %run the CA_CORRELATOR to determine the next iteration I,Q E,P,L        
         [I_prompt_kp1, Q_prompt_kp1, I_early_kp1, Q_early_kp1, I_late_kp1, Q_late_kp1] ...

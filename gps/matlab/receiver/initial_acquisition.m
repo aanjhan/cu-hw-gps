@@ -1,4 +1,4 @@
-function  [doppler_frequency, code_start_time, CNR] = initial_acquisition(in_sig, CAcode)
+function  [doppler_frequency, code_start_time, CNR, I2Q2] = initial_acquisition(in_sig, CAcode, Tacc)
 %function  [doppler_frequency, code_start_time, CNR] = INITIAL_ACQUISITION(in_sig, CAcode)
 %
 % This function will take as input:
@@ -35,7 +35,9 @@ function  [doppler_frequency, code_start_time, CNR] = initial_acquisition(in_sig
 constant_h;
 
 %pick coherent integration time
-Tacc=1;
+if(nargin<3 || Tacc==-1)
+    Tacc=1;
+end
 %Bring in Tacc+1 msec of input data
 in_sig_2ms = in_sig(1:ONE_MSEC_SAM*(Tacc+1));
 CAcode = digitize_ca_prompt(CAcode,Tacc);

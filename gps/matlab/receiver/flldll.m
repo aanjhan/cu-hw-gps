@@ -49,14 +49,20 @@ amplitude = (IQearly+IQlate)/(2-CHIPS_EML);
 %Get the shift in chips necessary to re-center the triangle
 tau_prime = (IQearly-IQlate)/2/amplitude;
 %and the code phase error
-err_code_k = tau_prime*1023;
+err_code_k = tau_prime*NUM_CHIPS;
 
 %Get the magnitudes of I,Q k and km1
 IQknorm = sqrt(CNo_k);
 IQkm1norm = sqrt(CNo_km1);
 
 %determine the angle by which I and Q have rotated from km1 to k
-rotation_angle = -(Q_prompt_k*I_prompt_km1-I_prompt_k*Q_prompt_km1)/IQknorm/IQkm1norm;
+% rotation_angle = -(Q_prompt_k*I_prompt_km1-I_prompt_k*Q_prompt_km1)/IQknorm/IQkm1norm;
+IQ_k=[I_prompt_k Q_prompt_k 0];
+IQ_km1=[I_prompt_km1 Q_prompt_km1 0];
+%Rotation Angle = (-/+)atan((IQ_km1 cross IQ_k)/(IQ_k dot IQ_km1))
+% -> high-side=-, low-side=+
+rotation_angle = MIXING_SIGN*atan((Q_prompt_k*I_prompt_km1-I_prompt_k*Q_prompt_km1)/dot(IQ_k, IQ_km1));
+% rotation_angle = rotation_angle(3);
 
 %the angle rot_angle, times a constant, plus the previous doppler shift rate, is the
 %next doppler shift rate

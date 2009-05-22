@@ -19,7 +19,7 @@
  T_QUARTER_CHIP = CHIP/4;             %Quarter chip duration used in DLL
  FSAMP_MSEC = 1e-3*FS;                 %number of samples in 1 millisecond
  AMP = sqrt(5);                       %this is the optimal signal amplitude to demodulate the data at, statistically
- SNR_FLOOR = 350000;                   %the statistical SNR floor
+ SNR_FLOOR = 80000;                   %the statistical SNR floor
  ONE_MSEC_SAM = round(FSAMP_MSEC);    %~number of samples in one millisecond of data
  NUM_CHIPS = 1023;                    %number of chips in CA code
  NUMSATS = 34;                        %total number of visible satellites including WAAS

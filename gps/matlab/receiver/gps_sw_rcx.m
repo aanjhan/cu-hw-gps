@@ -43,7 +43,7 @@ function gps_sw_rcx(debug)
 constant_h;
 constant_rcx;
 
-if(nargin>1 && debug)
+if(nargin>0 && debug)
     DEBUGFLAG=1;
 end
 
@@ -201,6 +201,20 @@ elseif(choose == 5)
     
     survey_file = input('\nEnter the survey output file name: ','s');
     load(survey_file);
+    
+    sat_string='\nEnter the satellites to track [';
+    for prn=PRN
+        sat_string=sprintf('%s%d',sat_string,prn);
+        if(prn==PRN(end))
+            sat_string=sprintf('%s]: ',sat_string);
+        else
+            sat_string=sprintf('%s ',sat_string);
+        end
+    end
+    prns = input(sat_string);
+    if(~isempty(prns))
+        PRN=PRN(ismember(PRN,prns));
+    end
     
     Nfiles = input('\nEnter the number of seconds to track the signal for: ');
     

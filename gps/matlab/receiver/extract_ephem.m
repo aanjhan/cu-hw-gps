@@ -61,7 +61,7 @@ end
 sfidnum = mat2int(data1(50:52));
 
 if(flag)
-    error('PARITY CHECK ERROR in subframe %d data', SV);
+    error('PARITY CHECK ERROR in PRN %d, subframe %d data', SV,sfidnum);
 end
 
 %find index of subframe 1 if sfidnum !=1
@@ -77,7 +77,7 @@ else %otherwise we have subframe 1 as the first subframe
 end
 
 if(flag)
-    error('PARITY CHECK ERROR in subframe %d data', SV);
+    error('PARITY CHECK ERROR in PRN %d, subframe %d data', SV,1);
 end
 
 %the GPS_time associated with the current subframe is obtained by looking
@@ -105,7 +105,7 @@ sf2_idx = sf1_idx+300;
 %parity check subframe 2 data
 [data2, flag] = parity_check(data(sf2_idx:sf2_idx+300-1),data(sf2_idx-2),data(sf2_idx-1));
 if(flag)
-    error('PARITY CHECK ERROR in subframe %d data', SV);
+    error('PARITY CHECK ERROR in PRN %d, subframe %d data', SV,2);
 end
 %and retrieve the relevant ephemerides
 C_rs = twoscomp2dec(data2(69:69+15))*2^-5;
@@ -123,7 +123,7 @@ sf3_idx = sf2_idx+300;
 %perform parity check
 [data3, flag] = parity_check(data(sf3_idx:sf3_idx+300-1),data(sf3_idx-2),data(sf3_idx-1));
 if(flag)
-    error('PARITY CHECK ERROR in subframe %d data', SV);
+    error('PARITY CHECK ERROR in PRN %d, subframe %d data', SV,3);
 end
 %and retrieve the ephemerides
 C_ic = twoscomp2dec(data3(61:61+15))*2^-29;

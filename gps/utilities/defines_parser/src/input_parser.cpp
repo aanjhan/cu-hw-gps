@@ -5,13 +5,14 @@
 
 using namespace std;
 
-const boost::regex InputParser::fileName("^(.*)\\.(.*)$");
+const boost::regex InputParser::fileName("^((.*\\/)?([^\\/]*))\\.([^.]+)$");
+const boost::regex InputParser::directive("^#(\\w+)( (.*))?$");
 const boost::regex InputParser::csvLine("^([A-Za-z_]\\w*),([^,]*)(,(.*))?$");
 const boost::regex InputParser::newLine("\\\\n");
 
-void InputParser::Parse(map<string,Expression*> &vars, std::map<std::string,std::string> &comments) throw(SyntaxError,FileNotFoundException)
+void InputParser::Parse(map<string,MacroEntry*> &vars, bool print) throw(Error)
 {
-    map<string,Expression*> tempVars;
+    map<string,MacroEntry*> tempVars;
 
     if(file=="-")useStdin=true;
 
@@ -21,17 +22,18 @@ void InputParser::Parse(map<string,Expression*> &vars, std::map<std::string,std:
     if(useStdin)
     {
         in=&cin;
+        file="";
     }
     else
     {
         boost::smatch m;
         if(boost::regex_match(file,m,fileName))
         {
-            if(m[2]=="xml")type=XML;
+            if(m[4]=="xml")type=XML;
         }
         
         inFile.open(file.c_str());
-        if(!inFile.good())throw FileNotFoundException(file);
+        if(!inFile.good())throw Warning("unable to open file '"+file+"', ignoring.");
         in=&inFile;
     }
 
@@ -39,13 +41,13 @@ void InputParser::Parse(map<string,Expression*> &vars, std::map<std::string,std:
     {
         switch(type)
         {
-        case XML: ParseXML(*in,tempVars,comments); break;
-        default: ParseCSV(*in,tempVars,comments); break;
+        case XML: ParseXML(*in,file,tempVars,print); break;
+        default: ParseCSV(*in,file,tempVars,print); break;
         }
     }
-    catch(LineSyntaxError &e)
+    catch(Error &e)
     {
-        for(map<string,Expression*>::iterator i=tempVars.begin();
+        for(map<string,MacroEntry*>::iterator i=tempVars.begin();
             i!=tempVars.end();
             i++)
         {
@@ -55,9 +57,10 @@ void InputParser::Parse(map<string,Expression*> &vars, std::map<std::string,std:
         if(!useStdin)
         {
             inFile.close();
-            throw SyntaxError(file,e.what());
+            e.SetFile(file);
         }
-        else throw SyntaxError(e.what());
+        
+        throw e;
     }
 
     if(!useStdin)
@@ -69,8 +72,9 @@ void InputParser::Parse(map<string,Expression*> &vars, std::map<std::string,std:
 }
 
 void InputParser::ParseCSV(std::istream &in,
-                           std::map<std::string,Expression*> &vars,
-                           std::map<std::string,std::string> &comments) throw(LineSyntaxError)
+                           const std::string &currentFile,
+                           std::map<std::string,MacroEntry*> &vars,
+                           bool print) throw(Error)
 {
     string line;
     boost::smatch m;
@@ -80,23 +84,117 @@ void InputParser::ParseCSV(std::istream &in,
         lineCount++;
         getline(in,line);
         if(line=="")continue;
-        else if(!boost::regex_match(line,m,csvLine))throw LineSyntaxError(lineCount);
+        else if(boost::regex_match(line,m,directive))
+        {
+            try
+            {
+                EvalDirective(m[1],m[3],currentFile,lineCount,vars);
+            }
+            catch(Error &e)
+            {
+                cout<<e.what()<<endl;
+            }
+            continue;
+        }
+        else if(!boost::regex_match(line,m,csvLine))
+        {
+            Error::PrintError(currentFile,lineCount,"syntax error, ignoring entry.");
+            continue;
+        }
+
+        string variable=m[1];
+        if(vars.find(variable)!=vars.end())
+            Error::PrintWarning(currentFile,lineCount,"duplicate declaration of variable '"+variable+"'.");
         
-        if(vars.find(m[1])!=vars.end())cout<<"Warning: duplicate declaration of variable '"<<m[1]<<"'."<<endl;
         try
         {
-            vars[m[1]]=new Expression(m[2]);
+            vars[variable]=new MacroEntry();
+            vars[variable]->expression=new Expression(m[2]);
+            vars[variable]->print=print;
             if(m[4].matched)
             {
                 string comment=m[4];
-                comments[m[1]]=boost::regex_replace(comment,newLine,"\\n");
+                vars[variable]->comments=boost::regex_replace(comment,newLine,"\\n");
             }
         }
-        catch(...){ throw LineSyntaxError(lineCount); }
+        catch(...)
+        {
+            Error::PrintError(currentFile,lineCount,"syntax error in expression.");
+            delete vars[variable];
+            vars.erase(variable);
+        }
     }
 }
+
 void InputParser::ParseXML(std::istream &in,
-                           std::map<std::string,Expression*> &vars,
-                           std::map<std::string,std::string> &comments) throw(LineSyntaxError)
+                           const std::string &currentFile,
+                           std::map<std::string,MacroEntry*> &vars,
+                           bool print) throw(Error)
 {
+}
+
+void InputParser::EvalDirective(const std::string &directive,
+                                const std::string &parameter,
+                                const std::string &currentFile,
+                                int currentLine,
+                                std::map<std::string,MacroEntry*> &vars,
+                                bool print) throw(Error)
+{
+    if(directive=="include")
+    {
+        boost::smatch m;
+        if(!boost::regex_match(parameter,m,boost::regex("^(!)?\"([\\w.]+)\"$")))
+            throw Error(currentFile,currentLine,"invalid include directive.");
+
+        if(print)print=!m[1].matched;
+        string file=m[2];
+        boost::regex_match(currentFile,m,fileName);
+        if(m[2].matched)file=m[2]+file;
+        ifstream in(file.c_str());
+        if(!in.good())throw Error(currentFile,currentLine,"unable to open included file \""+file+"\".");
+        in.close();
+
+        try
+        {
+            InputParser in(file);
+            in.Parse(vars,print);
+        }
+        catch(Error &e)
+        {
+            e.SetMessage(string("included here.\n")+e.what());
+            e.SetLine(currentLine);
+            e.SetFile(currentFile);
+            throw e;
+        }
+    }
+    else throw Error(currentFile,currentLine,"unknown directive '"+directive+"'.");
+}
+
+void InputParser::Error::PrintWarning(const std::string &file,int line,const std::string &message)
+{
+    cout<<ErrorString(WARNING,file,line,message)<<endl;
+}
+
+void InputParser::Error::PrintError(const std::string &file,int line,const std::string &message)
+{
+    cout<<ErrorString(ERROR,file,line,message)<<endl;
+}
+
+std::string InputParser::Error::ErrorString(ErrorType type,
+                                            const std::string &file,
+                                            int line,
+                                            const std::string &message)
+{
+    string out;
+
+    switch(type)
+    {
+    case ERROR: out="Error: "; break;
+    case WARNING: out="Warning: "; break;
+    default: out="Info: "; break;
+    }
+    
+    out+=message;
+    if(file!="")out=file+(line>0 ? "("+StringHelper::ToString(line)+")" : "")+": "+out;
+    return out;
 }

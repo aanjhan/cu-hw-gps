@@ -3,6 +3,7 @@
 #include <vector>
 #include <ostream>
 #include <fstream>
+#include "macro_entry.h"
 #include "expression.h"
 #include "input_parser.h"
 
@@ -38,8 +39,7 @@ int main(int argc, char *argv[])
     }
 
     //Parse input files.
-    map<string,Expression*> vars;
-    map<string,string> comments;
+    map<string,MacroEntry*> vars;
     if(vm.count("input"))
     {
         vector<string> inputFiles=vm["input"].as<vector<string> >();
@@ -48,14 +48,14 @@ int main(int argc, char *argv[])
             i++)
         {
             InputParser in(*i);
-            try{ in.Parse(vars,comments); }
+            try{ in.Parse(vars); }
             catch(exception &e){ cout<<e.what()<<endl; }
         }
     }
     else
     {
         InputParser in;
-        try{ in.Parse(vars,comments); }
+        try{ in.Parse(vars); }
         catch(exception &e){ cout<<e.what()<<endl; }
     }
 
@@ -78,21 +78,34 @@ int main(int argc, char *argv[])
         output="//This file has been automatically generated.\n";
         output+="//Edit contents with extreme caution.\n\n";
 
-        boost::regex newline("\\n");
-        for(map<string,Expression*>::iterator i=vars.begin();
+        map<string,Expression*> expList;
+        for(map<string,MacroEntry*>::iterator i=vars.begin();
             i!=vars.end();
             i++)
         {
+            expList[(*i).first]=(*i).second->expression;
+        }
+
+        boost::regex newline("\\n");
+        for(map<string,MacroEntry*>::iterator i=vars.begin();
+            i!=vars.end();
+            i++)
+        {
+            string variable=(*i).first;
+            MacroEntry *entry=(*i).second;
+
+            if(!entry->print)continue;
+            
             try
             {
-                if(comments.find((*i).first)!=comments.end())
+                if(entry->comments!="")
                 {
                     output+="//";
-                    output+=boost::regex_replace(comments[(*i).first],newline,"\\n//");
+                    output+=boost::regex_replace(entry->comments,newline,"\\n//");
                     output+="\n";
                 }
-                output+="`define "+(*i).first
-                        +" "+(*i).second->Value(vars)+"\n\n";
+                output+="`define "+variable
+                        +" "+entry->expression->Value(expList)+"\n\n";
             }
             catch(exception &e)
             {
@@ -109,7 +122,7 @@ int main(int argc, char *argv[])
     }
 
     //Cleanup expressions.
-    for(map<string,Expression*>::iterator i=vars.begin();
+    for(map<string,MacroEntry*>::iterator i=vars.begin();
         i!=vars.end();
         i++)
     {

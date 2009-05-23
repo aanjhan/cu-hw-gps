@@ -90,6 +90,7 @@ private:
     enum FileType { CSV, XML };
     
     const static boost::regex fileName;
+    const static boost::regex comment;
     const static boost::regex directive;
     const static boost::regex csvLine;
     const static boost::regex newLine;

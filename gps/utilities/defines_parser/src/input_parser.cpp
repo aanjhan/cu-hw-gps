@@ -6,6 +6,7 @@
 using namespace std;
 
 const boost::regex InputParser::fileName("^((.*\\/)?([^\\/]*))\\.([^.]+)$");
+const boost::regex InputParser::comment("^ *(//.*)?$");
 const boost::regex InputParser::directive("^#(\\w+)( (.*))?$");
 const boost::regex InputParser::csvLine("^([A-Za-z_]\\w*),([^,]*)(,(.*))?$");
 const boost::regex InputParser::newLine("\\\\n");
@@ -83,7 +84,7 @@ void InputParser::ParseCSV(std::istream &in,
     {
         lineCount++;
         getline(in,line);
-        if(line=="")continue;
+        if(boost::regex_match(line,comment))continue;
         else if(boost::regex_match(line,m,directive))
         {
             try

@@ -107,9 +107,10 @@ int main(int argc, char *argv[])
                 output+="`define "+variable
                         +" "+entry->expression->Value(expList)+"\n\n";
             }
-            catch(exception &e)
+            catch(Expression::ExpressionError &e)
             {
                 errorCount++;
+                e.SetVariable(variable);
                 cout<<e.what()<<endl;
             }
         }

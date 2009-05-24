@@ -12,26 +12,43 @@
 class Expression
 {
 public:
-    class UnknownVariable : public std::exception
+    class ExpressionError : public std::exception
     {
     public:
-        UnknownVariable(const std::string &var) : message("Error: unknown variable '"+var+"'.") {}
-        ~UnknownVariable() throw() {}
-        virtual const char* what() const throw() { return message.c_str(); }
+        ExpressionError(const std::string &message) : variable(""), message(message) {}
+        ExpressionError(const std::string &variable,
+                        const std::string &message) : variable(variable),
+                                                      message(message) {}
+        ~ExpressionError() throw() {}
         
-    private:
+        void SetVariable(const std::string &variable){ this->variable=variable; }
+        void SetMessage(const std::string &message){ this->message=message; }
+        
+        virtual const char* what() const throw()
+        {
+            std::string out="Error";
+            if(variable!="")out+="("+variable+")";
+            out+=": "+message;
+            return out.c_str();
+        }
+        
+    protected:
+        std::string variable;
         std::string message;
     };
     
-    class UnknownOperation : public std::exception
+    class UnknownVariable : public ExpressionError
     {
     public:
-        UnknownOperation(int type) : message("Error: unknown operation type "+StringHelper::ToString(type)+".") {}
+        UnknownVariable(const std::string &var) : ExpressionError("unknown variable '"+var+"'.") {}
+        ~UnknownVariable() throw() {}
+    };
+    
+    class UnknownOperation : public ExpressionError
+    {
+    public:
+        UnknownOperation(int type) : ExpressionError("unknown operation type "+StringHelper::ToString(type)+".") {}
         ~UnknownOperation() throw() {}
-        virtual const char* what() const throw() { return message.c_str(); }
-        
-    private:
-        std::string message;
     };
     
     Expression(TreeNode *tree) : tree(tree), evaluated(false) {}
@@ -39,7 +56,7 @@ public:
     Expression(const char *expression) : tree(Parser::Parse(expression)), evaluated(false) {}
     ~Expression();
 
-    std::string Value(std::map<std::string,Expression*> &vars) throw(UnknownVariable,UnknownOperation);
+    std::string Value(std::map<std::string,Expression*> &vars) throw(ExpressionError);
 
 protected:
     TreeNode *tree;
@@ -50,7 +67,7 @@ private:
 
     const static boost::regex number;
 
-    static std::string Evaluate(TreeNode *tree, std::map<std::string,Expression*> &vars) throw(UnknownVariable,UnknownOperation);
+    static std::string Evaluate(TreeNode *tree, std::map<std::string,Expression*> &vars) throw(ExpressionError);
     static double EvalValue(const std::string &valueString);
     static double EvalFunction(const std::string &function, double value);
 };

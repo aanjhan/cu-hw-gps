@@ -7,8 +7,8 @@ using namespace std;
 
 const boost::regex InputParser::fileName("^((.*\\/)?([^\\/]*))\\.([^.]+)$");
 const boost::regex InputParser::comment("^ *(//.*)?$");
-const boost::regex InputParser::directive("^#(\\w+)( (.*))?$");
-const boost::regex InputParser::csvLine("^([A-Za-z_]\\w*),([^,]*)(,(.*))?$");
+const boost::regex InputParser::directive("^ *# *(\\w+)( (.*))?$");
+const boost::regex InputParser::csvLine("^ *([A-Za-z_]\\w*) *,([^,]*)(,(.*))?$");
 const boost::regex InputParser::newLine("\\\\n");
 
 void InputParser::Parse(map<string,MacroEntry*> &vars, bool print) throw(Error)

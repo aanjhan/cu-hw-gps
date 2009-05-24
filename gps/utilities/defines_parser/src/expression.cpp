@@ -13,7 +13,7 @@ Expression::~Expression()
     if(tree!=NULL)delete tree;
 }
 
-string Expression::Value(std::map<std::string,Expression*> &vars) throw(UnknownVariable,UnknownOperation)
+string Expression::Value(std::map<std::string,Expression*> &vars) throw(ExpressionError)
 {
     if(!evaluated)
     {
@@ -23,7 +23,7 @@ string Expression::Value(std::map<std::string,Expression*> &vars) throw(UnknownV
     return value;
 }
 
-std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression*> &vars) throw(UnknownVariable,UnknownOperation)
+std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression*> &vars) throw(ExpressionError)
 {
     //Convert left parameter to a double.
     string leftString;

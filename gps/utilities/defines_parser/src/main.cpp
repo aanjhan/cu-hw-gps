@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
 
     //Parse input files.
     map<string,MacroEntry*> vars;
+    int errorCount=0;
     if(vm.count("input"))
     {
         vector<string> inputFiles=vm["input"].as<vector<string> >();
@@ -48,78 +49,84 @@ int main(int argc, char *argv[])
             i++)
         {
             InputParser in(*i);
-            try{ in.Parse(vars); }
-            catch(exception &e){ cout<<e.what()<<endl; }
+            errorCount+=in.Parse(vars);
         }
     }
     else
     {
         InputParser in;
-        try{ in.Parse(vars); }
-        catch(exception &e){ cout<<e.what()<<endl; }
+        errorCount+=in.Parse(vars);
     }
 
     //Print output file.
-    ofstream outFile;
-    ostream *out=NULL;
-    if(!vm.count("output"))out=&cout;
+    if(errorCount==0)
+    {
+        ofstream outFile;
+        ostream *out=NULL;
+        if(!vm.count("output"))out=&cout;
+        else
+        {
+            outFile.open(vm["output"].as<string>().c_str());
+            if(outFile.good())out=&outFile;
+            else cout<<"Error: unable to open output file '"
+                     <<vm["output"].as<string>()<<"'."<<endl;
+        }
+        if(out!=NULL)
+        {
+            int errorCount=0;
+
+            string output;
+            output="//This file has been automatically generated.\n";
+            output+="//Edit contents with extreme caution.\n\n";
+
+            map<string,Expression*> expList;
+            for(map<string,MacroEntry*>::iterator i=vars.begin();
+                i!=vars.end();
+                i++)
+            {
+                expList[(*i).first]=(*i).second->expression;
+            }
+
+            boost::regex newline("\\n");
+            for(map<string,MacroEntry*>::iterator i=vars.begin();
+                i!=vars.end();
+                i++)
+            {
+                string variable=(*i).first;
+                MacroEntry *entry=(*i).second;
+
+                if(!entry->print)continue;
+            
+                try
+                {
+                    if(entry->comments!="")
+                    {
+                        output+="//";
+                        output+=boost::regex_replace(entry->comments,newline,"\\n//");
+                        output+="\n";
+                    }
+                    output+="`define "+variable
+                            +" "+entry->expression->Value(expList)+"\n\n";
+                }
+                catch(Expression::ExpressionError &e)
+                {
+                    errorCount++;
+                    e.SetVariable(variable);
+                    cout<<e.what()<<endl;
+                }
+            }
+
+            if(errorCount==1)cout<<"Found 1 error."<<endl;
+            else if(errorCount>0)cout<<"Found "<<errorCount<<" errors."<<endl;
+            else (*out)<<output;
+
+            if(vm.count("output"))outFile.close();
+        }
+    }
     else
     {
-        outFile.open(vm["output"].as<string>().c_str());
-        if(outFile.good())out=&outFile;
-        else cout<<"Error: unable to open output file '"
-                 <<vm["output"].as<string>()<<"'."<<endl;
-    }
-    if(out!=NULL)
-    {
-        int errorCount=0;
-
-        string output;
-        output="//This file has been automatically generated.\n";
-        output+="//Edit contents with extreme caution.\n\n";
-
-        map<string,Expression*> expList;
-        for(map<string,MacroEntry*>::iterator i=vars.begin();
-            i!=vars.end();
-            i++)
-        {
-            expList[(*i).first]=(*i).second->expression;
-        }
-
-        boost::regex newline("\\n");
-        for(map<string,MacroEntry*>::iterator i=vars.begin();
-            i!=vars.end();
-            i++)
-        {
-            string variable=(*i).first;
-            MacroEntry *entry=(*i).second;
-
-            if(!entry->print)continue;
-            
-            try
-            {
-                if(entry->comments!="")
-                {
-                    output+="//";
-                    output+=boost::regex_replace(entry->comments,newline,"\\n//");
-                    output+="\n";
-                }
-                output+="`define "+variable
-                        +" "+entry->expression->Value(expList)+"\n\n";
-            }
-            catch(Expression::ExpressionError &e)
-            {
-                errorCount++;
-                e.SetVariable(variable);
-                cout<<e.what()<<endl;
-            }
-        }
-
-        if(errorCount==1)cout<<"1 error."<<endl;
-        else if(errorCount>0)cout<<errorCount<<" errors."<<endl;
-        else (*out)<<output;
-
-        if(vm.count("output"))outFile.close();
+        if(errorCount==1)cout<<"Found 1 error."<<endl;
+        else if(errorCount>0)cout<<"Found "<<errorCount<<" errors."<<endl;
     }
 
     //Cleanup expressions.

@@ -11,7 +11,7 @@ const boost::regex InputParser::directive("^ *# *(\\w+)( (.*))?$");
 const boost::regex InputParser::csvLine("^ *([A-Za-z_]\\w*) *,([^,]*)(,(.*))?$");
 const boost::regex InputParser::newLine("\\\\n");
 
-void InputParser::Parse(map<string,MacroEntry*> &vars, bool print) throw(Error)
+int InputParser::Parse(map<string,MacroEntry*> &vars, bool print)
 {
     map<string,MacroEntry*> tempVars;
 
@@ -34,34 +34,19 @@ void InputParser::Parse(map<string,MacroEntry*> &vars, bool print) throw(Error)
         }
         
         inFile.open(file.c_str());
-        if(!inFile.good())throw Warning("unable to open file '"+file+"', ignoring.");
+        if(!inFile.good())
+        {
+            InputErrors::PrintWarning("unable to open file '"+file+"', ignoring.");
+            return 0;
+        }
         in=&inFile;
     }
 
-    try
+    int errorCount;
+    switch(type)
     {
-        switch(type)
-        {
-        case XML: ParseXML(*in,file,tempVars,print); break;
-        default: ParseCSV(*in,file,tempVars,print); break;
-        }
-    }
-    catch(Error &e)
-    {
-        for(map<string,MacroEntry*>::iterator i=tempVars.begin();
-            i!=tempVars.end();
-            i++)
-        {
-            delete (*i).second;
-        }
-        
-        if(!useStdin)
-        {
-            inFile.close();
-            e.SetFile(file);
-        }
-        
-        throw e;
+    case XML: errorCount=ParseXML(*in,file,tempVars,print); break;
+    default: errorCount=ParseCSV(*in,file,tempVars,print); break;
     }
 
     if(!useStdin)
@@ -70,16 +55,19 @@ void InputParser::Parse(map<string,MacroEntry*> &vars, bool print) throw(Error)
     }
 
     copy(tempVars.begin(),tempVars.end(),inserter(vars,vars.end()));
+
+    return errorCount;
 }
 
-void InputParser::ParseCSV(std::istream &in,
-                           const std::string &currentFile,
-                           std::map<std::string,MacroEntry*> &vars,
-                           bool print) throw(Error)
+int InputParser::ParseCSV(std::istream &in,
+                          const std::string &currentFile,
+                          std::map<std::string,MacroEntry*> &vars,
+                          bool print)
 {
     string line;
     boost::smatch m;
     int lineCount=0;
+    int errorCount=0;
     while(!in.eof())
     {
         lineCount++;
@@ -87,25 +75,19 @@ void InputParser::ParseCSV(std::istream &in,
         if(boost::regex_match(line,comment))continue;
         else if(boost::regex_match(line,m,directive))
         {
-            try
-            {
-                EvalDirective(m[1],m[3],currentFile,lineCount,vars);
-            }
-            catch(Error &e)
-            {
-                cout<<e.what()<<endl;
-            }
+            errorCount+=EvalDirective(m[1],m[3],currentFile,lineCount,vars);
             continue;
         }
         else if(!boost::regex_match(line,m,csvLine))
         {
-            Error::PrintError(currentFile,lineCount,"syntax error, ignoring entry.");
+            InputErrors::PrintError(currentFile,lineCount,"syntax error.");
+            errorCount++;
             continue;
         }
 
         string variable=m[1];
         if(vars.find(variable)!=vars.end())
-            Error::PrintWarning(currentFile,lineCount,"duplicate declaration of variable '"+variable+"'.");
+            InputErrors::PrintWarning(currentFile,lineCount,"duplicate declaration of variable '"+variable+"'.");
         
         try
         {
@@ -120,71 +102,100 @@ void InputParser::ParseCSV(std::istream &in,
         }
         catch(...)
         {
-            Error::PrintError(currentFile,lineCount,"syntax error in expression.");
+            InputErrors::PrintError(currentFile,lineCount,"syntax error in expression.");
             delete vars[variable];
             vars.erase(variable);
+            errorCount++;
         }
     }
+
+    return errorCount;
 }
 
-void InputParser::ParseXML(std::istream &in,
-                           const std::string &currentFile,
-                           std::map<std::string,MacroEntry*> &vars,
-                           bool print) throw(Error)
+int InputParser::ParseXML(std::istream &in,
+                          const std::string &currentFile,
+                          std::map<std::string,MacroEntry*> &vars,
+                          bool print)
 {
+    return 0;
 }
 
-void InputParser::EvalDirective(const std::string &directive,
+int InputParser::EvalDirective(const std::string &directive,
                                 const std::string &parameter,
                                 const std::string &currentFile,
                                 int currentLine,
                                 std::map<std::string,MacroEntry*> &vars,
-                                bool print) throw(Error)
+                                bool print)
 {
     if(directive=="include")
     {
         boost::smatch m;
         if(!boost::regex_match(parameter,m,boost::regex("^(!)?\"([\\w.]+)\"$")))
-            throw Error(currentFile,currentLine,"invalid include directive.");
+        {
+            
+            cout<<InputErrors::ErrorString(InputErrors::ERROR,
+                                           currentFile,
+                                           currentLine,
+                                           "invalid include directive.")
+                <<endl;
+            return 1;
+        }
 
         if(print)print=!m[1].matched;
         string file=m[2];
         boost::regex_match(currentFile,m,fileName);
         if(m[2].matched)file=m[2]+file;
         ifstream in(file.c_str());
-        if(!in.good())throw Error(currentFile,currentLine,"unable to open included file \""+file+"\".");
+        if(!in.good())
+        {
+            
+            cout<<InputErrors::ErrorString(InputErrors::ERROR,
+                                           currentFile,
+                                           currentLine,
+                                           "unable to open included file \""+file+"\".")
+                <<endl;
+            return 1;
+        }
         in.close();
 
-        try
+        InputParser inParser(file);
+        int errorCount=inParser.Parse(vars,print);
+        if(errorCount>0)
         {
-            InputParser in(file);
-            in.Parse(vars,print);
+            cout<<InputErrors::ErrorString(InputErrors::ERROR,
+                                           currentFile,
+                                           currentLine,
+                                           StringHelper::ToString(errorCount)+" error"+(errorCount>0 ? "s" : "")+" from included file '"+file+"'.")
+                <<endl;
         }
-        catch(Error &e)
-        {
-            e.SetMessage(string("included here.\n")+e.what());
-            e.SetLine(currentLine);
-            e.SetFile(currentFile);
-            throw e;
-        }
+        return errorCount;
     }
-    else throw Error(currentFile,currentLine,"unknown directive '"+directive+"'.");
+    else
+    {
+            
+        cout<<InputErrors::ErrorString(InputErrors::ERROR,
+                                       currentFile,
+                                       currentLine,
+                                       "unknown directive '"+directive+"'.")
+            <<endl;
+        return 1;
+    }
 }
 
-void InputParser::Error::PrintWarning(const std::string &file,int line,const std::string &message)
+void InputErrors::PrintWarning(const std::string &file,int line,const std::string &message)
 {
-    cout<<ErrorString(WARNING,file,line,message)<<endl;
+    cout<<InputErrors::ErrorString(WARNING,file,line,message)<<endl;
 }
 
-void InputParser::Error::PrintError(const std::string &file,int line,const std::string &message)
+void InputErrors::PrintError(const std::string &file,int line,const std::string &message)
 {
-    cout<<ErrorString(ERROR,file,line,message)<<endl;
+    cout<<InputErrors::ErrorString(ERROR,file,line,message)<<endl;
 }
 
-std::string InputParser::Error::ErrorString(ErrorType type,
-                                            const std::string &file,
-                                            int line,
-                                            const std::string &message)
+std::string InputErrors::ErrorString(ErrorType type,
+                                     const std::string &file,
+                                     int line,
+                                     const std::string &message)
 {
     string out;
 

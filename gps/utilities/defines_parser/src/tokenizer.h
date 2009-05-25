@@ -7,18 +7,19 @@
 
 namespace TokenType
 {
-    const int PLUS     = 1;
-    const int MINUS    = 2;
-    const int TIMES    = 3;
-    const int DIVIDE   = 4;
-    const int CARET    = 5;
-    const int LPAREN   = 6;
-    const int RPAREN   = 7;
-    const int FUNCTION = 8;
-    const int VARIABLE = 9;
-    const int VALUE    = 10;
-    const int NUMBER   = 10;
-    const int ILLEGAL  = 11;
+    const int COLON    = 1;
+    const int PLUS     = 2;
+    const int MINUS    = 3;
+    const int TIMES    = 4;
+    const int DIVIDE   = 5;
+    const int CARET    = 6;
+    const int LPAREN   = 7;
+    const int RPAREN   = 8;
+    const int FUNCTION = 9;
+    const int VARIABLE = 10;
+    const int VALUE    = 11;
+    const int NUMBER   = 11;
+    const int ILLEGAL  = 12;
 }
 
 namespace CharType
@@ -26,8 +27,8 @@ namespace CharType
     const int LETTER   = 1;
     const int NUMBER   = 2;
     const int PAREN    = 3;
-    const int OPERATOR = 4;
-    const int ILLEGAL  = 5;
+    const int OPERATOR = 5;
+    const int ILLEGAL  = 6;
 }
 
 class Tokenizer

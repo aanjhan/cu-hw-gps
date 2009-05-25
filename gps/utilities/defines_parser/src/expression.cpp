@@ -98,6 +98,9 @@ std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression
         }
         else stringValue=leftString+"^"+rightString;
         break;
+    case TokenType::COLON:
+        stringValue=leftString+":"+rightString;
+        break;
     case TokenType::FUNCTION:
         if(haveRightValue)
         {
@@ -105,6 +108,7 @@ std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression
             value=EvalFunction(tree->GetValue(),rightValue);
         }
         else stringValue=tree->GetValue()+"("+rightString+")";
+        break;
     case TokenType::VARIABLE:
         if(tree->GetValue()[0]=='`')stringValue=tree->GetValue();
         else if(vars.find(tree->GetValue())==vars.end())throw UnknownVariable(tree->GetValue());
@@ -121,7 +125,7 @@ std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression
     {
         double diff;
         diff=value-floor(value+0.5);
-        if(diff<=1e-4)return ToString((int)floor(value+0.5));
+        if(diff<=1e-4)return ToString((int64_t)floor(value+0.5));
         else return ToString(value);
     }
     else return stringValue;
@@ -160,7 +164,7 @@ double Expression::EvalFunction(const std::string &function, double value)
     else if(function=="log10")return log10(value);
     else if(function=="log2")return log2(value);
     else if(function=="max_value")return pow(2,floor(value))-1;
-    else if(function=="max_width")return ceil(log2(value));
+    else if(function=="max_width")return ceil(log2(ceil(value)));
     else if(function=="round")return floor(value+0.5);
     else if(function=="sin")return sin(value);
     else if(function=="sqrt")return sqrt(value);

@@ -12,12 +12,26 @@ public:
     class SyntaxError : public std::exception
     {
     public:
-        SyntaxError() : message("Syntax error.") {}
-        SyntaxError(const std::string &error) : message("Syntax error: "+error+".") {}
+        SyntaxError() : message("syntax error."), embed(false) {}
+        SyntaxError(const std::string &error) : message(error+".") {}
         ~SyntaxError() throw() {}
-        virtual const char* what() const throw() { return message.c_str(); }
+        
+        void Embed(bool embed){ this->embed=embed; }
+        
+        virtual const char* what() const throw()
+        {
+            std::string out;
+            if(!embed)
+            {
+                out="Parser error: ";
+            }
+            else out="parser error : ";
+            out+=message;
+            return out.c_str();
+        }
         
     private:
+        bool embed;
         std::string message;
     };
     
@@ -31,8 +45,9 @@ public:
 
 private:
     Tokenizer tokenizer;
-    
+
     TreeNode* ParseExpression();
+    TreeNode* ParseSum();
     TreeNode* ParseTerm();
     TreeNode* ParseFactor();
     TreeNode* ParseBase();

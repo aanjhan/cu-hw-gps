@@ -100,9 +100,19 @@ int InputParser::ParseCSV(std::istream &in,
                 vars[variable]->comments=boost::regex_replace(comment,newLine,"\\n");
             }
         }
-        catch(...)
+        catch(Parser::SyntaxError &e)
         {
-            InputErrors::PrintError(currentFile,lineCount,"syntax error in expression.");
+            e.Embed(true);
+            InputErrors::PrintError(currentFile,lineCount,e.what());
+            delete vars[variable];
+            vars.erase(variable);
+            errorCount++;
+        }
+        catch(Expression::ExpressionError &e)
+        {
+            e.SetVariable(variable);
+            e.Embed(true);
+            InputErrors::PrintError(currentFile,lineCount,e.what());
             delete vars[variable];
             vars.erase(variable);
             errorCount++;

@@ -4,9 +4,38 @@ using namespace std;
 
 /**
 * Parse next expression.
-* Expressions are defined as: [-] Term { (+ | -) Term }
+* Expressions are defined as: Sum { : Sum }
 */
 TreeNode* Parser::ParseExpression()
+{
+    if(!tokenizer.HasNext())return NULL;
+
+    //Read range.
+    TreeNode *expression=ParseSum();
+
+    if(tokenizer.NextType()==TokenType::COLON)
+    {
+        tokenizer.ReadNext();
+        expression=new TreeNode(TokenType::COLON,expression,NULL);
+        
+        TreeNode *right=ParseSum();//Get second term
+        //Syntax error
+        if(right==NULL)
+        {
+            delete expression;
+            throw SyntaxError("missing right term");
+        }
+        else expression->SetRight(right);
+    }
+    
+    return expression;
+}
+
+/**
+* Parse next sum.
+* Sums are defined as: [-] Term { (+ | -) Term }
+*/
+TreeNode* Parser::ParseSum()
 {
     if(!tokenizer.HasNext())return NULL;
 
@@ -78,7 +107,7 @@ TreeNode* Parser::ParseTerm()
 
 /**
 * Parse next factor.
-* Factors are defined as: Base [ ^ [-] Number ]
+* Factors are defined as: Base [ ^ Sum ]
 */
 TreeNode* Parser::ParseFactor()
 {
@@ -90,7 +119,7 @@ TreeNode* Parser::ParseFactor()
         tokenizer.ReadNext();//Eat carrot
         bool minus=(tokenizer.NextType()==TokenType::MINUS);//Minus sign?
         if(minus)tokenizer.ReadNext();//Eat minus
-        TreeNode *exponent=ParseValue();//Get number
+        TreeNode *exponent=ParseSum();//Get number
         //Syntax error
         if(exponent==NULL)
         {
@@ -110,7 +139,7 @@ TreeNode* Parser::ParseFactor()
 /**
 * Parse next base.
 * Bases are defined as:
-* Number | Variable | Function ( Expression )
+* Number | Variable | Function ( Sum )
 */
 TreeNode* Parser::ParseBase()
 {
@@ -121,7 +150,7 @@ TreeNode* Parser::ParseBase()
     default:
         if(tokenizer.NextType()!=TokenType::LPAREN)return NULL;//Invalid syntax
         tokenizer.ReadNext();//Eat paren
-        TreeNode *expression=ParseExpression();
+        TreeNode *expression=ParseSum();
         if(expression==NULL)return NULL;
         else if(tokenizer.NextType()!=TokenType::RPAREN)
         {
@@ -135,7 +164,7 @@ TreeNode* Parser::ParseBase()
 
 /**
 * Parse next function.
-* Functions are defined as: Function ( Expression )
+* Functions are defined as: Function ( Sum )
 */
 TreeNode* Parser::ParseFunction()
 {
@@ -155,7 +184,7 @@ TreeNode* Parser::ParseFunction()
     }
     tokenizer.ReadNext();//Eat paren
     
-    TreeNode *expression=ParseExpression();
+    TreeNode *expression=ParseSum();
     //Invalid syntax - no expression
     if(expression==NULL)
     {

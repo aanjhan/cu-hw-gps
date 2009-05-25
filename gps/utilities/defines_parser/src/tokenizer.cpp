@@ -43,6 +43,7 @@ int Tokenizer::NextType() throw(UnknownTokenException)
     {
         switch(expression[0])
         {
+        case ':': return TokenType::COLON;
         case '+': return TokenType::PLUS;
         case '-': return TokenType::MINUS;
         case '*': return TokenType::TIMES;

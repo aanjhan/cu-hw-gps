@@ -15,24 +15,33 @@ public:
     class ExpressionError : public std::exception
     {
     public:
-        ExpressionError(const std::string &message) : variable(""), message(message) {}
+        ExpressionError(const std::string &message) : variable(""), message(message), embed(false) {}
         ExpressionError(const std::string &variable,
                         const std::string &message) : variable(variable),
-                                                      message(message) {}
+                                                      message(message),
+                                                      embed(false){}
         ~ExpressionError() throw() {}
-        
+
+        void Embed(bool embed){ this->embed=embed; }
         void SetVariable(const std::string &variable){ this->variable=variable; }
         void SetMessage(const std::string &message){ this->message=message; }
         
         virtual const char* what() const throw()
         {
-            std::string out="Error";
-            if(variable!="")out+="("+variable+")";
-            out+=": "+message;
+            std::string out="";
+            if(!embed)
+            {
+                out="Error";
+                if(variable!="")out+="("+variable+")";
+                out+=": ";
+            }
+            else if(variable!="")out+="("+variable+") : ";
+            out+=message;
             return out.c_str();
         }
         
     protected:
+        bool embed;
         std::string variable;
         std::string message;
     };

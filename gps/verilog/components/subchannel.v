@@ -1,25 +1,28 @@
+`include "global.vh"
+`include "ca_upsampler.vh"
+
 module subchannel(
-    input              clk,
-    input              clk_sample,
-    input              global_reset,
-    input              reset,
-    input [4:0]        prn,
-    input [2:0]        data,
-    input              seek_en,
-    input [14:0]       seek_target,
-    output wire [14:0] code_shift,
-    output wire        ca_bit,
-    output wire        ca_clk,
-    output wire [9:0]  ca_code_shift,
-    output wire [18:0] accumulator);
+    input                    clk,
+    input                    clk_sample,
+    input                    global_reset,
+    input                    reset,
+    input [4:0]              prn,
+    input [`INPUT_RANGE]     data,
+    input                    seek_en,
+    input [`CS_RANGE]        seek_target,
+    output wire [`CS_RANGE]  code_shift,
+    output wire              ca_bit,
+    output wire              ca_clk,
+    output wire [9:0]        ca_code_shift,
+    output wire [`ACC_RANGE] accumulator);
 
    //Clock domain crossing.
    wire clk_sample_sync;
    synchronizer input_clk_sync(.clk(clk),
                                .in(clk_sample),
                                .out(clk_sample_sync));
-   wire [2:0] data_sync;
-   synchronizer #(.WIDTH(3))
+   wire [`INPUT_RANGE] data_sync;
+   synchronizer #(.WIDTH(`INPUT_WIDTH))
      input_data_sync(.clk(clk),
                      .in(data),
                      .out(data_sync));
@@ -52,8 +55,8 @@ module subchannel(
                           .in(data_available),
                           .out(data_available_kmn));
      
-   wire [2:0] data_kmn;
-   delay #(.WIDTH(3),
+   wire [`INPUT_RANGE] data_kmn;
+   delay #(.WIDTH(`INPUT_WIDTH),
            .DELAY(DATA_DELAY))
      data_delay(.clk(clk),
                 .in(data_sync),

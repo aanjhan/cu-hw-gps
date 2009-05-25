@@ -1,41 +1,25 @@
+`include "global.vh"
+`include "ca_upsampler.vh"
+
 module ca_upsampler(
-    input              clk,
-    input              reset,
-    input              enable,
-    input [4:0]        prn,
-    output reg [(CS_WIDTH-1):0]  code_shift,
-    output             out,
+    input                  clk,
+    input                  reset,
+    input                  enable,
+    input [4:0]            prn,
+    output reg [`CS_RANGE] code_shift,
+    output                 out,
     //Seek control.
-    input              seek_en,
-    input [(CS_WIDTH-1):0]       seek_target,
-    output wire        seeking,
+    input                  seek_en,
+    input [`CS_RANGE]      seek_target,
+    output wire            seeking,
     //Debug outputs.
-    output wire        ca_clk,
-    output wire [9:0]  ca_code_shift);
-
-   `include "common_functions.vh"
-   
-   localparam FS = 16800000;
-   localparam F_CA = 1023000;
-   localparam T_CA = 0.001;
-   
-   localparam F_RES = 1;
-   localparam F_DOPP_MAX = 6000;
-   localparam ACC_WIDTH = log2(FS/F_RES);
-   localparam PHASE_INC_WIDTH = log2((1<<ACC_WIDTH)*F_DOPP_MAX/FS);
-
-   localparam [(PHASE_INC_WIDTH-1):0] CA_RATE_INC = (1<<ACC_WIDTH)*F_CA/FS;
-   localparam CS_WIDTH = max_width(FS*T_CA);
-   localparam MAX_CODE_SHIFT = 'd16799;//real_to_int((FS*T_CA)-1);
-
-   //C/A chipping rate phase increment
-   //for DDS to yeild 1.023MHz from 16.8MHz.
-   //localparam [19:0] CA_RATE_INC = 20'd1021613;
+    output wire            ca_clk,
+    output wire [9:0]      ca_code_shift);
 
    //Determine the next code shift value
    //for seek termination.
-   wire [(CS_WIDTH-1):0] next_code_shift;
-   assign next_code_shift = code_shift==MAX_CODE_SHIFT ? {CS_WIDTH{1'b0}} : (code_shift+{{(CS_WIDTH-1){1'b0}},1'h1});
+   wire [`CS_RANGE] next_code_shift;
+   assign next_code_shift = code_shift==`MAX_CODE_SHIFT ? {`CS_WIDTH{1'b0}} : (code_shift+{{(`CS_WIDTH-1){1'b0}},1'h1});
 
    //Target is coming up if it is the next shift
    //value and the shift is enabled.
@@ -65,7 +49,7 @@ module ca_upsampler(
                         .out(ca_clk_en_km1));
 
    always @(posedge clk) begin
-      code_shift <= reset ? {CS_WIDTH{1'b0}} :
+      code_shift <= reset ? {`CS_WIDTH{1'b0}} :
                     !ca_clk_en_km1 ? code_shift :
                     next_code_shift;
    end
@@ -73,18 +57,18 @@ module ca_upsampler(
    //Reset the C/A DDS unit at code shift
    //wrap-around to maintain code alignment.
    wire ca_clk_reset;
-   assign ca_clk_reset = code_shift==MAX_CODE_SHIFT;
+   assign ca_clk_reset = code_shift==`MAX_CODE_SHIFT;
    
    //Generate C/A code clock from reference
    //clock signal.
    wire ca_clk_n;
-   dds2 #(.ACC_WIDTH(ACC_WIDTH),
-         .PHASE_INC_WIDTH(PHASE_INC_WIDTH),
+   dds2 #(.ACC_WIDTH(`CA_ACC_WIDTH),
+         .PHASE_INC_WIDTH(`CA_PHASE_INC_WIDTH),
          .OUTPUT_WIDTH(1))
      ca_clock_gen(.clk(clk),
                   .reset(reset | ca_clk_reset),
                   .enable(ca_clk_en_km1),
-                  .inc(CA_RATE_INC),
+                  .inc(`CA_RATE_INC),
                   .out(ca_clk_n));
 
    //Strobe C/A clock for 1 cycle.

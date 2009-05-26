@@ -6,6 +6,7 @@
 using namespace std;
 using namespace StringHelper;
 
+const boost::regex Expression::hexValue("^([A-Fa-f0-9]+)$");
 const boost::regex Expression::number("^(\\d+(\\.\\d+)?)(e(-?\\d+))?$");
 
 Expression::~Expression()
@@ -45,7 +46,20 @@ std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression
     bool haveRightValue=false;
     if(tree->GetRight()!=NULL)
     {
-        rightString=Evaluate(tree->GetRight(),vars);
+        try
+        {
+            rightString=Evaluate(tree->GetRight(),vars);
+        }
+        catch(UnknownVariable)
+        {
+            boost::smatch m;
+            if(boost::regex_match(tree->GetRight()->GetValue(),m,hexValue))
+            {
+                rightString=m[1];
+            }
+            else throw;
+        }
+        
         if(IsDouble(rightString))
         {
             haveRightValue=true;
@@ -101,6 +115,9 @@ std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression
     case TokenType::COLON:
         stringValue=leftString+":"+rightString;
         break;
+    case TokenType::CONST:
+        stringValue=leftString+tree->GetValue()+rightString;
+        break;
     case TokenType::FUNCTION:
         if(haveRightValue)
         {
@@ -109,6 +126,8 @@ std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression
         }
         else stringValue=tree->GetValue()+"("+rightString+")";
         break;
+    case TokenType::HEX:
+        stringValue=tree->GetValue();
     case TokenType::VARIABLE:
         if(tree->GetValue()[0]=='`')stringValue=tree->GetValue();
         else if(vars.find(tree->GetValue())==vars.end())throw UnknownVariable(tree->GetValue());

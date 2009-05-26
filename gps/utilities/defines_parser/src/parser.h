@@ -9,12 +9,11 @@
 class Parser
 {
 public:
-    class SyntaxError : public std::exception
+    class ParserError : public std::exception
     {
     public:
-        SyntaxError() : message("syntax error."), embed(false) {}
-        SyntaxError(const std::string &error) : message(error+".") {}
-        ~SyntaxError() throw() {}
+        ParserError(const std::string &error) : message(error+".") {}
+        ~ParserError() throw() {}
         
         void Embed(bool embed){ this->embed=embed; }
         
@@ -35,25 +34,34 @@ public:
         std::string message;
     };
     
+    class SyntaxError : public ParserError
+    {
+    public:
+        SyntaxError() : ParserError("syntax error") {}
+        SyntaxError(const std::string &error) : ParserError(error) {}
+        ~SyntaxError() throw() {}
+    };
+    
     Parser(const std::string &expression) : tokenizer(Tokenizer(expression)) {}
     Parser(const char *expression) : tokenizer(Tokenizer(expression)) {}
 
-    TreeNode* Parse() { return ParseExpression(); }
+    TreeNode* Parse() throw(ParserError);
 
-    static TreeNode* Parse(const char *expression){ return Parser(expression).Parse(); }
-    static TreeNode* Parse(const std::string &expression){ return Parser(expression).Parse(); }
+    static TreeNode* Parse(const char *expression) throw(ParserError) { return Parser(expression).Parse(); }
+    static TreeNode* Parse(const std::string &expression) throw(ParserError) { return Parser(expression).Parse(); }
 
 private:
     Tokenizer tokenizer;
 
-    TreeNode* ParseExpression();
-    TreeNode* ParseSum();
-    TreeNode* ParseTerm();
-    TreeNode* ParseFactor();
-    TreeNode* ParseBase();
-    TreeNode* ParseFunction();
-    TreeNode* ParseValue();
-    TreeNode* ParseVariable();
+    TreeNode* ParseExpression() throw(SyntaxError);
+    TreeNode* ParseSum() throw(SyntaxError);
+    TreeNode* ParseTerm() throw(SyntaxError);
+    TreeNode* ParseFactor() throw(SyntaxError);
+    TreeNode* ParseBase() throw(SyntaxError);
+    TreeNode* ParseFunction() throw(SyntaxError);
+    TreeNode* ParseValue() throw(SyntaxError);
+    TreeNode* ParseHex() throw(SyntaxError);
+    TreeNode* ParseVariable() throw(SyntaxError);
 };
 
 #endif

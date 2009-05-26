@@ -8,18 +8,20 @@
 namespace TokenType
 {
     const int COLON    = 1;
-    const int PLUS     = 2;
-    const int MINUS    = 3;
-    const int TIMES    = 4;
-    const int DIVIDE   = 5;
-    const int CARET    = 6;
-    const int LPAREN   = 7;
-    const int RPAREN   = 8;
-    const int FUNCTION = 9;
-    const int VARIABLE = 10;
-    const int VALUE    = 11;
-    const int NUMBER   = 11;
-    const int ILLEGAL  = 12;
+    const int CONST    = 2;
+    const int PLUS     = 3;
+    const int MINUS    = 4;
+    const int TIMES    = 5;
+    const int DIVIDE   = 6;
+    const int CARET    = 7;
+    const int LPAREN   = 8;
+    const int RPAREN   = 9;
+    const int FUNCTION = 10;
+    const int VARIABLE = 11;
+    const int VALUE    = 12;
+    const int NUMBER   = 12;
+    const int HEX      = 13;
+    const int ILLEGAL  = 14;
 }
 
 namespace CharType
@@ -62,12 +64,14 @@ public:
     Tokenizer(const char *expression);
 
     bool HasNext();
-    int NextType() throw(UnknownTokenException);
+    int NextType() throw(UnknownTokenException,OutOfBoundsException);
     std::string ReadNext() throw(OutOfBoundsException);
 
 private:
     std::string expression;
 
+    const static boost::regex verilogConstant;
+    const static boost::regex hexValue;
     const static boost::regex number;
     const static boost::regex qualifiedName;
 

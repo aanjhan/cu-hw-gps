@@ -100,7 +100,7 @@ int InputParser::ParseCSV(std::istream &in,
                 vars[variable]->comments=boost::regex_replace(comment,newLine,"\\n");
             }
         }
-        catch(Parser::SyntaxError &e)
+        catch(Parser::ParserError &e)
         {
             e.Embed(true);
             InputErrors::PrintError(currentFile,lineCount,e.what());

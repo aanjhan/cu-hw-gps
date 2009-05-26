@@ -2,31 +2,56 @@
 
 using namespace std;
 
+TreeNode* Parser::Parse() throw(ParserError)
+{
+    TreeNode *expression=ParseExpression();
+
+    if(tokenizer.HasNext())
+    {
+        delete expression;
+        throw ParserError("characters remaining in expression");
+    }
+    
+    return expression;
+}
+
 /**
 * Parse next expression.
-* Expressions are defined as: Sum { : Sum }
+* Expressions are defined as: Sum [ : Sum | '[hdb] Expression ]
 */
-TreeNode* Parser::ParseExpression()
+TreeNode* Parser::ParseExpression() throw(SyntaxError)
 {
-    if(!tokenizer.HasNext())return NULL;
-
     //Read range.
     TreeNode *expression=ParseSum();
 
-    if(tokenizer.NextType()==TokenType::COLON)
+    try
     {
-        tokenizer.ReadNext();
-        expression=new TreeNode(TokenType::COLON,expression,NULL);
-        
-        TreeNode *right=ParseSum();//Get second term
-        //Syntax error
-        if(right==NULL)
+        if(tokenizer.HasNext())
         {
-            delete expression;
-            throw SyntaxError("missing right term");
+            if(tokenizer.NextType()==TokenType::COLON)
+            {
+                tokenizer.ReadNext();
+                expression=new TreeNode(TokenType::COLON,expression,NULL);
+
+                TreeNode *right;
+                try{ right=ParseSum(); }//Get second term
+                catch(...){ delete expression; throw; }
+                expression->SetRight(right);
+            }
+            else if(tokenizer.NextType()==TokenType::CONST)
+            {
+                expression=new TreeNode(TokenType::CONST,expression,NULL);
+                expression->SetValue(tokenizer.ReadNext());
+        
+                TreeNode *right;
+                try{ right=ParseSum(); }//Get second term
+                catch(...){ delete expression; throw; }
+                expression->SetRight(right);
+            }
         }
-        else expression->SetRight(right);
     }
+    catch(Tokenizer::UnknownTokenException &e){ throw SyntaxError("unknown token '"+e.GetToken()+"'"); }
+    catch(Tokenizer::OutOfBoundsException){ throw(SyntaxError("unexpected end of expression")); }
     
     return expression;
 }
@@ -35,10 +60,8 @@ TreeNode* Parser::ParseExpression()
 * Parse next sum.
 * Sums are defined as: [-] Term { (+ | -) Term }
 */
-TreeNode* Parser::ParseSum()
+TreeNode* Parser::ParseSum() throw(SyntaxError)
 {
-    if(!tokenizer.HasNext())return NULL;
-
     try
     {
         //Read initial minus sign.
@@ -46,7 +69,6 @@ TreeNode* Parser::ParseSum()
         if(minus)tokenizer.ReadNext();
 
         TreeNode *expression=ParseTerm();//Get term
-        if(expression==NULL)throw SyntaxError("no term for expression");//Syntax error
     
         if(minus)expression=new TreeNode(TokenType::MINUS,new TreeNode(TokenType::NUMBER,"0"),expression);//Make negative
     
@@ -57,167 +79,187 @@ TreeNode* Parser::ParseSum()
             TreeNode *t=new TreeNode(tokenizer.NextType(),NULL,NULL);
             t->SetLeft(expression);
             expression=t;
-            //expression=new TreeNode(tokenizer.NextType(),expression,NULL);//Create expression and move old left
             tokenizer.ReadNext();//Eat sign
-            TreeNode *right=ParseTerm();//Get second term
-            //Syntax error
-            if(right==NULL)
-            {
-                delete expression;
-                throw SyntaxError("missing right term");
-            }
+            TreeNode *right;
+            try{ right=ParseTerm(); }//Get second term
+            catch(...){ delete expression; throw; }
             expression->SetRight(right);//Set right
         }
-    
+        
         return expression;
     }
     catch(Tokenizer::UnknownTokenException &e){ throw SyntaxError("unknown token '"+e.GetToken()+"'"); }
     catch(Tokenizer::OutOfBoundsException){ throw(SyntaxError("unexpected end of expression")); }
-    catch(...){ throw; }
 }
 
 /**
 * Parse next term.
 * Terms are defined as: Factor { ( * | / ) Factor }
 */
-TreeNode* Parser::ParseTerm()
+TreeNode* Parser::ParseTerm() throw(SyntaxError)
 {
-    if(!tokenizer.HasNext())return NULL;//Nothing left
-    
-    TreeNode *term=ParseFactor();//Get factor
-    if(term==NULL)return NULL;//Syntax error
-    
-    while(tokenizer.NextType()==TokenType::TIMES ||
-          tokenizer.NextType()==TokenType::DIVIDE)
+    try
     {
-        term=new TreeNode(tokenizer.NextType(),term,NULL);//Create new node and move old term left
-        tokenizer.ReadNext();//Eat sign
-        TreeNode *right=ParseFactor();//Get second operand
-        //Syntax error
-        if(right==NULL)
-        {
-            delete term;
-            return NULL;
-        }
-        term->SetRight(right);//Set right
-    }
+        TreeNode *term=ParseFactor();//Get factor
     
-    return term;//Return term
+        while(tokenizer.HasNext() &&
+              (tokenizer.NextType()==TokenType::TIMES ||
+               tokenizer.NextType()==TokenType::DIVIDE))
+        {
+            term=new TreeNode(tokenizer.NextType(),term,NULL);//Create new node and move old term left
+            tokenizer.ReadNext();//Eat sign
+            TreeNode *right;
+            try{ right=ParseFactor(); }//Get second operand
+            catch(...){ delete term; throw; }
+            term->SetRight(right);//Set right
+        }
+    
+        return term;//Return term
+    }
+    catch(Tokenizer::UnknownTokenException &e){ throw SyntaxError("unknown token '"+e.GetToken()+"'"); }
+    catch(Tokenizer::OutOfBoundsException){ throw(SyntaxError("unexpected end of expression")); }
 }
 
 /**
 * Parse next factor.
 * Factors are defined as: Base [ ^ Sum ]
 */
-TreeNode* Parser::ParseFactor()
+TreeNode* Parser::ParseFactor() throw(SyntaxError)
 {
-    if(!tokenizer.HasNext())return NULL;//Nothing left
-    
-    TreeNode *base=ParseBase();//Get base
-    if(tokenizer.NextType()==TokenType::CARET)
+    try
     {
-        tokenizer.ReadNext();//Eat carrot
-        bool minus=(tokenizer.NextType()==TokenType::MINUS);//Minus sign?
-        if(minus)tokenizer.ReadNext();//Eat minus
-        TreeNode *exponent=ParseSum();//Get number
-        //Syntax error
-        if(exponent==NULL)
+        TreeNode *base=ParseBase();//Get base
+        if(tokenizer.HasNext() &&
+           tokenizer.NextType()==TokenType::CARET)
         {
-            delete base;
-            return NULL;
+            tokenizer.ReadNext();//Eat carrot
+            bool minus=(tokenizer.NextType()==TokenType::MINUS);//Minus sign?
+            if(minus)tokenizer.ReadNext();//Eat minus
+            TreeNode *exponent;
+            try{ exponent=ParseSum(); }//Get number
+            catch(...){ delete base; throw; }
+            
+            if(minus)
+            {
+                exponent=new TreeNode(TokenType::MINUS,
+                                      new TreeNode(TokenType::NUMBER,"0"),
+                                      exponent);//Make negative
+            }
+            return new TreeNode(TokenType::CARET,base,exponent);//Return factor
         }
-        else if(minus){
-            exponent=new TreeNode(TokenType::MINUS,
-                                  new TreeNode(TokenType::NUMBER,"0"),
-                                  exponent);//Make negative
-        }
-        return new TreeNode(TokenType::CARET,base,exponent);//Return factor
+        else return base;//Return base alone
     }
-    else return base;//Return base alone
+    catch(Tokenizer::UnknownTokenException &e){ throw SyntaxError("unknown token '"+e.GetToken()+"'"); }
+    catch(Tokenizer::OutOfBoundsException){ throw(SyntaxError("unexpected end of expression")); }
 }
 
 /**
 * Parse next base.
 * Bases are defined as:
-* Number | Variable | Function ( Sum )
+* Number | Variable | HEX | Function ( Sum )
 */
-TreeNode* Parser::ParseBase()
+TreeNode* Parser::ParseBase() throw(SyntaxError)
 {
-    switch(tokenizer.NextType()){
-    case TokenType::NUMBER: return ParseValue();
-    case TokenType::VARIABLE: return ParseVariable();
-    case TokenType::FUNCTION: return ParseFunction();
-    default:
-        if(tokenizer.NextType()!=TokenType::LPAREN)return NULL;//Invalid syntax
-        tokenizer.ReadNext();//Eat paren
-        TreeNode *expression=ParseSum();
-        if(expression==NULL)return NULL;
-        else if(tokenizer.NextType()!=TokenType::RPAREN)
-        {
-            delete expression;
-            return NULL;//Invalid syntax
+    try
+    {
+        switch(tokenizer.NextType()){
+        case TokenType::NUMBER: return ParseValue();
+        case TokenType::VARIABLE: return ParseVariable();
+        case TokenType::HEX: return ParseHex();
+        case TokenType::FUNCTION: return ParseFunction();
+        default:
+            if(tokenizer.NextType()!=TokenType::LPAREN)
+            {
+                throw SyntaxError("expected left paren '('");
+            }
+            tokenizer.ReadNext();//Eat paren
+            TreeNode *expression=ParseSum();
+            if(tokenizer.NextType()!=TokenType::RPAREN)
+            {
+                delete expression;
+                throw SyntaxError("expected right paren ')'");
+            }
+            tokenizer.ReadNext();//Eat paren
+            return expression;
         }
-        tokenizer.ReadNext();//Eat paren
-        return expression;
     }
+    catch(Tokenizer::UnknownTokenException &e){ throw SyntaxError("unknown token '"+e.GetToken()+"'"); }
+    catch(Tokenizer::OutOfBoundsException){ throw(SyntaxError("unexpected end of expression")); }
 }
 
 /**
 * Parse next function.
 * Functions are defined as: Function ( Sum )
 */
-TreeNode* Parser::ParseFunction()
+TreeNode* Parser::ParseFunction() throw(SyntaxError)
 {
-    if(!tokenizer.HasNext())return NULL;//Nothing left
-    
-    if(tokenizer.NextType()!=TokenType::FUNCTION)return NULL;//Expected function next
-
-    string functionName=tokenizer.ReadNext();
-    TreeNode *function=new TreeNode(TokenType::FUNCTION,functionName);//Parse and return leaf (value 0 for non-leaf)
-    if(function==NULL)return NULL;
-
-    //Invalid syntax - missing paren
-    if(tokenizer.NextType()!=TokenType::LPAREN)
+    try
     {
-        delete function;
-        return NULL;
-    }
-    tokenizer.ReadNext();//Eat paren
-    
-    TreeNode *expression=ParseSum();
-    //Invalid syntax - no expression
-    if(expression==NULL)
-    {
-        delete function;
-        return NULL;
-    }
-    else function->SetRight(expression);
+        if(tokenizer.NextType()!=TokenType::FUNCTION)throw SyntaxError("expected function");
 
-    //Invalid syntax - missing paren
-    if(tokenizer.NextType()!=TokenType::RPAREN)
-    {
-        delete function;
-        delete expression;
-        return NULL;
-    }
-    tokenizer.ReadNext();//Eat paren
+        string functionName=tokenizer.ReadNext();
+        TreeNode *function=new TreeNode(TokenType::FUNCTION,functionName);//Parse and return leaf (value 0 for non-leaf)
+
+        //Invalid syntax - missing paren
+        if(!tokenizer.HasNext() ||
+           tokenizer.NextType()!=TokenType::LPAREN)
+        {
+            delete function;
+            throw SyntaxError("expected left paren '('");
+        }
+        tokenizer.ReadNext();//Eat paren
     
-    return function;//Return function
+        TreeNode *expression;
+        try{ expression=ParseSum(); }
+        catch(...){ delete function; throw; }
+        function->SetRight(expression);
+
+        //Invalid syntax - missing paren
+        if(!tokenizer.HasNext() ||
+           tokenizer.NextType()!=TokenType::RPAREN)
+        {
+            delete function;
+            delete expression;
+            throw SyntaxError("expected right paren ')'");
+        }
+        tokenizer.ReadNext();//Eat paren
+    
+        return function;//Return function
+    }
+    catch(Tokenizer::UnknownTokenException &e){ throw SyntaxError("unknown token '"+e.GetToken()+"'"); }
+    catch(Tokenizer::OutOfBoundsException){ throw(SyntaxError("unexpected end of expression")); }
 }
 
-TreeNode* Parser::ParseValue()
+TreeNode* Parser::ParseValue() throw(SyntaxError)
 {
-    if(!tokenizer.HasNext() ||
-       tokenizer.NextType()!=TokenType::VALUE)
-        return NULL;//Expected number next
-    else return new TreeNode(tokenizer.NextType(),tokenizer.ReadNext());//Parse int and return leaf
+    try
+    {
+        if(tokenizer.NextType()!=TokenType::VALUE)throw SyntaxError("expected value");
+        return new TreeNode(tokenizer.NextType(),tokenizer.ReadNext());
+    }
+    catch(Tokenizer::UnknownTokenException &e){ throw SyntaxError("unknown token '"+e.GetToken()+"'"); }
+    catch(Tokenizer::OutOfBoundsException){ throw(SyntaxError("unexpected end of expression")); }
 }
 
-TreeNode* Parser::ParseVariable()
+TreeNode* Parser::ParseVariable() throw(SyntaxError)
 {
-    if(!tokenizer.HasNext() ||
-       tokenizer.NextType()!=TokenType::VARIABLE)
-        return NULL;//Expected number next
-    else return new TreeNode(tokenizer.NextType(),tokenizer.ReadNext());//Parse int and return leaf
+    try
+    {
+        if(tokenizer.NextType()!=TokenType::VARIABLE)throw SyntaxError("expected variable");
+        return new TreeNode(tokenizer.NextType(),tokenizer.ReadNext());
+    }
+    catch(Tokenizer::UnknownTokenException &e){ throw SyntaxError("unknown token '"+e.GetToken()+"'"); }
+    catch(Tokenizer::OutOfBoundsException){ throw(SyntaxError("unexpected end of expression")); }
+}
+
+TreeNode* Parser::ParseHex() throw(SyntaxError)
+{
+    try
+    {
+        if(tokenizer.NextType()!=TokenType::HEX)throw SyntaxError("expected value");
+        return new TreeNode(tokenizer.NextType(),tokenizer.ReadNext());
+    }
+    catch(Tokenizer::UnknownTokenException &e){ throw SyntaxError("unknown token '"+e.GetToken()+"'"); }
+    catch(Tokenizer::OutOfBoundsException){ throw(SyntaxError("unexpected end of expression")); }
 }
 

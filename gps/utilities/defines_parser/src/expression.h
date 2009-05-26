@@ -74,6 +74,7 @@ private:
     std::string value;
     bool evaluated;
 
+    const static boost::regex hexValue;
     const static boost::regex number;
 
     static std::string Evaluate(TreeNode *tree, std::map<std::string,Expression*> &vars) throw(ExpressionError);

@@ -235,7 +235,7 @@ TreeNode* Parser::ParseValue() throw(SyntaxError)
     try
     {
         if(tokenizer.NextType()!=TokenType::VALUE)throw SyntaxError("expected value");
-        return new TreeNode(tokenizer.NextType(),tokenizer.ReadNext());
+        return new TreeNode(TokenType::VALUE,tokenizer.ReadNext());
     }
     catch(Tokenizer::UnknownTokenException &e){ throw SyntaxError("unknown token '"+e.GetToken()+"'"); }
     catch(Tokenizer::OutOfBoundsException){ throw(SyntaxError("unexpected end of expression")); }
@@ -246,7 +246,7 @@ TreeNode* Parser::ParseVariable() throw(SyntaxError)
     try
     {
         if(tokenizer.NextType()!=TokenType::VARIABLE)throw SyntaxError("expected variable");
-        return new TreeNode(tokenizer.NextType(),tokenizer.ReadNext());
+        return new TreeNode(TokenType::VARIABLE,tokenizer.ReadNext());
     }
     catch(Tokenizer::UnknownTokenException &e){ throw SyntaxError("unknown token '"+e.GetToken()+"'"); }
     catch(Tokenizer::OutOfBoundsException){ throw(SyntaxError("unexpected end of expression")); }
@@ -257,7 +257,7 @@ TreeNode* Parser::ParseHex() throw(SyntaxError)
     try
     {
         if(tokenizer.NextType()!=TokenType::HEX)throw SyntaxError("expected value");
-        return new TreeNode(tokenizer.NextType(),tokenizer.ReadNext());
+        return new TreeNode(TokenType::HEX,tokenizer.ReadNext());
     }
     catch(Tokenizer::UnknownTokenException &e){ throw SyntaxError("unknown token '"+e.GetToken()+"'"); }
     catch(Tokenizer::OutOfBoundsException){ throw(SyntaxError("unexpected end of expression")); }

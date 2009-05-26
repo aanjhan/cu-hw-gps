@@ -80,9 +80,10 @@ std::string Tokenizer::ReadNext() throw(OutOfBoundsException)
        boost::regex_search(expression,m,number) ||
        boost::regex_search(expression,m,verilogConstant))
     {
-        try{ expression=expression.substr(m[1].length()); }
+        string s=m[1];
+        try{ expression=expression.substr(s.length()); }
         catch(out_of_range e){}
-        return m[1];
+        return s;
     }
     else
     {

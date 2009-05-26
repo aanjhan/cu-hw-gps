@@ -1,11 +1,10 @@
 #include !"global.csv"
 
-F_RES,1,C/A upsampler clock generator resolution.
-F_DOPP_MAX,6000,Maximum Doppler shift.
+CA_F_RES,1,C/A upsampler clock generator resolution.
 
-CA_ACC_WIDTH,max_width(F_S/F_RES),C/A clock generator accumulator width.
+CA_ACC_WIDTH,max_width(F_S/CA_F_RES),C/A clock generator accumulator width.
 CA_ACC_RANGE,CA_ACC_WIDTH-1:0,C/A clock generator accumulator range.
 
-CA_PHASE_INC_WIDTH,max_width((2^CA_ACC_WIDTH)*F_DOPP_MAX/F_S),C/A clock phase increment width.
+CA_PHASE_INC_WIDTH,max_width((2^CA_ACC_WIDTH)*F_CA/F_S),C/A clock phase increment width.
 CA_PHASE_INC_RANGE,CA_PHASE_INC_WIDTH-1:0,C/A clock phase increment range.
 CA_RATE_INC,CA_PHASE_INC_WIDTH'dround((2^CA_ACC_WIDTH)*F_CA/F_S),C/A code clock phase increment for\nDDS to yeild F_CA from F_S.

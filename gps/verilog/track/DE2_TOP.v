@@ -191,19 +191,19 @@ module DE2_TOP (
    wire ca_bit;
    wire ca_clk;
    wire [18:0] accumulator;
-   subchannel sub(.clk(clk_200),
-                  .clk_sample(clk_sample),
-                  .global_reset(global_reset),
-                  .reset(reset),
-                  .prn(SW[4:0]),
-                  .data(gps_data[2:0]),
-                  .seek_en(~KEY[0]),
-                  .seek_target({7'h0,SW[15:8]}),
-                  .code_shift(code_shift),
-                  .ca_bit(ca_bit),
-                  .ca_clk(ca_clk),
-                  .ca_code_shift(ca_code_shift),
-                  .accumulator(accumulator));
+   top sub(.clk(clk_200),
+           .clk_sample(clk_sample),
+           .global_reset(global_reset),
+           .reset(reset),
+           .prn(SW[4:0]),
+           .data(gps_data[2:0]),
+           .seek_en(~KEY[0]),
+           .seek_target({7'h0,SW[15:8]}),
+           .code_shift(code_shift),
+           .ca_bit(ca_bit),
+           .ca_clk(ca_clk),
+           .ca_code_shift(ca_code_shift),
+           .accumulator(accumulator));
 
    assign HEX5 = reset ? 7'h7F : {ca_bit,6'h3F};
    hex_driver gps_display0(reset ? 4'h8 : 4'h1,HEX4);

@@ -3,36 +3,26 @@
 
 module subchannel(
     input                    clk,
-    input                    clk_sample,
     input                    global_reset,
     input                    reset,
-    input [4:0]              prn,
+    //Sample data.
+    input                    data_available,
     input [`INPUT_RANGE]     data,
+    //Carrier control.
+    input [1:0]              doppler,//FIXME range?
+    //Code control.
+    input [4:0]              prn,
     input                    seek_en,
     input [`CS_RANGE]        seek_target,
     output wire [`CS_RANGE]  code_shift,
+    //Outputs.
+    output wire [`ACC_RANGE] accumulator,
+    //Debug outputs.
     output wire              ca_bit,
     output wire              ca_clk,
-    output wire [9:0]        ca_code_shift,
-    output wire [`ACC_RANGE] accumulator);
+    output wire [9:0]        ca_code_shift);
 
-   //Clock domain crossing.
-   wire clk_sample_sync;
-   synchronizer input_clk_sync(.clk(clk),
-                               .in(clk_sample),
-                               .out(clk_sample_sync));
-   wire [`INPUT_RANGE] data_sync;
-   synchronizer #(.WIDTH(`INPUT_WIDTH))
-     input_data_sync(.clk(clk),
-                     .in(data),
-                     .out(data_sync));
-
-   wire data_available;
-   strobe data_available_strobe(.clk(clk),
-                                .reset(reset),
-                                .in(clk_sample_sync),
-                                .out(data_available));
-   
+   //Upsample the C/A code to the incoming sampling rate.
    ca_upsampler upsampler(.clk(clk),
                           .reset(global_reset),
                           .enable(data_available),
@@ -59,7 +49,7 @@ module subchannel(
    delay #(.WIDTH(`INPUT_WIDTH),
            .DELAY(DATA_DELAY))
      data_delay(.clk(clk),
-                .in(data_sync),
+                .in(data),
                 .out(data_kmn));
    
    wire ca_bit_kmn;
@@ -67,6 +57,8 @@ module subchannel(
                       .in(ca_bit),
                       .out(ca_bit_kmn));
 
+   //In-phase code wipe-off and accumulation.
+   //FIXME Move code wipeoff to here. Track is just accumulator.
    track track_i(.clk(clk),
                  .reset(reset),
                  .data_available(data_available_kmn),

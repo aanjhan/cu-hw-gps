@@ -17,3 +17,6 @@ T_CA_CODE,N_CHIPS/F_CA,C/A code repetition rate.
 CS_WIDTH,max_width(F_S*T_CA_CODE),Upsampled C/A code shift width.
 CS_RANGE,CS_WIDTH-1:0,Upsampled C/A code shift range.
 MAX_CODE_SHIFT,CS_WIDTH'dT_CA_CODE*F_S-1,Maximum upsampled code shift value.
+
+NUM_CHANNELS,10,Number of tracking channels implemented in receiver.
+NUM_BANKS,4,Number of individual banks in memory bank.

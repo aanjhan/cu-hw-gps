@@ -154,7 +154,7 @@ int InputParser::EvalDirective(const std::string &directive,
     if(directive=="include")
     {
         boost::smatch m;
-        if(!boost::regex_match(parameter,m,boost::regex("^(!)?\"([\\w.]+)\"$")))
+        if(!boost::regex_match(parameter,m,boost::regex("^(!)?\"([\\/\\w.]+)\"$")))
         {
             
             cout<<InputErrors::ErrorString(InputErrors::ERROR,

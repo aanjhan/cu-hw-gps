@@ -1,4 +1,4 @@
-AC_INIT(DefParser, 1.0, ams348@cornell.edu)
+AC_INIT(DefParser, 1.1, ams348@cornell.edu)
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([-Wall])
 

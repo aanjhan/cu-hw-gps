@@ -63,6 +63,8 @@ int Tokenizer::NextType() throw(UnknownTokenException,OutOfBoundsException)
         case '^': return TokenType::CARET;
         case '(': return TokenType::LPAREN;
         case ')': return TokenType::RPAREN;
+        case ';': return TokenType::SEMICOLON;
+        case '@': return TokenType::AT;
         default: throw UnknownTokenException(expression.substr(0,1));
         }
     }

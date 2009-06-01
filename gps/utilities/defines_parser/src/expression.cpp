@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdlib.h>
+#include <vector>
 #include "expression.h"
 #include "string_helper.hpp"
 
@@ -122,7 +123,7 @@ std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression
         if(haveRightValue)
         {
             useValue=true;
-            value=EvalFunction(tree->GetValue(),rightValue);
+            value=EvalFunction(tree,vars);
         }
         else stringValue=tree->GetValue()+"("+rightString+")";
         break;
@@ -169,7 +170,56 @@ double Expression::EvalValue(const std::string &valueString)
     else return 0;
 }
 
-double Expression::EvalFunction(const std::string &function, double value)
+double Expression::EvalFunction(TreeNode *tree, std::map<std::string,Expression*> &vars) throw(ExpressionError)
+{
+    TreeNode *child=tree->GetRight();
+    string function=tree->GetValue();
+
+    if(child->GetRight()==NULL)
+    {
+        //Convert child parameter to a double.
+        double childValue;
+        FromString(Evaluate(child,vars),childValue);
+        return EvalFunction(function,childValue);
+    }
+    else
+    {
+        vector<double> values;
+        
+        //Convert right parameters to doubles.
+        string rightString;
+        double rightValue;
+        while(child!=NULL)
+        {
+            rightString=Evaluate(child,vars);
+        
+            if(IsDouble(rightString))
+            {
+                FromString(rightString,rightValue);
+            }
+            else throw ExpressionError("expected value for '"+rightString+"'.");
+
+            values.push_back(rightValue);
+            child=child->GetRight();
+        }
+
+        if(function=="max")
+        {
+            double val=values[0];
+            for(int i=1;i<values.size();i++)val=values[i]>val ? values[i] : val;
+            return val;
+        }
+        else if(function=="min")
+        {
+            double val=values[0];
+            for(int i=1;i<values.size();i++)val=values[i]<val ? values[i] : val;
+            return val;
+        }
+        else throw UnsupportedFunction(function);
+    }
+}
+
+double Expression::EvalFunction(const std::string &function, double value) throw(UnsupportedFunction)
 {
     if(function=="abs")return value<0 ? -value : value;
     else if(function=="acos")return acos(value);
@@ -188,5 +238,5 @@ double Expression::EvalFunction(const std::string &function, double value)
     else if(function=="sin")return sin(value);
     else if(function=="sqrt")return sqrt(value);
     else if(function=="tan")return tan(value);
-    else return 0;
+    else  throw UnsupportedFunction(function);
 }

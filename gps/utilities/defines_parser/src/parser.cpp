@@ -17,10 +17,16 @@ TreeNode* Parser::Parse() throw(ParserError)
 
 /**
 * Parse next expression.
-* Expressions are defined as: Sum [ : Sum | '[hdb] Expression ]
+* Expressions are defined as: @ | Sum [ : Sum | '[hdb] Expression ]
 */
 TreeNode* Parser::ParseExpression() throw(SyntaxError)
 {
+    if(tokenizer.HasNext() && tokenizer.NextType()==TokenType::AT)
+    {
+        tokenizer.ReadNext();
+        return new TreeNode(TokenType::AT,NULL,NULL);
+    }
+    
     //Read range.
     TreeNode *expression=ParseSum();
 
@@ -156,7 +162,7 @@ TreeNode* Parser::ParseFactor() throw(SyntaxError)
 /**
 * Parse next base.
 * Bases are defined as:
-* Number | Variable | HEX | Function ( Sum )
+* Number | Variable | HEX | Function ( Sum [; Sum]... )
 */
 TreeNode* Parser::ParseBase() throw(SyntaxError)
 {
@@ -189,7 +195,7 @@ TreeNode* Parser::ParseBase() throw(SyntaxError)
 
 /**
 * Parse next function.
-* Functions are defined as: Function ( Sum )
+* Functions are defined as: Function ( Sum [; Sum]... )
 */
 TreeNode* Parser::ParseFunction() throw(SyntaxError)
 {
@@ -214,12 +220,24 @@ TreeNode* Parser::ParseFunction() throw(SyntaxError)
         catch(...){ delete function; throw; }
         function->SetRight(expression);
 
+        TreeNode *child=expression;
+        while(tokenizer.HasNext() &&
+              (tokenizer.NextType()==TokenType::SEMICOLON))
+        {
+            tokenizer.ReadNext();
+            try
+            {
+                child->SetRight(ParseSum());
+                child=child->GetRight();
+            }
+            catch(...){ delete function; throw; }
+        }
+
         //Invalid syntax - missing paren
         if(!tokenizer.HasNext() ||
            tokenizer.NextType()!=TokenType::RPAREN)
         {
             delete function;
-            delete expression;
             throw SyntaxError("expected right paren ')'");
         }
         tokenizer.ReadNext();//Eat paren

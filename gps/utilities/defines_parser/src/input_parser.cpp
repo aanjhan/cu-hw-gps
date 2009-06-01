@@ -84,15 +84,29 @@ int InputParser::ParseCSV(std::istream &in,
             errorCount++;
             continue;
         }
-
-        string variable=m[1];
-        if(vars.find(variable)!=vars.end())
-            InputErrors::PrintWarning(currentFile,lineCount,"duplicate declaration of variable '"+variable+"'.");
         
+        string variable=m[1];
         try
         {
+            Expression *expression=new Expression(m[2]);
+
+            if(expression->IsReprint())
+            {
+                if(vars.find(variable)==vars.end())
+                {
+                    InputErrors::PrintError(currentFile,lineCount,"undefined variable '"+variable+"'.");
+                    errorCount++;
+                }
+                else if(!vars[variable]->print)vars[variable]->print=print;
+                delete expression;
+                continue;
+            }
+            
+            if(vars.find(variable)!=vars.end())
+                InputErrors::PrintWarning(currentFile,lineCount,"duplicate declaration of variable '"+variable+"'.");
+            
             vars[variable]=new MacroEntry();
-            vars[variable]->expression=new Expression(m[2]);
+            vars[variable]->expression=expression;
             vars[variable]->print=print;
             if(m[4].matched)
             {

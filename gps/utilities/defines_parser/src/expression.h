@@ -46,6 +46,13 @@ public:
         std::string message;
     };
     
+    class UnsupportedFunction : public ExpressionError
+    {
+    public:
+        UnsupportedFunction(const std::string &function) : ExpressionError("unsupported function '"+function+"'.") {}
+        ~UnsupportedFunction() throw() {}
+    };
+    
     class UnknownVariable : public ExpressionError
     {
     public:
@@ -65,6 +72,7 @@ public:
     Expression(const char *expression) : tree(Parser::Parse(expression)), evaluated(false) {}
     ~Expression();
 
+    bool IsReprint(){ return tree->GetType()==TokenType::AT; }
     std::string Value(std::map<std::string,Expression*> &vars) throw(ExpressionError);
 
 protected:
@@ -79,7 +87,8 @@ private:
 
     static std::string Evaluate(TreeNode *tree, std::map<std::string,Expression*> &vars) throw(ExpressionError);
     static double EvalValue(const std::string &valueString);
-    static double EvalFunction(const std::string &function, double value);
+    static double EvalFunction(TreeNode *tree, std::map<std::string,Expression*> &vars) throw(ExpressionError);
+    static double EvalFunction(const std::string &function, double value) throw(UnsupportedFunction);
 };
 
 #endif

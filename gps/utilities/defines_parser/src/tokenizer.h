@@ -7,30 +7,23 @@
 
 namespace TokenType
 {
-    const int COLON    = 1;
-    const int CONST    = 2;
-    const int PLUS     = 3;
-    const int MINUS    = 4;
-    const int TIMES    = 5;
-    const int DIVIDE   = 6;
-    const int CARET    = 7;
-    const int LPAREN   = 8;
-    const int RPAREN   = 9;
-    const int FUNCTION = 10;
-    const int VARIABLE = 11;
-    const int VALUE    = 12;
-    const int NUMBER   = 12;
-    const int HEX      = 13;
-    const int ILLEGAL  = 14;
-}
-
-namespace CharType
-{
-    const int LETTER   = 1;
-    const int NUMBER   = 2;
-    const int PAREN    = 3;
-    const int OPERATOR = 5;
-    const int ILLEGAL  = 6;
+    const int COLON     = 1;
+    const int CONST     = 2;
+    const int PLUS      = 3;
+    const int MINUS     = 4;
+    const int TIMES     = 5;
+    const int DIVIDE    = 6;
+    const int CARET     = 7;
+    const int LPAREN    = 8;
+    const int RPAREN    = 9;
+    const int FUNCTION  = 10;
+    const int VARIABLE  = 11;
+    const int VALUE     = 12;
+    const int NUMBER    = 12;
+    const int HEX       = 13;
+    const int SEMICOLON = 14;
+    const int AT        = 15;
+    const int ILLEGAL   = 16;
 }
 
 class Tokenizer
@@ -76,7 +69,6 @@ private:
     const static boost::regex qualifiedName;
 
     void Initialize(const std::string &expression);
-    int GetCharType(char c);
 };
 
 #endif

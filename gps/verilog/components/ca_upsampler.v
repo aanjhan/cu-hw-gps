@@ -63,8 +63,8 @@ module ca_upsampler(
    //clock signal.
    wire ca_clk_n;
    dds2 #(.ACC_WIDTH(`CA_ACC_WIDTH),
-         .PHASE_INC_WIDTH(`CA_PHASE_INC_WIDTH),
-         .OUTPUT_WIDTH(1))
+          .PHASE_INC_WIDTH(`CA_PHASE_INC_WIDTH),
+          .OUTPUT_WIDTH(1))
      ca_clock_gen(.clk(clk),
                   .reset(reset | ca_clk_reset),
                   .enable(ca_clk_en_km1),

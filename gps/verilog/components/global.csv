@@ -7,12 +7,13 @@ INPUT_SIGN,INPUT_WIDTH-1,Input sign value.
 INPUT_MAG,INPUT_WIDTH-2:0,Input magniude value.
 
 ACQ_ACC_LENGTH,3,Acquisition accumulation length in ms.
-ACC_WIDTH,max_width(max_value(INPUT_WIDTH-1)*ACQ_ACC_LENGTH*F_S*T_CA_CODE)+1,Track accumulator width.
-ACC_RANGE,ACC_WIDTH-1:0,Accumulator range.
 
 F_CA,1.023e6,C/A code chipping rate.
 N_CHIPS,1023,Number of C/A chips.
 T_CA_CODE,N_CHIPS/F_CA,C/A code repetition rate.
+
+F_DOPP_MAX,6000,Maximum expected Doppler shift.
+DOPP_BIN_SIZE,200,Doppler bin width in Hz.
 
 CS_WIDTH,max_width(F_S*T_CA_CODE),Upsampled C/A code shift width.
 CS_RANGE,CS_WIDTH-1:0,Upsampled C/A code shift range.

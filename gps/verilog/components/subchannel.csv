@@ -1,0 +1,29 @@
+#include !"global.csv"
+
+//Carrier generator DDS unit.
+CARRIER_F_RES,0.2,Carrier generator resolution.
+
+CARRIER_ACC_WIDTH,max_width(F_S/CARRIER_F_RES),Carrier generator accumulator width.
+CARRIER_ACC_RANGE,CARRIER_ACC_WIDTH-1:0,Carrier generator accumulator range.
+
+CARRIER_PHASE_INC_WIDTH,max_width((2^CARRIER_ACC_WIDTH)*(F_IF+F_DOPP_MAX)/F_S),Carrier phase increment width.
+CARRIER_PHASE_INC_RANGE,CARRIER_PHASE_INC_WIDTH-1:0,Carrier phase increment range.
+DOPPLER_INC_WIDTH,max_width((2^CARRIER_ACC_WIDTH)*F_DOPP_MAX/F_S),Doppler shift phase increment width.
+DOPPLER_INC_RANGE,DOPPLER_INC_WIDTH-1:0,Doppler shift phase increment range.
+DOPPLER_PAD_SIZE,CARRIER_PHASE_INC_WIDTH-DOPPLER_INC_WIDTH,Doppler shift pad size.
+
+F_IF_INC,CARRIER_PHASE_INC_WIDTH'dround((2^CARRIER_ACC_WIDTH)*F_IF/F_S),Carrier intermediate frequency phase increment.
+DOPP_BIN_INC,CARRIER_PHASE_INC_WIDTH'dround((2^CARRIER_ACC_WIDTH)*DOPP_BIN_SIZE/F_S),Doppler bin phase increment.
+
+//FIXME Check that this value matches with SIN_/COS_OUTPUT_WIDTH.
+//FIXME If not, throw an error.
+CARRIER_LUT_WIDTH,3,Carrier lookup table width.
+CARRIER_LUT_RANGE,CARRIER_LUT_WIDTH-1:0,Carrier lookup table range.
+
+//Carrier wiped signal.
+SIG_NO_CARRIER_WIDTH,max_width(max_value(INPUT_WIDTH-1)*max_value(CARRIER_LUT_WIDTH-1))+1,Signal width after carrier wipeoff (input*carrier).
+SIG_NO_CARRIER_RANGE,SIG_NO_CARRIER_WIDTH-1:0,Signal range after carrier wipeoff.
+
+//Track definitions.
+ACC_WIDTH,max_width(max_value(SIG_NO_CARRIER_WIDTH)*ACQ_ACC_LENGTH*F_S*T_CA_CODE)+1,Track accumulator width.
+ACC_RANGE,ACC_WIDTH-1:0,Accumulator range.

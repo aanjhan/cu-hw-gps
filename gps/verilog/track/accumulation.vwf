@@ -25,7 +25,7 @@ HEADER
 	VERSION = 1;
 	TIME_UNIT = ns;
 	DATA_OFFSET = 0.0;
-	DATA_DURATION = 20080.0;
+	DATA_DURATION = 20180.0;
 	SIMULATION_TIME = 0.0;
 	GRID_PHASE = 0.0;
 	GRID_PERIOD = 10.0;
@@ -922,12 +922,142 @@ SIGNAL("divider 2795")
 	PARENT = "";
 }
 
+SIGNAL("divider 2090")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = INPUT;
+	PARENT = "";
+}
+
+SIGNAL("subchannel:prompt|data_available_kmn")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "";
+}
+
+SIGNAL("subchannel:prompt|data_kmn")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = BUS;
+	WIDTH = 3;
+	LSB_INDEX = 0;
+	DIRECTION = BURIED;
+	PARENT = "";
+}
+
+SIGNAL("subchannel:prompt|data_kmn[2]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "subchannel:prompt|data_kmn";
+}
+
+SIGNAL("subchannel:prompt|data_kmn[1]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "subchannel:prompt|data_kmn";
+}
+
+SIGNAL("subchannel:prompt|data_kmn[0]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "subchannel:prompt|data_kmn";
+}
+
+SIGNAL("subchannel:prompt|ca_bit_kmn")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "";
+}
+
+SIGNAL("data_available")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "";
+}
+
+SIGNAL("clk_sample_sync")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "";
+}
+
+SIGNAL("data_sync")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = BUS;
+	WIDTH = 3;
+	LSB_INDEX = 0;
+	DIRECTION = BURIED;
+	PARENT = "";
+}
+
+SIGNAL("data_sync[2]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "data_sync";
+}
+
+SIGNAL("data_sync[1]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "data_sync";
+}
+
+SIGNAL("data_sync[0]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "data_sync";
+}
+
 TRANSITION_LIST("accumulator[21]")
 {
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -936,7 +1066,7 @@ TRANSITION_LIST("accumulator[20]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -945,7 +1075,7 @@ TRANSITION_LIST("accumulator[19]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -954,7 +1084,7 @@ TRANSITION_LIST("accumulator[18]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -963,7 +1093,7 @@ TRANSITION_LIST("accumulator[17]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -972,7 +1102,7 @@ TRANSITION_LIST("accumulator[16]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -981,7 +1111,7 @@ TRANSITION_LIST("accumulator[15]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -990,7 +1120,7 @@ TRANSITION_LIST("accumulator[14]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -999,7 +1129,7 @@ TRANSITION_LIST("accumulator[13]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1008,7 +1138,7 @@ TRANSITION_LIST("accumulator[12]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1017,7 +1147,7 @@ TRANSITION_LIST("accumulator[11]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1026,7 +1156,7 @@ TRANSITION_LIST("accumulator[10]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1035,7 +1165,7 @@ TRANSITION_LIST("accumulator[9]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1044,7 +1174,7 @@ TRANSITION_LIST("accumulator[8]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1053,7 +1183,7 @@ TRANSITION_LIST("accumulator[7]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1062,7 +1192,7 @@ TRANSITION_LIST("accumulator[6]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1071,7 +1201,7 @@ TRANSITION_LIST("accumulator[5]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1080,7 +1210,7 @@ TRANSITION_LIST("accumulator[4]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1089,7 +1219,7 @@ TRANSITION_LIST("accumulator[3]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1098,7 +1228,7 @@ TRANSITION_LIST("accumulator[2]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1107,7 +1237,7 @@ TRANSITION_LIST("accumulator[1]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1116,7 +1246,7 @@ TRANSITION_LIST("accumulator[0]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1127,7 +1257,7 @@ TRANSITION_LIST("clk")
 		REPEAT = 1;
 		NODE
 		{
-			REPEAT = 4016;
+			REPEAT = 4036;
 			LEVEL 0 FOR 2.5;
 			LEVEL 1 FOR 2.5;
 		}
@@ -1145,6 +1275,7 @@ TRANSITION_LIST("clk_sample")
 			LEVEL 0 FOR 10.0;
 			LEVEL 1 FOR 10.0;
 		}
+		LEVEL 0 FOR 100.0;
 	}
 }
 
@@ -1153,7 +1284,7 @@ TRANSITION_LIST("code_shift[14]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1162,7 +1293,7 @@ TRANSITION_LIST("code_shift[13]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1171,7 +1302,7 @@ TRANSITION_LIST("code_shift[12]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1180,7 +1311,7 @@ TRANSITION_LIST("code_shift[11]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1189,7 +1320,7 @@ TRANSITION_LIST("code_shift[10]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1198,7 +1329,7 @@ TRANSITION_LIST("code_shift[9]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1207,7 +1338,7 @@ TRANSITION_LIST("code_shift[8]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1216,7 +1347,7 @@ TRANSITION_LIST("code_shift[7]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1225,7 +1356,7 @@ TRANSITION_LIST("code_shift[6]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1234,7 +1365,7 @@ TRANSITION_LIST("code_shift[5]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1243,7 +1374,7 @@ TRANSITION_LIST("code_shift[4]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1252,7 +1383,7 @@ TRANSITION_LIST("code_shift[3]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1261,7 +1392,7 @@ TRANSITION_LIST("code_shift[2]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1270,7 +1401,7 @@ TRANSITION_LIST("code_shift[1]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1279,7 +1410,7 @@ TRANSITION_LIST("code_shift[0]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1288,7 +1419,7 @@ TRANSITION_LIST("ca_bit")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1297,7 +1428,7 @@ TRANSITION_LIST("ca_clk")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1306,7 +1437,7 @@ TRANSITION_LIST("ca_code_shift[9]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1315,7 +1446,7 @@ TRANSITION_LIST("ca_code_shift[8]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1324,7 +1455,7 @@ TRANSITION_LIST("ca_code_shift[7]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1333,7 +1464,7 @@ TRANSITION_LIST("ca_code_shift[6]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1342,7 +1473,7 @@ TRANSITION_LIST("ca_code_shift[5]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1351,7 +1482,7 @@ TRANSITION_LIST("ca_code_shift[4]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1360,7 +1491,7 @@ TRANSITION_LIST("ca_code_shift[3]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1369,7 +1500,7 @@ TRANSITION_LIST("ca_code_shift[2]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1378,7 +1509,7 @@ TRANSITION_LIST("ca_code_shift[1]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1387,7 +1518,7 @@ TRANSITION_LIST("ca_code_shift[0]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 20080.0;
+		LEVEL X FOR 20180.0;
 	}
 }
 
@@ -1434,6 +1565,7 @@ TRANSITION_LIST("data[2]")
 		LEVEL 1 FOR 980.0;
 		LEVEL 0 FOR 340.0;
 		LEVEL 1 FOR 300.0;
+		LEVEL 0 FOR 100.0;
 	}
 }
 
@@ -1442,7 +1574,7 @@ TRANSITION_LIST("data[1]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 20080.0;
+		LEVEL 0 FOR 20180.0;
 	}
 }
 
@@ -1452,7 +1584,12 @@ TRANSITION_LIST("data[0]")
 	{
 		REPEAT = 1;
 		LEVEL 0 FOR 80.0;
-		LEVEL 1 FOR 20000.0;
+		NODE
+		{
+			REPEAT = 1;
+			LEVEL 1 FOR 20000.0;
+		}
+		LEVEL 0 FOR 100.0;
 	}
 }
 
@@ -1461,7 +1598,7 @@ TRANSITION_LIST("doppler[1]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 20080.0;
+		LEVEL 0 FOR 20180.0;
 	}
 }
 
@@ -1470,7 +1607,7 @@ TRANSITION_LIST("doppler[0]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 20080.0;
+		LEVEL 0 FOR 20180.0;
 	}
 }
 
@@ -1480,7 +1617,7 @@ TRANSITION_LIST("global_reset")
 	{
 		REPEAT = 1;
 		LEVEL 1 FOR 40.0;
-		LEVEL 0 FOR 20040.0;
+		LEVEL 0 FOR 20140.0;
 	}
 }
 
@@ -1489,7 +1626,7 @@ TRANSITION_LIST("prn[4]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 20080.0;
+		LEVEL 0 FOR 20180.0;
 	}
 }
 
@@ -1498,7 +1635,7 @@ TRANSITION_LIST("prn[3]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 20080.0;
+		LEVEL 0 FOR 20180.0;
 	}
 }
 
@@ -1507,7 +1644,7 @@ TRANSITION_LIST("prn[2]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 20080.0;
+		LEVEL 0 FOR 20180.0;
 	}
 }
 
@@ -1516,7 +1653,7 @@ TRANSITION_LIST("prn[1]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 20080.0;
+		LEVEL 0 FOR 20180.0;
 	}
 }
 
@@ -1525,7 +1662,7 @@ TRANSITION_LIST("prn[0]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 20080.0;
+		LEVEL 0 FOR 20180.0;
 	}
 }
 
@@ -1536,7 +1673,7 @@ TRANSITION_LIST("reset")
 		REPEAT = 1;
 		LEVEL 0 FOR 30.0;
 		LEVEL 1 FOR 50.0;
-		LEVEL 0 FOR 20000.0;
+		LEVEL 0 FOR 20100.0;
 	}
 }
 
@@ -1545,7 +1682,7 @@ TRANSITION_LIST("seek_en")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 20080.0;
+		LEVEL 0 FOR 20180.0;
 	}
 }
 
@@ -1554,7 +1691,7 @@ TRANSITION_LIST("seek_target[14]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 20080.0;
+		LEVEL 0 FOR 20180.0;
 	}
 }
 
@@ -1563,7 +1700,7 @@ TRANSITION_LIST("seek_target[13]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 20080.0;
+		LEVEL 0 FOR 20180.0;
 	}
 }
 
@@ -1572,7 +1709,7 @@ TRANSITION_LIST("seek_target[12]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 20080.0;
+		LEVEL 0 FOR 20180.0;
 	}
 }
 
@@ -1581,7 +1718,7 @@ TRANSITION_LIST("seek_target[11]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 20080.0;
+		LEVEL 0 FOR 20180.0;
 	}
 }
 
@@ -1590,7 +1727,7 @@ TRANSITION_LIST("seek_target[10]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 20080.0;
+		LEVEL 0 FOR 20180.0;
 	}
 }
 
@@ -1599,8 +1736,13 @@ TRANSITION_LIST("seek_target[9]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 10220.0;
-		LEVEL 1 FOR 9860.0;
+		NODE
+		{
+			REPEAT = 1;
+			LEVEL 0 FOR 10220.0;
+			LEVEL 1 FOR 9860.0;
+		}
+		LEVEL 0 FOR 100.0;
 	}
 }
 
@@ -1609,10 +1751,15 @@ TRANSITION_LIST("seek_target[8]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 5100.0;
-		LEVEL 1 FOR 5120.0;
-		LEVEL 0 FOR 5120.0;
-		LEVEL 1 FOR 4740.0;
+		NODE
+		{
+			REPEAT = 1;
+			LEVEL 0 FOR 5100.0;
+			LEVEL 1 FOR 5120.0;
+			LEVEL 0 FOR 5120.0;
+			LEVEL 1 FOR 4740.0;
+		}
+		LEVEL 0 FOR 100.0;
 	}
 }
 
@@ -1631,6 +1778,7 @@ TRANSITION_LIST("seek_target[7]")
 			LEVEL 0 FOR 2560.0;
 		}
 		LEVEL 1 FOR 2180.0;
+		LEVEL 0 FOR 100.0;
 	}
 }
 
@@ -1649,6 +1797,7 @@ TRANSITION_LIST("seek_target[6]")
 			LEVEL 0 FOR 1280.0;
 		}
 		LEVEL 1 FOR 900.0;
+		LEVEL 0 FOR 100.0;
 	}
 }
 
@@ -1667,6 +1816,7 @@ TRANSITION_LIST("seek_target[5]")
 			LEVEL 0 FOR 640.0;
 		}
 		LEVEL 1 FOR 260.0;
+		LEVEL 0 FOR 100.0;
 	}
 }
 
@@ -1685,7 +1835,7 @@ TRANSITION_LIST("seek_target[4]")
 			LEVEL 0 FOR 320.0;
 		}
 		LEVEL 1 FOR 320.0;
-		LEVEL 0 FOR 260.0;
+		LEVEL 0 FOR 360.0;
 	}
 }
 
@@ -1704,6 +1854,7 @@ TRANSITION_LIST("seek_target[3]")
 			LEVEL 0 FOR 160.0;
 		}
 		LEVEL 1 FOR 100.0;
+		LEVEL 0 FOR 100.0;
 	}
 }
 
@@ -1722,6 +1873,7 @@ TRANSITION_LIST("seek_target[2]")
 		}
 		LEVEL 0 FOR 80.0;
 		LEVEL 1 FOR 20.0;
+		LEVEL 0 FOR 100.0;
 	}
 }
 
@@ -1735,14 +1887,12 @@ TRANSITION_LIST("seek_target[1]")
 		LEVEL 0 FOR 40.0;
 		NODE
 		{
-			REPEAT = 247;
+			REPEAT = 248;
 			LEVEL 1 FOR 40.0;
 			LEVEL 0 FOR 40.0;
 		}
 		LEVEL 1 FOR 40.0;
-		LEVEL 0 FOR 40.0;
-		LEVEL 1 FOR 40.0;
-		LEVEL 0 FOR 20.0;
+		LEVEL 0 FOR 120.0;
 	}
 }
 
@@ -1754,16 +1904,102 @@ TRANSITION_LIST("seek_target[0]")
 		LEVEL 0 FOR 80.0;
 		NODE
 		{
-			REPEAT = 497;
+			REPEAT = 499;
 			LEVEL 1 FOR 20.0;
 			LEVEL 0 FOR 20.0;
 		}
 		LEVEL 1 FOR 20.0;
-		LEVEL 0 FOR 20.0;
-		LEVEL 1 FOR 20.0;
-		LEVEL 0 FOR 20.0;
-		LEVEL 1 FOR 20.0;
-		LEVEL 0 FOR 20.0;
+		LEVEL 0 FOR 120.0;
+	}
+}
+
+TRANSITION_LIST("subchannel:prompt|data_available_kmn")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 20180.0;
+	}
+}
+
+TRANSITION_LIST("subchannel:prompt|data_kmn[2]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 20180.0;
+	}
+}
+
+TRANSITION_LIST("subchannel:prompt|data_kmn[1]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 20180.0;
+	}
+}
+
+TRANSITION_LIST("subchannel:prompt|data_kmn[0]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 20180.0;
+	}
+}
+
+TRANSITION_LIST("subchannel:prompt|ca_bit_kmn")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 20180.0;
+	}
+}
+
+TRANSITION_LIST("data_available")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 20180.0;
+	}
+}
+
+TRANSITION_LIST("clk_sample_sync")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 20180.0;
+	}
+}
+
+TRANSITION_LIST("data_sync[2]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 20180.0;
+	}
+}
+
+TRANSITION_LIST("data_sync[1]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 20180.0;
+	}
+}
+
+TRANSITION_LIST("data_sync[0]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 20180.0;
 	}
 }
 
@@ -2136,7 +2372,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "code_shift";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 37;
 	TREE_LEVEL = 0;
 	CHILDREN = 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52;
@@ -2146,7 +2382,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "code_shift[14]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 38;
 	TREE_LEVEL = 1;
 	PARENT = 37;
@@ -2156,7 +2392,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "code_shift[13]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 39;
 	TREE_LEVEL = 1;
 	PARENT = 37;
@@ -2166,7 +2402,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "code_shift[12]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 40;
 	TREE_LEVEL = 1;
 	PARENT = 37;
@@ -2176,7 +2412,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "code_shift[11]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 41;
 	TREE_LEVEL = 1;
 	PARENT = 37;
@@ -2186,7 +2422,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "code_shift[10]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 42;
 	TREE_LEVEL = 1;
 	PARENT = 37;
@@ -2196,7 +2432,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "code_shift[9]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 43;
 	TREE_LEVEL = 1;
 	PARENT = 37;
@@ -2206,7 +2442,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "code_shift[8]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 44;
 	TREE_LEVEL = 1;
 	PARENT = 37;
@@ -2216,7 +2452,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "code_shift[7]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 45;
 	TREE_LEVEL = 1;
 	PARENT = 37;
@@ -2226,7 +2462,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "code_shift[6]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 46;
 	TREE_LEVEL = 1;
 	PARENT = 37;
@@ -2236,7 +2472,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "code_shift[5]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 47;
 	TREE_LEVEL = 1;
 	PARENT = 37;
@@ -2246,7 +2482,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "code_shift[4]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 48;
 	TREE_LEVEL = 1;
 	PARENT = 37;
@@ -2256,7 +2492,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "code_shift[3]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 49;
 	TREE_LEVEL = 1;
 	PARENT = 37;
@@ -2266,7 +2502,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "code_shift[2]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 50;
 	TREE_LEVEL = 1;
 	PARENT = 37;
@@ -2276,7 +2512,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "code_shift[1]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 51;
 	TREE_LEVEL = 1;
 	PARENT = 37;
@@ -2286,7 +2522,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "code_shift[0]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 52;
 	TREE_LEVEL = 1;
 	PARENT = 37;
@@ -2314,7 +2550,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "ca_code_shift";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 55;
 	TREE_LEVEL = 0;
 	CHILDREN = 56, 57, 58, 59, 60, 61, 62, 63, 64, 65;
@@ -2324,7 +2560,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "ca_code_shift[9]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 56;
 	TREE_LEVEL = 1;
 	PARENT = 55;
@@ -2334,7 +2570,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "ca_code_shift[8]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 57;
 	TREE_LEVEL = 1;
 	PARENT = 55;
@@ -2344,7 +2580,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "ca_code_shift[7]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 58;
 	TREE_LEVEL = 1;
 	PARENT = 55;
@@ -2354,7 +2590,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "ca_code_shift[6]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 59;
 	TREE_LEVEL = 1;
 	PARENT = 55;
@@ -2364,7 +2600,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "ca_code_shift[5]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 60;
 	TREE_LEVEL = 1;
 	PARENT = 55;
@@ -2374,7 +2610,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "ca_code_shift[4]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 61;
 	TREE_LEVEL = 1;
 	PARENT = 55;
@@ -2384,7 +2620,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "ca_code_shift[3]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 62;
 	TREE_LEVEL = 1;
 	PARENT = 55;
@@ -2394,7 +2630,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "ca_code_shift[2]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 63;
 	TREE_LEVEL = 1;
 	PARENT = 55;
@@ -2404,7 +2640,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "ca_code_shift[1]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 64;
 	TREE_LEVEL = 1;
 	PARENT = 55;
@@ -2414,7 +2650,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "ca_code_shift[0]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Unsigned;
 	TREE_INDEX = 65;
 	TREE_LEVEL = 1;
 	PARENT = 55;
@@ -2422,232 +2658,358 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "accumulator";
+	CHANNEL = "divider 2090";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
+	RADIX = Binary;
 	TREE_INDEX = 66;
 	TREE_LEVEL = 0;
-	CHILDREN = 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88;
+	IS_DIVIDER = ON;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "clk_sample_sync";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = ASCII;
+	TREE_INDEX = 67;
+	TREE_LEVEL = 0;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "data_sync";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 68;
+	TREE_LEVEL = 0;
+	CHILDREN = 69, 70, 71;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "data_sync[2]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 69;
+	TREE_LEVEL = 1;
+	PARENT = 68;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "data_sync[1]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 70;
+	TREE_LEVEL = 1;
+	PARENT = 68;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "data_sync[0]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 71;
+	TREE_LEVEL = 1;
+	PARENT = 68;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "data_available";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = ASCII;
+	TREE_INDEX = 72;
+	TREE_LEVEL = 0;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "subchannel:prompt|data_available_kmn";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = ASCII;
+	TREE_INDEX = 73;
+	TREE_LEVEL = 0;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "subchannel:prompt|data_kmn";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 74;
+	TREE_LEVEL = 0;
+	CHILDREN = 75, 76, 77;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "subchannel:prompt|data_kmn[2]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 75;
+	TREE_LEVEL = 1;
+	PARENT = 74;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "subchannel:prompt|data_kmn[1]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 76;
+	TREE_LEVEL = 1;
+	PARENT = 74;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "subchannel:prompt|data_kmn[0]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 77;
+	TREE_LEVEL = 1;
+	PARENT = 74;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "subchannel:prompt|ca_bit_kmn";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = ASCII;
+	TREE_INDEX = 78;
+	TREE_LEVEL = 0;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "accumulator";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 79;
+	TREE_LEVEL = 0;
+	CHILDREN = 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[21]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 67;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 80;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[20]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 68;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 81;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[19]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 69;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 82;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[18]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 70;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 83;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[17]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 71;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 84;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[16]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 72;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 85;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[15]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 73;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 86;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[14]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 74;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 87;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[13]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 75;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 88;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[12]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 76;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 89;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[11]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 77;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 90;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[10]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 78;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 91;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[9]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 79;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 92;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[8]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 80;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 93;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[7]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 81;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 94;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[6]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 82;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 95;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[5]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 83;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 96;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[4]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 84;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 97;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[3]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 85;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 98;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[2]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 86;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 99;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[1]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 87;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 100;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 DISPLAY_LINE
 {
 	CHANNEL = "accumulator[0]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = ASCII;
-	TREE_INDEX = 88;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 101;
 	TREE_LEVEL = 1;
-	PARENT = 66;
+	PARENT = 79;
 }
 
 TIME_BAR

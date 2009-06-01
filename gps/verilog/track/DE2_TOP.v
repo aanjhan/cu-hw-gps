@@ -1,3 +1,6 @@
+`include "../components/global.vh"
+`include "../components/subchannel.vh"
+
 module DE2_TOP (
     // Clock Input
     input         CLOCK_27,    // 27 MHz

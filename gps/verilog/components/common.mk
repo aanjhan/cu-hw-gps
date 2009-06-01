@@ -2,9 +2,10 @@
 
 REPO_DIR?=../..
 VERILOG_DIR?=$(REPO_DIR)/verilog
+COMPONENTS_DIR?=$(VERILOG_DIR)/components
 DEFPARSER?=defparser
 
-SOURCES+=$(VERILOG_DIR)/components/global.csv
+SOURCES+=$(COMPONENTS_DIR)/global.csv
 
 all:
 	@for s in $(SOURCES); do \

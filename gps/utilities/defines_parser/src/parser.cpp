@@ -220,15 +220,18 @@ TreeNode* Parser::ParseFunction() throw(SyntaxError)
         catch(...){ delete function; throw; }
         function->SetRight(expression);
 
-        TreeNode *child=expression;
+        TreeNode *parent=function;
         while(tokenizer.HasNext() &&
               (tokenizer.NextType()==TokenType::SEMICOLON))
         {
             tokenizer.ReadNext();
             try
             {
-                child->SetRight(ParseSum());
-                child=child->GetRight();
+                parent->SetRight(new TreeNode(TokenType::SEMICOLON,
+                                              parent->GetRight(),
+                                              NULL));
+                parent=parent->GetRight();
+                parent->SetRight(ParseSum());
             }
             catch(...){ delete function; throw; }
         }

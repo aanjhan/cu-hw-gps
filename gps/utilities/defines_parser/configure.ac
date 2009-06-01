@@ -16,6 +16,13 @@ BOOST_PROGRAM_OPTIONS
 #Check for functionality.
 AC_C_CONST
 
+#Configure constants.
+AC_ARG_ENABLE(optimization, [  --disable-optimization   disable -Ox gcc optimization],,wantopto=yes)
+if test "$wantopto" != "yes"; then
+	CPPFLAGS=`echo $CPPFLAGS | sed -e 's/-O.//g'`
+	CXXFLAGS=`echo $CXXFLAGS | sed -e 's/-O.//g'`
+fi
+
 #Process output.
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/main.cpp])

@@ -45,7 +45,8 @@ std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression
     string rightString;
     double rightValue;
     bool haveRightValue=false;
-    if(tree->GetRight()!=NULL)
+    if(tree->GetRight()!=NULL &&
+       tree->GetRight()->GetType()!=TokenType::SEMICOLON)
     {
         try
         {
@@ -120,7 +121,8 @@ std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression
         stringValue=leftString+tree->GetValue()+rightString;
         break;
     case TokenType::FUNCTION:
-        if(haveRightValue)
+        if(haveRightValue ||
+           tree->GetRight()->GetType()==TokenType::SEMICOLON)
         {
             useValue=true;
             value=EvalFunction(tree,vars);
@@ -175,7 +177,7 @@ double Expression::EvalFunction(TreeNode *tree, std::map<std::string,Expression*
     TreeNode *child=tree->GetRight();
     string function=tree->GetValue();
 
-    if(child->GetRight()==NULL)
+    if(child->GetType()!=TokenType::SEMICOLON)
     {
         //Convert child parameter to a double.
         double childValue;
@@ -189,9 +191,9 @@ double Expression::EvalFunction(TreeNode *tree, std::map<std::string,Expression*
         //Convert right parameters to doubles.
         string rightString;
         double rightValue;
-        while(child!=NULL)
+        do
         {
-            rightString=Evaluate(child,vars);
+            rightString=Evaluate(child->GetLeft(),vars);
         
             if(IsDouble(rightString))
             {
@@ -202,6 +204,16 @@ double Expression::EvalFunction(TreeNode *tree, std::map<std::string,Expression*
             values.push_back(rightValue);
             child=child->GetRight();
         }
+        while(child->GetType()==TokenType::SEMICOLON);
+
+        //Evaluate last parameter.
+        rightString=Evaluate(child,vars);
+        if(IsDouble(rightString))
+        {
+            FromString(rightString,rightValue);
+        }
+        else throw ExpressionError("expected value for '"+rightString+"'.");
+        values.push_back(rightValue);
 
         if(function=="max")
         {

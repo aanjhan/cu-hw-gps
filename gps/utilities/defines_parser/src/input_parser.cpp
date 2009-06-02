@@ -13,8 +13,6 @@ const boost::regex InputParser::newLine("\\\\n");
 
 int InputParser::Parse(map<string,MacroEntry*> &vars, bool print)
 {
-    map<string,MacroEntry*> tempVars;
-
     if(file=="-")useStdin=true;
 
     FileType type=CSV;
@@ -45,16 +43,14 @@ int InputParser::Parse(map<string,MacroEntry*> &vars, bool print)
     int errorCount;
     switch(type)
     {
-    case XML: errorCount=ParseXML(*in,file,tempVars,print); break;
-    default: errorCount=ParseCSV(*in,file,tempVars,print); break;
+    case XML: errorCount=ParseXML(*in,file,vars,print); break;
+    default: errorCount=ParseCSV(*in,file,vars,print); break;
     }
 
     if(!useStdin)
     {
         inFile.close();
     }
-
-    copy(tempVars.begin(),tempVars.end(),inserter(vars,vars.end()));
 
     return errorCount;
 }
@@ -68,6 +64,7 @@ int InputParser::ParseCSV(std::istream &in,
     boost::smatch m;
     int lineCount=0;
     int errorCount=0;
+    
     while(!in.eof())
     {
         lineCount++;
@@ -157,7 +154,7 @@ int InputParser::EvalDirective(const std::string &directive,
         if(!boost::regex_match(parameter,m,boost::regex("^(!)?\"([\\/\\w.]+)\"$")))
         {
             
-            cout<<InputErrors::ErrorString(InputErrors::ERROR,
+            cerr<<InputErrors::ErrorString(InputErrors::ERROR,
                                            currentFile,
                                            currentLine,
                                            "invalid include directive.")
@@ -173,7 +170,7 @@ int InputParser::EvalDirective(const std::string &directive,
         if(!in.good())
         {
             
-            cout<<InputErrors::ErrorString(InputErrors::ERROR,
+            cerr<<InputErrors::ErrorString(InputErrors::ERROR,
                                            currentFile,
                                            currentLine,
                                            "unable to open included file \""+file+"\".")
@@ -186,7 +183,7 @@ int InputParser::EvalDirective(const std::string &directive,
         int errorCount=inParser.Parse(vars,print);
         if(errorCount>0)
         {
-            cout<<InputErrors::ErrorString(InputErrors::ERROR,
+            cerr<<InputErrors::ErrorString(InputErrors::ERROR,
                                            currentFile,
                                            currentLine,
                                            StringHelper::ToString(errorCount)+" error"+(errorCount>0 ? "s" : "")+" from included file '"+file+"'.")
@@ -197,7 +194,7 @@ int InputParser::EvalDirective(const std::string &directive,
     else
     {
             
-        cout<<InputErrors::ErrorString(InputErrors::ERROR,
+        cerr<<InputErrors::ErrorString(InputErrors::ERROR,
                                        currentFile,
                                        currentLine,
                                        "unknown directive '"+directive+"'.")
@@ -208,12 +205,12 @@ int InputParser::EvalDirective(const std::string &directive,
 
 void InputErrors::PrintWarning(const std::string &file,int line,const std::string &message)
 {
-    cout<<InputErrors::ErrorString(WARNING,file,line,message)<<endl;
+    cerr<<InputErrors::ErrorString(WARNING,file,line,message)<<endl;
 }
 
 void InputErrors::PrintError(const std::string &file,int line,const std::string &message)
 {
-    cout<<InputErrors::ErrorString(ERROR,file,line,message)<<endl;
+    cerr<<InputErrors::ErrorString(ERROR,file,line,message)<<endl;
 }
 
 std::string InputErrors::ErrorString(ErrorType type,

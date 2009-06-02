@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
         {
             outFile.open(vm["output"].as<string>().c_str());
             if(outFile.good())out=&outFile;
-            else cout<<"Error: unable to open output file '"
+            else cerr<<"Error: unable to open output file '"
                      <<vm["output"].as<string>()<<"'."<<endl;
         }
         if(out!=NULL)
@@ -125,12 +125,12 @@ int main(int argc, char *argv[])
                 {
                     errorCount++;
                     e.SetVariable(variable);
-                    cout<<e.what()<<endl;
+                    cerr<<e.what()<<endl;
                 }
             }
 
-            if(errorCount==1)cout<<"Found 1 error."<<endl;
-            else if(errorCount>0)cout<<"Found "<<errorCount<<" errors."<<endl;
+            if(errorCount==1)cerr<<"Found 1 error."<<endl;
+            else if(errorCount>0)cerr<<"Found "<<errorCount<<" errors."<<endl;
             else (*out)<<output;
 
             if(vm.count("output"))outFile.close();
@@ -138,8 +138,8 @@ int main(int argc, char *argv[])
     }
     else
     {
-        if(errorCount==1)cout<<"Found 1 error."<<endl;
-        else if(errorCount>0)cout<<"Found "<<errorCount<<" errors."<<endl;
+        if(errorCount==1)cerr<<"Found 1 error."<<endl;
+        else if(errorCount>0)cerr<<"Found "<<errorCount<<" errors."<<endl;
     }
 
     //Cleanup expressions.
@@ -150,5 +150,5 @@ int main(int argc, char *argv[])
         delete (*i).second;
     }
     
-    return 0;
+    return errorCount!=0;
 }

@@ -6,6 +6,9 @@
 class MacroEntry
 {
 public:
+    std::string file;
+    int line;
+    
     bool print;
     Expression *expression;
     std::string comments;

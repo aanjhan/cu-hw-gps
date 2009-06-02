@@ -2,8 +2,10 @@
 #include <fstream>
 #include <algorithm>
 #include "input_parser.h"
+#include "string_helper.hpp"
 
 using namespace std;
+using namespace StringHelper;
 
 const boost::regex InputParser::fileName("^((.*\\/)?([^\\/]*))\\.([^.]+)$");
 const boost::regex InputParser::comment("^ *(//.*)?$");
@@ -99,12 +101,17 @@ int InputParser::ParseCSV(std::istream &in,
                 continue;
             }
             
-            if(vars.find(variable)!=vars.end())
-                InputErrors::PrintWarning(currentFile,lineCount,"duplicate declaration of variable '"+variable+"'.");
+            if(vars.find(variable)!=vars.end() &&
+               (vars[variable]->file!=currentFile ||
+                vars[variable]->line!=lineCount))
+                InputErrors::PrintWarning(currentFile,lineCount,"duplicate declaration of variable '"+variable+
+                                          "'.\noriginally defined in '"+vars[variable]->file+"', line "+ToString(vars[variable]->line)+".");
             
             vars[variable]=new MacroEntry();
             vars[variable]->expression=expression;
             vars[variable]->print=print;
+            vars[variable]->file=currentFile;
+            vars[variable]->line=lineCount;
             if(m[4].matched)
             {
                 string comment=m[4];
@@ -218,16 +225,20 @@ std::string InputErrors::ErrorString(ErrorType type,
                                      int line,
                                      const std::string &message)
 {
+    string header;
     string out;
 
     switch(type)
     {
-    case ERROR: out="Error: "; break;
-    case WARNING: out="Warning: "; break;
-    default: out="Info: "; break;
+    case ERROR: header="Error: "; break;
+    case WARNING: header="Warning: "; break;
+    default: header="Info: "; break;
     }
+    if(file!="")header=file+(line>0 ? "("+StringHelper::ToString(line)+")" : "")+": "+header;
+
+    string spaces="\n";
+    for(int i=0;i<header.size();i++)spaces+=" ";
+    out=boost::regex_replace(message,boost::regex("\\n"),spaces);
     
-    out+=message;
-    if(file!="")out=file+(line>0 ? "("+StringHelper::ToString(line)+")" : "")+": "+out;
-    return out;
+    return header+out;
 }

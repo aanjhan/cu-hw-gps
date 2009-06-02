@@ -38,7 +38,7 @@ public:
     InputParser(const std::string &file) : useStdin(false), file(file) {}
 
     int Parse(std::map<std::string,MacroEntry*> &vars, bool print=true);
-
+    
 private:
     bool useStdin;
     std::string file;

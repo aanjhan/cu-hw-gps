@@ -66,6 +66,8 @@ int InputParser::ParseCSV(std::istream &in,
     boost::smatch m;
     int lineCount=0;
     int errorCount=0;
+
+    boost::filesystem::path currentPath(currentFile);
     
     while(!in.eof())
     {
@@ -102,15 +104,15 @@ int InputParser::ParseCSV(std::istream &in,
             }
             
             if(vars.find(variable)!=vars.end() &&
-               (vars[variable]->file!=currentFile ||
+               (!boost::filesystem::equivalent(vars[variable]->file,currentPath) ||
                 vars[variable]->line!=lineCount))
                 InputErrors::PrintWarning(currentFile,lineCount,"duplicate declaration of variable '"+variable+
-                                          "'.\noriginally defined in '"+vars[variable]->file+"', line "+ToString(vars[variable]->line)+".");
+                                          "'.\noriginally defined in '"+vars[variable]->file.string()+"', line "+ToString(vars[variable]->line)+".");
             
             vars[variable]=new MacroEntry();
             vars[variable]->expression=expression;
             vars[variable]->print=print;
-            vars[variable]->file=currentFile;
+            vars[variable]->file=boost::filesystem::path(currentFile);
             vars[variable]->line=lineCount;
             if(m[4].matched)
             {

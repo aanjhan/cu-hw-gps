@@ -2,11 +2,12 @@
 #define MACRO_ENTRY_H
 
 #include "expression.h"
+#include <boost/filesystem.hpp>
 
 class MacroEntry
 {
 public:
-    std::string file;
+    boost::filesystem::path file;
     int line;
     
     bool print;

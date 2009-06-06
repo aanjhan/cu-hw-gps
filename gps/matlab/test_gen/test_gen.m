@@ -54,7 +54,7 @@ function [signal,carrier,code,t]=test_gen(PRN,pack,filename,send)
     fwrite(file,frame);
     fclose(file);
     
-    write_vwf(ones_signal,'subchannel',filename);
+    write_vwf(ones_signal,'channel',filename);
     
     if(nargin>3 && send)
         if(strcmp(computer,'PCWIN'))

@@ -7,13 +7,14 @@ function write_vwf(signal,directory,filename)
     end
     
     f_system=200e6;
-    f_s=50e6;
+    f_s=200e6;
     t_s=1/f_s;
     t_step=t_s*1e9;
+    t_sys_step=1/f_system*1e9;
     start_time=80;
-    extra_cycles=10;
+    extra_cycles=40;
     data_end=start_time+length(signal)*t_step;
-    end_time=data_end+extra_cycles*t_step;
+    end_time=data_end+extra_cycles*t_sys_step;
     
     fwrite(file,sprintf('/* End Time: %d */\n\n',end_time));
 
@@ -56,7 +57,8 @@ function write_vwf(signal,directory,filename)
     fwrite(file,sprintf('\t{\n'));
     fwrite(file,sprintf('\t\tREPEAT = 1;\n'));
     fwrite(file,sprintf('\t\tLEVEL 0 FOR %.1f;\n',data_end-t_step));
-    fwrite(file,sprintf('\t\tLEVEL 1 FOR %.1f;\n',(extra_cycles+1)*t_step));
+    fwrite(file,sprintf('\t\tLEVEL 1 FOR %.1f;\n',t_step));
+    fwrite(file,sprintf('\t\tLEVEL 0 FOR %.1f;\n',end_time-data_end));
     fwrite(file,sprintf('\t}\n'));
     fwrite(file,sprintf('}\n'));
     fwrite(file,sprintf('\n'));

@@ -43,11 +43,11 @@ module subchannel(
                           .ca_clk(ca_clk),
                           .ca_code_shift(ca_code_shift));
 
-   //Delay accumulation 4 cycles to allow
+   //Delay accumulation 3 cycles to allow
    //for C/A upsampler to update. Delay 1
    //cycle to meet timing from the C/A bit
    //to the track accumulator.
-   localparam DATA_DELAY = 5;
+   localparam DATA_DELAY = 4;
    (* keep *) wire data_available_kmn;
    delay #(.DELAY(DATA_DELAY))
      data_available_delay(.clk(clk),

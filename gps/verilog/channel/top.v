@@ -3,6 +3,8 @@
 
 `include "../components/subchannel.vh"
 
+`define HIGH_SPEED
+
 module top(
     input                      clk,
     input                      global_reset,
@@ -54,10 +56,20 @@ module top(
 
    //Data available strobe.
    (* keep *) wire data_available;
+`ifndef HIGH_SPEED
    strobe data_available_strobe(.clk(clk),
                                 .reset(reset_sync),
                                 .in(clk_sample_sync),
                                 .out(data_available));
+`else
+   reg data_done;
+   always @(posedge clk) begin
+      data_done <= global_reset || reset_sync ? 1'b0 :
+                   feed_complete_sync ? 1'b1 :
+                   data_done;
+   end
+   assign data_available = !(global_reset || reset_sync) && !data_done;
+`endif
 
    //Channel.
    wire accumulator_updating;

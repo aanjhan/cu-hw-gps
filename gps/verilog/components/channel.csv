@@ -1,0 +1,10 @@
+#include !"subchannel.csv"
+
+//Accumulator magnitude (absolute value).
+ACC_MAG_WIDTH,ACC_WIDTH-1,Accumulator magnitude width.
+ACC_MAG_RANGE,ACC_MAG_WIDTH-1:0,Accumulator magnitude range.
+
+//Accumulation results.
+I2Q2_MAX_VAL,ACC_MAX_VAL^2,Maximum I^2+Q^2 value.
+I2Q2_WIDTH,max_width(I2Q2_MAX_VAL),I^2+Q^2 width.
+I2Q2_RANGE,I2Q2_WIDTH-1:0,I^2+Q^2 range.

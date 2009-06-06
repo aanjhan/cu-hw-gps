@@ -15,15 +15,21 @@ DOPPLER_PAD_SIZE,CARRIER_PHASE_INC_WIDTH-DOPPLER_INC_WIDTH,Doppler shift pad siz
 F_IF_INC,CARRIER_PHASE_INC_WIDTH'dround((2^CARRIER_ACC_WIDTH)*F_IF/F_S),Carrier intermediate frequency phase increment.
 DOPP_BIN_INC,CARRIER_PHASE_INC_WIDTH'dround((2^CARRIER_ACC_WIDTH)*DOPP_BIN_SIZE/F_S),Doppler bin phase increment.
 
-//FIXME Check that this value matches with SIN_/COS_OUTPUT_WIDTH.
-//FIXME If not, throw an error.
-CARRIER_LUT_WIDTH,3,Carrier lookup table width.
-CARRIER_LUT_RANGE,CARRIER_LUT_WIDTH-1:0,Carrier lookup table range.
+//FIXME Take value from SIN_/COS_OUTPUT_WIDTH.
+//FIXME If values do not match throw an error.
+CARRIER_LUT_INDEX_WIDTH,4,Carrier lookup table input width.
+CARRIER_LUT_INDEX_RANGE,CARRIER_LUT_INDEX_WIDTH-1:0,Carrier lookup table input range.
+CARRIER_LUT_WIDTH,3,Carrier lookup table output width.
+CARRIER_LUT_RANGE,CARRIER_LUT_WIDTH-1:0,Carrier lookup table output range.
 
 //Carrier wiped signal.
-SIG_NO_CARRIER_WIDTH,max_width(max_value(INPUT_WIDTH-1)*max_value(CARRIER_LUT_WIDTH-1))+1,Signal width after carrier wipeoff (input*carrier).
+SIG_NO_CARRIER_MAX_VAL,max_value(INPUT_WIDTH-1)*max_value(CARRIER_LUT_WIDTH-1),Maximum value of signal after carrier wipeoff (input*carrier).
+SIG_NO_CARRIER_WIDTH,max_width(SIG_NO_CARRIER_MAX_VAL)+1,Signal width after carrier wipeoff.
 SIG_NO_CARRIER_RANGE,SIG_NO_CARRIER_WIDTH-1:0,Signal range after carrier wipeoff.
 
 //Track definitions.
-ACC_WIDTH,max_width(max_value(SIG_NO_CARRIER_WIDTH)*ACQ_ACC_LENGTH*F_S*T_CA_CODE)+1,Track accumulator width.
+ACC_ACQ_MAX_VAL,SIG_NO_CARRIER_MAX_VAL*ACQ_ACC_LENGTH*F_S*T_CA_CODE,Maximum accumulation value for acquisition (mag).
+ACC_TRACK_MAX_VAL,SIG_NO_CARRIER_MAX_VAL*TRACK_ACC_LENGTH*F_S*T_CA_CODE,Maximum accumulation value for tracking (mag).
+ACC_MAX_VAL,max(ACC_ACQ_MAX_VAL;ACC_TRACK_MAX_VAL),Maximum accumulation value (abs).
+ACC_WIDTH,max_width(ACC_MAX_VAL)+1,Track accumulator width.\nTwo's complement, signed.
 ACC_RANGE,ACC_WIDTH-1:0,Accumulator range.

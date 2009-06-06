@@ -7,6 +7,7 @@ INPUT_SIGN,INPUT_WIDTH-1,Input sign value.
 INPUT_MAG,INPUT_WIDTH-2:0,Input magniude value.
 
 ACQ_ACC_LENGTH,3,Acquisition accumulation length in ms.
+TRACK_ACC_LENGTH,1,Tracking accumulation length in ms.
 
 F_CA,1.023e6,C/A code chipping rate.
 N_CHIPS,1023,Number of C/A chips.

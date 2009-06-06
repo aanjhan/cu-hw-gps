@@ -1,7 +1,10 @@
 `include "global.vh"
 `include "subchannel.vh"
+`include "channel__subchannel.vh"
 `include "cos.vh"
 `include "sin.vh"
+
+//`define DISABLE_CARRIER
 
 module subchannel(
     input                      clk,
@@ -18,6 +21,7 @@ module subchannel(
     input [`CS_RANGE]          seek_target,
     output wire [`CS_RANGE]    code_shift,
     //Outputs.
+    output wire                accumulator_updating,
     output wire [`ACC_RANGE]   accumulator_i,
     output wire [`ACC_RANGE]   accumulator_q,
     //Debug outputs.
@@ -26,6 +30,7 @@ module subchannel(
     output wire [9:0]          ca_code_shift);
 
    //Upsample the C/A code to the incoming sampling rate.
+   wire seeking;//FIXME What to do with this?
    ca_upsampler upsampler(.clk(clk),
                           .reset(global_reset),
                           .enable(data_available),
@@ -34,6 +39,7 @@ module subchannel(
                           .out(ca_bit),
                           .seek_en(seek_en),
                           .seek_target(seek_target),
+                          .seeking(seeking),
                           .ca_clk(ca_clk),
                           .ca_code_shift(ca_code_shift));
 
@@ -42,14 +48,14 @@ module subchannel(
    //cycle to meet timing from the C/A bit
    //to the track accumulator.
    localparam DATA_DELAY = 5;
-   wire data_available_kmn /* synthesis keep */;
+   (* keep *) wire data_available_kmn;
    delay #(.DELAY(DATA_DELAY))
      data_available_delay(.clk(clk),
                           .reset(reset),
                           .in(data_available),
                           .out(data_available_kmn));
      
-   wire [`INPUT_RANGE] data_kmn /* synthesis keep */;
+   (* keep *) wire [`INPUT_RANGE] data_kmn;
    delay #(.WIDTH(`INPUT_WIDTH),
            .DELAY(DATA_DELAY))
      data_delay(.clk(clk),
@@ -57,7 +63,7 @@ module subchannel(
                 .in(data),
                 .out(data_kmn));
    
-   wire ca_bit_kmn /* synthesis keep */;
+   (* keep *) wire ca_bit_kmn;
    delay ca_bit_delay(.clk(clk),
                       .reset(reset),
                       .in(ca_bit),
@@ -65,54 +71,92 @@ module subchannel(
 
    wire [`CARRIER_PHASE_INC_RANGE] f_carrier;
    assign f_carrier = `F_IF_INC+{{`DOPPLER_PAD_SIZE{1'b0}},doppler};
-   
-   wire [`CARRIER_LUT_RANGE] carrier_index;
+
+   //The carrier generator updates to the next carrier value
+   //when a new data sample is available. The current value
+   //to be used is the value one cycle BEFORE the update.
+   wire [`CARRIER_LUT_INDEX_RANGE] carrier_index;
    dds2 #(.ACC_WIDTH(`CARRIER_ACC_WIDTH),
           .PHASE_INC_WIDTH(`CARRIER_PHASE_INC_WIDTH),
-          .OUTPUT_WIDTH(`CARRIER_LUT_WIDTH))
+          .OUTPUT_WIDTH(`CARRIER_LUT_INDEX_WIDTH))
          carrier_generator(.clk(clk),
                            .reset(global_reset),
-                           .enable(1'b1),
+                           .enable(data_available_kmn),
                            .inc(f_carrier),//FIXME Two's complement for doppler value? How to represent/pad?
                            .out(carrier_index));
 
    //Generate in-phase carrier-wiped signal.
-   wire [`COS_OUTPUT_RANGE] carrier_i;
-   /*cos carrier_cos_lut(.in(carrier_index),
-                       .out(carrier_i));*/
-   assign carrier_i = `COS_OUTPUT_WIDTH'h1;
+   (* keep *) wire [`CARRIER_LUT_RANGE] carrier_i;
+`ifdef DISABLE_CARRIER
+   assign carrier_i = `CARRIER_LUT_WIDTH'h1;
+`else
+   cos carrier_cos_lut(.in(carrier_index),
+                       .out(carrier_i));
+`endif
    
-   wire [`SIG_NO_CARRIER_RANGE] sig_no_carrier_i;
+   (* keep *) wire [`SIG_NO_CARRIER_RANGE] sig_no_carrier_i;
    mult carrier_mux_i(.carrier(carrier_i),
                       .signal(data_kmn),
                       .out(sig_no_carrier_i));
 
    //Generate quadrature carrier-wiped signal.
-   wire [`COS_OUTPUT_RANGE] carrier_q;
+   (* keep *) wire [`CARRIER_LUT_RANGE] carrier_q;
+`ifdef DISABLE_CARRIER
+   assign carrier_q = `CARRIER_LUT_WIDTH'h0;
+`else
    sin carrier_sin_lut(.in(carrier_index),
                        .out(carrier_q));
+`endif
    
-   wire [`SIG_NO_CARRIER_RANGE] sig_no_carrier_q;
+   (* keep *) wire [`SIG_NO_CARRIER_RANGE] sig_no_carrier_q;
    mult carrier_mux_q(.carrier(carrier_q),
                       .signal(data_kmn),
                       .out(sig_no_carrier_q));
+
+   //Pipe post-carrier wipe signals to meet timing.
+   wire [`SIG_NO_CARRIER_RANGE] sig_no_carrier_i_km1;
+   delay #(.WIDTH(`SIG_NO_CARRIER_WIDTH))
+     post_carrier_i_delay(.clk(clk),
+                          .reset(global_reset),
+                          .in(sig_no_carrier_i),
+                          .out(sig_no_carrier_i_km1));
+   
+   wire [`SIG_NO_CARRIER_RANGE] sig_no_carrier_q_km1;
+   delay #(.WIDTH(`SIG_NO_CARRIER_WIDTH))
+     post_carrier_q_delay(.clk(clk),
+                          .reset(global_reset),
+                          .in(sig_no_carrier_q),
+                          .out(sig_no_carrier_q_km1));
+
+   wire track_ca_bit;
+   delay post_carrier_ca_delay(.clk(clk),
+                               .reset(global_reset),
+                               .in(ca_bit_kmn),
+                               .out(track_ca_bit));
+
+   wire track_data_available;
+   delay post_carrier_available_delay(.clk(clk),
+                                      .reset(global_reset),
+                                      .in(data_available_kmn),
+                                      .out(track_data_available));
+   assign accumulator_updating = track_data_available;
    
    //In-phase code wipe-off and accumulation.
    track #(.INPUT_WIDTH(`SIG_NO_CARRIER_WIDTH),
            .OUTPUT_WIDTH(`ACC_WIDTH))
      track_i(.clk(clk),
              .reset(reset),
-             .data_available(data_available_kmn),
-             .baseband_input(sig_no_carrier_i),
-             .ca_bit(ca_bit_kmn),
+             .data_available(track_data_available),
+             .baseband_input(sig_no_carrier_i_km1),
+             .ca_bit(track_ca_bit),
              .accumulator(accumulator_i));
    
    track #(.INPUT_WIDTH(`SIG_NO_CARRIER_WIDTH),
            .OUTPUT_WIDTH(`ACC_WIDTH))
      track_q(.clk(clk),
              .reset(reset),
-             .data_available(data_available_kmn),
-             .baseband_input(sig_no_carrier_q),
-             .ca_bit(ca_bit_kmn),
+             .data_available(track_data_available),
+             .baseband_input(sig_no_carrier_q_km1),
+             .ca_bit(track_ca_bit),
              .accumulator(accumulator_q));
 endmodule

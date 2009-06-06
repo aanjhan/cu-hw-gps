@@ -11,11 +11,12 @@
 #endif
 
 #define LED_TICKS (alt_ticks_per_second()/2)
-#define DATA_TICKS (alt_ticks_per_second()/50)
+#define DATA_TICKS (alt_ticks_per_second()/1000)
 
-#define GPS_DATA_CLOCK 0x08
-#define GPS_RESET      0x80
-#define GPS_DATA       0x07
+#define GPS_RESET         0x80
+#define GPS_FEED_COMPLETE 0x40
+#define GPS_DATA_CLOCK    0x08
+#define GPS_DATA          0x07
 
 #define CONTROL_STATE_B0      0
 #define CONTROL_STATE_B1      1
@@ -92,6 +93,8 @@ alt_u32 DataTick(void* context)
         
         ret=ReadGPSWord((GPSDataBuffer*)&gpsData,&value);
         gpsDataOut|=value;
+        
+        if(!ret)gpsDataOut|=GPS_FEED_COMPLETE;
         
         //Setup data before clock.
         IOWR_ALTERA_AVALON_PIO_DATA(GPS_DATA_BASE,value);

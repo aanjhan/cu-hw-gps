@@ -1,0 +1,5 @@
+#include !"subchannel.csv"
+
+ACC_RANGE,@
+ACC_WIDTH,@
+DOPPLER_INC_RANGE,@

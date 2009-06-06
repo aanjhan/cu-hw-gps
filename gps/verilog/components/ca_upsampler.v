@@ -45,6 +45,7 @@ module ca_upsampler(
    //to meet timing requirements.
    wire ca_clk_en_km1;
    delay ca_clock_delay(.clk(clk),
+                        .reset(reset),
                         .in(ca_clk_en),
                         .out(ca_clk_en_km1));
 

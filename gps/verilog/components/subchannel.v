@@ -69,21 +69,23 @@ module subchannel(
                       .in(ca_bit),
                       .out(ca_bit_kmn));
 
+   //Carrier value is front-end intermediate frequency plus
+   //sign-extended version of two's complement Doppler shift.
    wire [`CARRIER_PHASE_INC_RANGE] f_carrier;
-   assign f_carrier = `F_IF_INC+{{`DOPPLER_PAD_SIZE{1'b0}},doppler};
+   assign f_carrier = `F_IF_INC+{{`DOPPLER_PAD_SIZE{doppler[`DOPPLER_INC_WIDTH-1]}},doppler};
 
    //The carrier generator updates to the next carrier value
    //when a new data sample is available. The current value
    //to be used is the value one cycle BEFORE the update.
    wire [`CARRIER_LUT_INDEX_RANGE] carrier_index;
-   dds2 #(.ACC_WIDTH(`CARRIER_ACC_WIDTH),
-          .PHASE_INC_WIDTH(`CARRIER_PHASE_INC_WIDTH),
-          .OUTPUT_WIDTH(`CARRIER_LUT_INDEX_WIDTH))
-         carrier_generator(.clk(clk),
-                           .reset(global_reset),
-                           .enable(data_available_kmn),
-                           .inc(f_carrier),//FIXME Two's complement for doppler value? How to represent/pad?
-                           .out(carrier_index));
+   dds #(.ACC_WIDTH(`CARRIER_ACC_WIDTH),
+         .PHASE_INC_WIDTH(`CARRIER_PHASE_INC_WIDTH),
+         .OUTPUT_WIDTH(`CARRIER_LUT_INDEX_WIDTH))
+     carrier_generator(.clk(clk),
+                       .reset(global_reset),
+                       .enable(data_available_kmn),
+                       .inc(f_carrier),//FIXME Two's complement for doppler value? How to represent/pad?
+                       .out(carrier_index));
 
    //Generate in-phase carrier-wiped signal.
    (* keep *) wire [`CARRIER_LUT_RANGE] carrier_i;

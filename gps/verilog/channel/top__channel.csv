@@ -1,0 +1,6 @@
+#include !"../components/channel__subchannel.csv"
+#include !"../components/channel.csv"
+
+I2Q2_RANGE,@
+ACC_RANGE,@
+DOPPLER_INC_RANGE,@

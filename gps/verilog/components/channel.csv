@@ -1,5 +1,11 @@
 #include !"subchannel.csv"
 
+//Channel mode.
+MODE_WIDTH,1,Channel mode width.
+MODE_RANGE,MODE_WIDTH-1:0,Channel mode range.
+MODE_ACQ,1'b0,Acquisition mode.
+MODE_TRACK,1'b1,Tracking mode.
+
 //Accumulator magnitude (absolute value).
 ACC_MAG_WIDTH,ACC_WIDTH-1,Accumulator magnitude width.
 ACC_MAG_RANGE,ACC_MAG_WIDTH-1:0,Accumulator magnitude range.

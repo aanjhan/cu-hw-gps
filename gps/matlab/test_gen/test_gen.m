@@ -21,7 +21,7 @@ function [signal,carrier,code,t]=test_gen(PRN,pack,filename,send)
     signal=code.*carrier;
     
     packedSignal=gps_pack(signal);
-    ones_signal=twos_to_val(signal)';
+    ones_signal=twos_to_ones(signal,3);
     
     if(pack)
         frame=[hex2dec('FE');

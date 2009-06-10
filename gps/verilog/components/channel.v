@@ -190,24 +190,19 @@ module channel(
    end // always @ (posedge clk)
 
    //Square I and Q for each subchannel. Square
-   //starts when an accumilation is finished, or
+   //starts when an accumulation is finished, or
    //the early or prompt squares complete (3 required).
    wire start_square;
-   wire square_complete_km1;
+   wire [1:0] i2q2_select_km2;
    assign start_square = acc_ready ||
-                         square_complete_km1 && i2q2_select!=2'h3;
+                         square_complete && i2q2_select!=2'h2;
    
    wire square_complete;
-   delay #(.DELAY(6))
+   delay #(.DELAY(5))
      square_delay(.clk(clk),
                   .reset(global_reset),
                   .in(start_square),
                   .out(square_complete));
-
-   delay square_restart_delay(.clk(clk),
-                              .reset(global_reset),
-                              .in(square_complete),
-                              .out(square_complete_km1));
    
    reg [1:0] i2q2_select;
    always @(posedge clk) begin
@@ -231,23 +226,25 @@ module channel(
                              q_late),
                       .result(q2));
 
-   (* keep *) wire [`I2Q2_RANGE] i2_kmn;
+   //Pipe square results for timing.
+   (* keep *) wire [`I2Q2_RANGE] i2_km1;
    delay #(.WIDTH(`I2Q2_WIDTH))
      i2_delay(.clk(clk),
               .reset(global_reset),
               .in(i2),
-              .out(i2_kmn));
+              .out(i2_km1));
 
-   (* keep *) wire [`I2Q2_RANGE] q2_kmn;
+   (* keep *) wire [`I2Q2_RANGE] q2_km1;
    delay #(.WIDTH(`I2Q2_WIDTH))
      q2_delay(.clk(clk),
               .reset(global_reset),
               .in(q2),
-              .out(q2_kmn));
+              .out(q2_km1));
    
    wire [`I2Q2_RANGE] i2q2_out;
-   assign i2q2_out = i2_kmn+q2_kmn;
+   assign i2q2_out = i2_km1+q2_km1;
 
+   //Pipe sum result for timing.
    wire [`I2Q2_RANGE] i2q2_out_km1;
    delay #(.WIDTH(`I2Q2_WIDTH))
      i2q2_delay(.clk(clk),
@@ -255,20 +252,37 @@ module channel(
                 .in(i2q2_out),
                 .out(i2q2_out_km1));
 
-   assign i2q2_valid = square_complete && i2q2_select==2'h2;
+   //Pipe completion signals to match square/sum pipes.
+   wire i2q2_complete;
+   delay #(.DELAY(2))
+     i2q2_complete_delay(.clk(clk),
+                         .reset(global_reset),
+                         .in(square_complete),
+                         .out(i2q2_complete));
+   
+   delay #(.WIDTH(2),
+           .DELAY(2))
+     i2q2_select_delay(.clk(clk),
+                       .reset(global_reset),
+                       .in(i2q2_select),
+                       .out(i2q2_select_km2));
+
+   delay i2q2_valid_delay(.clk(clk),
+                          .reset(global_reset),
+                          .in(i2q2_complete && i2q2_select_km2==2'h2),
+                          .out(i2q2_valid));
 
    always @(posedge clk) begin
       i2q2_early <= global_reset ? `I2Q2_WIDTH'h0 :
-                    square_complete && i2q2_select==2'h0 ? i2q2_out_km1 :
+                    i2q2_complete && i2q2_select_km2==2'h0 ? i2q2_out_km1 :
                     i2q2_early;
       
       i2q2_prompt <= global_reset ? `I2Q2_WIDTH'h0 :
-                     square_complete && i2q2_select==2'h1 ? i2q2_out_km1 :
+                     i2q2_complete && i2q2_select_km2==2'h1 ? i2q2_out_km1 :
                      i2q2_prompt;
       
       i2q2_late <= global_reset ? `I2Q2_WIDTH'h0 :
-                   square_complete && i2q2_select==2'h2 ? i2q2_out_km1 :
+                   i2q2_complete && i2q2_select_km2==2'h2 ? i2q2_out_km1 :
                    i2q2_late;
    end
-   
 endmodule

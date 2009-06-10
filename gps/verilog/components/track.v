@@ -27,12 +27,12 @@ module track(
                   .result(input2c));
 
    //Pipe to meet timing.
-   wire [(OUTPUT_WIDTH-1):0] next_value;
+   wire [(OUTPUT_WIDTH-1):0] input2c_km1;
    delay #(.WIDTH(OUTPUT_WIDTH))
      value_delay(.clk(clk),
                  .reset(reset),
-                 .in(accumulator+input2c),
-                 .out(next_value));
+                 .in(input2c),
+                 .out(input2c_km1));
 
    wire data_available_km1;
    delay data_available_delay(.clk(clk),
@@ -43,7 +43,7 @@ module track(
    //Accumulate input value.
    always @(posedge clk) begin
       accumulator <= reset ? {OUTPUT_WIDTH{1'b0}} :
-                     data_available_km1 ? next_value :
+                     data_available_km1 ? accumulator+input2c_km1 :
                      accumulator;
    end
 endmodule

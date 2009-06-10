@@ -9,9 +9,10 @@
 module subchannel(
     input                      clk,
     input                      global_reset,
-    input                      reset,
+    input                      clear,
     //Sample data.
     input                      data_available,
+    input                      feed_complete,
     input [`INPUT_RANGE]       data,
     //Carrier control.
     input [`DOPPLER_INC_RANGE] doppler,
@@ -19,18 +20,19 @@ module subchannel(
     input [4:0]                prn,
     input                      seek_en,
     input [`CS_RANGE]          seek_target,
+    output wire                seeking,
     output wire [`CS_RANGE]    code_shift,
     //Outputs.
     output wire                accumulator_updating,
     output wire [`ACC_RANGE]   accumulator_i,
     output wire [`ACC_RANGE]   accumulator_q,
+    output wire                accumulation_complete,
     //Debug outputs.
     output wire                ca_bit,
     output wire                ca_clk,
     output wire [9:0]          ca_code_shift);
 
    //Upsample the C/A code to the incoming sampling rate.
-   wire seeking;//FIXME What to do with this?
    ca_upsampler upsampler(.clk(clk),
                           .reset(global_reset),
                           .enable(data_available),
@@ -51,7 +53,7 @@ module subchannel(
    (* keep *) wire data_available_kmn;
    delay #(.DELAY(DATA_DELAY))
      data_available_delay(.clk(clk),
-                          .reset(reset),
+                          .reset(global_reset || clear),
                           .in(data_available),
                           .out(data_available_kmn));
      
@@ -59,15 +61,24 @@ module subchannel(
    delay #(.WIDTH(`INPUT_WIDTH),
            .DELAY(DATA_DELAY))
      data_delay(.clk(clk),
-                .reset(reset),
+                .reset(global_reset || clear),
                 .in(data),
                 .out(data_kmn));
    
    (* keep *) wire ca_bit_kmn;
    delay ca_bit_delay(.clk(clk),
-                      .reset(reset),
+                      .reset(global_reset || clear),
                       .in(ca_bit),
                       .out(ca_bit_kmn));
+
+   //Delay feed complete signal for C/A upsampler
+   //update length, plus post-mixing timing delay below,
+   //plus one cycle for accumulator update.
+   delay #(.DELAY(DATA_DELAY+2))
+     feed_complete_delay(.clk(clk),
+                         .reset(global_reset || clear),
+                         .in(feed_complete),
+                         .out(accumulation_complete));
 
    //Carrier value is front-end intermediate frequency plus
    //sign-extended version of two's complement Doppler shift.
@@ -141,13 +152,18 @@ module subchannel(
                                       .reset(global_reset),
                                       .in(data_available_kmn),
                                       .out(track_data_available));
-   assign accumulator_updating = track_data_available;
+
+   //Track takes 2 cycles to update.
+   delay acc_updating_delay(.clk(clk),
+                            .reset(global_reset),
+                            .in(track_data_available),
+                            .out(accumulator_updating));
    
    //In-phase code wipe-off and accumulation.
    track #(.INPUT_WIDTH(`SIG_NO_CARRIER_WIDTH),
            .OUTPUT_WIDTH(`ACC_WIDTH))
      track_i(.clk(clk),
-             .reset(reset),
+             .reset(global_reset || clear),
              .data_available(track_data_available),
              .baseband_input(sig_no_carrier_i_km1),
              .ca_bit(track_ca_bit),
@@ -156,7 +172,7 @@ module subchannel(
    track #(.INPUT_WIDTH(`SIG_NO_CARRIER_WIDTH),
            .OUTPUT_WIDTH(`ACC_WIDTH))
      track_q(.clk(clk),
-             .reset(reset),
+             .reset(global_reset || clear),
              .data_available(track_data_available),
              .baseband_input(sig_no_carrier_q_km1),
              .ca_bit(track_ca_bit),

@@ -4,9 +4,12 @@ module strobe(
     input       in,
     output wire out);
 
+   parameter RESET_ZERO = 0;
+   
    reg in_km1;
    always @(posedge clk) begin
-      in_km1 <= in;
+      if(RESET_ZERO)in_km1 <= reset ? 1'b0 : in;
+      else in_km1 <= in;
    end
    
    assign out = reset ? 1'b0 : (in & ~in_km1);

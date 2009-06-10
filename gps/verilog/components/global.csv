@@ -22,3 +22,5 @@ MAX_CODE_SHIFT,CS_WIDTH'dT_CA_CODE*F_S-1,Maximum upsampled code shift value.
 
 NUM_CHANNELS,10,Number of tracking channels implemented in receiver.
 NUM_BANKS,4,Number of individual banks in memory bank.
+
+MEM_BANK_WAIT_CYCLES,2,Number of cycles to wait before restarting an acquisition feed.

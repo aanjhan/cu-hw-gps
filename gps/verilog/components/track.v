@@ -26,15 +26,24 @@ module track(
      input_extend(.value(wiped_input),
                   .result(input2c));
 
-   //FIXME If needed, place a delay pipe here for timing.
-   //FIXME In that case, reduce ones_extend output width
-   //FIXME to INPUT_WIDTH and pad sign bits in addition
-   //FIXME as {{(ACC_WIDTH-INPUT_WIDTH){input2c[INPUT_WIDTH-1]}},input2c}
+   //Pipe to meet timing.
+   wire [(OUTPUT_WIDTH-1):0] next_value;
+   delay #(.WIDTH(OUTPUT_WIDTH))
+     value_delay(.clk(clk),
+                 .reset(reset),
+                 .in(accumulator+input2c),
+                 .out(next_value));
+
+   wire data_available_km1;
+   delay data_available_delay(.clk(clk),
+                              .reset(reset),
+                              .in(data_available),
+                              .out(data_available_km1));
 
    //Accumulate input value.
    always @(posedge clk) begin
       accumulator <= reset ? {OUTPUT_WIDTH{1'b0}} :
-                     data_available ? accumulator + input2c :
+                     data_available_km1 ? next_value :
                      accumulator;
    end
 endmodule

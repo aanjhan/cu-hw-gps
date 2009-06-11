@@ -69,7 +69,7 @@ module channel(
                     .ca_code_shift(ca_code_shift_early));
    
    //Prompt subchannel.
-   wire prompt_updating, prompt_complete;
+   (* keep *) wire prompt_updating, prompt_complete;
    (* keep *) wire [`ACC_RANGE] acc_i_prompt, acc_q_prompt;
    wire seeking_prompt;
    subchannel prompt(.clk(clk),

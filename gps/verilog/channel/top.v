@@ -3,7 +3,7 @@
 
 `include "../components/subchannel.vh"
 
-`define HIGH_SPEED
+//`define HIGH_SPEED
 
 module top(
     input                      clk,

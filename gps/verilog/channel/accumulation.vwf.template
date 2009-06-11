@@ -1612,396 +1612,6 @@ SIGNAL("divider 2244")
 	PARENT = "";
 }
 
-SIGNAL("channel:channel_0|i2_kmn")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = BUS;
-	WIDTH = 38;
-	LSB_INDEX = 0;
-	DIRECTION = BURIED;
-	PARENT = "";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[37]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[36]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[35]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[34]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[33]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[32]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[31]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[30]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[29]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[28]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[27]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[26]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[25]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[24]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[23]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[22]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[21]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[20]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[19]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[18]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[17]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[16]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[15]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[14]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[13]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[12]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[11]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[10]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[9]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[8]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[7]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[6]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[5]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[4]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[3]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[2]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[1]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
-SIGNAL("channel:channel_0|i2_kmn[0]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|i2_kmn";
-}
-
 SIGNAL("channel:channel_0|i2q2_early")
 {
 	VALUE_TYPE = NINE_LEVEL_BIT;
@@ -3602,396 +3212,6 @@ SIGNAL("channel:channel_0|i_late[0]")
 	PARENT = "channel:channel_0|i_late";
 }
 
-SIGNAL("channel:channel_0|q2_kmn")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = BUS;
-	WIDTH = 38;
-	LSB_INDEX = 0;
-	DIRECTION = BURIED;
-	PARENT = "";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[37]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[36]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[35]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[34]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[33]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[32]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[31]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[30]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[29]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[28]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[27]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[26]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[25]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[24]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[23]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[22]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[21]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[20]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[19]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[18]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[17]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[16]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[15]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[14]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[13]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[12]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[11]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[10]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[9]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[8]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[7]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[6]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[5]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[4]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[3]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[2]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[1]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
-SIGNAL("channel:channel_0|q2_kmn[0]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "channel:channel_0|q2_kmn";
-}
-
 SIGNAL("channel:channel_0|q_early")
 {
 	VALUE_TYPE = NINE_LEVEL_BIT;
@@ -4612,16 +3832,6 @@ SIGNAL("divider 1928")
 	PARENT = "";
 }
 
-SIGNAL("channel:channel_0|i2q2_valid")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = BURIED;
-	PARENT = "";
-}
-
 SIGNAL("channel:channel_0|i_prompt")
 {
 	VALUE_TYPE = NINE_LEVEL_BIT;
@@ -4832,6 +4042,796 @@ SIGNAL("channel:channel_0|acc_ready")
 	PARENT = "";
 }
 
+SIGNAL("channel:channel_0|i2_km1")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = BUS;
+	WIDTH = 38;
+	LSB_INDEX = 0;
+	DIRECTION = BURIED;
+	PARENT = "";
+}
+
+SIGNAL("channel:channel_0|i2_km1[37]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[36]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[35]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[34]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[33]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[32]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[31]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[30]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[29]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[28]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[27]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[26]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[25]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[24]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[23]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[22]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[21]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[20]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[19]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[18]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[17]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[16]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[15]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[14]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[13]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[12]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[11]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[10]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[9]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[8]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[7]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[6]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[5]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[4]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[3]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[2]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[1]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|i2_km1[0]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|i2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = BUS;
+	WIDTH = 38;
+	LSB_INDEX = 0;
+	DIRECTION = BURIED;
+	PARENT = "";
+}
+
+SIGNAL("channel:channel_0|q2_km1[37]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[36]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[35]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[34]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[33]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[32]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[31]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[30]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[29]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[28]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[27]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[26]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[25]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[24]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[23]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[22]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[21]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[20]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[19]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[18]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[17]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[16]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[15]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[14]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[13]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[12]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[11]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[10]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[9]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[8]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[7]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[6]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[5]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[4]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[3]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[2]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[1]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("channel:channel_0|q2_km1[0]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = BURIED;
+	PARENT = "channel:channel_0|q2_km1";
+}
+
+SIGNAL("i2q2_valid")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "";
+}
+
 TRANSITION_LIST("clk")
 {
 	NODE
@@ -4857,6 +4857,7 @@ TRANSITION_LIST("clk_sample")
 			LEVEL 0 FOR 2.5;
 			LEVEL 1 FOR 2.5;
 		}
+		LEVEL 0 FOR 200.0;
 	}
 }
 
@@ -32888,6 +32889,7 @@ TRANSITION_LIST("global_reset")
 	{
 		REPEAT = 1;
 		LEVEL 1 FOR 40.0;
+		LEVEL 0 FOR 84240.0;
 	}
 }
 
@@ -32943,6 +32945,7 @@ TRANSITION_LIST("reset")
 		REPEAT = 1;
 		LEVEL 0 FOR 30.0;
 		LEVEL 1 FOR 50.0;
+		LEVEL 0 FOR 84200.0;
 	}
 }
 
@@ -33011,6 +33014,7 @@ TRANSITION_LIST("seek_target[9]")
 			LEVEL 0 FOR 10220.0;
 			LEVEL 1 FOR 9860.0;
 		}
+		LEVEL 0 FOR 64200.0;
 	}
 }
 
@@ -33027,6 +33031,7 @@ TRANSITION_LIST("seek_target[8]")
 			LEVEL 0 FOR 5120.0;
 			LEVEL 1 FOR 4740.0;
 		}
+		LEVEL 0 FOR 64200.0;
 	}
 }
 
@@ -33045,6 +33050,7 @@ TRANSITION_LIST("seek_target[7]")
 			LEVEL 0 FOR 2560.0;
 		}
 		LEVEL 1 FOR 2180.0;
+		LEVEL 0 FOR 64200.0;
 	}
 }
 
@@ -33063,6 +33069,7 @@ TRANSITION_LIST("seek_target[6]")
 			LEVEL 0 FOR 1280.0;
 		}
 		LEVEL 1 FOR 900.0;
+		LEVEL 0 FOR 64200.0;
 	}
 }
 
@@ -33081,6 +33088,7 @@ TRANSITION_LIST("seek_target[5]")
 			LEVEL 0 FOR 640.0;
 		}
 		LEVEL 1 FOR 260.0;
+		LEVEL 0 FOR 64200.0;
 	}
 }
 
@@ -33099,6 +33107,7 @@ TRANSITION_LIST("seek_target[4]")
 			LEVEL 0 FOR 320.0;
 		}
 		LEVEL 1 FOR 320.0;
+		LEVEL 0 FOR 64460.0;
 	}
 }
 
@@ -33117,6 +33126,7 @@ TRANSITION_LIST("seek_target[3]")
 			LEVEL 0 FOR 160.0;
 		}
 		LEVEL 1 FOR 100.0;
+		LEVEL 0 FOR 64200.0;
 	}
 }
 
@@ -33135,6 +33145,7 @@ TRANSITION_LIST("seek_target[2]")
 		}
 		LEVEL 0 FOR 80.0;
 		LEVEL 1 FOR 20.0;
+		LEVEL 0 FOR 64200.0;
 	}
 }
 
@@ -33153,6 +33164,7 @@ TRANSITION_LIST("seek_target[1]")
 			LEVEL 0 FOR 40.0;
 		}
 		LEVEL 1 FOR 40.0;
+		LEVEL 0 FOR 64220.0;
 	}
 }
 
@@ -33169,6 +33181,7 @@ TRANSITION_LIST("seek_target[0]")
 			LEVEL 0 FOR 20.0;
 		}
 		LEVEL 1 FOR 20.0;
+		LEVEL 0 FOR 64220.0;
 	}
 }
 
@@ -33918,348 +33931,6 @@ TRANSITION_LIST("feed_complete")
 		LEVEL 0 FOR 84075.0;
 		LEVEL 1 FOR 5.0;
 		LEVEL 0 FOR 200.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[37]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[36]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[35]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[34]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[33]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[32]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[31]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[30]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[29]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[28]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[27]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[26]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[25]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[24]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[23]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[22]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[21]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[20]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[19]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[18]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[17]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[16]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[15]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[14]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[13]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[12]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[11]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[10]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[9]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[8]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[7]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[6]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[5]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[4]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[3]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[2]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[1]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|i2_kmn[0]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
 	}
 }
 
@@ -35649,348 +35320,6 @@ TRANSITION_LIST("channel:channel_0|i_late[0]")
 	}
 }
 
-TRANSITION_LIST("channel:channel_0|q2_kmn[37]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[36]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[35]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[34]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[33]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[32]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[31]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[30]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[29]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[28]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[27]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[26]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[25]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[24]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[23]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[22]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[21]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[20]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[19]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[18]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[17]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[16]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[15]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[14]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[13]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[12]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[11]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[10]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[9]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[8]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[7]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[6]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[5]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[4]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[3]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[2]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[1]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
-TRANSITION_LIST("channel:channel_0|q2_kmn[0]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
 TRANSITION_LIST("channel:channel_0|q_early[18]")
 {
 	NODE
@@ -36513,15 +35842,6 @@ TRANSITION_LIST("channel:channel_0|start_square")
 	}
 }
 
-TRANSITION_LIST("channel:channel_0|i2q2_valid")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL U FOR 84280.0;
-	}
-}
-
 TRANSITION_LIST("channel:channel_0|i_prompt[18]")
 {
 	NODE
@@ -36699,6 +36019,699 @@ TRANSITION_LIST("channel:channel_0|acc_ready")
 	{
 		REPEAT = 1;
 		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[37]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[36]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[35]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[34]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[33]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[32]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[31]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[30]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[29]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[28]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[27]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[26]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[25]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[24]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[23]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[22]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[21]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[20]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[19]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[18]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[17]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[16]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[15]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[14]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[13]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[12]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[11]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[10]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[9]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[8]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[7]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[6]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[5]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[4]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[3]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[2]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[1]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|i2_km1[0]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[37]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[36]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[35]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[34]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[33]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[32]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[31]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[30]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[29]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[28]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[27]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[26]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[25]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[24]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[23]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[22]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[21]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[20]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[19]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[18]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[17]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[16]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[15]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[14]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[13]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[12]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[11]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[10]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[9]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[8]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[7]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[6]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[5]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[4]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[3]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[2]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[1]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("channel:channel_0|q2_km1[0]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL U FOR 84280.0;
+	}
+}
+
+TRANSITION_LIST("i2q2_valid")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 84280.0;
 	}
 }
 
@@ -39530,7 +39543,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn";
+	CHANNEL = "channel:channel_0|i2_km1";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 284;
@@ -39540,7 +39553,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[37]";
+	CHANNEL = "channel:channel_0|i2_km1[37]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 285;
@@ -39550,7 +39563,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[36]";
+	CHANNEL = "channel:channel_0|i2_km1[36]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 286;
@@ -39560,7 +39573,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[35]";
+	CHANNEL = "channel:channel_0|i2_km1[35]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 287;
@@ -39570,7 +39583,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[34]";
+	CHANNEL = "channel:channel_0|i2_km1[34]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 288;
@@ -39580,7 +39593,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[33]";
+	CHANNEL = "channel:channel_0|i2_km1[33]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 289;
@@ -39590,7 +39603,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[32]";
+	CHANNEL = "channel:channel_0|i2_km1[32]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 290;
@@ -39600,7 +39613,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[31]";
+	CHANNEL = "channel:channel_0|i2_km1[31]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 291;
@@ -39610,7 +39623,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[30]";
+	CHANNEL = "channel:channel_0|i2_km1[30]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 292;
@@ -39620,7 +39633,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[29]";
+	CHANNEL = "channel:channel_0|i2_km1[29]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 293;
@@ -39630,7 +39643,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[28]";
+	CHANNEL = "channel:channel_0|i2_km1[28]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 294;
@@ -39640,7 +39653,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[27]";
+	CHANNEL = "channel:channel_0|i2_km1[27]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 295;
@@ -39650,7 +39663,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[26]";
+	CHANNEL = "channel:channel_0|i2_km1[26]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 296;
@@ -39660,7 +39673,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[25]";
+	CHANNEL = "channel:channel_0|i2_km1[25]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 297;
@@ -39670,7 +39683,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[24]";
+	CHANNEL = "channel:channel_0|i2_km1[24]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 298;
@@ -39680,7 +39693,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[23]";
+	CHANNEL = "channel:channel_0|i2_km1[23]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 299;
@@ -39690,7 +39703,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[22]";
+	CHANNEL = "channel:channel_0|i2_km1[22]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 300;
@@ -39700,7 +39713,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[21]";
+	CHANNEL = "channel:channel_0|i2_km1[21]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 301;
@@ -39710,7 +39723,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[20]";
+	CHANNEL = "channel:channel_0|i2_km1[20]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 302;
@@ -39720,7 +39733,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[19]";
+	CHANNEL = "channel:channel_0|i2_km1[19]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 303;
@@ -39730,7 +39743,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[18]";
+	CHANNEL = "channel:channel_0|i2_km1[18]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 304;
@@ -39740,7 +39753,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[17]";
+	CHANNEL = "channel:channel_0|i2_km1[17]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 305;
@@ -39750,7 +39763,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[16]";
+	CHANNEL = "channel:channel_0|i2_km1[16]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 306;
@@ -39760,7 +39773,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[15]";
+	CHANNEL = "channel:channel_0|i2_km1[15]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 307;
@@ -39770,7 +39783,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[14]";
+	CHANNEL = "channel:channel_0|i2_km1[14]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 308;
@@ -39780,7 +39793,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[13]";
+	CHANNEL = "channel:channel_0|i2_km1[13]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 309;
@@ -39790,7 +39803,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[12]";
+	CHANNEL = "channel:channel_0|i2_km1[12]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 310;
@@ -39800,7 +39813,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[11]";
+	CHANNEL = "channel:channel_0|i2_km1[11]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 311;
@@ -39810,7 +39823,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[10]";
+	CHANNEL = "channel:channel_0|i2_km1[10]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 312;
@@ -39820,7 +39833,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[9]";
+	CHANNEL = "channel:channel_0|i2_km1[9]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 313;
@@ -39830,7 +39843,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[8]";
+	CHANNEL = "channel:channel_0|i2_km1[8]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 314;
@@ -39840,7 +39853,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[7]";
+	CHANNEL = "channel:channel_0|i2_km1[7]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 315;
@@ -39850,7 +39863,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[6]";
+	CHANNEL = "channel:channel_0|i2_km1[6]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 316;
@@ -39860,7 +39873,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[5]";
+	CHANNEL = "channel:channel_0|i2_km1[5]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 317;
@@ -39870,7 +39883,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[4]";
+	CHANNEL = "channel:channel_0|i2_km1[4]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 318;
@@ -39880,7 +39893,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[3]";
+	CHANNEL = "channel:channel_0|i2_km1[3]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 319;
@@ -39890,7 +39903,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[2]";
+	CHANNEL = "channel:channel_0|i2_km1[2]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 320;
@@ -39900,7 +39913,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[1]";
+	CHANNEL = "channel:channel_0|i2_km1[1]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 321;
@@ -39910,7 +39923,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2_kmn[0]";
+	CHANNEL = "channel:channel_0|i2_km1[0]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 322;
@@ -39920,7 +39933,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn";
+	CHANNEL = "channel:channel_0|q2_km1";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 323;
@@ -39930,7 +39943,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[37]";
+	CHANNEL = "channel:channel_0|q2_km1[37]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 324;
@@ -39940,7 +39953,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[36]";
+	CHANNEL = "channel:channel_0|q2_km1[36]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 325;
@@ -39950,7 +39963,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[35]";
+	CHANNEL = "channel:channel_0|q2_km1[35]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 326;
@@ -39960,7 +39973,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[34]";
+	CHANNEL = "channel:channel_0|q2_km1[34]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 327;
@@ -39970,7 +39983,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[33]";
+	CHANNEL = "channel:channel_0|q2_km1[33]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 328;
@@ -39980,7 +39993,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[32]";
+	CHANNEL = "channel:channel_0|q2_km1[32]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 329;
@@ -39990,7 +40003,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[31]";
+	CHANNEL = "channel:channel_0|q2_km1[31]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 330;
@@ -40000,7 +40013,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[30]";
+	CHANNEL = "channel:channel_0|q2_km1[30]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 331;
@@ -40010,7 +40023,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[29]";
+	CHANNEL = "channel:channel_0|q2_km1[29]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 332;
@@ -40020,7 +40033,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[28]";
+	CHANNEL = "channel:channel_0|q2_km1[28]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 333;
@@ -40030,7 +40043,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[27]";
+	CHANNEL = "channel:channel_0|q2_km1[27]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 334;
@@ -40040,7 +40053,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[26]";
+	CHANNEL = "channel:channel_0|q2_km1[26]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 335;
@@ -40050,7 +40063,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[25]";
+	CHANNEL = "channel:channel_0|q2_km1[25]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 336;
@@ -40060,7 +40073,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[24]";
+	CHANNEL = "channel:channel_0|q2_km1[24]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 337;
@@ -40070,7 +40083,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[23]";
+	CHANNEL = "channel:channel_0|q2_km1[23]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 338;
@@ -40080,7 +40093,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[22]";
+	CHANNEL = "channel:channel_0|q2_km1[22]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 339;
@@ -40090,7 +40103,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[21]";
+	CHANNEL = "channel:channel_0|q2_km1[21]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 340;
@@ -40100,7 +40113,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[20]";
+	CHANNEL = "channel:channel_0|q2_km1[20]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 341;
@@ -40110,7 +40123,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[19]";
+	CHANNEL = "channel:channel_0|q2_km1[19]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 342;
@@ -40120,7 +40133,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[18]";
+	CHANNEL = "channel:channel_0|q2_km1[18]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 343;
@@ -40130,7 +40143,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[17]";
+	CHANNEL = "channel:channel_0|q2_km1[17]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 344;
@@ -40140,7 +40153,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[16]";
+	CHANNEL = "channel:channel_0|q2_km1[16]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 345;
@@ -40150,7 +40163,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[15]";
+	CHANNEL = "channel:channel_0|q2_km1[15]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 346;
@@ -40160,7 +40173,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[14]";
+	CHANNEL = "channel:channel_0|q2_km1[14]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 347;
@@ -40170,7 +40183,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[13]";
+	CHANNEL = "channel:channel_0|q2_km1[13]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 348;
@@ -40180,7 +40193,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[12]";
+	CHANNEL = "channel:channel_0|q2_km1[12]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 349;
@@ -40190,7 +40203,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[11]";
+	CHANNEL = "channel:channel_0|q2_km1[11]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 350;
@@ -40200,7 +40213,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[10]";
+	CHANNEL = "channel:channel_0|q2_km1[10]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 351;
@@ -40210,7 +40223,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[9]";
+	CHANNEL = "channel:channel_0|q2_km1[9]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 352;
@@ -40220,7 +40233,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[8]";
+	CHANNEL = "channel:channel_0|q2_km1[8]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 353;
@@ -40230,7 +40243,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[7]";
+	CHANNEL = "channel:channel_0|q2_km1[7]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 354;
@@ -40240,7 +40253,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[6]";
+	CHANNEL = "channel:channel_0|q2_km1[6]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 355;
@@ -40250,7 +40263,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[5]";
+	CHANNEL = "channel:channel_0|q2_km1[5]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 356;
@@ -40260,7 +40273,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[4]";
+	CHANNEL = "channel:channel_0|q2_km1[4]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 357;
@@ -40270,7 +40283,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[3]";
+	CHANNEL = "channel:channel_0|q2_km1[3]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 358;
@@ -40280,7 +40293,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[2]";
+	CHANNEL = "channel:channel_0|q2_km1[2]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 359;
@@ -40290,7 +40303,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[1]";
+	CHANNEL = "channel:channel_0|q2_km1[1]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 360;
@@ -40300,7 +40313,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|q2_kmn[0]";
+	CHANNEL = "channel:channel_0|q2_km1[0]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 361;
@@ -40310,7 +40323,7 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "channel:channel_0|i2q2_valid";
+	CHANNEL = "i2q2_valid";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Unsigned;
 	TREE_INDEX = 362;

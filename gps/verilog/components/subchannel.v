@@ -50,24 +50,30 @@ module subchannel(
    //cycle to meet timing from the C/A bit
    //to the track accumulator.
    localparam DATA_DELAY = 4;
-   (* keep *) wire data_available_kmn;
-   delay #(.DELAY(DATA_DELAY))
+   (* keep *) wire data_available_kmnm1;
+   delay #(.DELAY(DATA_DELAY-1))
      data_available_delay(.clk(clk),
-                          .reset(global_reset || clear),
+                          .reset(global_reset),
                           .in(data_available),
-                          .out(data_available_kmn));
+                          .out(data_available_kmnm1));
+   
+   (* keep *) wire data_available_kmn;
+   delay data_available_delay_2(.clk(clk),
+                              .reset(global_reset),
+                              .in(data_available_kmnm1),
+                              .out(data_available_kmn));
      
    (* keep *) wire [`INPUT_RANGE] data_kmn;
    delay #(.WIDTH(`INPUT_WIDTH),
            .DELAY(DATA_DELAY))
      data_delay(.clk(clk),
-                .reset(global_reset || clear),
+                .reset(global_reset),
                 .in(data),
                 .out(data_kmn));
    
    (* keep *) wire ca_bit_kmn;
    delay ca_bit_delay(.clk(clk),
-                      .reset(global_reset || clear),
+                      .reset(global_reset),
                       .in(ca_bit),
                       .out(ca_bit_kmn));
 
@@ -76,8 +82,8 @@ module subchannel(
    //plus two cycles for accumulator update.
    delay #(.DELAY(DATA_DELAY+3))
      feed_complete_delay(.clk(clk),
-                         .reset(global_reset || clear),
-                         .in(feed_complete),
+                         .reset(global_reset),
+                         .in(feed_complete && data_available),
                          .out(accumulation_complete));
 
    //Carrier value is front-end intermediate frequency plus
@@ -91,10 +97,11 @@ module subchannel(
    wire [`CARRIER_LUT_INDEX_RANGE] carrier_index;
    dds #(.ACC_WIDTH(`CARRIER_ACC_WIDTH),
          .PHASE_INC_WIDTH(`CARRIER_PHASE_INC_WIDTH),
-         .OUTPUT_WIDTH(`CARRIER_LUT_INDEX_WIDTH))
+         .OUTPUT_WIDTH(`CARRIER_LUT_INDEX_WIDTH),
+         .PIPELINE(1))
      carrier_generator(.clk(clk),
                        .reset(global_reset),
-                       .enable(data_available_kmn),
+                       .enable(data_available_kmnm1),
                        .inc(f_carrier),//FIXME Two's complement for doppler value? How to represent/pad?
                        .out(carrier_index));
 

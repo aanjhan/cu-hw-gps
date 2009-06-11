@@ -155,12 +155,12 @@ module DE2_TOP (
                           .locked(pll_locked));
 
    wire   global_reset;
-   assign global_reset = ~pll_locked /*| ~KEY[0]*/;
+   assign global_reset = ~pll_locked | ~KEY[0];
 
    wire [7:0] leds;
    (* keep *) wire [7:0] gps_data;
    data_feed_nios data_feed(.clk_0(clk_50),
-                            .reset_n(~global_reset),
+                            .reset_n(1'b1),
                             .rxd_to_the_data_uart(UART_RXD),
                             .txd_from_the_data_uart(UART_TXD),
                             .out_port_from_the_gps_data(gps_data),
@@ -206,7 +206,7 @@ module DE2_TOP (
            .prn(SW[4:0]),
            .feed_complete(feed_complete),
            .data(data),
-           .seek_en(~KEY[0]),
+           .seek_en(~KEY[1]),
            .seek_target(15'h0),
            .doppler({SW[15:8],8'h0}),
            .code_shift(code_shift),
@@ -231,21 +231,23 @@ module DE2_TOP (
    assign disp_shift = !SW[17] && SW[16];
    assign disp_i2q2 = SW[17] && SW[16];
    
-   assign LEDR[17] = disp_i2q2 ? i2q2_valid : KEY[2];
-   assign LEDR[16] = clk_sample;
-   assign LEDR[15] = ca_clk;
-   assign LEDR[14:12] = gps_data[2:0];
-   assign LEDR[11:5] = 'h0;
+   assign LEDR[17] = ~KEY[3];
+   assign LEDR[16] = ~KEY[2];
+   assign LEDR[15] = ~KEY[1];
+   assign LEDR[14] = ~KEY[0];
+   assign LEDR[13] = clk_sample;
+   assign LEDR[12] = ca_clk;
+   assign LEDR[11:9] = gps_data[2:0];
+   assign LEDR[8:5] = 'h0;
    assign LEDR[4:0] = SW[4:0];
-   assign LEDG[8] = 1'b0;
+   assign LEDG[8] = global_reset;
    assign LEDG[7:0] = ca_code_shift[7:0];
 
    wire [6:0] hex7_value;
-   hex_driver hex7(i2q2_valid ?
-                   (KEY[2] ?
-                    i2q2[(`I2Q2_WIDTH-1):(`I2Q2_WIDTH-1-3)] :
-                    i2q2[31:28]) :
-                   4'h0,hex7_value);
+   hex_driver hex7(KEY[2] ?
+                   i2q2[(`I2Q2_WIDTH-1):(`I2Q2_WIDTH-1-3)] :
+                   i2q2[31:28],
+                   hex7_value);
    assign HEX7 = reset ? 7'h7F :
                  disp_i2q2 ? hex7_value :
                  {~gps_data[2],6'h3F};
@@ -253,31 +255,30 @@ module DE2_TOP (
    hex_driver hex6(reset ? 4'h8 :
                    disp_i2q2 ?
                    (KEY[2] ?
-                    i2q2[(`I2Q2_WIDTH-4):(`I2Q2_WIDTH-4-3)] :
+                    i2q2[(`I2Q2_WIDTH-5):(`I2Q2_WIDTH-5-3)] :
                     i2q2[27:24]) :
                    {2'h0,gps_data[1:0]},
                    HEX6);
 
    wire [6:0] hex5_value;
-   hex_driver hex5(i2q2_valid ?
-                   (KEY[2] ?
-                    i2q2[(`I2Q2_WIDTH-8):(`I2Q2_WIDTH-8-3)] :
-                    i2q2[23:20]) :
-                   4'h0,hex5_value);
+   hex_driver hex5(KEY[2] ?
+                   i2q2[(`I2Q2_WIDTH-9):(`I2Q2_WIDTH-9-3)] :
+                   i2q2[23:20],
+                   hex5_value);
    assign HEX5 = reset ? 7'h7F :
                  disp_i2q2 ? hex5_value :
                  {ca_bit,6'h3F};
    
    hex_driver hex4(disp_i2q2 ?
                    (KEY[2] ?
-                    i2q2[(`I2Q2_WIDTH-12):(`I2Q2_WIDTH-12-3)] :
+                    i2q2[(`I2Q2_WIDTH-13):(`I2Q2_WIDTH-13-3)] :
                     i2q2[19:16]) :
                    (KEY[2] ? accumulator_i[19:16] : accumulator_q[19:16]),
                    HEX4);
    
    hex_driver hex3(disp_i2q2 ?
                    (KEY[2] ?
-                    i2q2[(`I2Q2_WIDTH-16):(`I2Q2_WIDTH-16-3)] :
+                    i2q2[(`I2Q2_WIDTH-17):(`I2Q2_WIDTH-17-3)] :
                     i2q2[15:12] ) :
                    disp_shift ? {1'b0,code_shift[14:12]} :
                    disp_comp ? count[7:4] :
@@ -285,7 +286,7 @@ module DE2_TOP (
                    HEX3);
    hex_driver hex2(disp_i2q2 ?
                    (KEY[2] ?
-                    i2q2[(`I2Q2_WIDTH-20):(`I2Q2_WIDTH-20-3)] :
+                    i2q2[(`I2Q2_WIDTH-21):(`I2Q2_WIDTH-21-3)] :
                     i2q2[11:8] ) :
                    disp_shift ? code_shift[11:8] :
                    disp_comp ? count[3:0] :
@@ -293,14 +294,14 @@ module DE2_TOP (
                    HEX2);
    hex_driver hex1(disp_i2q2 ?
                    (KEY[2] ?
-                    i2q2[(`I2Q2_WIDTH-24):(`I2Q2_WIDTH-24-3)] :
+                    i2q2[(`I2Q2_WIDTH-25):(`I2Q2_WIDTH-25-3)] :
                     i2q2[7:4] ) :
                    disp_shift ? code_shift[7:4] :
                    (KEY[2] ? accumulator_i[7:4] : accumulator_q[7:4]),
                    HEX1);
    hex_driver hex0(disp_i2q2 ?
                    (KEY[2] ?
-                    i2q2[(`I2Q2_WIDTH-28):(`I2Q2_WIDTH-28-3)] :
+                    i2q2[(`I2Q2_WIDTH-29):(`I2Q2_WIDTH-29-3)] :
                     i2q2[3:0] ) :
                    disp_shift ? code_shift[3:0] :
                    (KEY[2] ? accumulator_i[3:0] : accumulator_q[3:0]),

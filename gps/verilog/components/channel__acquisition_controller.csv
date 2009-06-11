@@ -1,0 +1,11 @@
+#include !"channel.csv"
+#include !"subchannel.csv"
+
+//Mode.
+MODE_RANGE,@
+
+//Doppler shift control.
+DOPPLER_INC_RANGE,@
+
+//Peak search.
+I2Q2_RANGE,@

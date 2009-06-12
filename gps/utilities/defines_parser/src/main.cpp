@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
     visibleOptions.add_options()
         ("help,h","Display this help message.")
         ("output,o",opt::value<string>(),"Write output to specified file.")
+        ("undef,u","Generate an undefines file.")
         ("version,v","Show version information.");
     opt::options_description options("All program options");
     options.add(visibleOptions);
@@ -107,25 +108,35 @@ int main(int argc, char *argv[])
                 MacroEntry *entry=(*i).second;
 
                 if(!entry->print)continue;
-            
-                try
+
+                if(vm.count("undef"))
                 {
-                    if(entry->comments!="")
-                    {
-                        output+="//";
-                        output+=boost::regex_replace(entry->comments,newline,"\\n//");
-                        output+="\n";
-                    }
-                    output+="`ifndef "+variable+"\n";
-                    output+=" `define "+variable+" "+entry->expression->Value(expList)+"\n";
+                    output+="`ifdef "+variable+"\n";
+                    output+=" `undef "+variable+"\n";
                     output+="`endif\n";
                     output+="\n";
                 }
-                catch(Expression::ExpressionError &e)
+                else
                 {
-                    errorCount++;
-                    e.SetVariable(variable);
-                    cerr<<e.what()<<endl;
+                    try
+                    {
+                        if(entry->comments!="")
+                        {
+                            output+="//";
+                            output+=boost::regex_replace(entry->comments,newline,"\\n//");
+                            output+="\n";
+                        }
+                        output+="`ifndef "+variable+"\n";
+                        output+=" `define "+variable+" "+entry->expression->Value(expList)+"\n";
+                        output+="`endif\n";
+                        output+="\n";
+                    }
+                    catch(Expression::ExpressionError &e)
+                    {
+                        errorCount++;
+                        e.SetVariable(variable);
+                        cerr<<e.what()<<endl;
+                    }
                 }
             }
 

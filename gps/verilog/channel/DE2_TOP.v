@@ -177,16 +177,16 @@ module DE2_TOP (
                             .in_port_to_the_start(~KEY[3]));
    assign DRAM_CLK = clk_50_m3ns;
 
-   wire clk_sample, feed_complete, feed_reset;
+   wire clk_sample, feed_complete, reset;
    wire [2:0] data;
    assign clk_sample = gps_data[3];
    assign feed_complete = gps_data[6];
-   assign feed_reset = gps_data[7];
+   assign reset = gps_data[7];
    assign data = gps_data[2:0];
 
    reg [15:0] count;
    always @(posedge clk_sample) begin
-      count <= feed_reset ? 'h0 : count+'h1;
+      count <= reset ? 'h0 : count+'h1;
    end
 
    wire [14:0] code_shift;
@@ -199,17 +199,11 @@ module DE2_TOP (
    wire [`I2Q2_RANGE] i2q2_early;
    wire [`I2Q2_RANGE] i2q2_prompt;
    wire [`I2Q2_RANGE] i2q2_late;
-   wire [`MODE_RANGE] mode;
-   wire               acquisition_complete;
-   wire [`I2Q2_RANGE] acq_peak_i2q2;
-   wire [`DOPPLER_INC_RANGE] acq_peak_doppler;
-   wire [`CS_RANGE]          acq_peak_code_shift;
    top sub(.clk(clk_200),
-           .global_reset(global_reset),
-           .feed_reset(feed_reset),
-           .mode(mode),
-           .prn(SW[4:0]),
            .clk_sample(clk_sample),
+           .global_reset(global_reset),
+           .reset(reset),
+           .prn(SW[4:0]),
            .feed_complete(feed_complete),
            .data(data),
            .seek_en(~KEY[1]),
@@ -224,26 +218,18 @@ module DE2_TOP (
            .i2q2_valid(i2q2_valid),
            .i2q2_early(i2q2_early),
            .i2q2_prompt(i2q2_prompt),
-           .i2q2_late(i2q2_late),
-           .acquisition_complete(acquisition_complete),
-           .acq_peak_i2q2(acq_peak_i2q2),
-           .acq_peak_doppler(acq_peak_doppler),
-           .acq_peak_code_shift(acq_peak_code_shift));
+           .i2q2_late(i2q2_late));
 
    wire [`I2Q2_RANGE] i2q2;
-   assign i2q2 = SW[5] ? acq_peak_i2q2 :
-                 SW[7:6]==2'h0 ? i2q2_early :
+   assign i2q2 = SW[7:6]==2'h0 ? i2q2_early :
                  SW[7:6]==2'h1 ? i2q2_prompt :
                  i2q2_late;
 
    wire disp_acc, disp_comp, disp_shift, disp_i2q2;
-   wire disp_peak_dopp, disp_peak_cs;
    assign disp_acc = !SW[17] && !SW[16];
    assign disp_comp = SW[17] && !SW[16];
    assign disp_shift = !SW[17] && SW[16];
    assign disp_i2q2 = SW[17] && SW[16];
-   assign disp_peak_dopp = SW[5] && disp_acc;
-   assign disp_peak_cs = SW[5] && (disp_comp || disp_shift);
    
    assign LEDR[17] = ~KEY[3];
    assign LEDR[16] = ~KEY[2];
@@ -252,8 +238,7 @@ module DE2_TOP (
    assign LEDR[13] = clk_sample;
    assign LEDR[12] = ca_clk;
    assign LEDR[11:9] = gps_data[2:0];
-   assign LEDR[8] = acquisition_complete;
-   assign LEDR[7:5] = 'h0;
+   assign LEDR[8:5] = 'h0;
    assign LEDR[4:0] = SW[4:0];
    assign LEDG[8] = global_reset;
    assign LEDG[7:0] = ca_code_shift[7:0];
@@ -262,20 +247,17 @@ module DE2_TOP (
    hex_driver hex7(KEY[2] ?
                    i2q2[(`I2Q2_WIDTH-1):(`I2Q2_WIDTH-1-3)] :
                    i2q2[31:28],
-                   1'b1,
                    hex7_value);
-   assign HEX7 = feed_reset ? 7'h7F :
-                 SW[5] ? 7'h7F :
+   assign HEX7 = reset ? 7'h7F :
                  disp_i2q2 ? hex7_value :
                  {~gps_data[2],6'h3F};
    
-   hex_driver hex6(feed_reset ? 4'h8 :
+   hex_driver hex6(reset ? 4'h8 :
                    disp_i2q2 ?
                    (KEY[2] ?
                     i2q2[(`I2Q2_WIDTH-5):(`I2Q2_WIDTH-5-3)] :
                     i2q2[27:24]) :
                    {2'h0,gps_data[1:0]},
-                   SW[5],
                    HEX6);
 
    wire [6:0] hex5_value;
@@ -283,8 +265,7 @@ module DE2_TOP (
                    i2q2[(`I2Q2_WIDTH-9):(`I2Q2_WIDTH-9-3)] :
                    i2q2[23:20],
                    hex5_value);
-   assign HEX5 = feed_reset ? 7'h7F :
-                 SW[5] ? 7'h7F :
+   assign HEX5 = reset ? 7'h7F :
                  disp_i2q2 ? hex5_value :
                  {ca_bit,6'h3F};
    
@@ -293,49 +274,36 @@ module DE2_TOP (
                     i2q2[(`I2Q2_WIDTH-13):(`I2Q2_WIDTH-13-3)] :
                     i2q2[19:16]) :
                    (KEY[2] ? accumulator_i[19:16] : accumulator_q[19:16]),
-                   SW[5],
                    HEX4);
    
-   hex_driver hex3(disp_peak_dopp ? acq_peak_doppler[15:12] :
-                   disp_peak_cs ? {1'b0,acq_peak_code_shift[14:12]} :
-                   disp_i2q2 ?
+   hex_driver hex3(disp_i2q2 ?
                    (KEY[2] ?
                     i2q2[(`I2Q2_WIDTH-17):(`I2Q2_WIDTH-17-3)] :
                     i2q2[15:12] ) :
                    disp_shift ? {1'b0,code_shift[14:12]} :
                    disp_comp ? count[7:4] :
                    (KEY[2] ? accumulator_i[15:12] : accumulator_q[15:12]),
-                   1'b1,
                    HEX3);
-   hex_driver hex2(disp_peak_dopp ? acq_peak_doppler[11:8] :
-                   disp_peak_cs ? acq_peak_code_shift[11:8] :
-                   disp_i2q2 ?
+   hex_driver hex2(disp_i2q2 ?
                    (KEY[2] ?
                     i2q2[(`I2Q2_WIDTH-21):(`I2Q2_WIDTH-21-3)] :
                     i2q2[11:8] ) :
                    disp_shift ? code_shift[11:8] :
                    disp_comp ? count[3:0] :
                    (KEY[2] ? accumulator_i[11:8] : accumulator_q[11:8]),
-                   1'b1,
                    HEX2);
-   hex_driver hex1(disp_peak_dopp ? acq_peak_doppler[7:4] :
-                   disp_peak_cs ? acq_peak_code_shift[7:4] :
-                   disp_i2q2 ?
+   hex_driver hex1(disp_i2q2 ?
                    (KEY[2] ?
                     i2q2[(`I2Q2_WIDTH-25):(`I2Q2_WIDTH-25-3)] :
                     i2q2[7:4] ) :
                    disp_shift ? code_shift[7:4] :
                    (KEY[2] ? accumulator_i[7:4] : accumulator_q[7:4]),
-                   1'b1,
                    HEX1);
-   hex_driver hex0(disp_peak_dopp ? acq_peak_doppler[3:0] :
-                   disp_peak_cs ? acq_peak_code_shift[3:0] :
-                   disp_i2q2 ?
+   hex_driver hex0(disp_i2q2 ?
                    (KEY[2] ?
                     i2q2[(`I2Q2_WIDTH-29):(`I2Q2_WIDTH-29-3)] :
                     i2q2[3:0] ) :
                    disp_shift ? code_shift[3:0] :
                    (KEY[2] ? accumulator_i[3:0] : accumulator_q[3:0]),
-                   1'b1,
                    HEX0);
 endmodule

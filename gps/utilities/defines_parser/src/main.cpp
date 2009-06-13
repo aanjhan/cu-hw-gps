@@ -107,8 +107,6 @@ int main(int argc, char *argv[])
                 string variable=(*i).first;
                 MacroEntry *entry=(*i).second;
 
-                if(!entry->print)continue;
-
                 if(vm.count("undef"))
                 {
                     output+="`ifdef "+variable+"\n";
@@ -118,6 +116,7 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
+                    if(!entry->print)continue;
                     try
                     {
                         if(entry->comments!="")

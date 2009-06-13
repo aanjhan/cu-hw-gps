@@ -2,21 +2,24 @@
 `include "acquisition_controller.vh"
 `include "channel__acquisition_controller.vh"
 
-//`define DEBUG
-`ifdef DEBUG
- `define KEEP (* keep *)
- `define PRESERVE (* preserve *)
-`else
- `define KEEP
- `define PRESERVE
-`endif
+`define DEBUG
+`include "debug.vh"
 
 `ifdef DEBUG
-`undef MAX_CODE_SHIFT
-`define MAX_CODE_SHIFT `CS_WIDTH'h2
+ `undef MAX_CODE_SHIFT
+ `define MAX_CODE_SHIFT `CS_WIDTH'h0
 
-`undef DOPP_MAX_INC
-`define DOPP_MAX_INC -`DOPPLER_INC_WIDTH'd39945
+ `undef DOPP_MAX_INC
+ `define DOPP_MAX_INC `DOPPLER_INC_WIDTH'd6492
+
+ `undef DOPP_EARLY_START
+ `define DOPP_EARLY_START `DOPPLER_INC_WIDTH'd1598
+
+ `undef DOPP_PROMPT_START
+ `define DOPP_PROMPT_START `DOPPLER_INC_WIDTH'd0
+
+ `undef DOPP_LATE_START
+ `define DOPP_LATE_START -`DOPPLER_INC_WIDTH'd1598
 `endif
 
 module acquisition_controller(
@@ -248,4 +251,4 @@ module acquisition_controller(
                                prev_doppler_early>=`DOPP_MAX_INC &&
                                update_complete),
                           .out(acquisition_complete));
-endmodule
+endmodule // acquisition_controller

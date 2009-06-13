@@ -1,3 +1,5 @@
+`include "global_undef.vh"
+
 F_S,16.8e6,Front-end sampling rate.
 F_IF,3.78e6,Front-end intermediate frequency.
 

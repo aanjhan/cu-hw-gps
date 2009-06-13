@@ -1,0 +1,15 @@
+`ifdef KEEP
+ `undef KEEP
+`endif
+
+`ifdef PRESERVE
+ `undef PRESERVE
+`endif
+
+`ifdef DEBUG
+ `define KEEP (* keep *)
+ `define PRESERVE (* preserve *)
+`else
+ `define KEEP
+ `define PRESERVE
+`endif

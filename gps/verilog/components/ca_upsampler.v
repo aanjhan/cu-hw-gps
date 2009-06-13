@@ -19,7 +19,9 @@ module ca_upsampler(
    //Determine the next code shift value
    //for seek termination.
    wire [`CS_RANGE] next_code_shift;
-   assign next_code_shift = code_shift==`MAX_CODE_SHIFT ? {`CS_WIDTH{1'b0}} : (code_shift+{{(`CS_WIDTH-1){1'b0}},1'h1});
+   assign next_code_shift = code_shift==`MAX_CODE_SHIFT ?
+                            {`CS_WIDTH{1'b0}} :
+                            (code_shift+{{(`CS_WIDTH-1){1'b0}},1'h1});
 
    //Target is coming up if it is the next shift
    //value and the shift is enabled.
@@ -39,7 +41,7 @@ module ca_upsampler(
    //Advance the clock when the system is
    //enabled (data available) or when seeking.
    wire ca_clk_en;
-   assign ca_clk_en = (~seek_en & enable) | seeking;
+   assign ca_clk_en = ((~seek_en) & enable) | seeking;
 
    //Pipe clock enable signal for 1 cycle
    //to meet timing requirements.

@@ -1,8 +1,11 @@
 module hex_driver(
     input [3:0]      value,
+    input            enable,
     output reg [6:0] display);
     
-    always @(value) begin
+    always @(value or enable) begin
+       if(!enable)display<=7'h7F;
+       else begin
         case(value)
         4'h0: display<=7'b1000000;
         4'h1: display<=7'b1111001;
@@ -20,7 +23,7 @@ module hex_driver(
         4'hD: display<=7'b0100001;
         4'hE: display<=7'b0000110;
         4'hF: display<=7'b0001110;
-        default display<=7'b1111111;
-        endcase
+        endcase // case (value)
+       end
     end
 endmodule

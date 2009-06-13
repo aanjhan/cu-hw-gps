@@ -4,10 +4,10 @@ module abs(
 
    parameter WIDTH = 1;
 
-   (* keep *) wire negative;
+   wire negative;
    assign negative = in[WIDTH-1];
 
-   (* keep *) wire [(WIDTH-2):0] m_in;
+   wire [(WIDTH-2):0] m_in;
    assign m_in = (~in[(WIDTH-2):0]) + {{(WIDTH-2){1'b0}},1'b1};
    
    assign out = negative ?

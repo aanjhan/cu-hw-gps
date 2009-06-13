@@ -10,10 +10,13 @@ using namespace StringHelper;
 const boost::regex InputParser::fileName("^((.*\\/)?([^\\/]*))\\.([^.]+)$");
 const boost::regex InputParser::comment("^ *(//.*)?$");
 const boost::regex InputParser::directive("^ *# *(\\w+)( (.*))?$");
+const boost::regex InputParser::verilogDirective("^ *(`\\w+( (.*))?)$");
 const boost::regex InputParser::csvLine("^ *([A-Za-z_]\\w*) *,([^,]*)(,(.*))?$");
 const boost::regex InputParser::newLine("\\\\n");
 
-int InputParser::Parse(map<string,MacroEntry*> &vars, bool print)
+int InputParser::Parse(map<string,MacroEntry*> &vars,
+                       std::vector<std::string> &verilog,
+                       bool print)
 {
     if(file=="-")useStdin=true;
 
@@ -45,8 +48,8 @@ int InputParser::Parse(map<string,MacroEntry*> &vars, bool print)
     int errorCount;
     switch(type)
     {
-    case XML: errorCount=ParseXML(*in,file,vars,print); break;
-    default: errorCount=ParseCSV(*in,file,vars,print); break;
+    case XML: errorCount=ParseXML(*in,file,vars,verilog,print); break;
+    default: errorCount=ParseCSV(*in,file,vars,verilog,print); break;
     }
 
     if(!useStdin)
@@ -60,6 +63,7 @@ int InputParser::Parse(map<string,MacroEntry*> &vars, bool print)
 int InputParser::ParseCSV(std::istream &in,
                           const std::string &currentFile,
                           std::map<std::string,MacroEntry*> &vars,
+                          std::vector<std::string> &verilog,
                           bool print)
 {
     string line;
@@ -74,9 +78,14 @@ int InputParser::ParseCSV(std::istream &in,
         lineCount++;
         getline(in,line);
         if(boost::regex_match(line,comment))continue;
+        else if(boost::regex_match(line,m,verilogDirective))
+        {
+            if(print)verilog.push_back(m[1]);
+            continue;
+        }
         else if(boost::regex_match(line,m,directive))
         {
-            errorCount+=EvalDirective(m[1],m[3],currentFile,lineCount,vars);
+            errorCount+=EvalDirective(m[1],m[3],currentFile,lineCount,vars,verilog);
             continue;
         }
         else if(!boost::regex_match(line,m,csvLine))
@@ -145,17 +154,19 @@ int InputParser::ParseCSV(std::istream &in,
 int InputParser::ParseXML(std::istream &in,
                           const std::string &currentFile,
                           std::map<std::string,MacroEntry*> &vars,
+                          std::vector<std::string> &verilog,
                           bool print)
 {
     return 0;
 }
 
 int InputParser::EvalDirective(const std::string &directive,
-                                const std::string &parameter,
-                                const std::string &currentFile,
-                                int currentLine,
-                                std::map<std::string,MacroEntry*> &vars,
-                                bool print)
+                               const std::string &parameter,
+                               const std::string &currentFile,
+                               int currentLine,
+                               std::map<std::string,MacroEntry*> &vars,
+                               std::vector<std::string> &verilog,
+                               bool print)
 {
     if(directive=="include")
     {
@@ -189,7 +200,7 @@ int InputParser::EvalDirective(const std::string &directive,
         in.close();
 
         InputParser inParser(file);
-        int errorCount=inParser.Parse(vars,print);
+        int errorCount=inParser.Parse(vars,verilog,print);
         if(errorCount>0)
         {
             cerr<<InputErrors::ErrorString(InputErrors::ERROR,

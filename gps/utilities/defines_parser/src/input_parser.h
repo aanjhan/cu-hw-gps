@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 #include <exception>
 #include <istream>
 #include <boost/regex.hpp>
@@ -37,7 +38,9 @@ public:
     InputParser() : useStdin(true), file("") {}
     InputParser(const std::string &file) : useStdin(false), file(file) {}
 
-    int Parse(std::map<std::string,MacroEntry*> &vars, bool print=true);
+    int Parse(std::map<std::string,MacroEntry*> &vars,
+              std::vector<std::string> &verilog,
+              bool print=true);
     
 private:
     bool useStdin;
@@ -48,22 +51,26 @@ private:
     const static boost::regex fileName;
     const static boost::regex comment;
     const static boost::regex directive;
+    const static boost::regex verilogDirective;
     const static boost::regex csvLine;
     const static boost::regex newLine;
 
     int ParseCSV(std::istream &in,
                  const std::string &currentFile,
                  std::map<std::string,MacroEntry*> &vars,
+                 std::vector<std::string> &verilog,
                  bool print=true);
     int ParseXML(std::istream &in,
                  const std::string &currentFile,
                  std::map<std::string,MacroEntry*> &vars,
+                 std::vector<std::string> &verilog,
                  bool print=true);
     int EvalDirective(const std::string &directive,
                       const std::string &parameter,
                       const std::string &currentFile,
                       int currentLine,
                       std::map<std::string,MacroEntry*> &vars,
+                      std::vector<std::string> &verilog,
                       bool print=true);
 };
 

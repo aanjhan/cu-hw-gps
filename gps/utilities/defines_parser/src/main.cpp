@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
             output+="//This file has been automatically generated.\n";
             output+="//Edit contents with extreme caution.\n\n";
 
-            if(verilog.size()>0)
+            if(!vm.count("undef") && verilog.size()>0)
             {
                 for(vector<string>::iterator i=verilog.begin();
                     i!=verilog.end();

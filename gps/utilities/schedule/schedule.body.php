@@ -6,7 +6,9 @@ class Schedule
 {
     var $errors=array();
     var $events=array();
+    var $events_in_order=array();
     var $schedule=array();
+    var $current_in_progress=array();
 
     var $lastEvent="";
     
@@ -48,6 +50,7 @@ class Schedule
             }
 
             $item=array();
+            $item["name"]=$name;
             if(preg_match('/ +length="(\d+)"/',$line,$m))$item["length"]=$m[1];
             else
             {
@@ -63,6 +66,7 @@ class Schedule
             elseif(preg_match('/ +complete +/',$line))$item["complete"]="true";
             
             $this->events[$name]=$item;
+            $this->events_in_order[]=$item;
         }
     }
 
@@ -74,6 +78,7 @@ class Schedule
 
         //Determine start date.
         $start=0;
+        $manualStart=false;
         if(preg_match('/(start|end|complete)\((.*)\)(([+-])(\d+))?/',$event["start"],$m))
         {
             $type=$m[1];
@@ -89,8 +94,13 @@ class Schedule
 
             $start=$this->schedule[$dep][$type];
             if(strcmp($op,"")!=0){ $start+=(strcmp($op,"+")==0 ? $val : -$val)*SEC_PER_DAY; }
+            $manualStart=true;
         }
-        elseif(isset($event["start"]))$start=strtotime($event["start"]);
+        elseif(isset($event["start"]))
+        {
+            $start=strtotime($event["start"]);
+            $manualStart=true;
+        }
         elseif(preg_match('/(start|end|complete)\((.*)\)(([+-])(\d+))?/',$event["end"],$m))
         {
             $type=$m[1];
@@ -100,12 +110,13 @@ class Schedule
 
             if(!EvalEntry($dep))
             {
-                $this->Error("Parsing start time for '$name'.");
+                $this->Error("Parsing end time for '$name'.");
                 return false;
             }
 
             $start=$this->schedule[$dep][$type]-$event["length"]*SEC_PER_DAY;
             if(strcmp($op,"")!=0){ $start+=(strcmp($op,"+")==0 ? $val : -$val)*SEC_PER_DAY; }
+            $manualStart=true;
         }
         elseif(strcmp($event["depend"],"")!=0)
         {
@@ -133,10 +144,18 @@ class Schedule
             else $start=time();
         }
 
+        if(!$manualStart &&
+           strcmp($this->current_in_progress[$event["owner"]],"")!=0 &&
+           strcmp($this->current_in_progress[$event["owner"]],$name)!=0 &&
+           $start<time())
+        {
+            $start=time();
+        }
+
         $end=$start+$event["length"]*SEC_PER_DAY;
 
         $complete;
-        if(!isset($event["complete"]))$complete="";
+        if(!isset($event["complete"]))$complete=-1;
         elseif(strcmp($event["complete"],"true")==0)$complete=$end;
         else $complete=strtotime($event["complete"]);
 
@@ -144,15 +163,24 @@ class Schedule
         $entry["start"]=$start;
         $entry["end"]=$end;
         $entry["owner"]=$event["owner"];
-        $entry["complete"]=$complete;
+        $entry["complete"]=$complete>=0 ? $complete : "";
         $entry["depend"]=$event["depend"];
-        $entry["finish"]=strcmp($complete,"")!=0 ? $complete : $end;
+        if($complete>=0)$entry["finish"]=$complete;
+        elseif($end<time())$entry["finish"]=time();
+        else $entry["finish"]=$end;
         $this->schedule[$name]=$entry;
 
         if(strcmp($this->lastEvent,"")==0 ||
            $entry["finish"]>$this->schedule[$this->lastEvent]["finish"])
         {
             $this->lastEvent=$name;
+        }
+
+        if($complete<0 &&
+           strcmp($entry["owner"],"")!=0 &&
+           strcmp($this->current_in_progress[$entry["owner"]],"")==0)
+        {
+            $this->current_in_progress[$entry["owner"]]=$name;
         }
 
         return true;
@@ -163,7 +191,10 @@ class Schedule
         $output="";
 
         $this->ParseInput($input);
-        foreach($this->events as $name=>$event)$this->EvalEntry($name);
+        foreach($this->events_in_order as $event)
+        {
+            $this->EvalEntry($event["name"]);
+        }
         
         if(count($this->errors)>0)
         {foreach($this->errors as $error)

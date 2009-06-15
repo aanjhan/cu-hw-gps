@@ -2,15 +2,16 @@
 `include "acquisition_controller.vh"
 `include "channel__acquisition_controller.vh"
 
-`define DEBUG
+//`define DEBUG
 `include "debug.vh"
+`define DEBUG
 
 `ifdef DEBUG
  `undef MAX_CODE_SHIFT
  `define MAX_CODE_SHIFT `CS_WIDTH'h0
 
  `undef DOPP_MAX_INC
- `define DOPP_MAX_INC `DOPPLER_INC_WIDTH'd6492
+ `define DOPP_MAX_INC `DOPPLER_INC_WIDTH'd6392
 
  `undef DOPP_EARLY_START
  `define DOPP_EARLY_START `DOPPLER_INC_WIDTH'd1598

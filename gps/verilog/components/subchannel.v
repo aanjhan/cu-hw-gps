@@ -4,6 +4,9 @@
 `include "cos.vh"
 `include "sin.vh"
 
+//`define DEBUG
+`include "debug.vh"
+
 //`define DISABLE_CARRIER
 
 module subchannel(
@@ -50,20 +53,20 @@ module subchannel(
    //cycle to meet timing from the C/A bit
    //to the track accumulator.
    localparam DATA_DELAY = 4;
-   (* keep *) wire data_available_kmnm1;
+   `KEEP wire data_available_kmnm1;
    delay #(.DELAY(DATA_DELAY-1))
      data_available_delay(.clk(clk),
                           .reset(global_reset),
                           .in(data_available),
                           .out(data_available_kmnm1));
    
-   (* keep *) wire data_available_kmn;
+   `KEEP wire data_available_kmn;
    delay data_available_delay_2(.clk(clk),
                               .reset(global_reset),
                               .in(data_available_kmnm1),
                               .out(data_available_kmn));
      
-   (* keep *) wire [`INPUT_RANGE] data_kmn;
+   `KEEP wire [`INPUT_RANGE] data_kmn;
    delay #(.WIDTH(`INPUT_WIDTH),
            .DELAY(DATA_DELAY))
      data_delay(.clk(clk),
@@ -71,7 +74,7 @@ module subchannel(
                 .in(data),
                 .out(data_kmn));
    
-   (* keep *) wire ca_bit_kmn;
+   `KEEP wire ca_bit_kmn;
    delay ca_bit_delay(.clk(clk),
                       .reset(global_reset),
                       .in(ca_bit),
@@ -106,7 +109,7 @@ module subchannel(
                        .out(carrier_index));
 
    //Generate in-phase carrier-wiped signal.
-   (* keep *) wire [`CARRIER_LUT_RANGE] carrier_i;
+   `KEEP wire [`CARRIER_LUT_RANGE] carrier_i;
 `ifdef DISABLE_CARRIER
    assign carrier_i = `CARRIER_LUT_WIDTH'h1;
 `else
@@ -114,13 +117,13 @@ module subchannel(
                        .out(carrier_i));
 `endif
    
-   (* keep *) wire [`SIG_NO_CARRIER_RANGE] sig_no_carrier_i;
+   `KEEP wire [`SIG_NO_CARRIER_RANGE] sig_no_carrier_i;
    mult carrier_mux_i(.carrier(carrier_i),
                       .signal(data_kmn),
                       .out(sig_no_carrier_i));
 
    //Generate quadrature carrier-wiped signal.
-   (* keep *) wire [`CARRIER_LUT_RANGE] carrier_q;
+   `KEEP wire [`CARRIER_LUT_RANGE] carrier_q;
 `ifdef DISABLE_CARRIER
    assign carrier_q = `CARRIER_LUT_WIDTH'h0;
 `else
@@ -128,7 +131,7 @@ module subchannel(
                        .out(carrier_q));
 `endif
    
-   (* keep *) wire [`SIG_NO_CARRIER_RANGE] sig_no_carrier_q;
+   `KEEP wire [`SIG_NO_CARRIER_RANGE] sig_no_carrier_q;
    mult carrier_mux_q(.carrier(carrier_q),
                       .signal(data_kmn),
                       .out(sig_no_carrier_q));

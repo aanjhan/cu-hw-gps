@@ -9,7 +9,6 @@ end
 
 if(dataSelect==1)
     position=ecef([42,-76,0]);
-    SVs=[4 10 15 24 27 29];
     static=1;
     
     %Data set measurement noise.
@@ -17,168 +16,68 @@ if(dataSelect==1)
     sigmaD=5;
     
     %Data set process noise.
-    PhisVel=1.0;
+    PhisVel=0.01;
     PhisCdr=0.01;
-    PhisBias=10.0;
+    PhisNCO=0.01;
+    PhisBias=10;
 
-    load ephem_dual.asc;
+    ephemData=load('ephem.asc');
+    SVs=ephemData(:,1)';
     
-    load pseudorange_L1.asc;
-    [ephem pseudorange_L1]=formatdata(ephem_dual,pseudorange_L1,SVs); %#ok<NODEF>
+    obs=load('obs.asc');
+    [ephem pseudorange_L1]=formatdata(ephemData,obs,SVs); %#ok<NODEF>
     pseudorange_L1=pseudocalc(ephem,pseudorange_L1);%Remove satellite clock offsets.
     pseudorange_L1=pseudorange_L1(:,1:2:end);
     
-    load doppler_L1.asc;
-    [ephem doppler_L1]=formatdata(ephem_dual,doppler_L1,SVs); %#ok<NODEF>
+    obsdopp=load('obsdopp.asc');
+    [ephem doppler_L1]=formatdata(ephemData,obsdopp,SVs); %#ok<NODEF>
     doppler_L1=doppler_L1(:,1:2:end);
     
-    load pseudorange_L2.asc;
-    [ephem pseudorange_L2]=formatdata(ephem_dual,pseudorange_L2,SVs); %#ok<NODEF>
-    pseudorange_L2=pseudocalc(ephem,pseudorange_L2);%Remove satellite clock offsets.
-    pseudorange_L2=pseudorange_L2(:,1:2:end);
-    clear ephem_dual;
-
-    if(removeIon)
-        load ion_dual.asc;
-        ion=ion_dual;
-        clear ion_dual;
-    end
+    clear obs;
+    clear obsdopp;
+    clear ephemData;
+    
+    pseudorange_L1=pseudorange_L1(2:end,:);
+    doppler_L1=doppler_L1(2:end,:);
 elseif(dataSelect==2)
-    position=[0 0 0];
-    static=0;
-    
-    %Data set measurement noise.
-    sigmaP=10;
-    sigmaD=1;
-    
-    %Data set process noise.
-    PhisVel=10.0;
-    PhisCdr=0.01;
-    PhisBias=10;
-
-    load ephem_mobile.asc;
-    SVs=ephem_mobile(:,1)';
-    
-    load pseudorange_mobile.asc;
-    [ephem pseudorange_L1]=formatdata(ephem_mobile,pseudorange_mobile,SVs); %#ok<NODEF>
-    pseudorange_L1=pseudocalc(ephem,pseudorange_L1);%Remove satellite clock offsets.
-    pseudorange_L1=pseudorange_L1(:,1:2:end);
-    clear pseudorange_mobile;
-    
-    load doppler_mobile.asc;
-    [ephem doppler_L1]=formatdata(ephem_mobile,doppler_mobile,SVs); %#ok<NODEF>
-    doppler_L1=doppler_L1(:,1:2:end);
-    clear doppler_mobile;
-    clear ephem_dual;
-
-    if(removeIon)
-        load ion_mobile.asc;
-        ion=ion_mobile;
-        clear ion_mobile;
-    end
-elseif(dataSelect==3)
-    position=[0 0 0];
-    static=0;
-    
-    %Data set measurement noise.
-    sigmaP=3;
-    sigmaD=1;
-    
-    %Data set process noise.
-    PhisVel=100.0;
-    PhisCdr=0.01;
-    PhisBias=10;
-
-    load ephem_charlie_local.asc;
-    SVs=ephem_charlie_local(:,1)';
-    
-    load data/1205m003_C1.mat;
-    [ephem pseudorange_L1]=formatdata(ephem_charlie_local,obs,SVs); %#ok<NODEF>
-    pseudorange_L1=pseudocalc(ephem,pseudorange_L1);%Remove satellite clock offsets.
-    pseudorange_L1=pseudorange_L1(:,1:2:end);
-    clear obs;
-    
-    load data/1205m003_D1.mat;
-    [ephem doppler_L1]=formatdata(ephem_charlie_local,obs,SVs); %#ok<NODEF>
-    doppler_L1=doppler_L1(:,1:2:end);
-    clear obs;
-    clear ephem_charlie_local;
-
-    if(removeIon)
-        load ion_charlie_local.asc;
-        ion=ion_charlie_local;
-        clear ion_charlie_local;
-    end
-elseif(dataSelect==4)
-    position=[0 0 0];
-    static=0;
-    
-    %Data set measurement noise.
-    sigmaP=1e6;
-    sigmaD=10;
-    
-    %Data set process noise.
-    PhisVel=2.0;
-    PhisCdr=0.01;
-    PhisBias=10;
-
-    load ephem_charlie_country.asc;
-    SVs=ephem_charlie_country(:,1)';
-    
-    load data/1205m006_C1.mat;
-    [ephem pseudorange_L1]=formatdata(ephem_charlie_country,obs,SVs); %#ok<NODEF>
-    pseudorange_L1=pseudocalc(ephem,pseudorange_L1);%Remove satellite clock offsets.
-    pseudorange_L1=pseudorange_L1(:,1:2:end);
-    clear obs;
-    
-    load data/1205m006_D1.mat;
-    [ephem doppler_L1]=formatdata(ephem_charlie_country,obs,SVs); %#ok<NODEF>
-    doppler_L1=doppler_L1(:,1:2:end);
-    clear obs;
-    clear ephem_charlie_country;
-
-    if(removeIon)
-        load ion_charlie_country.asc;
-        ion=ion_charlie_country;
-        clear ion_charlie_country;
-    end
-else
-    findithaca;
-    position=ithaca_ecef;
-    SVs=[4 5 10 13 23 29];
+    position=ecef([65.1186,-147.4329,523.6649]);
     static=1;
     
     %Data set measurement noise.
-    sigmaP=10;
-    sigmaD=6;
+    sigmaP=6;
+    sigmaD=5;
     
     %Data set process noise.
-    PhisVel=0.0;
+    PhisVel=0.01;
     PhisCdr=0.01;
-    PhisBias=0.1;
+    PhisNCO=0.01;
+    PhisBias=10;
 
-    load ephem_lab.asc;
+    ephemData=load('ephem_alaska.asc');
+    SVs=ephemData(:,1)';
     
-    load obs_lab.asc;
-    [ephem pseudorange_L1]=formatdata(ephem,obs_lab,SVs); %#ok<NODEF>
+    obs=load('obs_alaska.asc');
+    [ephem pseudorange_L1]=formatdata(ephemData,obs,SVs); %#ok<NODEF>
     pseudorange_L1=pseudocalc(ephem,pseudorange_L1);%Remove satellite clock offsets.
     pseudorange_L1=pseudorange_L1(:,1:2:end);
-    clear obs_lab;
     
-    load obsdopp_lab.asc;
-    [ephem doppler_L1]=formatdata(ephem_lab,obsdopp_lab,SVs); %#ok<NODEF>
+    obsdopp=load('obsdopp_alaska.asc');
+    [ephem doppler_L1]=formatdata(ephemData,obsdopp,SVs); %#ok<NODEF>
     doppler_L1=doppler_L1(:,1:2:end);
-    clear obsdopp_lab;
-    clear ephem_lab;
-
-    if(removeIon)
-        load ion.asc;
-    end
+    
+    clear obs;
+    clear obsdopp;
+    clear ephemData;
+    
+    pseudorange_L1=pseudorange_L1(2:end,:);
+    doppler_L1=doppler_L1(2:end,:);
+else
+    error('Invalid data set');
 end
     
     constant;
     measurements=size(pseudorange_L1,1);
-    measurements=1000;
+%     measurements=1000;
     maxSatellites=size(pseudorange_L1,2)-1;
 
     %Initial measurement positions.
@@ -194,15 +93,18 @@ end
     %X(3)=y, X(4)=dy/dt
     %X(5)=z, X(6)=dz/dt
     %X(7)=cdr, X(8)=dcdr/dt
-    %X(8+j)=biasj
-    X=zeros(measurements,8+maxSatellites);
+    %X(9)=NCO offset
+    %X(9+j)=biasj
+    X=zeros(measurements,9+maxSatellites);
     numStates=size(X,2);
     X(1,[1 3 5])=Xraw(1,2:4);
-    X(1,7)=Xraw(1,5);
+    X(1,7)=Xraw(1,5)*c;
+    X(1,9)=1.3e3;%FIXME How to initialize NCO offset?
     P=30^2*eye(numStates);
     P(7,7)=20^2;
     P(8,8)=50^2;
-    P(9:end,9:end)=30^2*eye(maxSatellites);
+    P(9,9)=1e2^2;%FIXME How to initialize NCO offset?
+    P(10:end,10:end)=30^2*eye(maxSatellites);
     
     posLatLong=zeros(measurements,3);
     posLatLong(1,:)=latlong(X(1,[1 3 5]));
@@ -225,8 +127,10 @@ end
         %Receiver clock offset/drift rate.
         Phi(7:8,7:8)=[ 1, Ts;
                        0, 1 ;];
+        %NCO offset.
+        Phi(9,9)=1;
         %Satellite bias.
-        Phi(9:end,9:end)=eye(maxSatellites);
+        Phi(10:end,10:end)=eye(maxSatellites);
 
         %Process Noise Matrix
         Q=zeros(numStates);
@@ -242,15 +146,19 @@ end
         %Receiver clock offset process noise.
         Q(7:8,7:8)=PhisCdr*[ Ts^3/3 , Ts^2/2;
                              Ts^2/2 , Ts    ;];
+        %NCO offset process noise.
+        Q(9,9)=PhisNCO*Ts;
         %Satellite bias process noise.
-        Q(9:end,9:end)=PhisBias*Ts*eye(maxSatellites);
+        Q(10:end,10:end)=PhisBias*Ts*eye(maxSatellites);
    
         %Project state forward.
         Xp=Phi*X(i-1,:)';
         posp=Xp([1 3 5]);
         velp=Xp([2 4 6]);
         cdrp=Xp(7);
-        biasp=Xp(9:end);
+        cdrdotp=Xp(8);
+        ncop=Xp(9);
+        biasp=Xp(10:end);
         
         %Compute new satellite list.
         SVs=find(pseudorange_L1(i,2:end)~=0);
@@ -283,11 +191,6 @@ end
         khat=k./(rho*ones(1,3));
         obsLatLong=latlong(posp');
         vObs=OmegaE*norm(posp)*cos(obsLatLong(1)*pi/180)*[-sin(obsLatLong(2)*pi/180) cos(obsLatLong(2)*pi/180) 0];
-%         v=(satVel-ones(satellites,1)*(velp'+vObs));
-%         dopp=zeros(satellites,1);
-%         for s=1:satellites
-%             dopp(s)=v(s,:)*khat(s,:)'./lambda;
-%         end
         
         refTime=ephem(SVs,24);
         af1=ephem(SVs,21);
@@ -298,8 +201,9 @@ end
         rhohat=(satPos-ones(satellites,1)*posp')./(rho*ones(1,3));
         dopp=zeros(satellites,1);
         for s=1:satellites
-            dopp(s)=f0(s)*((Xp(8)-rhohat(s,:)*(satVel(s,:)'-velpe))/(c+rhohat(s,:)*(satVel(s,:)'-velpe))-delsdot(s));
+            dopp(s)=f0(s)*((cdrdotp-rhohat(s,:)*(satVel(s,:)'-velpe))/(c+rhohat(s,:)*(satVel(s,:)'-velpe))-delsdot(s));
         end
+        dopp=dopp+ncop;
         
         %Recompute measurement matrix.
         %PL1j=PL1j-cdj=rhoj-cdr+biasj
@@ -311,8 +215,9 @@ end
         dPL1dzdot=zeros(satellites,1);
         dPL1dcdr=-ones(satellites,1);
         dPL1dcdrdot=zeros(satellites,1);
+        dPL1dnco=zeros(satellites,1);
         dPL1dbias=zeros(satellites,maxSatellites);
-        %for s=1:satellites; dPL1dbias(s,SVs(s))=1; end;
+%         for s=1:satellites; dPL1dbias(s,SVs(s))=1; end;
         
         %Dj=ft-fr=(vsat-vrec)*khat/lambda+NCO
         refTime=ephem(SVs,24);
@@ -328,7 +233,7 @@ end
         %Derivative of Doppler shift with respect to pseudorange rate.
         %dpr=rhohat*(vsat-vrec)
         dpr=dot(rhohat,vdiff,2);
-        dDddpr=f0.*(-Xp(8)-c)./(c+dpr).^2;
+        dDddpr=f0.*(-cdrdotp-c)./(c+dpr).^2;
         
         %Calculate derivate of Doppler with respect to x from derivative of
         %pseudorange rate with respect to x.
@@ -346,8 +251,8 @@ end
         ddprdy(:,3)=pdiff(:,2)./rho.^3.*pdiff(:,3);
         dDdy=(dot(ddprdy,vdiff,2)-rhohat(:,1)*OmegaE).*dDddpr;
         
-        %Calculate derivate of Doppler with respect to y from derivative of
-        %pseudorange rate with respect to y.
+        %Calculate derivate of Doppler with respect to z from derivative of
+        %pseudorange rate with respect to z.
         ddprdz=zeros(satellites,3);
         ddprdz(:,1)=pdiff(:,3)./rho.^3.*pdiff(:,1);
         ddprdz(:,2)=pdiff(:,3)./rho.^3.*pdiff(:,2);
@@ -362,30 +267,31 @@ end
         
         dDdcdr=zeros(satellites,1);
         dDdcdrdot=f0./(c+dpr);
+        dDdnco=ones(satellites,1);
         dDdbias=zeros(satellites,maxSatellites);
         
-        H=[dPL1dx dPL1dxdot dPL1dy dPL1dydot dPL1dz dPL1dzdot dPL1dcdr dPL1dcdrdot dPL1dbias;
-           zeros(satellites,1) dDdxdot zeros(satellites,1) dDdydot zeros(satellites,1) dDdzdot dDdcdr dDdcdrdot dDdbias;];
-%         H=[dPL1dx dPL1dxdot dPL1dy dPL1dydot dPL1dz dPL1dzdot dPL1dcdr dPL1dcdrdot dPL1dbias;
-%            dDdx dDdxdot dDdy dDdydot dDdz dDdzdot dDdcdr dDdcdrdot dDdbias;];
+%         H=[dPL1dx dPL1dxdot dPL1dy dPL1dydot dPL1dz dPL1dzdot dPL1dcdr dPL1dcdrdot dPL1dnco dPL1dbias;
+%            zeros(satellites,1) dDdxdot zeros(satellites,1) dDdydot zeros(satellites,1) dDdzdot dDdcdr dDdcdrdot dDdnco dDdbias;];
+        H=[dPL1dx dPL1dxdot dPL1dy dPL1dydot dPL1dz dPL1dzdot dPL1dcdr dPL1dcdrdot dPL1dnco dPL1dbias;
+           dDdx dDdxdot dDdy dDdydot dDdz dDdzdot dDdcdr dDdcdrdot dDdnco dDdbias;];
         
-        x0=Xp;
-        dopptest0=DopplerFromState(SVs,ephem,rho,satPos,satVel,pseudorange_L1(i,1),x0);
-        doppdiff=doppler_L1(i,SVs+1)'-dopptest0;
-        
-        diff=zeros(satellites,numStates-maxSatellites);
-        for j=1:numStates-maxSatellites
-            dxp=zeros(numStates,1);
-            dxp(j)=1e-1;
-            x1=Xp+dxp;
-            fd_rho=sqrt(sum((satPos-ones(satellites,1)*x1([1 3 5])').^2,2));
-            dopptest1=DopplerFromState(SVs,ephem,fd_rho,satPos,satVel,pseudorange_L1(i,1),x1);
-            dD=(dopptest1-dopptest0)./dxp(j);
-            diff(:,j)=(H(satellites+1:end,j)-dD)./dD;
-        end
-        
-        dopptest2=f0.*((Xp(8)-(dpr+1e-2))./(c+dpr+1e-2)-delsdot);
-        diffdpr=dDddpr-(dopptest2-dopptest0)./1e-2;
+%         x0=Xp;
+%         dopptest0=DopplerFromState(SVs,ephem,rho,satPos,satVel,pseudorange_L1(i,1),x0);
+%         doppdiff=doppler_L1(i,SVs+1)'-dopptest0;
+%         
+%         diff=zeros(satellites,numStates-maxSatellites);
+%         for j=1:numStates-maxSatellites
+%             dxp=zeros(numStates,1);
+%             dxp(j)=1e-1;
+%             x1=Xp+dxp;
+%             fd_rho=sqrt(sum((satPos-ones(satellites,1)*x1([1 3 5])').^2,2));
+%             dopptest1=DopplerFromState(SVs,ephem,fd_rho,satPos,satVel,pseudorange_L1(i,1),x1);
+%             dD=(dopptest1-dopptest0)./dxp(j);
+%             diff(:,j)=(H(satellites+1:end,j)-dD)./dD;
+%         end
+%         
+%         dopptest2=f0.*((Xp(8)-(dpr+1e-2))./(c+dpr+1e-2)-delsdot);
+%         diffdpr=dDddpr-(dopptest2-dopptest0)./1e-2;
         
         %Compute Kalman gains from Riccati equations.
         M=Phi*P*Phi'+Q;
@@ -468,11 +374,11 @@ if(static)
     ylabel('Drift (s/s)');
     xlabel('GPS Time (s)');
     
-%     subplot(rows,2,6);
-%     plot(t,X(:,9),'b');
-%     title('NCO Offset');
-%     ylabel('Offset (Hz)');
-%     xlabel('GPS Time (s)');
+    subplot(rows,2,6);
+    plot(t,X(:,9),'b');
+    title('NCO Offset');
+    ylabel('Offset (Hz)');
+    xlabel('GPS Time (s)');
     
     for sat=1:satellites
         subplot(rows,2,6+sat);

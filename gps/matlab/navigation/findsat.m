@@ -116,9 +116,10 @@ function [satLoc,satVel,orb] = findsat(ephem,t)
 	ECEFy = (xp .* sin(l)) + (yp .* cos(i) .* cos(l));
 	ECEFz = (yp .* sin(i));
     %Calculate satellite velocity.
+    %From equation 6.8.
     a=sqrta.^2;
     n=sqrt(muearth./a.^3);
-    rdotX=a.^2.*n./r.*-sin(E);
+    rdotX=-a.^2.*n./r.*sin(E);
     rdotY=a.^2.*n./r.*sqrt(1-ecc.^2).*cos(E);
     rdot=[rdotX rdotY];
     satVel=SatToEcef([ephem(:,1) rdot omega.*180./pi i.*180./pi l.*180./pi]);

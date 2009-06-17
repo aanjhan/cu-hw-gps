@@ -5,7 +5,8 @@ module mem_bank_mux(
     ad_passthrough,
 <? for i in range(1,`NUM_BANKS+1):
     print("    buf_" + `i` + ",\n")
-?><? for i in range(1,`NUM_CHANNELS+1):
+?>
+<? for i in range(1,`NUM_CHANNELS+1):
     if i < `NUM_CHANNELS:
         print("    chan_" + `i` + ",\n")
     else:
@@ -46,7 +47,7 @@ always @( ctrl or ad_passthrough <?
 for i in range(1,`NUM_BANKS+1):
     print("or buf_" + `i` + " ")
 ?>)
-begin
+    begin
 
     // 1 case for each channel output
 <?

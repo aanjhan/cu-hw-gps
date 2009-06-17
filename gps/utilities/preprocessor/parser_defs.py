@@ -7,6 +7,9 @@ hexValue = re.compile("^(\\d+[A-Fa-f][A-Fa-f0-9]*)")
 number = re.compile("^(\\d+(\\.\\d+)?(e-?\\d+)?)")
 qualifiedName = re.compile("^(`?[A-Za-z_]\\w*)")
 
+# decimal to binary converter
+d2b = lambda n: n>0 and d2b(n>>1).lstrip('0')+str(n&1) or '0'
+
 #Define constants:
 
 #Source parser state machine states:

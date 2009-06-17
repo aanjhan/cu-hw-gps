@@ -66,7 +66,7 @@ def main():
         include_paths = list(set(include_paths))
 
         # Get the print buffer ready
-        pbuffer("HEADERS=")
+        pbuffer(False,"HEADERS=")
 
         # Escape any spaces in the pathname
         includes = [inc_path.replace(" ","\ ") for inc_path in include_paths]
@@ -74,7 +74,7 @@ def main():
         # Add the include paths to the print buffer
         for path in include_paths:
             path = path[0:len(path) - 3] + ".csv"
-            pbuffer(path + " ")
+            pbuffer(False,path + " ")
 
     # If in regular mode:
     else:       
@@ -135,9 +135,11 @@ def main():
 ###############################################################################
 
 # Print to the printbuffer
-def pbuffer(str):
+def pbuffer(newlines,str):
     global printbuffer
     printbuffer = printbuffer + str
+    if newlines:
+        printbuffer = printbuffer + "\n"
 
 ###############################################################################
 
@@ -307,41 +309,41 @@ def parseSource(sfile, vars_dict):
         if state == DEFAULT:
             if char == "/":
                 state = DEF_FOUND_FSLASH
-                pbuffer(char)
+                pbuffer(False,char)
             elif char == "%":
                 state = PRE_COM
             elif char == "`":
                 state = DEFINE
-                pbuffer(char)
+                pbuffer(False,char)
             elif char == "<":
                 state = DEF_FOUND_LCARET
             else:
-                pbuffer(char)
+                pbuffer(False,char)
 
         # DEF_FOUND_FSLASH
         elif state == DEF_FOUND_FSLASH:
             if char == "*":
                 state = V_COM
                 v_com_begin_line = line_count
-                pbuffer(char)
+                pbuffer(False,char)
             elif char == "/":
                 state = V_COM_LINE
-                pbuffer(char)
+                pbuffer(False,char)
             else:
                 state = DEFAULT
-                pbuffer(char)
+                pbuffer(False,char)
 
         # V_COM_LINE
         elif state == V_COM_LINE:
             if char == "\n":
                 state = DEFAULT
-            pbuffer(char)
+            pbuffer(False,char)
         
         # V_COM
         elif state == V_COM:
             if char == "*":
                 state = V_COM_FOUND_AST
-            pbuffer(char)
+            pbuffer(False,char)
 
         # V_COM_FOUND_AST       
         elif state == V_COM_FOUND_AST:
@@ -349,14 +351,14 @@ def parseSource(sfile, vars_dict):
                 state = DEFAULT
             elif not char == "*":
                 state = V_COM
-            pbuffer(char)    
+            pbuffer(False,char)    
 
         # DEFINE
         elif state == DEFINE:
             if char == "\n":
                 state = DEFAULT
                 parseDefine(define_buffer,vars_dict)
-                pbuffer(define_buffer + "\n")
+                pbuffer(True,define_buffer)
                 define_buffer = ""
             else:
                 define_buffer = define_buffer + char
@@ -368,7 +370,7 @@ def parseSource(sfile, vars_dict):
                 pre_seg_begin_line = line_count
             else:
                 state = DEFAULT
-                pbuffer("<" + char)  # have to put a < because prev state didn't write one 
+                pbuffer(False, "<" + char)  # have to put a < because prev state didn't write one 
         
         # PRE_COM
         elif state == PRE_COM:
@@ -545,14 +547,20 @@ def parsePreSeg(seg_str,vars_dict):
 
     # Get rid of carriage return
     regex = re.compile(".\n")
+    regex2 = re.compile("\r")    
     seg_str = regex.sub("\n",seg_str)
+    seg_str = regex2.sub("",seg_str)
 
     # Replace "print(" with "pbuffer("
     regex = re.compile("print\(")
-    seg_str = regex.sub("pbuffer(",seg_str)
+    seg_str = regex.sub("pbuffer(False,",seg_str)
 
     # Execute the segment
-    exec(seg_str)
+    try:
+        exec(seg_str)
+    except:
+        print "Error executing the following code:\n" + seg_str
+        sys.exit(1)
 
 ###############################################################################
 

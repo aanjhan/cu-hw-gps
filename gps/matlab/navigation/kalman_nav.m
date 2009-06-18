@@ -12,7 +12,7 @@ if(dataSelect==1)
     static=1;
     
     %Data set measurement noise.
-    sigmaP=6;
+    sigmaP=5;
     sigmaD=5;
     
     %Data set process noise.
@@ -44,7 +44,7 @@ elseif(dataSelect==2)
     static=1;
     
     %Data set measurement noise.
-    sigmaP=6;
+    sigmaP=100;
     sigmaD=5;
     
     %Data set process noise.
@@ -99,7 +99,7 @@ end
     numStates=size(X,2);
     X(1,[1 3 5])=Xraw(1,2:4);
     X(1,7)=Xraw(1,5)*c;
-    X(1,9)=1.3e3;%FIXME How to initialize NCO offset?
+    X(1,9)=-800;%FIXME How to initialize NCO offset?
     P=30^2*eye(numStates);
     P(7,7)=20^2;
     P(8,8)=50^2;
@@ -198,6 +198,8 @@ end
         delsdot=-(af1+2.*af2.*(pseudorange_L1(i,1).*ones(satellites,1)-refTime));
         f0=f_L1./(1+delsdot);
         velpe=velp+vObs';
+        pdiff=satPos-ones(satellites,1)*posp';
+        vdiff=satVel-ones(satellites,1)*velpe';
         rhohat=(satPos-ones(satellites,1)*posp')./(rho*ones(1,3));
         dopp=zeros(satellites,1);
         for s=1:satellites
@@ -218,17 +220,6 @@ end
         dPL1dnco=zeros(satellites,1);
         dPL1dbias=zeros(satellites,maxSatellites);
 %         for s=1:satellites; dPL1dbias(s,SVs(s))=1; end;
-        
-        %Dj=ft-fr=(vsat-vrec)*khat/lambda+NCO
-        refTime=ephem(SVs,24);
-        af1=ephem(SVs,21);
-        af2=ephem(SVs,22);
-        delsdot=-(af1+2.*af2.*(pseudorange_L1(i,1).*ones(satellites,1)-refTime));
-        f0=f_L1./(1+delsdot);
-        velpe=velp+vObs';
-        pdiff=satPos-ones(satellites,1)*posp';
-        vdiff=satVel-ones(satellites,1)*velpe';
-        rhohat=pdiff./(rho*ones(1,3));
         
         %Derivative of Doppler shift with respect to pseudorange rate.
         %dpr=rhohat*(vsat-vrec)

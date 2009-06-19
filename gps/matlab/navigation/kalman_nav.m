@@ -12,7 +12,7 @@ if(dataSelect==1)
     static=1;
     
     %Data set measurement noise.
-    sigmaP=5;
+    sigmaP=10;
     sigmaD=5;
     
     %Data set process noise.
@@ -44,7 +44,7 @@ elseif(dataSelect==2)
     static=1;
     
     %Data set measurement noise.
-    sigmaP=100;
+    sigmaP=10;
     sigmaD=5;
     
     %Data set process noise.
@@ -187,16 +187,12 @@ end
         
         %Calculate doppler shift projection, adding velocity
         %component due to the rotation of the Earth.
-        k=ones(satellites,1)*posp'-satPos;
-        khat=k./(rho*ones(1,3));
-        obsLatLong=latlong(posp');
-        vObs=OmegaE*norm(posp)*cos(obsLatLong(1)*pi/180)*[-sin(obsLatLong(2)*pi/180) cos(obsLatLong(2)*pi/180) 0];
-        
         refTime=ephem(SVs,24);
         af1=ephem(SVs,21);
         af2=ephem(SVs,22);
         delsdot=-(af1+2.*af2.*(pseudorange_L1(i,1).*ones(satellites,1)-refTime));
         f0=f_L1./(1+delsdot);
+        vObs=cross([0 0 OmegaE],posp);
         velpe=velp+vObs';
         pdiff=satPos-ones(satellites,1)*posp';
         vdiff=satVel-ones(satellites,1)*velpe';
@@ -226,29 +222,26 @@ end
         dpr=dot(rhohat,vdiff,2);
         dDddpr=f0.*(-cdrdotp-c)./(c+dpr).^2;
         
-        %Calculate derivate of Doppler with respect to x from derivative of
-        %pseudorange rate with respect to x.
-        ddprdx=zeros(satellites,3);
-        ddprdx(:,1)=-1./rho+pdiff(:,1)./rho.^3.*pdiff(:,1);
-        ddprdx(:,2)=pdiff(:,1)./rho.^3.*pdiff(:,2);
-        ddprdx(:,3)=pdiff(:,1)./rho.^3.*pdiff(:,3);
-        dDdx=(dot(ddprdx,vdiff,2)+rhohat(:,2)*OmegaE).*dDddpr;
+        %Calculate derivate of Doppler with respect to x.
+        dxdotedx=0;
+        dydotedx=-OmegaE;
+        dzdotedx=0;
+        doorhodx=pdiff(:,1)./rho.^3;
+        ddprdx=doorhodx.*dot(pdiff,vdiff,2)-vdiff(:,1)./rho-(pdiff(:,1).*dxdotedx+dydotedx+dzdotedx)./rho;
+        dDdx=dDddpr.*ddprdx;
         
-        %Calculate derivate of Doppler with respect to y from derivative of
-        %pseudorange rate with respect to y.
-        ddprdy=zeros(satellites,3);
-        ddprdy(:,1)=pdiff(:,2)./rho.^3.*pdiff(:,1);
-        ddprdy(:,2)=-1./rho+pdiff(:,2)./rho.^3.*pdiff(:,2);
-        ddprdy(:,3)=pdiff(:,2)./rho.^3.*pdiff(:,3);
-        dDdy=(dot(ddprdy,vdiff,2)-rhohat(:,1)*OmegaE).*dDddpr;
+        %Calculate derivate of Doppler with respect to y.
+        dxdotedy=OmegaE;
+        dydotedy=0;
+        dzdotedy=0;
+        doorhody=pdiff(:,2)./rho.^3;
+        ddprdy=doorhody.*dot(pdiff,vdiff,2)-vdiff(:,2)./rho-(dxdotedy+pdiff(:,2).*dydotedy+dzdotedy)./rho;
+        dDdy=dDddpr.*ddprdy;
         
-        %Calculate derivate of Doppler with respect to z from derivative of
-        %pseudorange rate with respect to z.
-        ddprdz=zeros(satellites,3);
-        ddprdz(:,1)=pdiff(:,3)./rho.^3.*pdiff(:,1);
-        ddprdz(:,2)=pdiff(:,3)./rho.^3.*pdiff(:,2);
-        ddprdz(:,3)=-1./rho+pdiff(:,3)./rho.^3.*pdiff(:,3);
-        dDdz=dot(ddprdz,vdiff,2).*dDddpr;
+        %Calculate derivate of Doppler with respect to z.
+        doorhodz=pdiff(:,3)./rho.^3;
+        ddprdz=doorhodz.*dot(pdiff,vdiff,2)-vdiff(:,3)./rho;
+        dDdz=dDddpr.*ddprdz;
         
         %Calculate derivate of Doppler with respect to velocity from
         %derivative of pseudorange rate with respect to velocity.
@@ -280,9 +273,6 @@ end
 %             dD=(dopptest1-dopptest0)./dxp(j);
 %             diff(:,j)=(H(satellites+1:end,j)-dD)./dD;
 %         end
-%         
-%         dopptest2=f0.*((Xp(8)-(dpr+1e-2))./(c+dpr+1e-2)-delsdot);
-%         diffdpr=dDddpr-(dopptest2-dopptest0)./1e-2;
         
         %Compute Kalman gains from Riccati equations.
         M=Phi*P*Phi'+Q;
@@ -391,14 +381,17 @@ else
 end
 return;
 
-function dopp=DopplerFromState(SVs,ephem,rho,satPos,satVel,time,X)
+function dopp=DopplerFromState(SVs,ephem,rho,satPos,satVel,time,Xp)
     constant;
     satellites=length(SVs);
     
-    posp=X([1 3 5]);
-    velp=X([2 4 6]);
-    obsLatLong=latlong(posp');
-    vObs=OmegaE*norm(posp)*cos(obsLatLong(1)*pi/180)*[-sin(obsLatLong(2)*pi/180) cos(obsLatLong(2)*pi/180) 0];
+    posp=Xp([1 3 5]);
+    velp=Xp([2 4 6]);
+    cdrdotp=Xp(8);
+    ncop=Xp(9);
+%     obsLatLong=latlong(posp');
+%     vObs=OmegaE*norm(posp)*cos(obsLatLong(1)*pi/180)*[-sin(obsLatLong(2)*pi/180) cos(obsLatLong(2)*pi/180) 0];
+    vObs=cross([0 0 OmegaE],posp);
     velpe=velp+vObs';
     
     refTime=ephem(SVs,24);
@@ -410,6 +403,7 @@ function dopp=DopplerFromState(SVs,ephem,rho,satPos,satVel,time,X)
     rhohat=(satPos-ones(satellites,1)*posp')./(rho*ones(1,3));
     dopp=zeros(satellites,1);
     for s=1:satellites
-        dopp(s)=f0(s)*((X(8)-rhohat(s,:)*(satVel(s,:)'-velpe))/(c+rhohat(s,:)*(satVel(s,:)'-velpe))-delsdot(s));
+        dopp(s)=f0(s)*((cdrdotp-rhohat(s,:)*(satVel(s,:)'-velpe))/(c+rhohat(s,:)*(satVel(s,:)'-velpe))-delsdot(s));
     end
+    dopp=dopp+ncop;
 return;

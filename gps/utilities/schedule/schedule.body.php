@@ -92,7 +92,8 @@ class Schedule
                 return false;
             }
 
-            $start=$this->schedule[$dep][$type];
+            if(strcmp($type,"end")==0){ $start=$this->schedule[$dep]["finish"]; }
+            else { $start=$this->schedule[$dep][$type]; }
             if(strcmp($op,"")!=0){ $start+=(strcmp($op,"+")==0 ? $val : -$val)*SEC_PER_DAY; }
             $manualStart=true;
         }
@@ -114,7 +115,9 @@ class Schedule
                 return false;
             }
 
-            $start=$this->schedule[$dep][$type]-$event["length"]*SEC_PER_DAY;
+            if(strcmp($type,"end")==0){ $start=$this->schedule[$dep]["finish"]; }
+            else { $start=$this->schedule[$dep][$type]; }
+            $start-=$event["length"]*SEC_PER_DAY;
             if(strcmp($op,"")!=0){ $start+=(strcmp($op,"+")==0 ? $val : -$val)*SEC_PER_DAY; }
             $manualStart=true;
         }

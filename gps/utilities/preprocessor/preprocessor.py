@@ -7,6 +7,7 @@ import math
 
 #src imports
 from parser_defs import *
+from extra_functions import *
 
 #import pdb   #debugger
 
@@ -15,10 +16,13 @@ from parser_defs import *
 #Init a global printbuffer
 printbuffer = ""
 
+#Global tab-level variable
+tab_level = 1
+
 def main():
 
     global printbuffer
-
+    
     # Parse input args
     (args,list_mode,help_mode,ofile) = parseArgs()
 
@@ -66,7 +70,7 @@ def main():
         include_paths = list(set(include_paths))
 
         # Get the print buffer ready
-        pbuffer(False,"HEADERS=")
+        pbufferStr("HEADERS=")
 
         # Escape any spaces in the pathname
         includes = [inc_path.replace(" ","\ ") for inc_path in include_paths]
@@ -74,7 +78,7 @@ def main():
         # Add the include paths to the print buffer
         for path in include_paths:
             path = path[0:len(path) - 3] + ".csv"
-            pbuffer(False,path + " ")
+            pbufferStr(path + " ")
 
     # If in regular mode:
     else:       
@@ -134,12 +138,25 @@ def main():
 
 ###############################################################################
 
-# Print to the printbuffer
-def pbuffer(newlines,str):
+# Print a string (zero or more characters) to the printbuffer
+def pbufferStr(str):
     global printbuffer
-    printbuffer = printbuffer + str
-    if newlines:
-        printbuffer = printbuffer + "\n"
+    printbuffer = printbuffer + str     
+
+###############################################################################
+
+# Print a single char (1 character exactly) to the printbuffer
+def pbufferChar(char):
+    global printbuffer
+    printbuffer = printbuffer + char
+
+###############################################################################
+
+# Print a string to the printbuffer, with tab and newline options
+def pbuffer(str,suf="\n"):
+    global printbuffer 
+    global tab_level
+    printbuffer = printbuffer + (" " * TAB_SPACING * tab_level) + str + suf
 
 ###############################################################################
 
@@ -283,6 +300,9 @@ def parseHeader(hfile, hfile_path, var_dict):
 # Parse a source file, replace preprocessor tags, and write output file
 def parseSource(sfile, vars_dict):
 
+    global tab_level
+    tab_level = 1
+
     i = 0;                  #line counter
     in_v_comment = False;   #Flag for lines inside a verilog comment block
     in_p_block = False;     #Flag for lines inside a preprocessor block
@@ -295,6 +315,8 @@ def parseSource(sfile, vars_dict):
     pre_expr_begin_line = 0     # Line number of a preprocessor expression start
     line_count = 0              # Current line number
     char_count = 0              # Current character number (in line)
+    
+    tab_state = FOUND_          # State variable for tab state parser 
 
     pre_seg_buffer = ""         # Character buffer for preprocessor segments
     pre_expr_buffer = ""        # Character buffer for preprocessor expressions
@@ -307,43 +329,86 @@ def parseSource(sfile, vars_dict):
 
         # DEFAULT
         if state == DEFAULT:
+
+            # Run tab-level state machine
+            if tab_state == FOUND_:
+                if char == "b":
+                    tab_state = FOUND_B
+                elif char == "e":
+                    tab_state = FOUND_E
+
+            elif tab_state == FOUND_B:
+                if char == "e":
+                    tab_state = FOUND_BE
+                else:
+                    tab_state = FOUND_
+
+            elif tab_state == FOUND_BE:
+                if char == "g":
+                    tab_state = FOUND_BEG
+                else: 
+                    tab_state = FOUND_
+
+            elif tab_state == FOUND_BEG:
+                if char == "i":
+                    tab_state = FOUND_BEGI
+                else:
+                    tab_state = FOUND_
+
+            elif tab_state == FOUND_BEGI:
+                if char == "n":
+                    tab_level += 1
+                tab_state = FOUND_
+
+            elif tab_state == FOUND_E:
+                if char == "n":
+                    tab_state = FOUND_EN
+                else:
+                    tab_state = FOUND_
+
+            elif tab_state == FOUND_EN:
+                if char == "d":
+                    tab_level -= 1
+                tab_state = FOUND_
+
+            # Now run the main state machine code for DEFAULT    
             if char == "/":
                 state = DEF_FOUND_FSLASH
-                pbuffer(False,char)
+                pbufferChar(char)
             elif char == "%":
                 state = PRE_COM
             elif char == "`":
                 state = DEFINE
-                pbuffer(False,char)
+                pbufferChar(char)
             elif char == "<":
                 state = DEF_FOUND_LCARET
             else:
-                pbuffer(False,char)
+                pbufferChar(char)
 
         # DEF_FOUND_FSLASH
         elif state == DEF_FOUND_FSLASH:
             if char == "*":
                 state = V_COM
                 v_com_begin_line = line_count
-                pbuffer(False,char)
+                pbufferChar(char)
             elif char == "/":
                 state = V_COM_LINE
-                pbuffer(False,char)
+                pbufferChar(char)
             else:
                 state = DEFAULT
-                pbuffer(False,char)
+                pbufferChar(char)
 
         # V_COM_LINE
         elif state == V_COM_LINE:
             if char == "\n":
                 state = DEFAULT
-            pbuffer(False,char)
+            pbufferChar(char)
         
         # V_COM
         elif state == V_COM:
             if char == "*":
                 state = V_COM_FOUND_AST
-            pbuffer(False,char)
+            pbufferChar(char)
 
         # V_COM_FOUND_AST       
         elif state == V_COM_FOUND_AST:
@@ -351,14 +416,14 @@ def parseSource(sfile, vars_dict):
                 state = DEFAULT
             elif not char == "*":
                 state = V_COM
-            pbuffer(False,char)    
+            pbufferChar(char)    
 
         # DEFINE
         elif state == DEFINE:
             if char == "\n":
                 state = DEFAULT
                 parseDefine(define_buffer,vars_dict)
-                pbuffer(True,define_buffer)
+                pbufferStr(define_buffer + "\n")
                 define_buffer = ""
             else:
                 define_buffer = define_buffer + char
@@ -370,7 +435,7 @@ def parseSource(sfile, vars_dict):
                 pre_seg_begin_line = line_count
             else:
                 state = DEFAULT
-                pbuffer(False, "<" + char)  # have to put a < because prev state didn't write one 
+                pbufferStr("<" + char)  # have to put a < because prev state didn't write one 
         
         # PRE_COM
         elif state == PRE_COM:
@@ -406,7 +471,7 @@ def parseSource(sfile, vars_dict):
         elif state == PRE_FOUND_QUEST:
             if char == ">":
                 state = DEFAULT
-                parsePreSeg(pre_seg_buffer, vars_dict)
+                parsePreSeg(pre_seg_buffer, pre_seg_begin_line, vars_dict)
                 pre_seg_buffer = ""
             else:
                 state = PRE_SEG
@@ -534,32 +599,44 @@ def parsePreExpr(expr_str,pre_seg_buffer,vars_dict):
 
 # Parse a preprocessor segment and write the resulting Verilog code to the 
 # output file
-def parsePreSeg(seg_str,vars_dict):
+# IMPORTANT NOTE: All temp. vars in this method must have the prefix "pp_" to 
+# prevent scope problems in code execution
+def parsePreSeg(pp_seg_str, pp_line, pp_vars_dict):
 
     # Strip whitespace
-    seg_str = seg_str.strip()
+    pp_seg_str = pp_seg_str.strip()
 
-    # Replace any defined variables using regex search & replace
-    for var in vars_dict:
-        regex = re.compile("`"+var)
-        replacement = vars_dict.get(var)[0]
-        seg_str = regex.sub(replacement,seg_str)
+    # Process the lines of pp_seg_str
+    pp_seg_str_lines = pp_seg_str.split("\n")
+    new_pp_seg_str_lines = []
+
+    pp_print_regex = re.compile("print\(")
+    for line in pp_seg_str_lines:
+        if not pp_print_regex.search(line):
+            # Replace any defined variables using regex search & replace
+            i = 0
+            for pp_var in pp_vars_dict:                
+                pp_regex = re.compile("`"+pp_var)
+                pp_replacement = pp_vars_dict.get(pp_var)[0]
+                line = pp_regex.sub(pp_replacement, line)
+        new_pp_seg_str_lines.append(line)
+
+    # Join the lines back together
+    pp_seg_str = "\n".join(new_pp_seg_str_lines)
 
     # Get rid of carriage return
-    regex = re.compile(".\n")
-    regex2 = re.compile("\r")    
-    seg_str = regex.sub("\n",seg_str)
-    seg_str = regex2.sub("",seg_str)
+    pp_regex = re.compile("\r")    
+    pp_seg_str = pp_regex.sub("",pp_seg_str)
 
     # Replace "print(" with "pbuffer("
-    regex = re.compile("print\(")
-    seg_str = regex.sub("pbuffer(False,",seg_str)
+    pp_regex = re.compile("print\(")
+    pp_seg_str = pp_regex.sub("pbuffer(", pp_seg_str)
 
     # Execute the segment
     try:
-        exec(seg_str)
+        exec(pp_seg_str)
     except:
-        print "Error executing the following code:\n" + seg_str
+        print "Error executing the following code (beginning at line " + `pp_line` + "):\n" + pp_seg_str
         sys.exit(1)
 
 ###############################################################################

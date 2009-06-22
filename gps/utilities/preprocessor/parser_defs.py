@@ -1,16 +1,14 @@
 import re
 import string
 
+#TAB SPACING FOR PRINTED TEXT
+TAB_SPACING = 4
+
 #Compile regexes
 verilogConstant = re.compile("^('[dhb])")
 hexValue = re.compile("^(\\d+[A-Fa-f][A-Fa-f0-9]*)")
 number = re.compile("^(\\d+(\\.\\d+)?(e-?\\d+)?)")
 qualifiedName = re.compile("^(`?[A-Za-z_]\\w*)")
-
-# decimal to binary converter
-d2b = lambda n: n>0 and d2b(n>>1).lstrip('0')+str(n&1) or '0'
-
-#Define constants:
 
 #Source parser state machine states:
 DEFAULT          = 1;
@@ -25,6 +23,20 @@ PRE_SEG          = 9;
 PRE_EXPR         = 10;
 PRE_FOUND_QUEST  = 11;
 PRE_FOUND_LCARET = 12;
+
+#tab-level tracker states
+#begin
+FOUND_B          = 13;
+FOUND_BE         = 14;
+FOUND_BEG        = 15;
+FOUND_BEGI       = 16;
+#end
+FOUND_E          = 17;
+FOUND_EN         = 18;
+#default
+FOUND_           = 19;
+
+#Error state
 ERROR            = -1;
 
 #State machine dict: (for debugging!)
@@ -40,6 +52,13 @@ state_dict = {"1":"DEFAULT",
               "10":"PRE_EXPR",
               "11":"PRE_FOUND_QUEST",
               "12":"PRE_FOUND_LCARET",
+              "13":"FOUND_B",
+              "14":"FOUND_BE",
+              "15":"FOUND_BEG",
+              "16":"FOUND_BEGI",
+              "17":"FOUND_E",
+              "18":"FOUND_EN",
+              "19":"FOUND_",
               "-1":"ERROR"}
 
 #Preprocessor expression state machine states:

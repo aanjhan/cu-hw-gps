@@ -1,4 +1,5 @@
 #include <iostream>
+#include <boost/regex.hpp>
 #include <boost/program_options.hpp>
 #include <vector>
 #include <map>

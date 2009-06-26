@@ -84,6 +84,8 @@ private:
 
     const static boost::regex hexValue;
     const static boost::regex number;
+    const static boost::regex integer;
+    const static boost::regex decimal;
 
     static std::string Evaluate(TreeNode *tree, std::map<std::string,Expression*> &vars) throw(ExpressionError);
     static double EvalValue(const std::string &valueString);

@@ -9,6 +9,8 @@ using namespace StringHelper;
 
 const boost::regex Expression::hexValue("^([A-Fa-f0-9]+)$");
 const boost::regex Expression::number("^(\\d+(\\.\\d+)?)(e(-?\\d+))?$");
+const boost::regex Expression::integer("^(\\d+)\\.0+$");
+const boost::regex Expression::decimal("^(\\d+\\.\\d*[1-9])0+$");
 
 Expression::~Expression()
 {
@@ -145,12 +147,16 @@ std::string Expression::Evaluate(TreeNode *tree, std::map<std::string,Expression
 
     if(useValue)
     {
-        double diff;
-        diff=value-floor(value+0.5);
-        if(diff<=1e-4)return ToString((int64_t)floor(value+0.5));
-        else return ToString(value);
+        stringValue=ToString(value);
+        boost::smatch m;
+        if(boost::regex_match(stringValue,m,integer) ||
+           boost::regex_match(stringValue,m,decimal))
+        {
+            stringValue=m[1];
+        }
     }
-    else return stringValue;
+    
+    return stringValue;
 }
 
 double Expression::EvalValue(const std::string &valueString)

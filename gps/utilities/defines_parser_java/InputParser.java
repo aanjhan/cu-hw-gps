@@ -177,7 +177,7 @@ public class InputParser
                 if(m.start(4)>=0)
                 {
                     String comment=m.group(4);
-                    entry.comments=newLine.matcher(comment).replaceAll("\\n");
+                    entry.comments=newLine.matcher(comment).replaceAll("\n");
                 }
                 vars.put(variable,entry);
             }

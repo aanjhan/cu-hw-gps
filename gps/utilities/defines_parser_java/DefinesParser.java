@@ -131,7 +131,8 @@ public class DefinesParser {
                             if(!entry.comments.equals(""))
                             {
                                 output+="//";
-                                output+=entry.comments.replaceAll("\\n","\\n//");
+                                System.out.println(variable+": "+entry.comments);
+                                output+=entry.comments.replaceAll("\\n","\n//");
                                 output+="\n";
                             }
                             output+="`ifndef "+variable+"\n";

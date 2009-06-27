@@ -157,7 +157,7 @@ public class Expression
 
         if(useValue)
         {
-            stringValue=String.valueOf(value);
+            stringValue=String.format("%f",value);
             Matcher m;
             if((m=integer.matcher(stringValue)).matches() ||
                (m=decimal.matcher(stringValue)).matches())

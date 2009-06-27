@@ -131,7 +131,6 @@ public class DefinesParser {
                             if(!entry.comments.equals(""))
                             {
                                 output+="//";
-                                System.out.println(variable+": "+entry.comments);
                                 output+=entry.comments.replaceAll("\\n","\n//");
                                 output+="\n";
                             }

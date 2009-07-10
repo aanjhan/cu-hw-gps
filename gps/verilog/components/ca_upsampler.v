@@ -7,11 +7,14 @@ module ca_upsampler(
     input                  enable,
     input [4:0]            prn,
     output reg [`CS_RANGE] code_shift,
-    output                 out,
+    output                 out_early,
+    output                 out_prompt,
+    output                 out_late,
     //Seek control.
     input                  seek_en,
     input [`CS_RANGE]      seek_target,
     output wire            seeking,
+    output wire            target_reached,
     //Debug outputs.
     output wire            ca_clk,
     output wire [9:0]      ca_code_shift);
@@ -31,7 +34,6 @@ module ca_upsampler(
    //The seek target has been reached when
    //the current code shift is equal to
    //the target value.
-   wire target_reached;
    assign target_reached = code_shift==seek_target;
 
    //We are seeking when seeking has been
@@ -52,7 +54,7 @@ module ca_upsampler(
                         .out(ca_clk_en_km1));
 
    always @(posedge clk) begin
-      code_shift <= reset ? {`CS_WIDTH{1'b0}} :
+      code_shift <= reset ? `CS_RESET_VALUE :
                     !ca_clk_en_km1 ? code_shift :
                     next_code_shift;
    end
@@ -60,7 +62,7 @@ module ca_upsampler(
    //Reset the C/A DDS unit at code shift
    //wrap-around to maintain code alignment.
    wire ca_clk_reset;
-   assign ca_clk_reset = code_shift==`MAX_CODE_SHIFT;
+   assign ca_clk_reset = code_shift==`CS_RESET_VALUE;
    
    //Generate C/A code clock from reference
    //clock signal.
@@ -86,5 +88,20 @@ module ca_upsampler(
                        .enable(ca_clk),
                        .prn(prn),
                        .code_shift(ca_code_shift),
-                       .out(out));
+                       .out(out_early));
+
+   //Delay early code for prompt and late.
+   delay_en #(.DELAY(`CHIPS_LEAD_LAG))
+     bit_delay_prompt(.clk(clk),
+                      .reset(reset),
+                      .enable(ca_clk_en_km1),
+                      .in(out_early),
+                      .out(out_prompt));
+   
+   delay_en #(.DELAY(`CHIPS_LEAD_LAG))
+     bit_delay_late(.clk(clk),
+                    .reset(reset),
+                    .enable(ca_clk_en_km1),
+                    .in(out_prompt),
+                    .out(out_late));
 endmodule

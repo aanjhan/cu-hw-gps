@@ -4,7 +4,7 @@
 `include "cos.vh"
 `include "sin.vh"
 
-//`define DEBUG
+`define DEBUG
 `include "debug.vh"
 
 //`define DISABLE_CARRIER
@@ -24,6 +24,7 @@ module subchannel(
     input                      seek_en,
     input [`CS_RANGE]          seek_target,
     output wire                seeking,
+    output wire                target_reached,
     output wire [`CS_RANGE]    code_shift,
     //Outputs.
     output wire                accumulator_updating,
@@ -36,15 +37,19 @@ module subchannel(
     output wire [9:0]          ca_code_shift);
 
    //Upsample the C/A code to the incoming sampling rate.
+   wire ca_bit_early, ca_bit_late;
    ca_upsampler upsampler(.clk(clk),
                           .reset(global_reset),
                           .enable(data_available),
                           .prn(prn),
                           .code_shift(code_shift),
-                          .out(ca_bit),
+                          .out_early(ca_bit_early),
+                          .out_prompt(ca_bit),
+                          .out_late(ca_bit_late),
                           .seek_en(seek_en),
                           .seek_target(seek_target),
                           .seeking(seeking),
+                          .target_reached(target_reached),
                           .ca_clk(ca_clk),
                           .ca_code_shift(ca_code_shift));
 

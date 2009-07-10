@@ -2,9 +2,9 @@
 `include "acquisition_controller.vh"
 `include "channel__acquisition_controller.vh"
 
-//`define DEBUG
-`include "debug.vh"
 `define DEBUG
+`include "debug.vh"
+//`define DEBUG
 
 `ifdef DEBUG
  `undef MAX_CODE_SHIFT
@@ -28,12 +28,14 @@ module acquisition_controller(
     input                           global_reset,
     //Acquisiton control.
     input [`MODE_RANGE]             mode,
+    input                           feed_reset,
     output reg [`DOPPLER_INC_RANGE] doppler_early,
     output reg [`DOPPLER_INC_RANGE] doppler_prompt,
     output reg [`DOPPLER_INC_RANGE] doppler_late,
     output reg                      seek_en,
     output reg [`CS_RANGE]          code_shift,
     input                           seeking,
+    input                           target_reached,
     //Accumulation results.
     input                           accumulation_complete,
     input                           i2q2_valid,
@@ -77,31 +79,27 @@ module acquisition_controller(
                             .out(acc_complete_km1));
 
    wire seek_complete;
-   assign seek_complete = !seeking && acc_complete_km1;
+   strobe seek_complete_strobe(.clk(clk),
+                               .reset(global_reset),
+                               .in(!seeking),
+                               .out(seek_complete));
+   //assign seek_complete = !seeking && acc_complete_km1;
    
    //A single search is active when its seek target has
    //been reached immediately following the completion
    //of an accumulation.
-   reg active;
+   `PRESERVE reg active;
    always @(posedge clk) begin
       active <= global_reset ? 1'b0 :
                 !acq_active ? 1'b0 :
-                seek_en && seek_complete ? 1'b1 :
+                feed_reset && target_reached ? 1'b1 :
                 accumulation_complete ? 1'b0 :
                 active;
    end
 
-   reg ignore_return;
-   always @(posedge clk) begin
-      ignore_return <= global_reset ? 1'b0 :
-                       !active && i2q2_valid ? 1'b1 :
-                       i2q2_valid ? 1'b0 :
-                       ignore_return;
-   end
-
    //Only advance the current code shift and Doppler
    //when a currently active accumulation finishes.
-   wire advance;
+   `KEEP wire advance;
    assign advance = active && accumulation_complete;
 
    //Reset code shift after hitting maximum value.
@@ -114,7 +112,9 @@ module acquisition_controller(
    //right away to stop the code generator from updating
    //when inactive.
    always @(posedge clk) begin
-      seek_en <= accumulation_complete ? 1'b1 :
+      seek_en <= target_reached ? 1'b0 :
+                 start_acq ? 1'b1 :
+                 accumulation_complete ? 1'b1 :
                  seek_complete ? 1'b0 :
                  seek_en;
       
@@ -154,21 +154,23 @@ module acquisition_controller(
       prev_doppler_late <= advance ? doppler_late : prev_doppler_late;
    end
 
-   reg ignore_update;
+   //If the search wasn't active ignore the returned
+   //I2Q2 values.
+   /*`PRESERVE reg ignore_update;
    always @(posedge clk) begin
       ignore_update <= global_reset ? 1'b0 :
                        restarting ? 1'b1 :
-                       !active && i2q2_valid ? 1'b1 :
+                       !active && accumulation_complete ? 1'b1 :
                        i2q2_valid ? 1'b0 :
                        ignore_update;
-   end
+   end*/
 
    `KEEP wire peak_update_pending;
    flag peak_update_flag(.clk(clk),
                          .reset(global_reset),
                          .clear(i2q2_valid),
                          .set(accumulation_complete &&
-                              !ignore_update &&
+                              active &&
                               acq_active),
                          .out(peak_update_pending));
    

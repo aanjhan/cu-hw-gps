@@ -1,10 +1,10 @@
 `include "../components/global.vh"
 `include "top__channel.vh"
 
-//`define DEBUG
+`define DEBUG
 `include "../components/debug.vh"
 
-//`define HIGH_SPEED
+`define HIGH_SPEED
 
 `include "../components/subchannel.vh"
 
@@ -85,6 +85,7 @@ module top(
    channel channel_0(.clk(clk),
                      .global_reset(global_reset),
                      .mode(mode),
+                     .feed_reset(feed_reset_sync),
                      .data_available(data_available),
                      .feed_complete(feed_complete_sync),
                      .data(data_sync),

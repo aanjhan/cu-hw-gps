@@ -4,7 +4,7 @@
 `include "channel__acquisition_controller.vh"
 `include "top__channel.vh"
 
-//`define DEBUG
+`define DEBUG
 `include "debug.vh"
 
 module channel(
@@ -13,6 +13,7 @@ module channel(
     input [`MODE_RANGE]              mode,
     //Sample data.
     input                            data_available,
+    input                            feed_reset,
     input                            feed_complete,
     input [`INPUT_RANGE]             data,
     //Carrier control.
@@ -24,7 +25,12 @@ module channel(
     input                            seek_en,
     input [`CS_RANGE]                seek_target,
     output wire [`CS_RANGE]          code_shift,
-    //Outputs.
+    //Acquisition results.
+    output wire                      acquisition_complete,
+    output wire [`I2Q2_RANGE]        acq_peak_i2q2,
+    output wire [`DOPPLER_INC_RANGE] acq_peak_doppler,
+    output wire [`CS_RANGE]          acq_peak_code_shift,
+    //Accumulation debug outputs.
     output wire                      accumulator_updating,
     output wire [`ACC_RANGE]         accumulator_i,
     output wire [`ACC_RANGE]         accumulator_q,
@@ -33,11 +39,6 @@ module channel(
     output reg [`I2Q2_RANGE]         i2q2_early,
     output reg [`I2Q2_RANGE]         i2q2_prompt,
     output reg [`I2Q2_RANGE]         i2q2_late,
-    //Acquisition results.
-    output wire                      acquisition_complete,
-    output wire [`I2Q2_RANGE]        acq_peak_i2q2,
-    output wire [`DOPPLER_INC_RANGE] acq_peak_doppler,
-    output wire [`CS_RANGE]          acq_peak_code_shift,
     //Debug outputs.
     output wire                      ca_bit,
     output wire                      ca_clk,
@@ -50,15 +51,18 @@ module channel(
    `KEEP wire                      acq_seek_en;
    `KEEP wire [`CS_RANGE]          acq_seek_target;
    `KEEP wire                      seeking;
+   `KEEP wire                      target_reached;
    acquisition_controller acq_controller(.clk(clk),
                                          .global_reset(global_reset),
                                          .mode(mode),
+                                         .feed_reset(feed_reset),
                                          .doppler_early(acq_dopp_early),
                                          .doppler_prompt(acq_dopp_prompt),
                                          .doppler_late(acq_dopp_late),
                                          .seek_en(acq_seek_en),
                                          .code_shift(acq_seek_target),
                                          .seeking(seeking),
+                                         .target_reached(target_reached),
                                          .accumulation_complete(accumulation_complete),
                                          .i2q2_valid(i2q2_valid),
                                          .i2q2_early(i2q2_early),
@@ -78,7 +82,7 @@ module channel(
    wire early_updating, early_complete;
    `KEEP wire [`ACC_RANGE] acc_i_early, acc_q_early;
    wire [`CS_RANGE] code_shift_early;
-   wire seeking_early;
+   wire seeking_early, target_reached_early;
    wire ca_bit_early, ca_clk_early;
    wire [9:0] ca_code_shift_early;
    subchannel early(.clk(clk),
@@ -92,6 +96,7 @@ module channel(
                     .seek_en(mode==`MODE_ACQ ? acq_seek_en : seek_en),
                     .seek_target(mode==`MODE_ACQ ? acq_seek_target : seek_target),
                     .seeking(seeking_early),
+                    .target_reached(target_reached_early),
                     .code_shift(code_shift_early),
                     .accumulator_updating(early_updating),
                     .accumulator_i(acc_i_early),
@@ -104,7 +109,7 @@ module channel(
    //Prompt subchannel.
    `KEEP wire prompt_updating, prompt_complete;
    `KEEP wire [`ACC_RANGE] acc_i_prompt, acc_q_prompt;
-   wire seeking_prompt;
+   wire seeking_prompt, target_reached_prompt;
    subchannel prompt(.clk(clk),
                      .global_reset(global_reset),
                      .clear(clear_subchannels),
@@ -116,6 +121,7 @@ module channel(
                      .seek_en(mode==`MODE_ACQ ? acq_seek_en : seek_en),
                      .seek_target(mode==`MODE_ACQ ? acq_seek_target : seek_target),
                      .seeking(seeking_prompt),
+                     .target_reached(target_reached_prompt),
                      .code_shift(code_shift),
                      .accumulator_updating(prompt_updating),
                      .accumulator_i(acc_i_prompt),
@@ -129,13 +135,13 @@ module channel(
    assign accumulator_q = acc_q_prompt;
    assign accumulation_complete = prompt_complete;
    assign seeking = seeking_prompt;
-   
+   assign target_reached = target_reached_prompt;
    
    //Late subchannel.
    wire late_updating, late_complete;
    `KEEP wire [`ACC_RANGE] acc_i_late, acc_q_late;
    wire [`CS_RANGE] code_shift_late;
-   wire seeking_late;
+   wire seeking_late, target_reached_late;
    wire ca_bit_late, ca_clk_late;
    wire [9:0] ca_code_shift_late;
    subchannel late(.clk(clk),
@@ -149,6 +155,7 @@ module channel(
                    .seek_en(mode==`MODE_ACQ ? acq_seek_en : seek_en),
                    .seek_target(mode==`MODE_ACQ ? acq_seek_target : seek_target),
                    .seeking(seeking_late),
+                   .target_reached(target_reached_late),
                    .code_shift(code_shift_late),
                    .accumulator_updating(late_updating),
                    .accumulator_i(acc_i_late),

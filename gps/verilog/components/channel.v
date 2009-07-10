@@ -73,6 +73,24 @@ module channel(
                                          .peak_doppler(acq_peak_doppler),
                                          .peak_code_shift(acq_peak_code_shift));
 
+   //Upsample the C/A code to the incoming sampling rate.
+   wire ca_bit_early, ca_bit_prompt, ca_bit_late;
+   ca_upsampler upsampler(.clk(clk),
+                          .reset(global_reset),
+                          .enable(data_available),
+                          .prn(prn),
+                          .code_shift(code_shift),
+                          .out_early(ca_bit_early),
+                          .out_prompt(ca_bit_prompt),
+                          .out_late(ca_bit_late),
+                          .seek_en(mode==`MODE_ACQ ? acq_seek_en : seek_en),
+                          .seek_target(mode==`MODE_ACQ ? acq_seek_target : seek_target),
+                          .seeking(seeking),
+                          .target_reached(target_reached),
+                          .ca_clk(ca_clk),
+                          .ca_code_shift(ca_code_shift));
+   assign ca_bit = ca_bit_prompt;
+
    //Reset subchannels immediately after accumulation
    //has finished.
    wire clear_subchannels;
@@ -81,10 +99,6 @@ module channel(
    //Early subchannel.
    wire early_updating, early_complete;
    `KEEP wire [`ACC_RANGE] acc_i_early, acc_q_early;
-   wire [`CS_RANGE] code_shift_early;
-   wire seeking_early, target_reached_early;
-   wire ca_bit_early, ca_clk_early;
-   wire [9:0] ca_code_shift_early;
    subchannel early(.clk(clk),
                     .global_reset(global_reset),
                     .clear(clear_subchannels),
@@ -92,24 +106,15 @@ module channel(
                     .feed_complete(feed_complete),
                     .data(data),
                     .doppler(mode==`MODE_ACQ ? acq_dopp_early : doppler_early),
-                    .prn(prn),
-                    .seek_en(mode==`MODE_ACQ ? acq_seek_en : seek_en),
-                    .seek_target(mode==`MODE_ACQ ? acq_seek_target : seek_target),
-                    .seeking(seeking_early),
-                    .target_reached(target_reached_early),
-                    .code_shift(code_shift_early),
+                    .ca_bit(mode==`MODE_ACQ ? ca_bit_prompt : ca_bit_early),
                     .accumulator_updating(early_updating),
                     .accumulator_i(acc_i_early),
                     .accumulator_q(acc_q_early),
-                    .accumulation_complete(early_complete),
-                    .ca_bit(ca_bit_early),
-                    .ca_clk(ca_clk_early),
-                    .ca_code_shift(ca_code_shift_early));
+                    .accumulation_complete(early_complete));
    
    //Prompt subchannel.
    `KEEP wire prompt_updating, prompt_complete;
    `KEEP wire [`ACC_RANGE] acc_i_prompt, acc_q_prompt;
-   wire seeking_prompt, target_reached_prompt;
    subchannel prompt(.clk(clk),
                      .global_reset(global_reset),
                      .clear(clear_subchannels),
@@ -117,33 +122,19 @@ module channel(
                      .feed_complete(feed_complete),
                      .data(data),
                      .doppler(mode==`MODE_ACQ ? acq_dopp_prompt : doppler_prompt),
-                     .prn(prn),
-                     .seek_en(mode==`MODE_ACQ ? acq_seek_en : seek_en),
-                     .seek_target(mode==`MODE_ACQ ? acq_seek_target : seek_target),
-                     .seeking(seeking_prompt),
-                     .target_reached(target_reached_prompt),
-                     .code_shift(code_shift),
+                     .ca_bit(ca_bit_prompt),
                      .accumulator_updating(prompt_updating),
                      .accumulator_i(acc_i_prompt),
                      .accumulator_q(acc_q_prompt),
-                     .accumulation_complete(prompt_complete),
-                     .ca_bit(ca_bit),
-                     .ca_clk(ca_clk),
-                     .ca_code_shift(ca_code_shift));
+                     .accumulation_complete(prompt_complete));
    assign accumulator_updating = prompt_updating;
    assign accumulator_i = acc_i_prompt;
    assign accumulator_q = acc_q_prompt;
    assign accumulation_complete = prompt_complete;
-   assign seeking = seeking_prompt;
-   assign target_reached = target_reached_prompt;
    
    //Late subchannel.
    wire late_updating, late_complete;
    `KEEP wire [`ACC_RANGE] acc_i_late, acc_q_late;
-   wire [`CS_RANGE] code_shift_late;
-   wire seeking_late, target_reached_late;
-   wire ca_bit_late, ca_clk_late;
-   wire [9:0] ca_code_shift_late;
    subchannel late(.clk(clk),
                    .global_reset(global_reset),
                    .clear(clear_subchannels),
@@ -151,19 +142,11 @@ module channel(
                    .feed_complete(feed_complete),
                    .data(data),
                    .doppler(mode==`MODE_ACQ ? acq_dopp_late : doppler_late),
-                   .prn(prn),
-                   .seek_en(mode==`MODE_ACQ ? acq_seek_en : seek_en),
-                   .seek_target(mode==`MODE_ACQ ? acq_seek_target : seek_target),
-                   .seeking(seeking_late),
-                   .target_reached(target_reached_late),
-                   .code_shift(code_shift_late),
+                   .ca_bit(mode==`MODE_ACQ ? ca_bit_prompt : ca_bit_late),
                    .accumulator_updating(late_updating),
                    .accumulator_i(acc_i_late),
                    .accumulator_q(acc_q_late),
-                   .accumulation_complete(late_complete),
-                   .ca_bit(ca_bit_late),
-                   .ca_clk(ca_clk_late),
-                   .ca_code_shift(ca_code_shift_late));
+                   .accumulation_complete(late_complete));
 
    //Take the absolute value of I and Q accumulations.
    wire [`ACC_MAG_RANGE] i_early_mag;

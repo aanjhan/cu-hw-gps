@@ -17,41 +17,14 @@ module subchannel(
     input                      data_available,
     input                      feed_complete,
     input [`INPUT_RANGE]       data,
-    //Carrier control.
+    //Carrier and code control.
     input [`DOPPLER_INC_RANGE] doppler,
-    //Code control.
-    input [4:0]                prn,
-    input                      seek_en,
-    input [`CS_RANGE]          seek_target,
-    output wire                seeking,
-    output wire                target_reached,
-    output wire [`CS_RANGE]    code_shift,
+    input                      ca_bit,
     //Outputs.
     output wire                accumulator_updating,
     output wire [`ACC_RANGE]   accumulator_i,
     output wire [`ACC_RANGE]   accumulator_q,
-    output wire                accumulation_complete,
-    //Debug outputs.
-    output wire                ca_bit,
-    output wire                ca_clk,
-    output wire [9:0]          ca_code_shift);
-
-   //Upsample the C/A code to the incoming sampling rate.
-   wire ca_bit_early, ca_bit_late;
-   ca_upsampler upsampler(.clk(clk),
-                          .reset(global_reset),
-                          .enable(data_available),
-                          .prn(prn),
-                          .code_shift(code_shift),
-                          .out_early(ca_bit_early),
-                          .out_prompt(ca_bit),
-                          .out_late(ca_bit_late),
-                          .seek_en(seek_en),
-                          .seek_target(seek_target),
-                          .seeking(seeking),
-                          .target_reached(target_reached),
-                          .ca_clk(ca_clk),
-                          .ca_code_shift(ca_code_shift));
+    output wire                accumulation_complete);
 
    //Delay accumulation 3 cycles to allow
    //for C/A upsampler to update. Delay 1

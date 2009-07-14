@@ -12,8 +12,8 @@ public class Expression
 {
     private static final Pattern hexValue=Pattern.compile("^([A-Fa-f0-9]+)$");
     private static final Pattern number=Pattern.compile("^(\\d+(\\.\\d+)?)(e(-?\\d+))?$");
-    private static final Pattern integer=Pattern.compile("^(\\d+)\\.0+$");
-    private static final Pattern decimal=Pattern.compile("^(\\d+\\.\\d*[1-9])0+$");
+    private static final Pattern integer=Pattern.compile("^(\\d+)\\.0+ *$");
+    private static final Pattern decimal=Pattern.compile("^(\\d+\\.\\d*[1-9])0+ *$");
     
     private String value;
     private boolean evaluated;
@@ -157,7 +157,7 @@ public class Expression
 
         if(useValue)
         {
-            stringValue=String.format("%f",value);
+            stringValue=String.format("%-1.15f",value);
             Matcher m;
             if((m=integer.matcher(stringValue)).matches() ||
                (m=decimal.matcher(stringValue)).matches())

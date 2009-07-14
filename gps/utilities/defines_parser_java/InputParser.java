@@ -134,7 +134,7 @@ public class InputParser
             }
             else if(!(m=csvLine.matcher(line)).matches())
             {
-                InputErrors.PrintError(currentFile,lineCount,"syntax error.");
+                InputErrors.PrintError(currentFile,lineCount,"unrecognized input format.");
                 errorCount++;
                 continue;
             }

@@ -7,7 +7,7 @@ module DE2_TOP (
     input  [3:0]  KEY,         // Pushbutton[3:0]
     // DPDT Switch
     input  [17:0] SW,          // Toggle Switch[17:0]
-    // 7-SEG Dispaly
+    // 7-SEG Display
     output [6:0]  HEX0,        // Seven Segment Digit 0
     output [6:0]  HEX1,        // Seven Segment Digit 1
     output [6:0]  HEX2,        // Seven Segment Digit 2
@@ -126,21 +126,21 @@ module DE2_TOP (
     inout  [35:0] GPIO_1       // GPIO Connection 1
 );
 
-   // Turn on all display
-   assign HEX0 = 7'h00;
-   assign HEX1 = 7'h00;
-   assign HEX2 = 7'h00;
-   assign HEX3 = 7'h00;
-   assign HEX4 = 7'h00;
-   assign HEX5 = 7'h00;
-   assign HEX6 = 7'h00;
-   assign HEX7 = 7'h00;
-   assign LEDR      = 18'h3FFFF;
-   assign LEDG      = 9'h1FF;
-   assign LCD_ON    = 1'b1;
-   assign LCD_BLON  = 1'b1;
+   //Turn off all displays.
+   assign HEX0 = 7'hFF;
+   assign HEX1 = 7'hFF;
+   assign HEX2 = 7'hFF;
+   assign HEX3 = 7'hFF;
+   assign HEX4 = 7'hFF;
+   assign HEX5 = 7'hFF;
+   assign HEX6 = 7'hFF;
+   assign HEX7 = 7'hFF;
+   assign LEDR      = 18'h0;
+   assign LEDG      = 9'h0;
+   assign LCD_ON    = 1'b0;
+   assign LCD_BLON  = 1'b0;
    
-   // All inout port turn to tri-state
+   //Set all inout ports to tri-state.
    assign DRAM_DQ   = 16'hzzzz;
    assign FL_DQ     = 8'hzz;
    assign SRAM_DQ   = 16'hzzzz;

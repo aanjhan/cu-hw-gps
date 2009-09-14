@@ -33,14 +33,19 @@ public class DefinesParser {
         
         if(o.Get("help").matched)
         {
+            System.out.println(packageName+" version "+version+".");
+            System.out.println("");
             System.out.println("Usage: java DefinesParser.jar [OPTION]... [FILE]...");
-            System.out.println("Generate verilog include file from XML variable");
+            System.out.println("");
+            System.out.println("Generate a verilog include file from a CSV variable");
             System.out.println("definitions file.");
             System.out.println("");
             System.out.println(o.ToString());
             System.out.println("If supplied, input is read from the listed files.");
             System.out.println("By default, input is taken from stdin and output");
             System.out.println("is written to stdout.");
+            System.out.println("");
+            System.out.println("Written by Adam Shapiro <ams348@cornell.edu>.");
             System.exit(0);
         }
         else if(o.Get("version").matched)

@@ -4,6 +4,7 @@ import csv
 import os
 import string
 import math
+import traceback
 
 #src imports
 from parser_defs import *
@@ -30,8 +31,6 @@ def main():
     if help_mode:
         print HELP_STRING
         sys.exit(1)
-
-  #  try:
 
     # If in list mode:
     if list_mode:
@@ -336,6 +335,8 @@ def parseSource(sfile, vars_dict):
                     tab_state = FOUND_B
                 elif char == "e":
                     tab_state = FOUND_E
+                elif char == 'c':
+                    tab_state = FOUND_C
 
             elif tab_state == FOUND_B:
                 if char == "e":
@@ -357,7 +358,13 @@ def parseSource(sfile, vars_dict):
 
             elif tab_state == FOUND_BEGI:
                 if char == "n":
-                    tab_level += 1
+                    tab_state = FOUND_BEGIN
+                else:
+                    tab_state = FOUND_
+
+            elif tab_state == FOUND_BEGIN:
+                if (not char.isalnum()) and char != '_':
+                     tab_level += 1
                 tab_state = FOUND_
 
             elif tab_state == FOUND_E:
@@ -368,9 +375,65 @@ def parseSource(sfile, vars_dict):
 
             elif tab_state == FOUND_EN:
                 if char == "d":
+                    tab_state = FOUND_END
+                else:
+                    tab_state = FOUND_
+
+            elif tab_state == FOUND_END:
+                if (not char.isalnum()) and char != '_':
+                    tab_state = FOUND_
+                    tab_level -= 1
+                elif char == 'c':
+                    tab_state = FOUND_ENDC
+                else:
+                    tab_state = FOUND_
+
+            elif tab_state == FOUND_ENDC:
+                if char == 'a':
+                    tab_state = FOUND_ENDCA
+                else:
+                    tab_state = FOUND_
+
+            elif tab_state == FOUND_ENDCA:
+                if char == 's':
+                    tab_state = FOUND_ENDCAS
+                else:
+                    tab_state = FOUND_
+
+            elif tab_state == FOUND_ENDCAS:
+                if char == 'e':
+                    tab_state = FOUND_ENDCASE
+                else:
+                    tab_state = FOUND_
+
+            elif tab_state == FOUND_ENDCASE:
+                if (not char.isalnum()) and char != '_':
                     tab_level -= 1
                 tab_state = FOUND_
 
+            elif tab_state == FOUND_C:
+                if char == 'a':
+                    tab_state = FOUND_CA
+                else:
+                    tab_state = FOUND_
+
+            elif tab_state == FOUND_CA:
+                if char == 's':
+                    tab_state = FOUND_CAS
+                else:
+                    tab_state = FOUND_
+
+            elif tab_state == FOUND_CAS:
+                if char == 'e':
+                    tab_state = FOUND_CASE
+                else:
+                    tab_state = FOUND_
+
+            elif tab_state == FOUND_CASE:
+                if (not char.isalnum()) and char != '_':
+                    tab_level += 1
+                tab_state = FOUND_
+            
             # Now run the main state machine code for DEFAULT    
             if char == "/":
                 state = DEF_FOUND_FSLASH
@@ -637,6 +700,7 @@ def parsePreSeg(pp_seg_str, pp_line, pp_vars_dict):
         exec(pp_seg_str)
     except:
         print "Error executing the following code (beginning at line " + `pp_line` + "):\n" + pp_seg_str
+        traceback.print_exc(file=sys.stdout)
         sys.exit(1)
 
 ###############################################################################

@@ -30,11 +30,29 @@ FOUND_B          = 13;
 FOUND_BE         = 14;
 FOUND_BEG        = 15;
 FOUND_BEGI       = 16;
+FOUND_BEGIN      = 17;
+
 #end
-FOUND_E          = 17;
-FOUND_EN         = 18;
+FOUND_E          = 18;
+FOUND_EN         = 19;
+
+#case
+FOUND_C          = 20;
+FOUND_CA         = 21;
+FOUND_CAS        = 22;
+FOUND_CASE       = 23;
+
+#endcase
+FOUND_E          = 24;
+FOUND_EN         = 25;
+FOUND_END        = 26;
+FOUND_ENDC       = 27;
+FOUND_ENDCA      = 28;
+FOUND_ENDCAS     = 29;
+FOUND_ENDCASE    = 30;
+
 #default
-FOUND_           = 19;
+FOUND_           = 31;
 
 #Error state
 ERROR            = -1;

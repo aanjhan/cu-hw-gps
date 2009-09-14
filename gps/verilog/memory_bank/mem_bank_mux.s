@@ -1,67 +1,49 @@
 `include "../components/global.vh"
 
 module mem_bank_mux(
-    ctrl,
-    ad_passthrough,
-<? for i in range(1,`NUM_BANKS+1):
-    print("buf_" + `i` + ",\n")
+
+    //Control signal input - 3 bits per channel
+<?
+ctrl_width = 3 * `NUM_CHANNELS - 1;
+print("input [%s:%s] ctrl," % (`ctrl_width`,'0'));
 ?>
-<? for i in range(1,`NUM_CHANNELS+1):
+
+    //Data inputs from the direct A/D passthrough and the data buffers
+<?
+print("input [%s:%s] ad_passthrough," % ('`INPUT_WIDTH-1','0'))
+
+for i in range(1,`NUM_BANKS+1):
+    print("input [`INPUT_WIDTH-1:0] buf_%s," % `i`)
+?>
+
+    //Sample-width output for each channel
+<?
+for i in range(1,`NUM_CHANNELS+1):
     if i < `NUM_CHANNELS:
-        print("chan_" + `i`,"\n")
+        print("output reg [`INPUT_WIDTH-1:0] chan_%s," % `i`)
     else:
-        print("chan_" + `i`,"\n")
+        print("output reg [`INPUT_WIDTH-1:0] chan_%s;" % `i`)
 ?>
 );
 
-    //Data inputs from the direct A/D passthrough and the data buffers
-    input [<?print('`INPUT_WIDTH-1')?>:0] ad_passthrough;
-<? for i in range(1,`NUM_BANKS+1):
-    print("input [" + '`INPUT_WIDTH-1' + ":0] buf_" + `i` + ";", "\n")
-?>
-
-//Control signal input - 3 bits per channel
-<? h = 3 * `NUM_CHANNELS - 1
-print("input [" + `h` + ":0] ctrl;", "\n")
-?>
-
-//3-bit output for each channel
-<? h = `INPUT_WIDTH-1
-for i in range(1,`NUM_CHANNELS+1):
-    print("output [" + `h` + ":0] chan_" + `i` + ";", "\n")
-?>
-
-<? 
-h = `INPUT_WIDTH-1
-for i in range(1,`NUM_CHANNELS+1):
-    print("reg [" + `h` + ":0] chan_" + `i` + ";", "\n")
-?>
-    
-<? 
-h = `INPUT_WIDTH-1
-print("wire [" + `h` + ":0] ad_passthrough;", "\n")
-for i in range(1,`NUM_BANKS+1):
-    print("wire [" + `h` + ":0] buf_" + `i` + ";", "\n")
-print("wire [ + `3 * `NUM_CHANNELS - 1` + :0] ctrl;", "\n")
-?>
-
-always @( ctrl or ad_passthrough <?
+always @( ctrl or ad_passthrough
+<?
 for i in range(1,`NUM_BANKS+1):
     print("or buf_" + `i` + " ")
-?>)
-begin
+?>) begin
 
     // 1 case for each channel output
 <?
 N = len(d2b(`NUM_BANKS))
+numbanks = `NUM_BANKS
 for i in range(1,`NUM_CHANNELS + 1):
     print("case( ctrl [" + `(3 * i - 1)` + ":0] )", "\n")
     for j in range(1,`NUM_BANKS + 1):
         print(""+`N`+"'b"+d2b(j-1).rjust(N,'0') + ": chan_" + `i` + " = buf_" + `j` + ";", "\n")
-    print(""+`N`+"'b"+d2b(`NUM_BANKS).rjust(N,`0`) + ": chan_" + `i` + " = ad_passthrough;", "\n")
+    print(""+`N`+"'b"+d2b(numbanks).rjust(N,'0') + ": chan_" + `i` + " = ad_passthrough;", "\n")
     print("default: chan_" + `i` + " = ad_passthrough;", "\n")
     print("endcase\n\n")
 ?>
-    end
+end
 
 endmodule

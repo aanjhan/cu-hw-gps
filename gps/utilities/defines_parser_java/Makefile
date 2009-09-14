@@ -4,7 +4,7 @@ OBJECTS=$(patsubst %.java,%.class,$(SOURCES))
 OUTPUT=defparser.jar
 
 .PHONY: all
-all: $(OUTPUT)
+all: $(OUTPUT) clean_build
 
 $(OUTPUT): objects
 	jar -cfm $@ Manifest.txt $(OBJECTS)
@@ -13,7 +13,9 @@ $(OUTPUT): objects
 objects: $(SOURCES)
 	javac -g $(SOURCES)
 
-.PHONY: clean
-clean:
-	rm -f $(OBJECTS)
+.PHONY: clean clean_build
+clean: clean_build
 	rm -f $(OUTPUT)
+
+clean_build:
+	rm -f $(OBJECTS)

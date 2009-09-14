@@ -5,6 +5,7 @@ module strobe(
     output wire out);
 
    parameter RESET_ZERO = 0;
+   parameter FLAG_CHANGE = 0;
    
    reg in_km1;
    always @(posedge clk) begin
@@ -12,6 +13,8 @@ module strobe(
       else in_km1 <= in;
    end
    
-   assign out = reset ? 1'b0 : (in & ~in_km1);
-   
+   assign out = reset ? 1'b0 :
+                FLAG_CHANGE ? in!=in_km1 :
+                (in & ~in_km1);
+
 endmodule

@@ -1,0 +1,2 @@
+MODE_PLAYBACK,1'b0,Memory bank playback mode.
+MODE_WRITING,1'b1,Memory bank writing mode.

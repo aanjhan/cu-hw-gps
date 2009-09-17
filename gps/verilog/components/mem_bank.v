@@ -35,10 +35,6 @@ module mem_bank (
 	
 	wire m4k_wren;
 	
-		parameter WORD_LENGTH = 24;
-	parameter NUM_WORDS   = 8192;
-	parameter ADDR_WIDTH  = 13;
-	
 	m4k_ram #(.WORD_LENGTH(`WORD_LENGTH), 
              .NUM_WORDS(`NUM_WORDS),
              .ADDR_WIDTH(`ADDRESS_LENGTH))

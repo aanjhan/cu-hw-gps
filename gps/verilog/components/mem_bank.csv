@@ -7,8 +7,8 @@ WORD_LENGTH,24,Memory bank RAM word length.
 NUM_WORDS,8192,Number of words in one m4k RAM module.
 WORD_RANGE,23:0,Memory bank RAM word range.
 SAMPLES_PER_WORD,8,Number of samples in one RAM word.
-OFFSET_LENGTH,log2(SAMPLES_PER_WORD),Number of bits needed for possible word offsets.
-OFFSET_RANGE,log2(SAMPLES_PER_WORD)-1:0,Bit range for possible word offsets.
-ADDRESS_LENGTH,log2(NUM_WORDS),Number of bits needed for possible addresses.
-ADDRESS_RANGE,log2(NUM_WORDS)-1:0,Bit range for possible addresses.
+OFFSET_LENGTH,max_width(SAMPLES_PER_WORD),Number of bits needed for possible word offsets.
+OFFSET_RANGE,OFFSET_LENGTH-1:0,Bit range for possible word offsets.
+ADDRESS_LENGTH,max_width(NUM_WORDS),Number of bits needed for possible addresses.
+ADDRESS_RANGE,ADDRESS_LENGTH-1:0,Bit range for possible addresses.
 

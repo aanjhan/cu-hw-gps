@@ -127,14 +127,14 @@ module DE2_TOP (
 );
 
    //Turn off all displays.
-   assign HEX0 = 7'hFF;
-   assign HEX1 = 7'hFF;
-   assign HEX2 = 7'hFF;
-   assign HEX3 = 7'hFF;
-   assign HEX4 = 7'hFF;
-   assign HEX5 = 7'hFF;
-   assign HEX6 = 7'hFF;
-   assign HEX7 = 7'hFF;
+   assign HEX0 = 7'h7F;
+   assign HEX1 = 7'h7F;
+   assign HEX2 = 7'h7F;
+   assign HEX3 = 7'h7F;
+   assign HEX4 = 7'h7F;
+   assign HEX5 = 7'h7F;
+   assign HEX6 = 7'h7F;
+   assign HEX7 = 7'h7F;
    assign LEDR      = 18'h0;
    assign LEDG      = 9'h0;
    assign LCD_ON    = 1'b0;

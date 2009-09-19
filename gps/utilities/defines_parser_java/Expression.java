@@ -260,7 +260,7 @@ public class Expression
         else if(function.equals("log10"))return Math.log10(value);
         else if(function.equals("log2"))return Math.log(value)/Math.log(2);
         else if(function.equals("max_value"))return Math.pow(2,Math.floor(value))-1;
-        else if(function.equals("max_width"))return Math.ceil(Math.log(Math.ceil(value))/Math.log(2));
+        else if(function.equals("max_width"))return Math.ceil(Math.log(Math.ceil(value+1))/Math.log(2));
         else if(function.equals("round"))return Math.floor(value+0.5);
         else if(function.equals("sin"))return Math.sin(value);
         else if(function.equals("sqrt"))return Math.sqrt(value);

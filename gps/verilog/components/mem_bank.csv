@@ -5,10 +5,26 @@ MODE_WRITING,1'b1,Memory bank writing mode.
 
 WORD_LENGTH,24,Memory bank RAM word length.
 NUM_WORDS,8192,Number of words in one m4k RAM module.
+NUM_WORDS_M1,NUM_WORDS-1,Number of words in one m4k RAM module - 1.
 WORD_RANGE,23:0,Memory bank RAM word range.
 SAMPLES_PER_WORD,8,Number of samples in one RAM word.
 OFFSET_LENGTH,max_width(SAMPLES_PER_WORD),Number of bits needed for possible word offsets.
 OFFSET_RANGE,OFFSET_LENGTH-1:0,Bit range for possible word offsets.
 ADDRESS_LENGTH,max_width(NUM_WORDS),Number of bits needed for possible addresses.
 ADDRESS_RANGE,ADDRESS_LENGTH-1:0,Bit range for possible addresses.
+
+SAMPLES_PER_ACQ,(ACQ_ACC_LENGTH*0.001)*F_S,Number of samples used for each acquisition time.
+SAMPLES_PER_ACQ_M1,SAMPLES_PER_ACQ-1,Number of samples used for each acquisition time - 1.
+SAMPLES_PER_ACQ_M3,SAMPLES_PER_ACQ-3,Number of samples used for each acquisition time - 3.
+SAMPLES_PER_ACQ_M4,SAMPLES_PER_ACQ-4,Number of samples used for each acquisition time - 4.
+
+SAMPLE_COUNT_WIDTH,max_width(SAMPLES_PER_ACQ),Number of bits needed for sample counter.
+SAMPLE_COUNT_RANGE,SAMPLE_COUNT_WIDTH-1:0,Bit range for sample counter.
+
+DATA_OUT_RANGE,WORD_LENGTH-1:WORD_LENGTH-INPUT_WIDTH,Range for grabbing the top sample from the word buffer.
+DATA_IN_RANGE,WORD_LENGTH-1-INPUT_WIDTH:0,Range for shifting in a new sample to the word buffer.
+BUFFER_MAX_OFFSET,OFFSET_LENGTH'dSAMPLES_PER_WORD-1,Maximum value of sample buffer offset.
+BUFFER_MAX_OFFSET_M2,OFFSET_LENGTH'dSAMPLES_PER_WORD-3,Maximum sample buffer offset - 2.
+
+
 

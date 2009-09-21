@@ -473,3 +473,4 @@ set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name VECTOR_WAVEFORM_FILE mem_bank_test.vwf
 set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE mem_bank_test.vwf
+set_global_assignment -name FMAX_REQUIREMENT "200 MHz"

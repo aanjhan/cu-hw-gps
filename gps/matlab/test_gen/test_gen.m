@@ -1,3 +1,8 @@
+% SEQUENCE FOR MAKING .vwf FILES:
+% - Run test_gen(<any PRN #>,0)
+% - Run twos_to_ones(<data>,3)
+% - Run write_vwf
+
 function [signal,carrier,code,t]=test_gen(PRN,pack,filename,send)
     constant_h;
     constant_rcx;

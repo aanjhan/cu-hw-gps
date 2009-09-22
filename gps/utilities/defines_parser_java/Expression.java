@@ -12,7 +12,7 @@ public class Expression
 {
     private static final Pattern hexValue=Pattern.compile("^([A-Fa-f0-9]+)$");
     private static final Pattern number=Pattern.compile("^(\\d+(\\.\\d+)?)(e(-?\\d+))?$");
-    private static final Pattern integer=Pattern.compile("^(\\d+)\\.0+ *$");
+    private static final Pattern integer=Pattern.compile("^(\\d+'d)?(\\d+)(\\.0+)? *$");
     private static final Pattern decimal=Pattern.compile("^(\\d+\\.\\d*[1-9])0+ *$");
     
     private String value;
@@ -39,13 +39,18 @@ public class Expression
 
     private String Evaluate(TreeNode tree, HashMap<String,Expression> vars) throws ExpressionError
     {
+        return Evaluate(tree,vars,false);
+    }
+    
+    private String Evaluate(TreeNode tree, HashMap<String,Expression> vars, boolean forceValue) throws ExpressionError
+    {
         //Convert left parameter to a double.
         String leftString="";
         double leftValue=0;
         boolean haveLeftValue=false;
         if(tree.GetLeft()!=null)
         {
-            leftString=Evaluate(tree.GetLeft(),vars);
+            leftString=Evaluate(tree.GetLeft(),vars,true);
             if(IsDouble(leftString))
             {
                 haveLeftValue=true;
@@ -62,7 +67,7 @@ public class Expression
         {
             try
             {
-                rightString=Evaluate(tree.GetRight(),vars);
+                rightString=Evaluate(tree.GetRight(),vars,true);
             }
             catch(UnknownVariable e)
             {
@@ -159,10 +164,21 @@ public class Expression
         {
             stringValue=String.format("%-1.15f",value);
             Matcher m;
-            if((m=integer.matcher(stringValue)).matches() ||
-               (m=decimal.matcher(stringValue)).matches())
+            if((m=integer.matcher(stringValue)).matches())
+            {
+                stringValue=m.group(2);
+            }
+            else if((m=decimal.matcher(stringValue)).matches())
             {
                 stringValue=m.group(1);
+            }
+        }
+        else if(forceValue)
+        {
+            Matcher m;
+            if((m=integer.matcher(stringValue)).matches())
+            {
+                stringValue=m.group(2);
             }
         }
         

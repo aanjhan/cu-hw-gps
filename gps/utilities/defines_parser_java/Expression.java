@@ -224,7 +224,7 @@ public class Expression
             double rightValue;
             do
             {
-                rightString=Evaluate(child.GetLeft(),vars);
+                rightString=Evaluate(child.GetLeft(),vars,true);
             
                 if(IsDouble(rightString))
                 {
@@ -238,7 +238,7 @@ public class Expression
             while(child.GetType()==Tokenizer.TokenType.SEMICOLON);
 
             //Evaluate last parameter.
-            rightString=Evaluate(child,vars);
+            rightString=Evaluate(child,vars,true);
             if(IsDouble(rightString))
             {
                 rightValue=FromDoubleString(rightString);

@@ -212,7 +212,7 @@ public class Expression
         {
             //Convert child parameter to a double.
             double childValue;
-            childValue=FromDoubleString(Evaluate(child,vars));
+            childValue=FromDoubleString(Evaluate(child,vars,true));
             return EvalFunction(function,childValue);
         }
         else

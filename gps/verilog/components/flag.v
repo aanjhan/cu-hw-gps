@@ -5,9 +5,11 @@ module flag(
     input       set,
     output wire out);
 
+   parameter RESET_SET = 0;
+
    reg pending;
    always @(posedge clk) begin
-      pending <= reset ? 1'b0 :
+      pending <= reset ? (RESET_SET ? 1'b1 : 1'b0) :
                  clear ? 1'b0 :
                  set ? 1'b1 :
                  pending;

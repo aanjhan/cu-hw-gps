@@ -3,6 +3,8 @@
 
 //Mode.
 MODE_RANGE,@
+MODE_ACQ,@
+MODE_TRACK,@
 
 //Doppler shift control.
 DOPPLER_INC_RANGE,@

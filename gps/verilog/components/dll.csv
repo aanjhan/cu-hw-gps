@@ -1,0 +1,40 @@
+#include !"global.csv"
+#include !"channel.csv"
+
+//Operating parameters.
+DLL_I2Q2_SHIFT,24,Amount to which I2Q2 values are shifted before operation.
+DLL_CLK_COUNT,10,Division clock divider (must be even).
+DLL_DIV_SETUP,5,Length (in cycles) of required division setup time.
+
+//Clock divider counter.
+DLL_CLK_MAX,ceil(DLL_CLK_COUNT/2)-1,Division clock counter max value.
+DLL_CLK_WIDTH,max_width(DLL_CLK_MAX),Division clock counter width.
+DLL_CLK_RANGE,DLL_CLK_WIDTH-1:0,Division clock counter bit range.
+
+//Pre-truncation operand width and index width.
+I2Q2_WIDTH,@
+DLL_OP_PRE_WIDTH,max_width(I2Q2_MAX_VAL*2),Operand width before truncation.
+DLL_OP_PRE_RANGE,DLL_OP_PRE_WIDTH-1:0,Operand range before truncation.
+DLL_OP_INDEX_WIDTH,max_width(DLL_OP_PRE_WIDTH-1),Operand bit index width.
+DLL_OP_INDEX_RANGE,DLL_OP_INDEX_WIDTH-1:0,Operand bit index range.
+
+//I2Q2 value truncation.
+DLL_OP_WIDTH,I2Q2_WIDTH-DLL_I2Q2_SHIFT,I2Q2 sum and difference operand widths.
+DLL_OP_RANGE,DLL_OP_WIDTH-1:0,I2Q2 operand bit range.
+DLL_TRUNC_RANGE,I2Q2_WIDTH-1:I2Q2_WIDTH-DLL_I2Q2_SHIFT,Truncated bit range for operands.
+
+//Fixed-point DLL amplitude scale factor.
+DLL_SCALE_SHIFT,8,DLL fixed-point shift.
+DLL_SCALE_VAL,round((2-CHIPS_EML)*F_S/F_CA/2*2^DLL_SCALE_SHIFT),Amplitude scale factor.
+DLL_SCALE_WIDTH,max_width(DLL_SCALE_VAL),Amplitude scale factor width.
+DLL_SCALE,DLL_SCALE_WIDTH'dDLL_SCALE_VAL,Amplitude scale factor constant.
+
+//Multiplication result width.
+DLL_MULT_OUTPUT_WIDTH,DLL_OP_WIDTH+DLL_SCALE_WIDTH,Scaled result width, before shift.
+DLL_MULT_OUTPUT_RANGE,DLL_MULT_OUTPUT_WIDTH-1:0,Scaled result range, before shift.
+
+//Shift results.
+DLL_SHIFT_WIDTH,max_width(DLL_MULT_OUTPUT_WIDTH-DLL_SCALE_SHIFT),Shift amount (final result) width.
+DLL_SHIFT_RANGE,DLL_SHIFT_WIDTH-1:0,Shift amount range.
+DLL_SHIFT_DIR_FWD,1'b0,Forward shift direction.
+DLL_SHIFT_DIR_REV,1'b1,Reverse shift direction.

@@ -27,10 +27,13 @@ MAX_CODE_SHIFT,CS_WIDTH'dMAX_CS_VALUE,Maximum upsampled code shift value.
 F_DOPP_MAX,6000,Maximum expected Doppler shift.
 DOPP_BIN_SIZE,200,Doppler bin width in Hz.
 
-//Memory bank parameters.
+//Channel configuration.
 NUM_CHANNELS,10,Number of tracking channels implemented in receiver.
-NUM_BANKS,4,Number of individual banks in memory bank.
+CHANNEL_ID_WIDTH,max_width(NUM_CHANNELS-1),Channel ID width.
+CHANNEL_ID_RANGE,CHANNEL_ID_WIDTH-1:0,Channel ID range.
 
+//Memory bank parameters.
+NUM_BANKS,4,Number of individual banks in memory bank.
 MEM_BANK_WAIT_CYCLES,2,Number of cycles to wait before restarting an acquisition feed.
 
 //Tracking parameters.

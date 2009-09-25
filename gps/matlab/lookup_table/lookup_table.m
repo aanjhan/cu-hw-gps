@@ -1,21 +1,58 @@
-function table=lookup_table(type,quantization,width,module,outputDir)
+function table=lookup_table(type,quantization,width,twos_en,module,outputDir)
     num_entries=2^width;
-    max_value=2^(quantization-1)-1;
+    
+    if(nargin<4)
+        twos_en=0;
+    end
+    
+    if(twos_en)
+        max_value=2^(quantization-1)-1;
+    else
+        max_value=2^quantization-1;
+    end
     
     if(strcmpi(type,'sin'))
-        table=round(max_value*(sin(linspace(0,2*pi,num_entries))'));
+        if(twos_en)
+            table=round(max_value*(sin(linspace(0,2*pi,num_entries))'));
+        else
+            table=round(max_value*(sin(linspace(0,2*pi,num_entries))'+1)/2);
+        end
     elseif(strcmpi(type,'cos'))
-        table=round(max_value*(cos(linspace(0,2*pi,num_entries))'));
+        if(twos_en)
+            table=round(max_value*(cos(linspace(0,2*pi,num_entries))'));
+        else
+            table=round(max_value*(cos(linspace(0,2*pi,num_entries))'/.5+.5));
+        end
+    elseif(strcmpi(type,'tri'))
+        if(twos_en)
+            a=linspace(0,1,num_entries/4+1);
+            b=linspace(1,-1,num_entries/2);
+            c=linspace(-1,0,num_entries/4+1);
+        else
+            a=linspace(0.5,1,num_entries/4+1);
+            b=linspace(1,0,num_entries/2);
+            c=linspace(0,0.5,num_entries/4+1);
+        end
+        x=[a(1:end-1) b c(2:end)];
+        table=round(max_value*x');%FIXME
+    elseif(strcmpi(type,'saw'))
+        if(twos_en)
+            table=round(max_value*(linspace(-1,1,num_entries)'));
+        else
+            table=round(max_value*(linspace(0,1,num_entries)'));
+        end
     else
         table=zeros(num_entries,1);
     end
     
-    negative=table<0;
-    table=abs(table);
-    table=bitxor(table,2^(quantization-1)*negative);
+    if(twos_en)
+        negative=table<0;
+        table=abs(table);
+        table=bitxor(table,2^(quantization-1)*negative);
+    end
     
-    if(nargin>3)
-        if(nargin<4)
+    if(nargin>4)
+        if(nargin<6)
             outputDir='.';
         elseif(outputDir(end)=='/')
             outputDir=outputDir(1:end-1);

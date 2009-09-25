@@ -8,7 +8,7 @@ function [signal,carrier,code,t]=test_gen(PRN,pack,filename,send)
     constant_rcx;
     
     %Signal length in C/A codes.
-    acc_length=1;
+    acc_length=3;
     range=1:acc_length*FSAMP_MSEC;
     %     range=1:4000;
     t=0:1/FS:acc_length*T-1/FS;

@@ -237,18 +237,22 @@ module channel(
    end
    
    wire [`I2Q2_RANGE] i2;
-   multiplier i2_mult(.clock(clk),
-                      .dataa(i2q2_select==2'h0 ? i_early :
-                             i2q2_select==2'h1 ? i_prompt :
-                             i_late),
-                      .result(i2));
+   iq_square #(.INPUT_WIDTH(`ACC_MAG_WIDTH),
+               .OUTPUT_WIDTH(`I2Q2_WIDTH))
+     i2_square(.clock(clk),
+               .dataa(i2q2_select==2'h0 ? i_early :
+                      i2q2_select==2'h1 ? i_prompt :
+                      i_late),
+               .result(i2));
    
    wire [`I2Q2_RANGE] q2;
-   multiplier q2_mult(.clock(clk),
-                      .dataa(i2q2_select==2'h0 ? q_early :
-                             i2q2_select==2'h1 ? q_prompt :
-                             q_late),
-                      .result(q2));
+   iq_square #(.INPUT_WIDTH(`ACC_MAG_WIDTH),
+               .OUTPUT_WIDTH(`I2Q2_WIDTH))
+     q2_square(.clock(clk),
+               .dataa(i2q2_select==2'h0 ? q_early :
+                      i2q2_select==2'h1 ? q_prompt :
+                      q_late),
+               .result(q2));
 
    //Pipe square results for timing.
    `KEEP wire [`I2Q2_RANGE] i2_km1;

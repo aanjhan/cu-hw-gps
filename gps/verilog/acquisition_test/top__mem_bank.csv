@@ -1,0 +1,4 @@
+#include !"../components/mem_bank.csv"
+
+MODE_PLAYBACK,@
+MODE_WRITING,@

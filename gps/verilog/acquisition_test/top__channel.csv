@@ -1,0 +1,11 @@
+#include !"../components/subchannel.csv"
+#include !"../components/channel.csv"
+
+DOPP_BIN_INC,@
+DOPPLER_INC_RANGE,@
+ACC_RANGE,@
+
+MODE_RANGE,@
+MODE_ACQ,@
+MODE_TRACK,@
+I2Q2_RANGE,@

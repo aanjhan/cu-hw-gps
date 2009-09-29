@@ -25,8 +25,9 @@ public class Tokenizer
     }
     
     private static final Pattern verilogConstant = Pattern.compile("^('[dhb])");
+    private static final Pattern sciNotation = Pattern.compile("^(\\d+(\\.\\d+)?e-?\\d+)");
     private static final Pattern hexValue = Pattern.compile("^(\\d+[A-Fa-f][A-Fa-f0-9]*)");
-    private static final Pattern number = Pattern.compile("^(\\d+(\\.\\d+)?(e-?\\d+)?)");
+    private static final Pattern number = Pattern.compile("^(\\d+(\\.\\d+)?)");
     private static final Pattern qualifiedName = Pattern.compile("^(`?[A-Za-z_]\\w*)");
     
     private String expression;
@@ -54,6 +55,11 @@ public class Tokenizer
                expression.charAt(m.group(1).length())=='(')
                 return TokenType.FUNCTION;
             else return TokenType.VARIABLE;
+        }
+        //Is this scientific notation?
+        else if((m=sciNotation.matcher(expression)).lookingAt())
+        {
+            return TokenType.NUMBER;
         }
         //Is this a hex value?
         else if((m=hexValue.matcher(expression)).lookingAt())
@@ -97,6 +103,7 @@ public class Tokenizer
 
         //Is this a number of qualified name (variable or function)?
         if((m=qualifiedName.matcher(expression)).lookingAt() ||
+           (m=sciNotation.matcher(expression)).lookingAt() ||
            (m=hexValue.matcher(expression)).lookingAt() ||
            (m=number.matcher(expression)).lookingAt() ||
            (m=verilogConstant.matcher(expression)).lookingAt())

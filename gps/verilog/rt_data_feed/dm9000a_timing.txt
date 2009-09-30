@@ -1,0 +1,34 @@
+**I/O Read**
+
+Clock period (T)                        40 ns (25 MHz)
+CS,CMD valid to RD_N valid              0 ns
+RD_N width                              10 ns (min)
+RD_N invalid to data invalid            3 ns (max)
+RD_N invalid to CS,CMD invalid          3 ns (max)
+RD_N invalid to next RD_N valid         40 ns (min)*
+(on register read)
+RD_N invalid to next RD_N valid         80 ns (min)*
+(on F0 pre-fetch read)
+RD_N invalid to next RD_N valid         20 ns (min)*
+(on F2 data read)
+CS,CMD valid to data valid              3 ns (max)
+CS,CMD invalid to data invalid          3 ns (max)
+
+**I/O Write**
+
+Clock period (T)                        40 ns (25 MHz)
+CS,CMD valid to WR_N valid              0 ns
+WR_N width                              10 ns (min)
+Data setup time                         10 ns (min)
+Data hold time                          10 ns (min)
+WR_N invalid to CS,CMD invalid          3 ns (max)
+WR_N invalid to next WR_N valid         20 ns (min)*
+(command setup)
+WR_N invalid to next WR_N valid         40 ns (min)*
+(data register write)
+WR_N invalid to next WR_N valid         20 ns (min)*
+(packet data write)
+CS,CMD valid to data valid              3 ns (max)
+CS,CMD invalid to data invalid          3 ns (max)
+
+*Note: these times are nT where T is the controller system clock period. The default system clock speed is 50MHz. Programmable to 100MHz or 20MHz via Operation Test Control Register (0x2E).

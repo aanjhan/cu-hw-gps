@@ -1,0 +1,125 @@
+//Control states.
+DM9000A_STATE_MAX_STATE,8,DM9000A control state variable maximum value.
+DM9000A_STATE_WIDTH,max_width(DM9000A_STATE_MAX_STATE),DM9000A control state variable width.
+DM9000A_STATE_RANGE,DM9000A_STATE_WIDTH-1:0,DM9000A control state variable bit range.
+DM9000A_STATE_IDLE,DM9000A_STATE_WIDTH'd0,Control idle state.
+DM9000A_STATE_SETUP,DM9000A_STATE_WIDTH'd2,Command setup state.
+DM9000A_STATE_READ,DM9000A_STATE_WIDTH'd3,Read data state.
+DM9000A_STATE_WRITE,DM9000A_STATE_WIDTH'd4,Write data state.
+DM9000A_STATE_RX_PREFETCH,DM9000A_STATE_WIDTH'd5,RX read setup (pre-fetch) state.
+DM9000A_STATE_RX_PREFETCH_2,DM9000A_STATE_WIDTH'd6,Issue read for pre-fetch result.
+DM9000A_STATE_RX_SPIN,DM9000A_STATE_WIDTH'd7,Spin two cycles between pre-fetch and RX.
+DM9000A_STATE_RX,DM9000A_STATE_WIDTH'd8,Receive packet data word.
+
+//Initialization states.
+DM9000A_INIT_STATE_MAX_STATE,11,DM9000A initialization state variable maximum value.
+DM9000A_INIT_STATE_WIDTH,max_width(DM9000A_INIT_STATE_MAX_STATE),DM9000A initialization state variable width.
+DM9000A_INIT_STATE_RANGE,DM9000A_INIT_STATE_WIDTH-1:0,DM9000A initialization state variable bit range.
+DM9000A_INIT_STATE_IDLE,DM9000A_INIT_STATE_WIDTH'd0,Initialization complete (idle) state.
+DM9000A_INIT_STATE_SPIN,DM9000A_INIT_STATE_WIDTH'd1,Spin - some instructions require idle time.
+DM9000A_INIT_STATE_RESET,DM9000A_INIT_STATE_WIDTH'd2,Soft-reset DM9000A module.
+DM9000A_INIT_STATE_PHY,DM9000A_INIT_STATE_WIDTH'd3,Power-up DM9000A PHY.
+DM9000A_INIT_STATE_INTM,DM9000A_INIT_STATE_WIDTH'd4,Setup interrupts.
+DM9000A_INIT_STATE_RXCR,DM9000A_INIT_STATE_WIDTH'd5,Setup RX control register.
+DM9000A_INIT_STATE_READ_RXPH,DM9000A_INIT_STATE_WIDTH'd10
+DM9000A_INIT_STATE_READ_RXPL,DM9000A_INIT_STATE_WIDTH'd11
+
+//Command signal values.
+DM9000A_CMD_INDEX,1'b0,Register index value.
+DM9000A_CMD_DATA,1'b1,Data I/O value.
+
+//RX word types.
+DM9000A_RX_WORD_TYPE_RANGE,1:0,RX word type bit range.
+DM9000A_RX_WORD_TYPE_HEADER,2'd0,Packet header ({status,0x01}).
+DM9000A_RX_WORD_TYPE_LEN,2'd1,Packet length (16b).
+DM9000A_RX_WORD_TYPE_DATA,2'd2,Packet data.
+DM9000A_RX_WORD_TYPE_NONE,2'd3,RX inactive.
+
+//Initialization spin counter.
+DM9000A_RESET_SPIN_LENGTH,10e-6,Reset spin length (in seconds).
+DM9000A_RESET_SPIN_LENGTH_CYC,round(25e6*DM9000A_RESET_SPIN_LENGTH)+4,Reset spin length (in cycles).
+DM9000A_PHY_SPIN_LENGTH,2e-3,PHY power-up spin length (in seconds).
+DM9000A_PHY_SPIN_LENGTH_CYC,round(25e6*DM9000A_PHY_SPIN_LENGTH),PHY power-up spin length (in cycles).
+
+DM9000A_INIT_SPIN_WIDTH,max_width(max(DM9000A_RESET_SPIN_LENGTH_CYC-1;DM9000A_PHY_SPIN_LENGTH_CYC-1)),Initialization spin counter width.
+DM9000A_INIT_SPIN_RANGE,DM9000A_INIT_SPIN_WIDTH-1:0,Initialization spin counter range.
+
+                                                                        DM9000A_RESET_SPIN_MAX_COUNT,DM9000A_INIT_SPIN_WIDTH'dDM9000A_RESET_SPIN_LENGTH_CYC-1,Maximum reset spin counter value.
+DM9000A_PHY_SPIN_MAX_COUNT,DM9000A_INIT_SPIN_WIDTH'dDM9000A_PHY_SPIN_LENGTH_CYC-1,Maximum PHY spin counter value.
+
+//Register addresses.
+DM9000A_REG_NCR,16'h00,Network control register.
+DM9000A_REG_NSR,16'h01,Network status register.
+DM9000A_REG_TXCR1,16'h02,TX control register 1.
+DM9000A_REG_TXCR2,16'h2D,TX control register 2.
+DM9000A_REG_TXSR1,16'h03,TX status register 1 (packet 1).
+DM9000A_REG_TXSR2,16'h04,TX status register 2 (packet 2).
+DM9000A_REG_RXCR,16'h05,RX control register.
+DM9000A_REG_RXSR,16'h06,RX status register.
+DM9000A_REG_PAR_5,16'h15,Physical address register, byte 5.
+DM9000A_REG_PAR_4,16'h14,Physical address register, byte 4.
+DM9000A_REG_PAR_3,16'h13,Physical address register, byte 3.
+DM9000A_REG_PAR_2,16'h12,Physical address register, byte 2.
+DM9000A_REG_PAR_1,16'h11,Physical address register, byte 1.
+DM9000A_REG_PAR_0,16'h10,Physical address register, byte 0.
+DM9000A_REG_GPR,16'h1F,General purpose register (and PHY power-down control).
+DM9000A_REG_TX_PTR_H,16'h23,TX SRAM pointer, high byte.
+DM9000A_REG_TX_PTR_L,16'h22,TX SRAM pointer, low byte.
+DM9000A_REG_RX_PTR_H,16'h25,RX SRAM pointer, high byte.
+DM9000A_REG_RX_PTR_L,16'h24,RX SRAM pointer, low byte.
+DM9000A_REG_MEM_RD_PF,16'hF0,Memory data pre-fetch command (no address increment).
+DM9000A_REG_MEM_RD_NO_INC,16'hF1,Memory data read command (no address increment).
+DM9000A_REG_MEM_RD_INC,16'hF2,Memory data read command (with address increment).
+DM9000A_REG_MEM_RD_ADDR_H,16'hF5,Memory read address, high byte.
+DM9000A_REG_MEM_RD_ADDR_L,16'hF4,Memory read address, low byte.
+DM9000A_REG_MEM_WR_NO_INC,16'hF6,Memory data write command (no address increment).
+DM9000A_REG_MEM_WR_INC,16'hF8,Memory data write command (with address increment).
+DM9000A_REG_MEM_WR_ADDR_H,16'hFB,Memory write address, high byte.
+DM9000A_REG_MEM_WR_ADDR_L,16'hFA,Memory write address, low byte.
+DM9000A_REG_TX_LEN_H,16'hFD,TX packet length, high byte.
+DM9000A_REG_TX_LEN_L,16'hFC,TX packet length, low byte.
+DM9000A_REG_INTS,16'hFE,Interrupt status.
+DM9000A_REG_INTM,16'hFF,Interrupt mask.
+
+//Network control register (NCR) bits.
+DM9000A_BIT_NCR_RST,16'h1,Software reset and auto clear after 10us.
+
+//General purpose register (GPR) bits.
+DM9000A_BIT_GPR_PHYPD,16'h1,PHY power-down control (0=on, 1=off).
+
+//Interrupt status register (INTS) bits.
+DM9000A_BIT_INTM_LNKCHG,16'h20,Link status change flag.
+DM9000A_BIT_INTM_UDRUN,16'h10,Transmit under-run flag.
+DM9000A_BIT_INTM_ROO,16'h08,Receive overflow counter overflow flag.
+DM9000A_BIT_INTM_RO,16'h04,Receive overflow flag.
+DM9000A_BIT_INTM_PT,16'h02,Packet transmitted flag.
+DM9000A_BIT_INTM_PR,16'h01,Packet received flag.
+
+//Interrupt mask register (INTM) bits.
+DM9000A_BIT_INTM_PAR,16'h80,Read/write pointer auto-return enable.
+DM9000A_BIT_INTM_LNKCHGI,16'h20,Link status change interrupt.
+DM9000A_BIT_INTM_UDRUNI,16'h10,Transmit under-run interrupt.
+DM9000A_BIT_INTM_ROOI,16'h08,Receive overflow counter overflow interrupt.
+DM9000A_BIT_INTM_ROI,16'h04,Receive overflow interrupt.
+DM9000A_BIT_INTM_PTI,16'h02,Packet transmitted interrupt.
+DM9000A_BIT_INTM_PRI,16'h01,Packet received interrupt.
+
+//TX control register 1 (TXCR1) bits.
+DM9000A_BIT_TXCR1_TXREQ,16'h01,TX request (auto-clears after transmission completion).
+
+//RX control register (RXCR) bits.
+DM9000A_BIT_RXCR_DIS_LONG,16'h20,Discard long packets (>1522B).
+DM9000A_BIT_RXCR_DIS_CRC,16'h10,Discard packets with invalid CRCs.
+DM9000A_BIT_RXCR_ALL,16'h08,Pass all multicast packets.
+DM9000A_BIT_RXCR_PRMSC,16'h02,Enable promiscuous mode.
+DM9000A_BIT_RXCR_RXEN,16'h01,RX enable.
+
+//RX status register (RXSR) bits.
+DM9000A_BIT_RXSR_RF,16'h80,Runt frame (<64B).
+DM9000A_BIT_RXSR_MF,16'h40,Multicast frame.
+DM9000A_BIT_RXSR_LCS,16'h20,Late collision seen.
+DM9000A_BIT_RXSR_RWTO,16'h10,Receive watchdog time-out.
+DM9000A_BIT_RXSR_PLE,16'h08,PHY error.
+DM9000A_BIT_RXSR_AE,16'h04,Alignment error.
+DM9000A_BIT_RXSR_CE,16'h02,CRC error.
+DM9000A_BIT_RXSR_FOE,16'h01,FIFO overflow error.

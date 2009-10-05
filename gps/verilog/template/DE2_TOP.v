@@ -135,20 +135,96 @@ module DE2_TOP (
    assign HEX5 = 7'h7F;
    assign HEX6 = 7'h7F;
    assign HEX7 = 7'h7F;
-   assign LEDR      = 18'h0;
-   assign LEDG      = 9'h0;
-   assign LCD_ON    = 1'b0;
-   assign LCD_BLON  = 1'b0;
+   assign LEDR = 18'h0;
+   assign LEDG = 9'h0;
    
-   //Set all inout ports to tri-state.
-   assign DRAM_DQ   = 16'hzzzz;
-   assign FL_DQ     = 8'hzz;
+   //Set all GPIO to tri-state.
+   assign GPIO_0 = 36'hzzzzzzzzz;
+   assign GPIO_1 = 36'hzzzzzzzzz;
+
+   //Disable audio codec.
+   assign AUD_DACDAT = 1'b0;
+   assign AUD_XCK    = 1'b0;
+
+   //Disable DRAM.
+   assign DRAM_ADDR  = 12'h0;
+   assign DRAM_BA_0  = 1'b0;
+   assign DRAM_BA_1  = 1'b0;
+   assign DRAM_CAS_N = 1'b1;
+   assign DRAM_CKE   = 1'b0;
+   assign DRAM_CLK   = 1'b0;
+   assign DRAM_CS_N  = 1'b1;
+   assign DRAM_DQ    = 16'hzzzz;
+   assign DRAM_LDQM  = 1'b0;
+   assign DRAM_RAS_N = 1'b1;
+   assign DRAM_UDQM  = 1'b0;
+   assign DRAM_WE_N  = 1'b1;
+
+   //Disable Ethernet.
+   assign ENET_CLK   = 1'b0;
+   assign ENET_CS_N  = 1'b1;
+   assign ENET_CMD   = 1'b0;
+   assign ENET_DATA  = 16'hzzzz;
+   assign ENET_RD_N  = 1'b1;
+   assign ENET_RST_N = 1'b1;
+   assign ENET_WR_N  = 1'b1;
+
+   //Disable flash.
+   assign FL_ADDR  = 22'h0;
+   assign FL_CE_N  = 1'b1;
+   assign FL_DQ    = 8'hzz;
+   assign FL_OE_N  = 1'b1;
+   assign FL_RST_N = 1'b1;
+   assign FL_WE_N  = 1'b1;
+
+   //Disable LCD.
+   assign LCD_BLON = 1'b0;
+   assign LCD_DATA = 8'hzz;
+   assign LCD_EN   = 1'b0;
+   assign LCD_ON   = 1'b0;
+   assign LCD_RS   = 1'b0;
+   assign LCD_RW   = 1'b0;
+
+   //Disable OTG.
+   assign OTG_ADDR    = 2'h0;
+   assign OTG_CS_N    = 1'b1;
+   assign OTG_DACK0_N = 1'b1;
+   assign OTG_DACK1_N = 1'b1;
+   assign OTG_FSPEED  = 1'b1;
+   assign OTG_DATA    = 16'hzzzz;
+   assign OTG_LSPEED  = 1'b1;
+   assign OTG_RD_N    = 1'b1;
+   assign OTG_RST_N   = 1'b1;
+   assign OTG_WR_N    = 1'b1;
+
+   //Disable SDRAM.
+   assign SD_DAT = 1'bz;
+   assign SD_CLK = 1'b0;
+
+   //Disable SRAM.
+   assign SRAM_ADDR = 18'h0;
+   assign SRAM_CE_N = 1'b1;
    assign SRAM_DQ   = 16'hzzzz;
-   assign OTG_DATA  = 16'hzzzz;
-   assign LCD_DATA  = 8'hzz;
-   assign SD_DAT    = 1'bz;
-   assign ENET_DATA = 16'hzzzz;
-   assign GPIO_0    = 36'hzzzzzzzzz;
-   assign GPIO_1    = 36'hzzzzzzzzz;
+   assign SRAM_LB_N = 1'b1;
+   assign SRAM_OE_N = 1'b1;
+   assign SRAM_UB_N = 1'b1;
+   assign SRAM_WE_N = 1'b1;
+
+   //Disable VGA.
+   assign VGA_CLK   = 1'b0;
+   assign VGA_BLANK = 1'b0;
+   assign VGA_SYNC  = 1'b0;
+   assign VGA_HS    = 1'b0;
+   assign VGA_VS    = 1'b0;
+   assign VGA_R     = 10'h0;
+   assign VGA_G     = 10'h0;
+   assign VGA_B     = 10'h0;
+
+   //Disable all other peripherals.
+   assign I2C_SCLK = 1'b0;
+   assign IRDA_TXD = 1'b0;
+   assign TD_RESET = 1'b0;
+   assign TDO = 1'b0;
+   assign UART_TXD = 1'b0;
    
 endmodule

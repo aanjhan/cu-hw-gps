@@ -14,9 +14,7 @@ module dll(
     output wire [`CHANNEL_ID_RANGE] result_tag,
     output wire                     result_ready,                     
     output wire                     shift_direction,
-    output wire [`DLL_SHIFT_RANGE]  shift_amount,
-    output wire [`DLL_MULT_OUTPUT_RANGE] mult_result,
-    output wire [`DLL_MULT_OUTPUT_RANGE] quo);
+    output wire [`DLL_SHIFT_RANGE]  shift_amount);
 
    //Shift amount calculation:
    //  eml=i2q2_early-i2q2_late
@@ -64,10 +62,10 @@ module dll(
 
    //Zero-pad I2Q2 values if necessary to meet sum width.
    wire [`DLL_OP_PRE_RANGE] i2q2_early_padded;
-   assign i2q2_early_padded = {{(`DLL_OP_PRE_WIDTH-`I2Q2_WIDTH){1'b0}},i2q2_early};
+   assign i2q2_early_padded = {{(`DLL_OP_PRE_WIDTH-`I2Q2_WIDTH_TRACK){1'b0}},i2q2_early[`I2Q2_RANGE_TRACK]};
    
    wire [`DLL_OP_PRE_RANGE] i2q2_late_padded;
-   assign i2q2_late_padded = {{(`DLL_OP_PRE_WIDTH-`I2Q2_WIDTH){1'b0}},i2q2_late};
+   assign i2q2_late_padded = {{(`DLL_OP_PRE_WIDTH-`I2Q2_WIDTH_TRACK){1'b0}},i2q2_late[`I2Q2_RANGE_TRACK]};
 
    //Compute the sum and difference of
    //the early and late I2Q2 values.
@@ -143,12 +141,12 @@ module dll(
    //stable for at least three cycles because of divided
    //DLL clock edge.
    wire [`DLL_OP_RANGE] i2q2_sum;
-   dll_truncate sum_trunc(.top(i2q2_index_km1),
+   dll_truncate sum_trunc(.index(i2q2_index_km1),
                           .in(i2q2_sum_pre_km1),
                           .out(i2q2_sum));
    
    wire [`DLL_OP_RANGE] i2q2_diff;
-   dll_truncate diff_trunc(.top(i2q2_index_km1),
+   dll_truncate diff_trunc(.index(i2q2_index_km1),
                            .in(i2q2_diff_pre_km1),
                            .out(i2q2_diff));
 
@@ -162,7 +160,7 @@ module dll(
    end
 
    //Perform multiplication div_edge: M=(e-l)*K.
-   //`KEEP wire [`DLL_MULT_OUTPUT_RANGE] mult_result;
+   `KEEP wire [`DLL_MULT_OUTPUT_RANGE] mult_result;
    multiplier mult(.clock(clk),
                    .dataa(i2q2_diff_km1),
                    .datab(`DLL_SCALE),
@@ -208,7 +206,7 @@ module dll(
                    .out(clk_dll_kmn));
    
    //Perform division div_edge: M/(e+l).
-   //`KEEP wire [`DLL_MULT_OUTPUT_RANGE] quo;
+   `KEEP wire [`DLL_MULT_OUTPUT_RANGE] quo;
    wire [`DLL_OP_RANGE] rem;
    divider div(.clock(clk_dll_kmn),
                .numer(mult_result_km1),

@@ -1,5 +1,6 @@
 #include !"global.csv"
 #include !"channel.csv"
+#include !"subchannel.csv"
 
 //Operating parameters.
 DLL_I2Q2_SHIFT,24,Amount to which I2Q2 values are shifted before operation.
@@ -11,17 +12,21 @@ DLL_CLK_MAX,ceil(DLL_CLK_COUNT/2)-1,Division clock counter max value.
 DLL_CLK_WIDTH,max_width(DLL_CLK_MAX),Division clock counter width.
 DLL_CLK_RANGE,DLL_CLK_WIDTH-1:0,Division clock counter bit range.
 
+//Tracking-only accumulator width.
+I2Q2_MAX_VAL_TRACK,ACC_TRACK_MAX_VAL^2,Maximum I2Q2 value when tracking.
+I2Q2_WIDTH_TRACK,max_width(I2Q2_MAX_VAL_TRACK),I2Q2 width when tracking.
+I2Q2_RANGE_TRACK,I2Q2_WIDTH_TRACK-1:0,I2Q2 range when tracking.
+
 //Pre-truncation operand width and index width.
-I2Q2_WIDTH,@
-DLL_OP_PRE_WIDTH,max_width(I2Q2_MAX_VAL*2),Operand width before truncation.
+DLL_OP_PRE_WIDTH,max_width(I2Q2_MAX_VAL_TRACK*2),Operand width before truncation.
 DLL_OP_PRE_RANGE,DLL_OP_PRE_WIDTH-1:0,Operand range before truncation.
 DLL_OP_INDEX_WIDTH,max_width(DLL_OP_PRE_WIDTH-1),Operand bit index width.
 DLL_OP_INDEX_RANGE,DLL_OP_INDEX_WIDTH-1:0,Operand bit index range.
 
 //I2Q2 value truncation.
-DLL_OP_WIDTH,I2Q2_WIDTH-DLL_I2Q2_SHIFT,I2Q2 sum and difference operand widths.
+DLL_OP_WIDTH,I2Q2_WIDTH_TRACK-DLL_I2Q2_SHIFT,I2Q2 sum and difference operand widths.
 DLL_OP_RANGE,DLL_OP_WIDTH-1:0,I2Q2 operand bit range.
-DLL_TRUNC_RANGE,I2Q2_WIDTH-1:I2Q2_WIDTH-DLL_I2Q2_SHIFT,Truncated bit range for operands.
+DLL_TRUNC_RANGE,I2Q2_WIDTH_TRACK-1:I2Q2_WIDTH_TRACK-DLL_I2Q2_SHIFT,Truncated bit range for operands.
 
 //Fixed-point DLL amplitude scale factor.
 DLL_SCALE_SHIFT,8,DLL fixed-point shift.

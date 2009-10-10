@@ -1,0 +1,7 @@
+#include !"global.csv"
+#include !"channel.csv"
+#include !"dll.csv"
+
+CHANNEL_ID_RANGE,@
+I2Q2_RANGE,@
+DLL_SHIFT_RANGE,@

@@ -1,5 +1,6 @@
 %Fixed-point integer square root.
 %Note: fixed-point shift MUST be an even number.
+%Reference: http://www.embedded.com/98/9802fe2.htm
 function root=sqrt_fixed(value)
     root=0;
     rem=0;

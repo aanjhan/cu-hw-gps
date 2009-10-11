@@ -4,9 +4,19 @@ module dll_truncate(
     output reg [10:0] out);
 
    //FIXME Parameters with preprocessor or defines.
+   parameter INDEX_WIDTH = 1;
+   parameter INPUT_WIDTH = 1;
+   parameter OUTPUT_WIDTH = 1;
    
    always @(index or in) begin
       case(index)
+        /*generate
+           genvar i;
+           for(i=INPUT_WIDTH-1;i>=OUTPUT_WIDTH;i=i-1) begin : trunc_gen
+              INDEX_WIDTH'di: out <= in[i:i-(OUTPUT_WIDTH-1)];
+           end
+        default: out <= in[OUTPUT_WIDTH-1:0];
+        endgenerate*/
         6'd35: out <= in[35:25];
         6'd34: out <= in[34:24];
         6'd33: out <= in[33:23];

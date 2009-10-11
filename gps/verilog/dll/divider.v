@@ -45,13 +45,13 @@ module divider (
 
 	input	  clock;
 	input	[10:0]  denom;
-	input	[22:0]  numer;
-	output	[22:0]  quotient;
+	input	[18:0]  numer;
+	output	[18:0]  quotient;
 	output	[10:0]  remain;
 
-	wire [22:0] sub_wire0;
+	wire [18:0] sub_wire0;
 	wire [10:0] sub_wire1;
-	wire [22:0] quotient = sub_wire0[22:0];
+	wire [18:0] quotient = sub_wire0[18:0];
 	wire [10:0] remain = sub_wire1[10:0];
 
 	lpm_divide	lpm_divide_component (
@@ -69,7 +69,7 @@ module divider (
 		lpm_divide_component.lpm_pipeline = 2,
 		lpm_divide_component.lpm_type = "LPM_DIVIDE",
 		lpm_divide_component.lpm_widthd = 11,
-		lpm_divide_component.lpm_widthn = 23;
+		lpm_divide_component.lpm_widthn = 19;
 
 
 endmodule
@@ -89,15 +89,15 @@ endmodule
 // Retrieval info: CONSTANT: LPM_PIPELINE NUMERIC "2"
 // Retrieval info: CONSTANT: LPM_TYPE STRING "LPM_DIVIDE"
 // Retrieval info: CONSTANT: LPM_WIDTHD NUMERIC "11"
-// Retrieval info: CONSTANT: LPM_WIDTHN NUMERIC "23"
+// Retrieval info: CONSTANT: LPM_WIDTHN NUMERIC "19"
 // Retrieval info: USED_PORT: clock 0 0 0 0 INPUT NODEFVAL clock
 // Retrieval info: USED_PORT: denom 0 0 11 0 INPUT NODEFVAL denom[10..0]
-// Retrieval info: USED_PORT: numer 0 0 23 0 INPUT NODEFVAL numer[22..0]
-// Retrieval info: USED_PORT: quotient 0 0 23 0 OUTPUT NODEFVAL quotient[22..0]
+// Retrieval info: USED_PORT: numer 0 0 19 0 INPUT NODEFVAL numer[18..0]
+// Retrieval info: USED_PORT: quotient 0 0 19 0 OUTPUT NODEFVAL quotient[18..0]
 // Retrieval info: USED_PORT: remain 0 0 11 0 OUTPUT NODEFVAL remain[10..0]
-// Retrieval info: CONNECT: @numer 0 0 23 0 numer 0 0 23 0
+// Retrieval info: CONNECT: @numer 0 0 19 0 numer 0 0 19 0
 // Retrieval info: CONNECT: @denom 0 0 11 0 denom 0 0 11 0
-// Retrieval info: CONNECT: quotient 0 0 23 0 @quotient 0 0 23 0
+// Retrieval info: CONNECT: quotient 0 0 19 0 @quotient 0 0 19 0
 // Retrieval info: CONNECT: remain 0 0 11 0 @remain 0 0 11 0
 // Retrieval info: CONNECT: @clock 0 0 0 0 clock 0 0 0 0
 // Retrieval info: LIBRARY: lpm lpm.lpm_components.all

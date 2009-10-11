@@ -1,11 +1,15 @@
 #include !"global.csv"
 #include !"channel.csv"
 #include !"subchannel.csv"
+#include !"ca_upsampler.csv"
 
 //Operating parameters.
 DLL_I2Q2_SHIFT,24,Amount to which I2Q2 values are shifted before operation.
 DLL_CLK_COUNT,10,Division clock divider (must be even).
 DLL_DIV_SETUP,5,Length (in cycles) of required division setup time.
+DLL_DIV_STABLE,4,Length (in cycles) before division result stabilizes.
+DLL_SCALE_SHIFT,0,DLL fixed-point scale factor shift.
+DLL_HNUM,5.8e-7,DLL convergence factor.
 
 //Clock divider counter.
 DLL_CLK_MAX,ceil(DLL_CLK_COUNT/2)-1,Division clock counter max value.
@@ -29,8 +33,7 @@ DLL_OP_RANGE,DLL_OP_WIDTH-1:0,I2Q2 operand bit range.
 DLL_TRUNC_RANGE,I2Q2_WIDTH_TRACK-1:I2Q2_WIDTH_TRACK-DLL_I2Q2_SHIFT,Truncated bit range for operands.
 
 //Fixed-point DLL amplitude scale factor.
-DLL_SCALE_SHIFT,8,DLL fixed-point shift.
-DLL_SCALE_VAL,round((2-CHIPS_EML)*F_S/F_CA/2*2^DLL_SCALE_SHIFT),Amplitude scale factor.
+DLL_SCALE_VAL,round((2^CA_ACC_WIDTH)*(2-CHIPS_EML)*F_S/F_CA/2*DLL_HNUM*2^DLL_SCALE_SHIFT),Amplitude scale factor.
 DLL_SCALE_WIDTH,max_width(DLL_SCALE_VAL),Amplitude scale factor width.
 DLL_SCALE,DLL_SCALE_WIDTH'dDLL_SCALE_VAL,Amplitude scale factor constant.
 
@@ -38,8 +41,8 @@ DLL_SCALE,DLL_SCALE_WIDTH'dDLL_SCALE_VAL,Amplitude scale factor constant.
 DLL_MULT_OUTPUT_WIDTH,DLL_OP_WIDTH+DLL_SCALE_WIDTH,Scaled result width, before shift.
 DLL_MULT_OUTPUT_RANGE,DLL_MULT_OUTPUT_WIDTH-1:0,Scaled result range, before shift.
 
-//Shift results.
-DLL_SHIFT_WIDTH,max_width(DLL_MULT_OUTPUT_WIDTH-DLL_SCALE_SHIFT),Shift amount (final result) width.
-DLL_SHIFT_RANGE,DLL_SHIFT_WIDTH-1:0,Shift amount range.
-DLL_SHIFT_DIR_FWD,1'b0,Forward shift direction.
-DLL_SHIFT_DIR_REV,1'b1,Reverse shift direction.
+//Phase increment offset.
+DLL_DPHI_WIDTH,DLL_MULT_OUTPUT_WIDTH-DLL_SCALE_SHIFT+1,Phase increment offset width (two's complement).
+DLL_DPHI_RANGE,DLL_DPHI_WIDTH-1:0,Phase increment offset range.
+DLL_DPHI_DIR_FWD,1'b0,Forward shift direction.
+DLL_DPHI_DIR_REV,1'b1,Reverse shift direction.

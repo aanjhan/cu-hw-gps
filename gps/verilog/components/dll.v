@@ -12,19 +12,20 @@ module dll(
     input [`I2Q2_RANGE]             i2q2_early,
     input [`I2Q2_RANGE]             i2q2_late,
     output wire [`CHANNEL_ID_RANGE] result_tag,
-    output wire                     result_ready,                     
-    output wire                     shift_direction,
-    output wire [`DLL_SHIFT_RANGE]  shift_amount);
+    output wire                     result_ready,
+    output wire [`DLL_DPHI_RANGE]   delta_phase_increment);
 
-   //Shift amount calculation:
+   //Phase increment offset calculation:
    //  eml=i2q2_early-i2q2_late
    //  epl=i2q2_early+i2q2_late
    //  tau_prime=eml/epl*((2-CHIPS_EML)/2)
    //  tau_prime_up=tau_prime*F_S/F_CA
    //              =eml/epl*((2-CHIPS_EML)*F_S/F_CA/2)
-   //              =eml/epl*C
-   //              =(eml/epl*K)>>shift
-   //  C=((2-CHIPS_EML)*F_S/F_CA/2)
+   //  dphi=tau_prime_up*2^ca_acc_width*HNUM
+   //      =eml/epl*(2^ca_acc_width*(2-chips_eml)*f_s/f_ca/2*HNUM)
+   //      =eml/epl*C
+   //      =(eml/epl*K)>>kshift
+   //  C=2^ca_acc_width*HNUM*(2-chips_eml)*f_s/f_ca/2
    //  K=C<<shift (fixed-point)
    //
    //Calculation sequence:
@@ -41,8 +42,9 @@ module dll(
    //  --Multiplication = 2 cycles
    //  --Division setup = `DLL_DIV_SETUP cycles
    //  --Division = 20 cycles
+   //  --Division stabilization = `DLL_DIV_STABLE cycles
    localparam DIV_CLOCK_DELAY=7+`DLL_DIV_SETUP;
-   localparam TOTAL_DELAY_LENGTH=10+DIV_CLOCK_DELAY;
+   localparam TOTAL_DELAY_LENGTH=10+DIV_CLOCK_DELAY+`DLL_DIV_STABLE;
 
    //Generate DLL clock from system clock.
    reg [`DLL_CLK_RANGE] dll_clk_count;
@@ -57,7 +59,7 @@ module dll(
                  dll_clk_count==`DLL_CLK_MAX ? ~clk_dll :
                  clk_dll;
 
-      div_edge <= dll_clk_count==`DLL_CLK_MAX && !clk_dll ? 1'b1 : 1'b0;
+      div_edge <= !global_reset && dll_clk_count==`DLL_CLK_MAX && !clk_dll ? 1'b1 : 1'b0;
    end // always @ (posedge clk)
 
    //Zero-pad I2Q2 values if necessary to meet sum width.
@@ -95,6 +97,7 @@ module dll(
    //Pipe the tag and shift direction along
    //until calculation is complete.
    //FIXME Edge-triggered flops instead of long delay path?
+   `KEEP wire shift_direction;
    delay #(.DELAY(TOTAL_DELAY_LENGTH))
      shift_direction_delay(.clk(clk),
                            .reset(global_reset),
@@ -107,6 +110,12 @@ module dll(
                .reset(global_reset),
                .in(tag),
                .out(result_tag));
+   
+   delay #(.DELAY(TOTAL_DELAY_LENGTH))
+     result_ready_delay(.clk(clk),
+                        .reset(global_reset),
+                        .in(div_edge),
+                        .out(result_ready));
 
    //Truncate operands to specified width, starting
    //at the most significant bit in the larger of
@@ -141,12 +150,18 @@ module dll(
    //stable for at least three cycles because of divided
    //DLL clock edge.
    wire [`DLL_OP_RANGE] i2q2_sum;
-   dll_truncate sum_trunc(.index(i2q2_index_km1),
-                          .in(i2q2_sum_pre_km1),
-                          .out(i2q2_sum));
+   dll_truncate #(.INDEX_WIDTH(`DLL_OP_INDEX_WIDTH),
+                  .INPUT_WIDTH(`DLL_OP_PRE_WIDTH),
+                  .OUTPUT_WIDTH(`DLL_OP_WIDTH))
+     sum_trunc(.index(i2q2_index_km1),
+               .in(i2q2_sum_pre_km1),
+               .out(i2q2_sum));
    
    wire [`DLL_OP_RANGE] i2q2_diff;
-   dll_truncate diff_trunc(.index(i2q2_index_km1),
+   dll_truncate #(.INDEX_WIDTH(`DLL_OP_INDEX_WIDTH),
+                  .INPUT_WIDTH(`DLL_OP_PRE_WIDTH),
+                  .OUTPUT_WIDTH(`DLL_OP_WIDTH))
+     diff_trunc(.index(i2q2_index_km1),
                            .in(i2q2_diff_pre_km1),
                            .out(i2q2_diff));
 
@@ -215,11 +230,13 @@ module dll(
                .remain(rem));
 
    //Strobe result ready signal on divider clock edge.
-   strobe result_strobe(.clk(clk),
+   /*strobe result_strobe(.clk(clk),
                         .reset(global_reset),
                         .in(clk_dll_kmn),
-                        .out(result_ready));
+                        .out(result_ready));*/
 
    //Shift division result to produce final value.
-   assign shift_amount = quo>>`DLL_SCALE_SHIFT;
+   assign delta_phase_increment = shift_direction==`DLL_DPHI_DIR_FWD ?
+                                  quo>>`DLL_SCALE_SHIFT :
+                                  -(quo>>`DLL_SCALE_SHIFT);
 endmodule

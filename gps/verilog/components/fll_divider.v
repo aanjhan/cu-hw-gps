@@ -60,7 +60,7 @@ module fll_divider (
 				    .clken (1'b1));
    defparam lpm_divide_component.lpm_drepresentation = "UNSIGNED",
 	    lpm_divide_component.lpm_hint = "MAXIMIZE_SPEED=6,LPM_REMAINDERPOSITIVE=TRUE",
-	    lpm_divide_component.lpm_nrepresentation = "UNSIGNED",
+	    lpm_divide_component.lpm_nrepresentation = "SIGNED",
 	    lpm_divide_component.lpm_pipeline = 2,
 	    lpm_divide_component.lpm_type = "LPM_DIVIDE",
 	    lpm_divide_component.lpm_widthd = DEN_WIDTH,

@@ -8,15 +8,16 @@
 module dll(
     input                           clk,
     input                           reset,
+    //Control interface.
     input                           start,
     input [`CHANNEL_ID_RANGE]       tag,
+    //Channel tracking values.
     input [`IQ_RANGE]               iq_early,
     input [`IQ_RANGE]               iq_late,
-    output wire [`CHANNEL_ID_RANGE] result_tag,
+    //Results interface.
     output wire                     result_ready,
+    output wire [`CHANNEL_ID_RANGE] result_tag,
     output wire [`DLL_DPHI_RANGE]   delta_phase_increment);
-
-   //FIXME eml and epl values should be using IQ values, not I2Q2.
 
    //Phase increment offset calculation:
    //  eml=iq_early-iq_late
@@ -30,6 +31,8 @@ module dll(
    //      =(eml/epl*K)>>kshift
    //  C=2^ca_acc_width*HNUM*(2-chips_eml)*f_s/f_ca/2
    //  K=C<<shift (fixed-point)
+   //Note: the resulting phase increment does not include Doppler
+   //      aiding, which is necessary for long-term tracking.
    //
    //Calculation sequence:
    //  -Calculation of eml and epl values.

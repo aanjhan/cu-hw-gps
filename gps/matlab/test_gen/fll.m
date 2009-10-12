@@ -2,8 +2,8 @@ function fll(i_prompt_k,q_prompt_k,...
         i_prompt_km1,q_prompt_km1,...
         wdf_k,wdfdot_k)
     IQ_SHIFT=11;
-    iq_width=18;
-    op_width=iq_width-IQ_SHIFT;
+    ACC_WIDTH_TRACK=19;
+    op_width=ACC_WIDTH_TRACK-IQ_SHIFT;
     
     PER_SHIFT=12;
     T=1e-3;
@@ -27,6 +27,7 @@ function fll(i_prompt_k,q_prompt_k,...
     
     %Print parameters.
     disp(sprintf('FLL Parameters: iq_shift=%d, angle_shift=%d, fll_const_shift=%d',IQ_SHIFT,ANGLE_SHIFT,FLL_CONST_SHIFT));
+    disp(sprintf('                iq_prompt_k=%d, iq_prompt_km1=%d',iq_prompt_k,iq_prompt_km1));
     
     %Floating point truth value.
     num=q_prompt_k*i_prompt_km1-i_prompt_k*q_prompt_km1;
@@ -55,8 +56,10 @@ function fll(i_prompt_k,q_prompt_k,...
         dtheta,wdfdot_kp1,wdf_kp1,num,den,div_result));
     
     %Fixed-point with IQ sum/diff truncation.
-    index=ceil(log2(iq_prompt_k))-1;
-    shift=index-op_width+1;
+    index_k=ceil(log2(iq_prompt_k))-1;
+    index_km1=ceil(log2(iq_prompt_km1))-1;
+    index=max(index_k,index_km1);
+    shift=index-op_width+1+1;%Shift extra bit to account for signed I/Q values.
     if(shift<0)shift=0; end
     i_prompt_k=floor(i_prompt_k/2^shift);
     q_prompt_k=floor(q_prompt_k/2^shift);
@@ -75,5 +78,9 @@ function fll(i_prompt_k,q_prompt_k,...
             floor(FLL_B*div_result/2^FLL_CONST_SHIFT);
     disp(sprintf('Truncate (%db): dtheta=%f, wdfdot_kp1=%f, wdf_kp1=%f [num=%d, den=%d, div_result=%d].',...
         op_width,dtheta,wdfdot_kp1,wdf_kp1,num,den,div_result));
+    disp(sprintf('               [index=%d, shift=%d, iq_k_trunc=%d, iq_km1_trunc=%d]',...
+        index,shift,iq_prompt_k,iq_prompt_km1));
+    disp(sprintf('               [i_k_trunc=%d, q_k_trunc=%d, i_km1_trunc=%d, q_km1_trunc=%d]',...
+        i_prompt_k,q_prompt_k,i_prompt_km1,q_prompt_km1));
     
     return;

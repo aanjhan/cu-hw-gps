@@ -19,3 +19,5 @@ IQ_RANGE,IQ_WIDTH-1:0,IQ range when tracking.
 ANGLE_SHIFT,9,Fixed-point angle shift.
 DOPPLER_SHIFT_WIDTH,max_width(F_DOPP_MAX*2^ANGLE_SHIFT),Doppler shift width (in Hz).
 DOPPLER_SHIFT_RANGE,DOPPLER_SHIFT_WIDTH-1:0,Doppler shift range (in Hz).
+DOPPLER_INC_WIDTH,@
+DOPPLER_INC_RANGE,@

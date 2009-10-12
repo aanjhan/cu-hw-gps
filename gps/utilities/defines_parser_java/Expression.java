@@ -141,8 +141,12 @@ public class Expression
             if(haveRightValue ||
                tree.GetRight().GetType()==Tokenizer.TokenType.SEMICOLON)
             {
-                useValue=true;
-                value=EvalFunction(tree,vars);
+                stringValue=EvalFunction(tree,vars);
+                if(IsDouble(stringValue))
+                {
+                    useValue=true;
+                    value=FromDoubleString(stringValue);
+                }
             }
             else stringValue=tree.GetValue()+"("+rightString+")";
             break;
@@ -211,7 +215,7 @@ public class Expression
         else return 0;
     }
 
-    private double EvalFunction(TreeNode tree, HashMap<String,Expression> vars) throws ExpressionError
+    private String EvalFunction(TreeNode tree, HashMap<String,Expression> vars) throws ExpressionError
     {
         TreeNode child=tree.GetRight();
         String function=tree.GetValue();
@@ -254,17 +258,18 @@ public class Expression
             else throw new ExpressionError("expected value for '"+rightString+"'.");
             values.add(rightValue);
 
+            double result;
             if(function.equals("max"))
             {
                 double val=values.get(0);
                 for(int i=1;i<values.size();i++)val=values.get(i)>val ? values.get(i) : val;
-                return val;
+                result=val;
             }
             else if(function.equals("min"))
             {
                 double val=values.get(0);
                 for(int i=1;i<values.size();i++)val=values.get(i)<val ? values.get(i) : val;
-                return val;
+                result=val;
             }
             else if(function.equals("fix"))
             {
@@ -272,7 +277,7 @@ public class Expression
                 else if(values.size()>2)throw new ExpressionError("unexpected parameters.");
                 double val=values.get(0);
                 double shift=Math.ceil(values.get(1));
-                return Math.floor(val*Math.pow(2,shift)+0.5);
+                result=Math.floor(val*Math.pow(2,shift)+0.5);
             }
             else if(function.equals("float"))
             {
@@ -280,32 +285,38 @@ public class Expression
                 else if(values.size()>2)throw new ExpressionError("unexpected parameters.");
                 double val=values.get(0);
                 double shift=Math.ceil(values.get(1));
-                return val/Math.pow(2,shift);
+                result=val/Math.pow(2,shift);
             }
             else throw new UnsupportedFunction(function);
+
+            return Double.toString(result);
         }
     }
 
-    private double EvalFunction(String function, double value) throws UnsupportedFunction
+    private String EvalFunction(String function, double value) throws UnsupportedFunction
     {
-        if(function.equals("abs"))return value<0 ? -value : value;
-        else if(function.equals("acos"))return Math.acos(value);
-        else if(function.equals("asin"))return Math.asin(value);
-        else if(function.equals("atan"))return Math.atan(value);
-        else if(function.equals("ceil"))return Math.ceil(value);
-        else if(function.equals("cos"))return Math.cos(value);
-        else if(function.equals("exp"))return Math.exp(value);
-        else if(function.equals("floor"))return Math.floor(value);
-        else if(function.equals("ln"))return Math.log(value);
-        else if(function.equals("log10"))return Math.log10(value);
-        else if(function.equals("log2"))return Math.log(value)/Math.log(2);
-        else if(function.equals("max_value"))return Math.pow(2,Math.floor(value))-1;
-        else if(function.equals("max_width"))return Math.ceil(Math.log(Math.ceil(value+1))/Math.log(2));
-        else if(function.equals("round"))return Math.floor(value+0.5);
-        else if(function.equals("sin"))return Math.sin(value);
-        else if(function.equals("sqrt"))return Math.sqrt(value);
-        else if(function.equals("tan"))return Math.tan(value);
+        double result;
+        if(function.equals("abs"))result=value<0 ? -value : value;
+        else if(function.equals("acos"))result=Math.acos(value);
+        else if(function.equals("asin"))result=Math.asin(value);
+        else if(function.equals("atan"))result=Math.atan(value);
+        else if(function.equals("ceil"))result=Math.ceil(value);
+        else if(function.equals("cos"))result=Math.cos(value);
+        else if(function.equals("exp"))result=Math.exp(value);
+        else if(function.equals("floor"))result=Math.floor(value);
+        else if(function.equals("ln"))result=Math.log(value);
+        else if(function.equals("log10"))result=Math.log10(value);
+        else if(function.equals("log2"))result=Math.log(value)/Math.log(2);
+        else if(function.equals("max_value"))result=Math.pow(2,Math.floor(value))-1;
+        else if(function.equals("max_width"))result=Math.ceil(Math.log(Math.ceil(value+1))/Math.log(2));
+        else if(function.equals("range"))return String.format("%d:0",(int)value-1);
+        else if(function.equals("round"))result=Math.floor(value+0.5);
+        else if(function.equals("sin"))result=Math.sin(value);
+        else if(function.equals("sqrt"))result=Math.sqrt(value);
+        else if(function.equals("tan"))result=Math.tan(value);
         else throw new UnsupportedFunction(function);
+
+        return Double.toString(result);
     }
     
     private boolean IsDouble(String value)

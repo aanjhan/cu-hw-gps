@@ -5,7 +5,9 @@ function fll(i_prompt_k,q_prompt_k,...
     iq_width=18;
     op_width=iq_width-IQ_SHIFT;
     
+    PER_SHIFT=12;
     T=1e-3;
+    T_fix=round(T*2^PER_SHIFT);
     ANGLE_SHIFT=9;
     FLL_CONST_SHIFT=2;
     FLL_BW=10;
@@ -46,7 +48,9 @@ function fll(i_prompt_k,q_prompt_k,...
     div_result=floor(num/den);
     dtheta=floor(div_result/2^ANGLE_SHIFT);
     wdfdot_kp1=wdfdot_k+floor(FLL_A*div_result/2^FLL_CONST_SHIFT);
-    wdf_kp1=wdf_k+wdfdot_k*T+floor(FLL_B*div_result/2^FLL_CONST_SHIFT);%FIXME fixed-point T?
+    wdf_kp1=wdf_k+...
+            floor(wdfdot_k*T_fix/2^PER_SHIFT)+...
+            floor(FLL_B*div_result/2^FLL_CONST_SHIFT);
     disp(sprintf('No truncate: dtheta=%f, wdfdot_kp1=%f, wdf_kp1=%f [num=%d, den=%d, div_result=%d].',...
         dtheta,wdfdot_kp1,wdf_kp1,num,den,div_result));
     
@@ -66,7 +70,9 @@ function fll(i_prompt_k,q_prompt_k,...
     div_result=floor(num/den);
     dtheta=floor(div_result/2^ANGLE_SHIFT);
     wdfdot_kp1=wdfdot_k+floor(FLL_A*div_result/2^FLL_CONST_SHIFT);
-    wdf_kp1=wdf_k+wdfdot_k*T+floor(FLL_B*div_result/2^FLL_CONST_SHIFT);%FIXME fixed-point T?
+    wdf_kp1=wdf_k+...
+            floor(wdfdot_k*T_fix/2^PER_SHIFT)+...
+            floor(FLL_B*div_result/2^FLL_CONST_SHIFT);
     disp(sprintf('Truncate (%db): dtheta=%f, wdfdot_kp1=%f, wdf_kp1=%f [num=%d, den=%d, div_result=%d].',...
         op_width,dtheta,wdfdot_kp1,wdf_kp1,num,den,div_result));
     

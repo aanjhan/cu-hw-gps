@@ -322,8 +322,10 @@ while(fileNo-1 < Nfiles)
                 I_early_k, Q_early_k, I_late_k, Q_late_k, err_phs_km1, err_phs_km2, w_df_k, w_df_km1);
         else
             %run the FLL/DLL
-            [chip_rate_kp1, err_phs_k, err_code_k, w_df_kp1, w_df_dot_kp1] = flldll(I_prompt_k, Q_prompt_k,...
+            [chip_rate_kp1, err_phs_k, err_code_k, w_df_kp1, w_df_dot_kp1] = flldll_fixed(I_prompt_k, Q_prompt_k,...
                 I_early_k, Q_early_k, I_late_k, Q_late_k, w_df_k, w_df_dot_k, I_prompt_km1, Q_prompt_km1, CNo_k, CNo_km1);
+%             [chip_rate_kp1, err_phs_k, err_code_k, w_df_kp1, w_df_dot_kp1] = flldll(I_prompt_k, Q_prompt_k,...
+%                 I_early_k, Q_early_k, I_late_k, Q_late_k, w_df_k, w_df_dot_k, I_prompt_km1, Q_prompt_km1, CNo_k, CNo_km1);
         end
         % record time k data into history vectors
         index = index+1;

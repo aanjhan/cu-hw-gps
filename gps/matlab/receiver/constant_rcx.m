@@ -33,7 +33,7 @@
  CARRIER_THRESHOLD = pi/3;            %set the width of the clouds for carrier lock
  NBS = 22.5;                          %Bit transistion threshold...this seems to be a good value for real data
  %Following parameters are used for the PLL
- USE_PLL = 1;           % To use only the FLL, set USE_PLL = 0.  If you want to use the PLL, set this to 1
+ USE_PLL = 0;           % To use only the FLL, set USE_PLL = 0.  If you want to use the PLL, set this to 1
  INITIALIZE_PLL = 1;    % This is to run the initialization of km1 and km2 variables used in the PLL
  PLL_LOOP_ORDER = 2;    % This is the loop order to use for the PLL
  PLL_SWITCH_TIME = 0.8; % This is the time (in seconds) at which to switch over to the PLL, note this is determined empirically using the bandwidth of the FLL.
@@ -59,6 +59,6 @@
  B_FLL = (sqrt(2)*1.89*FLL_BANDWIDTH); %EE = sqrt(2)*w_nF = sqrt(2)*1.89*B_LF
 
 
- DEBUGFLAG = 0;
+ DEBUGFLAG = 1;
 
 %test

@@ -266,6 +266,22 @@ public class Expression
                 for(int i=1;i<values.size();i++)val=values.get(i)<val ? values.get(i) : val;
                 return val;
             }
+            else if(function.equals("fix"))
+            {
+                if(values.size()==1)throw new ExpressionError("missing fixed-point shift amount.");
+                else if(values.size()>2)throw new ExpressionError("unexpected parameters.");
+                double val=values.get(0);
+                double shift=Math.ceil(values.get(1));
+                return Math.floor(val*Math.pow(2,shift)+0.5);
+            }
+            else if(function.equals("float"))
+            {
+                if(values.size()==1)throw new ExpressionError("missing fixed-point shift amount.");
+                else if(values.size()>2)throw new ExpressionError("unexpected parameters.");
+                double val=values.get(0);
+                double shift=Math.ceil(values.get(1));
+                return val/Math.pow(2,shift);
+            }
             else throw new UnsupportedFunction(function);
         }
     }

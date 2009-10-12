@@ -22,6 +22,7 @@ public class Tokenizer
         static final int SEMICOLON = 14;
         static final int AT        = 15;
         static final int ILLEGAL   = 16;
+        static final int MOD       = 17;
     }
     
     private static final Pattern verilogConstant = Pattern.compile("^('[dhb])");
@@ -90,6 +91,7 @@ public class Tokenizer
             case ')': return TokenType.RPAREN;
             case ';': return TokenType.SEMICOLON;
             case '@': return TokenType.AT;
+            case '%': return TokenType.MOD;
             default: throw new UnknownTokenException(expression.substring(0,1));
             }
         }

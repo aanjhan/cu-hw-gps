@@ -112,7 +112,7 @@ public class Parser
 
     /**
     * Parse next term.
-    * Terms are defined as: Factor { ( * | / ) Factor }
+    * Terms are defined as: Factor { ( * | / | %) Factor }
     */
     public TreeNode ParseTerm() throws SyntaxError
     {
@@ -122,7 +122,8 @@ public class Parser
         
             while(tokenizer.HasNext() &&
                   (tokenizer.NextType()==Tokenizer.TokenType.TIMES ||
-                   tokenizer.NextType()==Tokenizer.TokenType.DIVIDE))
+                   tokenizer.NextType()==Tokenizer.TokenType.DIVIDE ||
+                   tokenizer.NextType()==Tokenizer.TokenType.MOD))
             {
                 term=new TreeNode(tokenizer.NextType(),term,null);//Create new node and move old term left
                 tokenizer.ReadNext();//Eat sign

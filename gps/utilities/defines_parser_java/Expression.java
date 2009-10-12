@@ -157,6 +157,14 @@ public class Expression
             useValue=true;
             value=EvalValue(tree.GetValue());
             break;
+        case Tokenizer.TokenType.MOD:
+            if(haveLeftValue && haveRightValue)
+            {
+                useValue=true;
+                value=leftValue % rightValue;
+            }
+            else stringValue=leftString+"%"+rightString;
+            break;
         default: throw new UnknownOperation(tree.GetType());
         }
 

@@ -33,21 +33,22 @@ function [ip,qp,w_df,snr_floor]=load_track(prns,maxSecond,iqplot,compute_snr_flo
             qp=Q_prompt_hist;
             w_df=w_df_hist;
 
-            second=2;
-            file=sprintf('PRN%d_hist_%d.mat',prn,second);
-            while(exist(file,'file')==2)
+            second=1;
+            file=sprintf('PRN%d_hist_%d.mat',prn,second+1);
+            while(exist(file,'file')==2 &&...
+                    (maxSecond<0 || second+1<=maxSecond))
+                second=second+1;
+
                 eval(sprintf('load %s',file));
                 ip=[ip;I_prompt_hist];
                 qp=[qp;Q_prompt_hist];
                 w_df=[w_df;w_df_hist];
 
-                second=second+1;
                 if(maxSecond>0 && second==maxSecond+1)
                     break;
                 end
-                file=sprintf('PRN%d_hist_%d.mat',prn,second);
+                file=sprintf('PRN%d_hist_%d.mat',prn,second+1);
             end
-            second=second-1;
         end
 
         if(second==1)s='';

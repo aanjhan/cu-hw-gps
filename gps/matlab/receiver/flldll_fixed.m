@@ -37,28 +37,31 @@ function [chip_rate_kp1, err_phs_k, err_code_k, w_df_kp1, w_df_dot_kp1] = flldll
 %Copyright 2006, Cornell University, Electrical and Computer Engineering,
 %Ithaca, NY 14853
 constant_h;
-%Obtain magnitude of early and late I and Q vectors used for DLL
-IQearly = sqrt(I_early_k^2+Q_early_k^2);
-IQlate  = sqrt(I_late_k^2+Q_late_k^2);
 
-%This is the phase error
-err_phs_k = -atan(Q_prompt_k/I_prompt_k);
-
-%Determine the amplitude of the peak
-amplitude = (IQearly+IQlate)/(2-CHIPS_EML);
-%Get the shift in chips necessary to re-center the triangle
-tau_prime = (IQearly-IQlate)/2/amplitude;
-%and the code phase error
-err_code_k = tau_prime*NUM_CHIPS;
-
+%%%%%%%%%%%%%%%%%%%%
+% FLL
+%%%%%%%%%%%%%%%%%%%%
 [w_df_kp1,w_df_dot_kp1]=fll_fixed(I_prompt_k, Q_prompt_k,...
                                   w_df_k, w_df_dot_k,...
                                   I_prompt_km1, Q_prompt_km1,...
                                   CNo_k, CNo_km1);
 
-%
-%  Do the code tracking DLL calculations with doppler aiding 
-%
-chip_rate_kp1 = CA_FREQ*(1+HNUM*tau_prime+w_df_kp1/2/pi/L1);
+%%%%%%%%%%%%%%%%%%%%
+% DLL
+%%%%%%%%%%%%%%%%%%%%
+
+%Obtain magnitude of early and late I and Q vectors used for DLL
+IQearly = sqrt(I_early_k^2+Q_early_k^2);
+IQlate  = sqrt(I_late_k^2+Q_late_k^2);
+
+[dchip_rate_kp1,err_code_k]=dll_fixed(IQearly,IQlate);
+
+%Add nominal chipping rate and Doppler aiding to DLL.
+%Note: can't track code without Doppler aiding.
+chip_rate_kp1 = dchip_rate_kp1+CA_FREQ*(1+w_df_kp1/2/pi/L1);
+% chip_rate_kp1 = dchip_rate_kp1+CA_FREQ;
+
+%This is the phase error
+err_phs_k = -atan(Q_prompt_k/I_prompt_k);
 
 return;

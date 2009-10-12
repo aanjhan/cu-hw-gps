@@ -9,8 +9,6 @@ function dll(iqe,iql)
     f_s=16.8e6;
     HNUM=5.8e-7;
     
-    %FIXME iqe and iql are IQ values (sqrt(I2Q2))!
-    
     %eml=(iqe-iql)
     %epl=(iqe+iql)
     %tau_prime=(iqe-iql)/(iqe+iql)*(2-chips_eml)/2

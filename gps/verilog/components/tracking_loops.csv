@@ -1,0 +1,21 @@
+#include !"global.csv"
+#include !"subchannel.csv"
+
+//Tracking-only accumulator width.
+ACC_WIDTH_TRACK,max_width(ACC_TRACK_MAX_VAL)+1,Accumulator width when tracking (two's complement).
+ACC_RANGE_TRACK,ACC_WIDTH_TRACK-1:0,Accumulator range when tracking.
+
+//I^2+Q^2 width when tracking only.
+I2Q2_MAX_VAL_TRACK,ACC_TRACK_MAX_VAL^2,Maximum I2Q2 value when tracking.
+I2Q2_WIDTH_TRACK,max_width(I2Q2_MAX_VAL_TRACK),I2Q2 width when tracking.
+I2Q2_RANGE_TRACK,I2Q2_WIDTH_TRACK-1:0,I2Q2 range when tracking.
+
+//IQ width (IQ=sqrt(I^2+Q^2)) when tracking only.
+IQ_MAX_VAL,ACC_TRACK_MAX_VAL,Maximum IQ value when tracking.
+IQ_WIDTH,max_width(IQ_MAX_VAL),IQ width when tracking.
+IQ_RANGE,IQ_WIDTH-1:0,IQ range when tracking.
+
+//Carrier parameters.
+ANGLE_SHIFT,9,Fixed-point angle shift.
+DOPPLER_SHIFT_WIDTH,max_width(F_DOPP_MAX*2^ANGLE_SHIFT),Doppler shift width (in Hz).
+DOPPLER_SHIFT_RANGE,DOPPLER_SHIFT_WIDTH-1:0,Doppler shift range (in Hz).

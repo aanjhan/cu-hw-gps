@@ -1,13 +1,15 @@
 function dll(iqe,iql)
     chips_eml=0.5;
-    i2q2_shift=24;
-    i2q2_width=35;
-    op_width=i2q2_width-i2q2_shift;
+    iq_shift=9;
+    iq_width=18;
+    op_width=iq_width-iq_shift;
     
     ca_acc_width=25;
     f_ca=1.023e6;
     f_s=16.8e6;
     HNUM=5.8e-7;
+    
+    %FIXME iqe and iql are IQ values (sqrt(I2Q2))!
     
     %eml=(iqe-iql)
     %epl=(iqe+iql)
@@ -30,7 +32,7 @@ function dll(iqe,iql)
     epl=iqe+iql;
     
     %Print parameters.
-    disp(sprintf('DLL Parameters: chips_eml=%.1f, i2q2_shift=%d, k_shift=%d, HNUM=%e',chips_eml,i2q2_shift,kshift,HNUM));
+    disp(sprintf('DLL Parameters: chips_eml=%.1f, iq_shift=%d, k_shift=%d, HNUM=%e',chips_eml,iq_shift,kshift,HNUM));
     
     %Floating point truth value.
     dphi=eml/epl*C;
@@ -38,7 +40,7 @@ function dll(iqe,iql)
     chips=round(chipsf);
     disp(sprintf('Truth: shift by %d (%.10f) chips - dphi=%.6f.',chips,chipsf,dphi));
     
-    %Fixed-point without truncating I2Q2 values
+    %Fixed-point without truncating IQ values
     %for speed increase and circuit complexity reduction.
     s=sign(eml);
     eml=abs(eml);
@@ -50,13 +52,13 @@ function dll(iqe,iql)
     disp(sprintf('No truncate: shift by %d (%.10f) chips - dphi=%.6f. [eml=%d, epl=%d, mult=%d, div=%d]',...
         chips,chipsf,dphi,eml,epl,mult_result,div_result));
     
-    %Fixed-point with I2Q2 sum/diff truncation.
+    %Fixed-point with IQ sum/diff truncation.
     eml=iqe-iql;
     epl=iqe+iql;
     diff_index=ceil(log2(eml))-1;
     sum_index=ceil(log2(epl))-1;
     index=max(sum_index,diff_index);
-    shift=index-op_width;
+    shift=index-op_width+1;
     if(shift<0)shift=0; end
     s=sign(eml);
     eml=abs(eml);

@@ -36,41 +36,35 @@
 // synopsys translate_off
 `timescale 1 ps / 1 ps
 // synopsys translate_on
-module divider (
-	clock,
-	denom,
-	numer,
-	quotient,
-	remain);
+module dll_divider (
+    input                       clock,
+    input [DEN_WIDTH-1:0]       denom,
+    input [NUM_WIDTH-1:0]       numer,
+    output wire [NUM_WIDTH-1:0] quotient,
+    output wire [DEN_WIDTH-1:0] remain);
 
-	input	  clock;
-	input	[10:0]  denom;
-	input	[18:0]  numer;
-	output	[18:0]  quotient;
-	output	[10:0]  remain;
+   parameter NUM_WIDTH = 9;
+   parameter DEN_WIDTH = 9;
 
-	wire [18:0] sub_wire0;
-	wire [10:0] sub_wire1;
-	wire [18:0] quotient = sub_wire0[18:0];
-	wire [10:0] remain = sub_wire1[10:0];
+   wire [NUM_WIDTH-1:0] sub_wire0;
+   wire [DEN_WIDTH-1:0] sub_wire1;
+   assign quotient = sub_wire0;
+   assign remain = sub_wire1;
 
-	lpm_divide	lpm_divide_component (
-				.denom (denom),
-				.clock (clock),
-				.numer (numer),
-				.quotient (sub_wire0),
-				.remain (sub_wire1),
-				.aclr (1'b0),
-				.clken (1'b1));
-	defparam
-		lpm_divide_component.lpm_drepresentation = "UNSIGNED",
-		lpm_divide_component.lpm_hint = "MAXIMIZE_SPEED=6,LPM_REMAINDERPOSITIVE=TRUE",
-		lpm_divide_component.lpm_nrepresentation = "UNSIGNED",
-		lpm_divide_component.lpm_pipeline = 2,
-		lpm_divide_component.lpm_type = "LPM_DIVIDE",
-		lpm_divide_component.lpm_widthd = 11,
-		lpm_divide_component.lpm_widthn = 19;
-
+   lpm_divide lpm_divide_component (.denom (denom),
+				    .clock (clock),
+				    .numer (numer),
+				    .quotient (sub_wire0),
+				    .remain (sub_wire1),
+				    .aclr (1'b0),
+				    .clken (1'b1));
+   defparam lpm_divide_component.lpm_drepresentation = "UNSIGNED",
+	    lpm_divide_component.lpm_hint = "MAXIMIZE_SPEED=6,LPM_REMAINDERPOSITIVE=TRUE",
+	    lpm_divide_component.lpm_nrepresentation = "UNSIGNED",
+	    lpm_divide_component.lpm_pipeline = 2,
+	    lpm_divide_component.lpm_type = "LPM_DIVIDE",
+	    lpm_divide_component.lpm_widthd = DEN_WIDTH,
+	    lpm_divide_component.lpm_widthn = NUM_WIDTH;
 
 endmodule
 
@@ -88,17 +82,17 @@ endmodule
 // Retrieval info: CONSTANT: LPM_NREPRESENTATION STRING "UNSIGNED"
 // Retrieval info: CONSTANT: LPM_PIPELINE NUMERIC "2"
 // Retrieval info: CONSTANT: LPM_TYPE STRING "LPM_DIVIDE"
-// Retrieval info: CONSTANT: LPM_WIDTHD NUMERIC "11"
-// Retrieval info: CONSTANT: LPM_WIDTHN NUMERIC "19"
+// Retrieval info: CONSTANT: LPM_WIDTHD NUMERIC "8"
+// Retrieval info: CONSTANT: LPM_WIDTHN NUMERIC "16"
 // Retrieval info: USED_PORT: clock 0 0 0 0 INPUT NODEFVAL clock
-// Retrieval info: USED_PORT: denom 0 0 11 0 INPUT NODEFVAL denom[10..0]
-// Retrieval info: USED_PORT: numer 0 0 19 0 INPUT NODEFVAL numer[18..0]
-// Retrieval info: USED_PORT: quotient 0 0 19 0 OUTPUT NODEFVAL quotient[18..0]
-// Retrieval info: USED_PORT: remain 0 0 11 0 OUTPUT NODEFVAL remain[10..0]
-// Retrieval info: CONNECT: @numer 0 0 19 0 numer 0 0 19 0
-// Retrieval info: CONNECT: @denom 0 0 11 0 denom 0 0 11 0
-// Retrieval info: CONNECT: quotient 0 0 19 0 @quotient 0 0 19 0
-// Retrieval info: CONNECT: remain 0 0 11 0 @remain 0 0 11 0
+// Retrieval info: USED_PORT: denom 0 0 8 0 INPUT NODEFVAL denom[7..0]
+// Retrieval info: USED_PORT: numer 0 0 16 0 INPUT NODEFVAL numer[15..0]
+// Retrieval info: USED_PORT: quotient 0 0 16 0 OUTPUT NODEFVAL quotient[15..0]
+// Retrieval info: USED_PORT: remain 0 0 8 0 OUTPUT NODEFVAL remain[7..0]
+// Retrieval info: CONNECT: @numer 0 0 16 0 numer 0 0 16 0
+// Retrieval info: CONNECT: @denom 0 0 8 0 denom 0 0 8 0
+// Retrieval info: CONNECT: quotient 0 0 16 0 @quotient 0 0 16 0
+// Retrieval info: CONNECT: remain 0 0 8 0 @remain 0 0 8 0
 // Retrieval info: CONNECT: @clock 0 0 0 0 clock 0 0 0 0
 // Retrieval info: LIBRARY: lpm lpm.lpm_components.all
 // Retrieval info: GEN_FILE: TYPE_NORMAL divider.v TRUE

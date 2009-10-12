@@ -36,37 +36,33 @@
 // synopsys translate_off
 `timescale 1 ps / 1 ps
 // synopsys translate_on
-module multiplier (
-	clock,
-	dataa,
-	datab,
-	result);
+module dll_multiplier (
+    input                          clock,
+    input [INPUT_A_WIDTH-1:0]      dataa,
+    input [INPUT_B_WIDTH-1:0]      datab,
+    output wire [OUTPUT_WIDTH-1:0] result);
 
-	input	  clock;
-	input	[10:0]  dataa;
-	input	[7:0]  datab;
-	output	[18:0]  result;
+   parameter INPUT_A_WIDTH = 9;
+   parameter INPUT_B_WIDTH = 9;
+   parameter OUTPUT_WIDTH = 18;
 
-	wire [18:0] sub_wire0;
-	wire [18:0] result = sub_wire0[18:0];
+   wire [OUTPUT_WIDTH-1:0] sub_wire0;
+   assign result = sub_wire0;
 
-	lpm_mult	lpm_mult_component (
-				.dataa (dataa),
+   lpm_mult lpm_mult_component (.dataa (dataa),
 				.datab (datab),
 				.clock (clock),
 				.result (sub_wire0),
 				.aclr (1'b0),
 				.clken (1'b1),
 				.sum (1'b0));
-	defparam
-		lpm_mult_component.lpm_hint = "MAXIMIZE_SPEED=9",
-		lpm_mult_component.lpm_pipeline = 2,
-		lpm_mult_component.lpm_representation = "UNSIGNED",
-		lpm_mult_component.lpm_type = "LPM_MULT",
-		lpm_mult_component.lpm_widtha = 11,
-		lpm_mult_component.lpm_widthb = 8,
-		lpm_mult_component.lpm_widthp = 19;
-
+   defparam lpm_mult_component.lpm_hint = "MAXIMIZE_SPEED=9",
+	    lpm_mult_component.lpm_pipeline = 2,
+	    lpm_mult_component.lpm_representation = "UNSIGNED",
+	    lpm_mult_component.lpm_type = "LPM_MULT",
+	    lpm_mult_component.lpm_widtha = INPUT_A_WIDTH,
+	    lpm_mult_component.lpm_widthb = INPUT_B_WIDTH,
+	    lpm_mult_component.lpm_widthp = OUTPUT_WIDTH;
 
 endmodule
 
@@ -83,9 +79,9 @@ endmodule
 // Retrieval info: PRIVATE: SignedMult NUMERIC "0"
 // Retrieval info: PRIVATE: USE_MULT NUMERIC "1"
 // Retrieval info: PRIVATE: ValidConstant NUMERIC "1"
-// Retrieval info: PRIVATE: WidthA NUMERIC "11"
+// Retrieval info: PRIVATE: WidthA NUMERIC "8"
 // Retrieval info: PRIVATE: WidthB NUMERIC "8"
-// Retrieval info: PRIVATE: WidthP NUMERIC "19"
+// Retrieval info: PRIVATE: WidthP NUMERIC "16"
 // Retrieval info: PRIVATE: aclr NUMERIC "0"
 // Retrieval info: PRIVATE: clken NUMERIC "0"
 // Retrieval info: PRIVATE: optimize NUMERIC "1"
@@ -93,15 +89,15 @@ endmodule
 // Retrieval info: CONSTANT: LPM_PIPELINE NUMERIC "2"
 // Retrieval info: CONSTANT: LPM_REPRESENTATION STRING "UNSIGNED"
 // Retrieval info: CONSTANT: LPM_TYPE STRING "LPM_MULT"
-// Retrieval info: CONSTANT: LPM_WIDTHA NUMERIC "11"
+// Retrieval info: CONSTANT: LPM_WIDTHA NUMERIC "8"
 // Retrieval info: CONSTANT: LPM_WIDTHB NUMERIC "8"
-// Retrieval info: CONSTANT: LPM_WIDTHP NUMERIC "19"
+// Retrieval info: CONSTANT: LPM_WIDTHP NUMERIC "16"
 // Retrieval info: USED_PORT: clock 0 0 0 0 INPUT NODEFVAL clock
-// Retrieval info: USED_PORT: dataa 0 0 11 0 INPUT NODEFVAL dataa[10..0]
+// Retrieval info: USED_PORT: dataa 0 0 8 0 INPUT NODEFVAL dataa[7..0]
 // Retrieval info: USED_PORT: datab 0 0 8 0 INPUT NODEFVAL datab[7..0]
-// Retrieval info: USED_PORT: result 0 0 19 0 OUTPUT NODEFVAL result[18..0]
-// Retrieval info: CONNECT: @dataa 0 0 11 0 dataa 0 0 11 0
-// Retrieval info: CONNECT: result 0 0 19 0 @result 0 0 19 0
+// Retrieval info: USED_PORT: result 0 0 16 0 OUTPUT NODEFVAL result[15..0]
+// Retrieval info: CONNECT: @dataa 0 0 8 0 dataa 0 0 8 0
+// Retrieval info: CONNECT: result 0 0 16 0 @result 0 0 16 0
 // Retrieval info: CONNECT: @datab 0 0 8 0 datab 0 0 8 0
 // Retrieval info: CONNECT: @clock 0 0 0 0 clock 0 0 0 0
 // Retrieval info: LIBRARY: lpm lpm.lpm_components.all

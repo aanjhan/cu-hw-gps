@@ -3,5 +3,5 @@
 #include !"dll.csv"
 
 CHANNEL_ID_RANGE,@
-I2Q2_RANGE,@
+IQ_RANGE,@
 DLL_DPHI_RANGE,@

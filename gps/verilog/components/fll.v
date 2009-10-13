@@ -11,6 +11,7 @@ module fll(
     //Control interface.
     input                                  start,
     input [`CHANNEL_ID_RANGE]              tag,
+    output wire                            starting,
     //Channel tracking history.
     input [`IQ_RANGE]                      iq_prompt_k,
     input [`IQ_RANGE]                      iq_prompt_km1,
@@ -26,6 +27,27 @@ module fll(
     output reg [`DOPPLER_INC_RANGE]        doppler_inc_kp1,
     output reg [`W_DF_RANGE]               w_df_kp1,
     output reg [`W_DF_DOT_RANGE]           w_df_dot_kp1);
+   
+   //Generate FLL clock at speed required for division.
+   `PRESERVE reg [`FLL_CLK_RANGE] fll_clk_count;
+   `PRESERVE reg                  clk_fll;
+   always @(posedge clk) begin
+      fll_clk_count <= reset ? `FLL_CLK_WIDTH'd`FLL_CLK_MAX :
+                       fll_clk_count==`FLL_CLK_WIDTH'd`FLL_CLK_MAX ? `FLL_CLK_WIDTH'h0 :
+                       fll_clk_count+`FLL_CLK_WIDTH'h1;
+
+      clk_fll <= reset ? 1'b0 :
+                 fll_clk_count==`FLL_CLK_WIDTH'd`FLL_CLK_MAX && start_div ? 1'b1 :
+                 fll_clk_count==`FLL_CLK_WIDTH'd`FLL_CLK_MAX ? ~clk_fll :
+                 clk_fll;
+   end
+
+   //Start a new operation on the edge of the FLL clock
+   //when start is asserted from the top level.
+   `KEEP wire starting_trunc;
+   assign starting_trunc = start &&
+                           ~clk_fll &&
+                           fll_clk_count==`FLL_CLK_WIDTH'd`FLL_CLK_MAX;
 
    //Doppler phase increment calculation:
    //  dtheta=((Q_k*I_km1-I_k*Q_km1)<<ANGLE_SHIFT)/(IQ_k*IQ_km1)
@@ -35,26 +57,6 @@ module fll(
    //Required FLL parameters.
    //  --numerator=(Q_k*I_km1-I_k*Q_km1)
    //  --denominator=IQ_k*IQ_km1
-
-   //Generate FLL clock from system clock.
-   reg [`FLL_CLK_RANGE] fll_clk_count;
-   reg clk_fll;
-   reg div_edge;
-   always @(posedge clk) begin
-      fll_clk_count <= reset ? `FLL_CLK_WIDTH'd`FLL_CLK_MAX :
-                       fll_clk_count==`FLL_CLK_MAX ? `FLL_CLK_WIDTH'h0 :
-                       fll_clk_count+`FLL_CLK_WIDTH'h1;
-
-      clk_fll <= reset ? 1'b0 :
-                 fll_clk_count==`FLL_CLK_WIDTH'd`FLL_CLK_MAX ? ~clk_fll :
-                 clk_fll;
-
-      div_edge <= (!reset &&
-                   fll_clk_count==`FLL_CLK_WIDTH'd`FLL_CLK_MAX &&
-                   !clk_fll) ?
-                  start :
-                  1'b0;
-   end // always @ (posedge clk)
 
    //////////////////////////////
    // Operand Smart-Truncation
@@ -81,16 +83,16 @@ module fll(
                               iq_k_index :
                               iq_km1_index;
 
-   wire div_edge_km2;
+   `KEEP wire continue_trunc;
    delay #(.DELAY(2))
      div_edge_delay_1(.clk(clk),
                       .reset(reset),
-                      .in(div_edge),
-                      .out(div_edge_km2));
+                      .in(starting_trunc),
+                      .out(continue_trunc));
 
    `PRESERVE reg [`FLL_INDEX_RANGE] trunc_index;
    always @(posedge clk) begin
-      trunc_index <= div_edge_km2 ? trunc_index_value : trunc_index;
+      trunc_index <= continue_trunc ? trunc_index_value : trunc_index;
    end
 
    reg [`ACC_RANGE_TRACK] trunc0_in;
@@ -158,7 +160,7 @@ module fll(
               start_op_setup <= 1'b1;
            end
            default: begin
-              st_state <= div_edge_km2 ?
+              st_state <= continue_trunc ?
                           `FLL_ST_STATE_IQ :
                           `FLL_ST_STATE_IDLE;
 
@@ -166,7 +168,16 @@ module fll(
            end
          endcase
       end
-   end
+   end // always @ (posedge clk)
+
+   //Assert starting back to the top level after
+   //truncation has finished and input values are
+   //no longer needed.
+   delay #(.DELAY(3))
+     starting_delay(.clk(clk),
+                    .reset(reset),
+                    .in(starting_trunc),
+                    .out(starting));
 
    ////////////////////////////////////////
    // Numerator/Denominator Computation
@@ -193,6 +204,7 @@ module fll(
 
    //Operand setup state machine.
    `PRESERVE reg [`FLL_OP_STATE_RANGE] op_setup_state;
+   `KEEP wire div_clk_edge_pending;
    always @(posedge clk) begin
       if(reset) begin
          op_setup_state <= `FLL_OP_STATE_IDLE;
@@ -254,7 +266,7 @@ module fll(
          //Don't deassert division start signal
          //until after division clock posedge.
          start_div <= op_setup_state==`FLL_OP_STATE_FINISH ? 1'b1 :
-                      clk_fll ? 1'b0 :
+                      div_clk_edge_pending ? 1'b0 :
                       start_div;
       end
    end // always @ (clk)
@@ -262,6 +274,60 @@ module fll(
    ////////////////////
    // Division
    ////////////////////
+
+   //Generate FLL division clock from system clock.
+   `PRESERVE reg [`FLL_CLK_RANGE] div_clk_count;
+   wire                 div_clk_max_count;
+   assign div_clk_max_count = div_clk_count==`FLL_CLK_WIDTH'd`FLL_CLK_MAX;
+
+   //Disable the division clock if a new division
+   //is not to set to start.
+   wire div_clk_disable;
+   assign div_clk_disable = div_clk_edge_pending && !start_div;
+   
+   `PRESERVE reg [1:0]            div_clk_state;
+   `KEEP reg                  clk_div;
+   always @(posedge clk) begin
+      if(reset) begin
+            div_clk_state <= 2'd3;
+            div_clk_count <= `FLL_CLK_WIDTH'd`FLL_CLK_MAX;
+            clk_div <= 1'b0;
+      end
+      else begin
+         case(div_clk_state)
+           2'd0: begin
+              div_clk_state <= div_clk_edge_pending ?
+                               (start_div ? 2'd0 : 2'd1) :
+                               2'd0;
+              div_clk_count <= div_clk_max_count ?
+                               `FLL_CLK_WIDTH'd0 :
+                               div_clk_count+`FLL_CLK_WIDTH'd1;
+              clk_div <= div_clk_max_count ? ~clk_div : clk_div;
+           end
+           2'd1: begin
+              div_clk_state <= div_clk_disable ? 2'd3 :
+                               div_clk_edge_pending ? 2'd0 :
+                               2'd1;
+              div_clk_count <= div_clk_disable ? div_clk_count :
+                               div_clk_max_count ? `FLL_CLK_WIDTH'd0 :
+                               div_clk_count+`FLL_CLK_WIDTH'd1;
+              clk_div <= div_clk_max_count && !div_clk_disable ? ~clk_div : clk_div;
+           end
+           default: begin
+              div_clk_state <= start_div ? 2'd0 : 2'd3;
+              div_clk_count <= start_div ? `FLL_CLK_WIDTH'd0 :`FLL_CLK_WIDTH'd`FLL_CLK_MAX;
+              clk_div <= start_div;
+           end
+      endcase // case (div_clk_state)
+      end
+   end // always @ (posedge clk)
+
+   //Flag the cycle before the posedge of the
+   //division clock to latch operands and clear
+   //start_div flag.
+   assign div_clk_edge_pending = (div_clk_state!=2'd3 || start_div) &&
+                                 div_clk_max_count &&
+                                 ~clk_div;
 
    //Take the absolute value of the numerator
    //to reduce multiply/divide complexity.
@@ -274,31 +340,33 @@ module fll(
    reg [`FLL_QUO_RANGE] numerator_in;
    reg [`FLL_DEN_RANGE] denominator_in;
    reg                  div_sign;
-   always @(posedge clk_fll) begin
-      numerator_in <= start_div ? numerator_abs : numerator_in;
-      denominator_in <= start_div ? denominator : denominator_in;
-      div_sign <= start_div ? numerator[`FLL_NUM_WIDTH-1] : div_sign;
+   always @(posedge clk) begin
+      numerator_in <= div_clk_edge_pending ? numerator_abs : numerator_in;
+      denominator_in <= div_clk_edge_pending ? denominator : denominator_in;
+      div_sign <= div_clk_edge_pending ? numerator[`FLL_NUM_WIDTH-1] : div_sign;
    end
 
-   `KEEP wire clk_fll_kmn;
+   `KEEP wire clk_div_kmn;
    delay #(.DELAY(`FLL_DIV_SETUP))
      div_clk_delay(.clk(clk),
                    .reset(reset),
-                   .in(clk_fll),
-                   .out(clk_fll_kmn));
+                   .in(clk_div),
+                   .out(clk_div_kmn));
 
    `KEEP wire div_setup_complete;
    delay #(.DELAY(`FLL_DIV_SETUP))
      div_start_delay(.clk(clk),
                      .reset(reset),
-                     .in(start_div && clk_fll),
+                     .in(div_clk_edge_pending && !div_clk_disable),
                      .out(div_setup_complete));
 
    //Pipe division result sign along
    //with 2-stage division.
    reg div_sign_km1;
-   always @(posedge clk_fll) begin
+   reg div_sign_km2;
+   always @(posedge clk_div_kmn) begin
       div_sign_km1 <= div_sign;
+      div_sign_km2 <= div_sign_km1;
    end
 
    //Divider.
@@ -306,7 +374,7 @@ module fll(
    wire [`FLL_DEN_RANGE] rem;
    fll_divider #(.NUM_WIDTH(`FLL_QUO_WIDTH),
                  .DEN_WIDTH(`FLL_DEN_WIDTH))
-     div(.clock(clk_fll_kmn),
+     div(.clock(clk_div_kmn),
          .numer(numerator_in),
          .denom(denominator_in),
          .quotient(quo),
@@ -325,7 +393,7 @@ module fll(
    `PRESERVE reg [`FLL_QUO_RANGE] dtheta;
    always @(posedge clk) begin
       dtheta <= div_results_ready ? quo : dtheta;
-      dtheta_sign <= div_results_ready ? div_sign_km1 : dtheta_sign;
+      dtheta_sign <= div_results_ready ? div_sign_km2 : dtheta_sign;
    end
 
    /////////////////////////
@@ -430,7 +498,7 @@ module fll(
       end
    end // always @ (posedge clk)
 
-   //Delay incoming tag on the division clock.
+   //Delay incoming tag on the FLL clock.
    delay #(.DELAY(`FLL_TAG_DELAY),
            .WIDTH(`CHANNEL_ID_WIDTH))
      tag_delay(.clk(clk_fll),

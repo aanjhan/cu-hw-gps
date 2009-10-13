@@ -469,7 +469,7 @@ set_global_assignment -name FMAX_REQUIREMENT "27 MHz" -section_id CLOCK_27
 set_global_assignment -name FMAX_REQUIREMENT "200 MHz"
 set_instance_assignment -name CLOCK_SETTINGS CLOCK_50 -to CLOCK_50
 set_instance_assignment -name CLOCK_SETTINGS CLOCK_27 -to CLOCK_27
-set_global_assignment -name SIMULATION_MODE FUNCTIONAL
+set_global_assignment -name SIMULATION_MODE TIMING
 set_global_assignment -name FMAX_REQUIREMENT "200 MHz" -section_id clk_200
 set_instance_assignment -name CLOCK_SETTINGS clk_200 -to clk
 set_global_assignment -name BASED_ON_CLOCK_SETTINGS clk_200 -section_id clk_20
@@ -493,3 +493,9 @@ set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE fll_test.vwf
+set_instance_assignment -name CLOCK_SETTINGS clk_20 -to clk_div
+set_instance_assignment -name CLOCK_SETTINGS clk_20_p4 -to clk_div_kmn
+set_global_assignment -name BASED_ON_CLOCK_SETTINGS clk_200 -section_id clk_20_p4
+set_global_assignment -name MULTIPLY_BASE_CLOCK_PERIOD_BY 10 -section_id clk_20_p4
+set_global_assignment -name OFFSET_FROM_BASE_CLOCK "20 ns" -section_id clk_20_p4
+set_global_assignment -name ADD_DEFAULT_PINS_TO_SIMULATION_OUTPUT_WAVEFORMS OFF

@@ -14,8 +14,7 @@ FLL_CLK_COUNT,10,Division clock divider (must be even).
 FLL_DIV_SETUP,5,Length (in cycles) of required division setup time.
 FLL_DIV_HOLD,4,Length (in cycles) before division result stabilizes.
 FLL_TAG_DELAY,5,Number of division clock cycles to delay tag for result.
-FLL_MAX_ROT_ANGLE,5,Maximum expected rotation angle (in degrees).
-FLL_BW,10,FLL bandwidth (in Hz).
+FLL_BW,10,FLL bandwidth [Hz].
 
 //Clock divider counter.
 FLL_CLK_MAX,ceil(FLL_CLK_COUNT/2)-1,Division clock counter max value.
@@ -25,31 +24,13 @@ FLL_CLK_RANGE,range(FLL_CLK_WIDTH),Division clock counter bit range.
 //FLL tuning.
 FLL_A_VAL,fix(((1.89*FLL_BW)^2);FLL_CONST_SHIFT),FLL_A contant value.
 FLL_B_VAL,fix(sqrt(2)*1.89*FLL_BW;FLL_CONST_SHIFT),FLL_B contant value.
-FLL_CONST_WIDTH,max_width(max(FLL_A_VAL;FLL_B_VAL;FLL_T)),FLL constant width.
+FLL_CONST_WIDTH,max_width(max(FLL_A_VAL;FLL_B_VAL;FLL_T;W_DF_TO_INC_VAL)),FLL constant width.
 FLL_CONST_RANGE,range(FLL_CONST_WIDTH),FLL constant range.
 FLL_A,FLL_CONST_WIDTH'dFLL_A_VAL,A_FLL constant.
 FLL_B,FLL_CONST_WIDTH'dFLL_B_VAL,B_FLL constant.
-FLL_CONST_RES_WIDTH,max_width(max(FLL_A;FLL_B)*fix(3.1415;ANGLE_SHIFT)),FLL result multiplication output width.
-FLL_CONST_RES_RANGE,range(FLL_CONST_RES_WIDTH),FLL result multiplication output range.
 
 //Accumulation period.
 FLL_T,fix(TRACK_ACC_LENGTH*T_CA_CODE;FLL_PER_SHIFT),Fixed-point accumulation period.
-
-//Tracking loop parameters.
-ACC_WIDTH_TRACK,@
-ACC_RANGE_TRACK,@
-IQ_WIDTH,@
-IQ_RANGE,@
-ANGLE_SHIFT,@
-DOPPLER_SHIFT_WIDTH,@
-DOPPLER_SHIFT_RANGE,@
-DOPPLER_INC_WIDTH,@
-DOPPLER_INC_RANGE,@
-
-//Doppler shift drift rate.
-DOPPLER_SHIFT_DOT_MAX_VAL,fix(3*FLL_MAX_ROT_ANGLE*float(FLL_A;FLL_CONST_SHIFT);ANGLE_SHIFT),Approximate expected maximum wdfdot value (in Hz/s).
-DOPPLER_SHIFT_DOT_WIDTH,max_width(DOPPLER_SHIFT_DOT_MAX_VAL),Expected maximum wdfdot width.
-DOPPLER_SHIFT_DOT_RANGE,range(DOPPLER_SHIFT_DOT_WIDTH),Expected maximum wdfdot range.
 
 //FLL smart-truncation.
 FLL_INDEX_WIDTH,max_width(ACC_WIDTH_TRACK),FLL smart-truncation index width.
@@ -62,8 +43,25 @@ FLL_NUM_WIDTH,2*FLL_OP_WIDTH+ANGLE_SHIFT,FLL numerator width (before abs).
 FLL_NUM_RANGE,range(FLL_NUM_WIDTH),FLL numerator range.
 FLL_DEN_WIDTH,2*FLL_OP_WIDTH,FLL denominator width.
 FLL_DEN_RANGE,range(FLL_DEN_WIDTH),FLL denominator range.
-FLL_QUO_WIDTH,FLL_NUM_WIDTH-1,FLL quotient wwidthrange.
+FLL_QUO_WIDTH,FLL_NUM_WIDTH-1,FLL quotient width.
 FLL_QUO_RANGE,range(FLL_QUO_WIDTH),FLL quotient range.
+
+//Result multiplication operand sizes.
+FLL_RES_MULT_B_WIDTH,max(FLL_QUO_WIDTH;W_DF_DOT_WIDTH;W_DF_WIDTH),FLL result multiplication operand width.
+FLL_RES_MULT_B_RANGE,range(FLL_RES_MULT_B_WIDTH),FLL result multiplication operand range.
+FLL_CONST_RES_WIDTH,max(W_DF_WIDTH;W_DF_DOT_WIDTH;DOPPLER_INC_WIDTH)+max(FLL_CONST_SHIFT;FLL_PER_SHIFT),FLL result multiplication output width.
+FLL_CONST_RES_RANGE,range(FLL_CONST_RES_WIDTH),FLL result multiplication output range.
+
+//Result multiplication operand padding
+FLL_RES_DT_PAD,pad(FLL_RES_MULT_B_WIDTH;FLL_QUO_WIDTH),Result multiplication dtheta padding.
+FLL_RES_W_DF_DOT_PAD,pad(FLL_RES_MULT_B_WIDTH;W_DF_DOT_WIDTH),Result multiplication w_df_dot padding.
+FLL_RES_W_DF_PAD,pad(FLL_RES_MULT_B_WIDTH;W_DF_WIDTH),Result multiplication w_df padding.
+
+//Result multiplication output select ranges.
+FLL_RES_A_RANGE,W_DF_DOT_WIDTH+FLL_CONST_SHIFT-1:FLL_CONST_SHIFT,FLL_A*dtheta select range.
+FLL_RES_B_RANGE,W_DF_WIDTH+FLL_CONST_SHIFT-1:FLL_CONST_SHIFT,FLL_B*dtheta select range.
+FLL_RES_T_RANGE,W_DF_WIDTH+FLL_PER_SHIFT-1:FLL_PER_SHIFT,FLL_T*w_df_dot_k select range.
+FLL_RES_INC_RANGE,DOPPLER_INC_WIDTH+W_DF_TO_INC_SHIFT-1:W_DF_TO_INC_SHIFT,Doppler increment select range.
 
 //Smart-truncation state machine.
 FLL_ST_STATE_MAX_VAL,4,Maximum smart-truncation state value.
@@ -89,7 +87,7 @@ FLL_OP_STATE_MULT_5,FLL_OP_STATE_WIDTH'd6,Multiply IQ_k*IQ_km1 (second cycle).
 FLL_OP_STATE_FINISH,FLL_OP_STATE_WIDTH'd7,Retrieve denominator and trigger division.
 
 //Result computation state machine.
-FLL_RES_STATE_MAX_VAL,6,Maximum result computation state value.
+FLL_RES_STATE_MAX_VAL,8,Maximum result computation state value.
 FLL_RES_STATE_WIDTH,max_width(FLL_RES_STATE_MAX_VAL),Result computation state variable width.
 FLL_RES_STATE_RANGE,range(FLL_RES_STATE_WIDTH),Result computation state variable range.
 FLL_RES_STATE_IDLE,FLL_RES_STATE_WIDTH'd0,Result computation idle.
@@ -98,4 +96,6 @@ FLL_RES_STATE_W_DF_DOT_1,FLL_RES_STATE_WIDTH'd2,Compute w_df_dot_kp1 (second cyc
 FLL_RES_STATE_W_DF_0,FLL_RES_STATE_WIDTH'd3,Compute w_df_kp1.
 FLL_RES_STATE_W_DF_1,FLL_RES_STATE_WIDTH'd4,Compute w_df_kp1 (second cycle).
 FLL_RES_STATE_W_DF_2,FLL_RES_STATE_WIDTH'd5,Compute w_df_kp1 (third cycle).
-FLL_RES_STATE_FINISH,FLL_RES_STATE_WIDTH'd6,Retrieve final result and flag finished.
+FLL_RES_STATE_INC_0,FLL_RES_STATE_WIDTH'd6,Compute doppler_inc_kp1.
+FLL_RES_STATE_INC_1,FLL_RES_STATE_WIDTH'd7,Compute doppler_inc_kp1 (second cycle).
+FLL_RES_STATE_FINISH,FLL_RES_STATE_WIDTH'd8,Retrieve final result and flag finished.

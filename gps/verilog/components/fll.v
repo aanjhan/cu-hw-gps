@@ -1,4 +1,5 @@
 `include "global.vh"
+`include "tracking_loops.vh"
 `include "fll.vh"
 
 `define DEBUG
@@ -17,14 +18,14 @@ module fll(
     input [`ACC_RANGE_TRACK]               q_prompt_k,
     input [`ACC_RANGE_TRACK]               i_prompt_km1,
     input [`ACC_RANGE_TRACK]               q_prompt_km1,
-    input [`DOPPLER_SHIFT_RANGE]           w_df_k,
-    input [`DOPPLER_SHIFT_DOT_RANGE]       w_df_dot_k,
+    input [`W_DF_RANGE]                    w_df_k,
+    input [`W_DF_DOT_RANGE]                w_df_dot_k,
     //Results interface.
     output reg                             result_ready,
     output wire [`CHANNEL_ID_RANGE]        result_tag,
-    output reg [`DOPPLER_INC_RANGE]        doppler_inc,
-    output reg [`DOPPLER_SHIFT_RANGE]      w_df_kp1,
-    output reg [`DOPPLER_SHIFT_DOT_RANGE]  w_df_dot_kp1);
+    output reg [`DOPPLER_INC_RANGE]        doppler_inc_kp1,
+    output reg [`W_DF_RANGE]               w_df_kp1,
+    output reg [`W_DF_DOT_RANGE]           w_df_dot_kp1);
 
    //Doppler phase increment calculation:
    //  dtheta=((Q_k*I_km1-I_k*Q_km1)<<ANGLE_SHIFT)/(IQ_k*IQ_km1)
@@ -331,15 +332,12 @@ module fll(
    // Result Computation
    /////////////////////////
 
-   //Shared signed multiplier.
-   //Note: constants are forced positive.//FIXME
-   //FIXME B width should be max of FLL_NUM_WIDTH (dtheta)
-   //FIXME and w_df_dot width.
-   reg [`FLL_CONST_RANGE]                     res_mult_a;
-   reg [`FLL_QUO_RANGE]                       res_mult_b;
-   wire [`FLL_CONST_WIDTH+`FLL_QUO_WIDTH-1:0] res_mult_output;
+   //Shared multiplier.
+   reg [`FLL_CONST_RANGE]                            res_mult_a;
+   reg [`FLL_RES_MULT_B_RANGE]                       res_mult_b;
+   wire [`FLL_CONST_WIDTH+`FLL_RES_MULT_B_WIDTH-1:0] res_mult_output;
    fll_multiplier #(.INPUT_A_WIDTH(`FLL_CONST_WIDTH),
-                    .INPUT_B_WIDTH(`FLL_QUO_WIDTH),
+                    .INPUT_B_WIDTH(`FLL_RES_MULT_B_WIDTH),
                     .SIGN("UNSIGNED"))
      res_mult(.clock(clk),
               .dataa(res_mult_a),
@@ -357,56 +355,74 @@ module fll(
       end
       else begin
          case(res_state)
+           //Calculate w_df_kp1.
+           //w_df_kp1=w_df_k+
+           //         (w_df_dot_k*FLL_T)>>FLL_PER_SHIFT+
+           //         (FLL_B*dtheta)>>FLL_CONST_SHIFT
+           `FLL_RES_STATE_W_DF_0: begin
+              res_state <= `FLL_RES_STATE_W_DF_1;
+              res_mult_a <= `FLL_T;
+              res_mult_b <= w_df_dot_k[`W_DF_DOT_WIDTH-1] ?
+                            {{`FLL_RES_W_DF_DOT_PAD{1'b0}},-w_df_dot_k} :
+                            {{`FLL_RES_W_DF_DOT_PAD{1'b0}},w_df_dot_k};
+           end
+           `FLL_RES_STATE_W_DF_1: begin
+              res_state <= `FLL_RES_STATE_W_DF_2;
+              res_mult_a <= `FLL_B;
+              res_mult_b <= {{`FLL_RES_DT_PAD{1'b0}},dtheta};
+           end
+           `FLL_RES_STATE_W_DF_2: begin
+              res_state <= `FLL_RES_STATE_W_DF_DOT_0;
+
+              if(w_df_dot_k[`W_DF_DOT_WIDTH-1])
+                w_df_kp1 <= w_df_k-res_mult_result[`FLL_RES_T_RANGE];
+              else
+                w_df_kp1 <= w_df_k+res_mult_result[`FLL_RES_T_RANGE];
+           end
            //Calculate w_df_dot_kp1.
            //w_df_dot_kp1=w_df_dot_k+(FLL_A*dtheta)>>FLL_CONST_SHIFT
            `FLL_RES_STATE_W_DF_DOT_0: begin
               res_state <= `FLL_RES_STATE_W_DF_DOT_1;
               res_mult_a <= `FLL_A;
-              res_mult_b <= dtheta;
+              res_mult_b <= {{`FLL_RES_DT_PAD{1'b0}},dtheta};
+
+              if(dtheta_sign)
+                w_df_kp1 <= w_df_kp1-res_mult_result[`FLL_RES_B_RANGE];
+              else
+                w_df_kp1 <= w_df_kp1+res_mult_result[`FLL_RES_B_RANGE];
            end
            `FLL_RES_STATE_W_DF_DOT_1: begin
-              res_state <= `FLL_RES_STATE_W_DF_0;
-              res_mult_a <= `FLL_A;
-              res_mult_b <= dtheta;
+              res_state <= `FLL_RES_STATE_INC_0;
            end
-           //Calculate w_df_kp1.
-           //w_df_kp1=w_df_k+
-           //         (w_df_dot_k*FLL_T)>>FLL_PER_SHIFT+
-           //         (FLL_A*dtheta)>>FLL_CONST_SHIFT
-           `FLL_RES_STATE_W_DF_0: begin
-              res_state <= `FLL_RES_STATE_W_DF_1;
-              res_mult_a <= `FLL_T;
-              res_mult_b <= w_df_dot_k;
+           //Calculate Doppler phase increment.
+           //dopp_inc_kp1=w_df_kp1*(180*2^(CARRIER_ACC_WIDTH-ANGLE_SHIFT)/PI/F_S)
+           `FLL_RES_STATE_INC_0: begin
+              res_state <= `FLL_RES_STATE_INC_1;
+              res_mult_a <= `W_DF_TO_INC;
+              res_mult_b <= w_df_kp1[`W_DF_WIDTH-1] ?
+                            {{`FLL_RES_W_DF_PAD{1'b0}},-w_df_kp1} :
+                            {{`FLL_RES_W_DF_PAD{1'b0}},w_df_kp1};
 
-              w_df_dot_kp1 <= w_df_dot_k+(dtheta_sign ?
-                                          -(res_mult_result>>`FLL_CONST_SHIFT) :
-                                          (res_mult_result>>`FLL_CONST_SHIFT));
+              if(dtheta_sign)
+                w_df_dot_kp1 <= w_df_dot_k-res_mult_result[`FLL_RES_A_RANGE];
+              else
+                w_df_dot_kp1 <= w_df_dot_k+res_mult_result[`FLL_RES_A_RANGE];
            end
-           `FLL_RES_STATE_W_DF_1: begin
-              res_state <= `FLL_RES_STATE_W_DF_2;
-              res_mult_a <= `FLL_B;
-              res_mult_b <= dtheta;
-           end
-           `FLL_RES_STATE_W_DF_2: begin
+           `FLL_RES_STATE_INC_1: begin
               res_state <= `FLL_RES_STATE_FINISH;
-
-              w_df_kp1 <= w_df_kp1+(w_df_dot_k[`DOPPLER_SHIFT_DOT_WIDTH-1] ?
-                                    -(res_mult_result>>`FLL_PER_SHIFT) :
-                                    (res_mult_result>>`FLL_PER_SHIFT));
            end
-           //FIXME Calculate phase increment and get w_df from that?
-           //FIXME Or just calculate phase increment separately.
            `FLL_RES_STATE_FINISH: begin
               res_state <= `FLL_RES_STATE_IDLE;
               
-              w_df_kp1 <= w_df_k+(dtheta_sign ?
-                                  -(res_mult_result>>`FLL_CONST_SHIFT) :
-                                  (res_mult_result>>`FLL_CONST_SHIFT));
               result_ready <= 1'b1;
+              if(w_df_kp1[`W_DF_WIDTH-1])
+                doppler_inc_kp1 <= -res_mult_result[`FLL_RES_INC_RANGE];
+              else
+                doppler_inc_kp1 <= res_mult_result[`FLL_RES_INC_RANGE];
            end
            default: begin
               res_state <= div_results_ready ?
-                           `FLL_RES_STATE_W_DF_DOT_0 :
+                           `FLL_RES_STATE_W_DF_0 :
                            `FLL_RES_STATE_IDLE;
               result_ready <= 1'b0;
            end

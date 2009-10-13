@@ -1,0 +1,32 @@
+//Square root input
+SQRT_INPUT_WIDTH,38,Bit width of sqrt_fixed argument.
+SQRT_INPUT_WIDTH_M1,SQRT_INPUT_WIDTH-1,Bit width of sqrt_fixed argument - 1.
+
+//Input pad
+SQRT_INPUT_PAD,SQRT_INPUT_WIDTH%2,Padding amount to make the input width an even number (0 if SQRT_INPUT_WIDTH is odd, 1 if SQRT_INPUT_WIDTH is even).
+SQRT_INPUT_RANGE,SQRT_INPUT_WIDTH+SQRT_INPUT_PAD-1:0,Bit range of sqrt_fixed argument.
+
+//Square root output
+SQRT_OUTPUT_WIDTH,ceil(SQRT_INPUT_WIDTH/2),Bit width of output.
+SQRT_OUTPUT_RANGE,SQRT_OUTPUT_WIDTH-1:0,Bit range of output.
+
+//Square root shift
+SQRT_SHIFT,SQRT_INPUT_WIDTH-2,Shift amount.
+SQRT_SHIFT_DIV_BY_2,SQRT_SHIFT/2,Shift amount / 2.
+
+//Square root loop counter
+SQRT_LOOPCOUNTER_WIDTH,max_width(SQRT_INPUT_WIDTH)+1,Bit width of loop counter.
+SQRT_LOOPCOUNTER_RANGE,SQRT_LOOPCOUNTER_WIDTH-1:0,Bit range of loop counter.
+SQRT_LOOPCOUNTER_MAX_VALUE,SQRT_LOOPCOUNTER_WIDTH'dSQRT_SHIFT*2+1+1+1,Value to which the loop counter is reset before each full sqrt computation.
+SQRT_LOOPCOUNTER_MAX_VALUE_M1,SQRT_LOOPCOUNTER_WIDTH'dSQRT_LOOPCOUNTER_MAX_VALUE-1,(Value to which the loop counter is reset before each full sqrt compilation) - 1.
+
+
+//Misc
+SQRT_WIDTH_M_SHIFT,SQRT_INPUT_WIDTH-SQRT_SHIFT,Difference between width and shift amount.
+SQRT_ROOT_WIDTH,36,Bit width of root variable in sqrt computation.
+SQRT_ROOT_RANGE,SQRT_ROOT_WIDTH-1:0,Bit range of root variable in sqrt computation.
+SQRT_REM_WIDTH,28,Bit width of remainder variable in sqrt computation.
+SQRT_REM_RANGE,SQRT_REM_WIDTH-1:0,Bit range of remainder variable in sqrt computation.
+SQRT_DIVISOR_WIDTH,36,Bit width of divisor variable in sqrt computation.
+SQRT_DIVISOR_RANGE,SQRT_DIVISOR_WIDTH-1:0,Bit range of divisor variable in sqrt computation.
+SQRT_X_ANDMASK,SQRT_INPUT_WIDTH'd(2^SQRT_INPUT_WIDTH)-1,And-mask for transfer between x1 and x2.

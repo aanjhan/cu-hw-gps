@@ -1,5 +1,5 @@
 include ../components/common_header.mk
 
-SOURCES+=$(COMPONENTS_DIR)/sqrt_fixed.csv
+SOURCES+=
 
 include ../components/common.mk

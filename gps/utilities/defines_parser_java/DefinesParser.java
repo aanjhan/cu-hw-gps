@@ -13,7 +13,7 @@ import OptionsParser.*;
 
 public class DefinesParser {
     public static final String packageName="DefParser";
-    public static final String version="0.10";
+    public static final String version="0.11";
     
     public static void main(String[] args) throws UnexpectedOption {
         OptionsParser o=new OptionsParser();
@@ -73,6 +73,19 @@ public class DefinesParser {
             InputParser in=new InputParser();
             errorCount+=in.Parse(vars,verilog);
         }
+
+        //Add constants.
+        MacroEntry constantEntry=new MacroEntry();
+        constantEntry.print=false;
+        constantEntry.file="";
+        constantEntry.line=-1;
+        constantEntry.comments=packageName+" constant.";
+        try
+        {
+            constantEntry.expression=new Expression("3.141592654");
+            vars.put("PI",constantEntry);
+        }
+        catch(Exceptions.ParserError e){}
 
         //Print output file.
         if(errorCount==0)

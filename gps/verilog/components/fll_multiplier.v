@@ -44,7 +44,8 @@ module fll_multiplier (
 
    parameter INPUT_A_WIDTH = 9;
    parameter INPUT_B_WIDTH = 9;
-   parameter OUTPUT_WIDTH = 18;
+   localparam OUTPUT_WIDTH = INPUT_A_WIDTH+INPUT_B_WIDTH;
+   parameter SIGN = "SIGNED";
 
    wire [OUTPUT_WIDTH-1:0] sub_wire0;
    assign result = sub_wire0;
@@ -58,7 +59,7 @@ module fll_multiplier (
 				.sum (1'b0));
    defparam lpm_mult_component.lpm_hint = "MAXIMIZE_SPEED=9",
 	    lpm_mult_component.lpm_pipeline = 1,
-	    lpm_mult_component.lpm_representation = "SIGNED",
+	    lpm_mult_component.lpm_representation = SIGN,
 	    lpm_mult_component.lpm_type = "LPM_MULT",
 	    lpm_mult_component.lpm_widtha = INPUT_A_WIDTH,
 	    lpm_mult_component.lpm_widthb = INPUT_B_WIDTH,

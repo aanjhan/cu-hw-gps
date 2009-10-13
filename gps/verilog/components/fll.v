@@ -21,7 +21,7 @@ module fll(
     input [`DOPPLER_SHIFT_DOT_RANGE]       w_df_dot_k,
     //Results interface.
     output reg                             result_ready,
-    output reg [`CHANNEL_ID_RANGE]         result_tag,
+    output wire [`CHANNEL_ID_RANGE]        result_tag,
     output reg [`DOPPLER_INC_RANGE]        doppler_inc,
     output reg [`DOPPLER_SHIFT_RANGE]      w_df_kp1,
     output reg [`DOPPLER_SHIFT_DOT_RANGE]  w_df_dot_kp1);
@@ -172,16 +172,18 @@ module fll(
    ////////////////////////////////////////
 
    //Shared multiplier for value calculation.
-   reg [`FLL_OP_RANGE]   mult_a;
-   reg [`FLL_OP_RANGE]   mult_b;
-   `KEEP wire [`FLL_DEN_RANGE] mult_result;
+   reg [`FLL_OP_RANGE]        mult_a;
+   reg [`FLL_OP_RANGE]        mult_b;
+   wire [2*`FLL_OP_WIDTH-1:0] mult_output;
    fll_multiplier #(.INPUT_A_WIDTH(`FLL_OP_WIDTH),
-                    .INPUT_B_WIDTH(`FLL_OP_WIDTH),
-                    .OUTPUT_WIDTH(`FLL_DEN_WIDTH))
+                    .INPUT_B_WIDTH(`FLL_OP_WIDTH))
      mult(.clock(clk),
           .dataa(mult_a),
           .datab(mult_b),
-          .result(mult_result));
+          .result(mult_output));
+   
+   `KEEP wire [`FLL_DEN_RANGE] mult_result;
+   assign mult_result = mult_output[`FLL_DEN_RANGE];
 
    //Division parameters.
    reg [`FLL_NUM_RANGE] numerator;
@@ -240,18 +242,19 @@ module fll(
            `FLL_OP_STATE_FINISH: begin
               op_setup_state <= `FLL_OP_STATE_IDLE;
               denominator <= mult_result;
-              start_div <= 1'b1;
            end
            default: begin
              op_setup_state <= start_op_setup ?
                                `FLL_OP_STATE_MULT_0 :
                                `FLL_OP_STATE_IDLE;
-
-              //Don't deassert division start signal
-              //until after division clock posedge.
-              start_div <= clk_fll ? 1'b0 : start_div;
            end
-         endcase
+         endcase // case (op_setup_state)
+         
+         //Don't deassert division start signal
+         //until after division clock posedge.
+         start_div <= op_setup_state==`FLL_OP_STATE_FINISH ? 1'b1 :
+                      clk_fll ? 1'b0 :
+                      start_div;
       end
    end // always @ (clk)
 
@@ -259,12 +262,21 @@ module fll(
    // Division
    ////////////////////
 
+   //Take the absolute value of the numerator
+   //to reduce multiply/divide complexity.
+   wire [`FLL_QUO_RANGE] numerator_abs;
+   abs #(.WIDTH(`FLL_NUM_WIDTH))
+     num_abs(.in(numerator),
+             .out(numerator_abs));
+
    //Latch division operands for specified setup time.
-   reg [`FLL_NUM_RANGE]       numerator_in;
-   reg [`FLL_DEN_RANGE]       denominator_in;
+   reg [`FLL_QUO_RANGE] numerator_in;
+   reg [`FLL_DEN_RANGE] denominator_in;
+   reg                  div_sign;
    always @(posedge clk_fll) begin
-      numerator_in <= start_div ? numerator : numerator_in;
+      numerator_in <= start_div ? numerator_abs : numerator_in;
       denominator_in <= start_div ? denominator : denominator_in;
+      div_sign <= start_div ? numerator[`FLL_NUM_WIDTH-1] : div_sign;
    end
 
    `KEEP wire clk_fll_kmn;
@@ -281,10 +293,17 @@ module fll(
                      .in(start_div && clk_fll),
                      .out(div_setup_complete));
 
+   //Pipe division result sign along
+   //with 2-stage division.
+   reg div_sign_km1;
+   always @(posedge clk_fll) begin
+      div_sign_km1 <= div_sign;
+   end
+
    //Divider.
-   `KEEP wire [`FLL_NUM_RANGE] quo;
+   `KEEP wire [`FLL_QUO_RANGE] quo;
    wire [`FLL_DEN_RANGE] rem;
-   fll_divider #(.NUM_WIDTH(`FLL_NUM_WIDTH),
+   fll_divider #(.NUM_WIDTH(`FLL_QUO_WIDTH),
                  .DEN_WIDTH(`FLL_DEN_WIDTH))
      div(.clock(clk_fll_kmn),
          .numer(numerator_in),
@@ -298,10 +317,14 @@ module fll(
                     .reset(reset),
                     .in(div_setup_complete),
                     .out(div_results_ready));
-   
-   `PRESERVE reg [`FLL_NUM_RANGE] dtheta;
+
+   //Store the result (i.e. the angle between the
+   //vectors). This angle is always positive.
+   reg                            dtheta_sign;
+   `PRESERVE reg [`FLL_QUO_RANGE] dtheta;
    always @(posedge clk) begin
       dtheta <= div_results_ready ? quo : dtheta;
+      dtheta_sign <= div_results_ready ? div_sign_km1 : dtheta_sign;
    end
 
    /////////////////////////
@@ -309,17 +332,22 @@ module fll(
    /////////////////////////
 
    //Shared signed multiplier.
-   //Note: constants are forced positive.
-   reg [`FLL_CONST_RANGE]            res_mult_a;
-   reg [`FLL_NUM_RANGE]              res_mult_b;
-   `KEEP wire [`FLL_CONST_RES_RANGE] res_mult_result;
-   fll_multiplier #(.INPUT_A_WIDTH(`FLL_CONST_WIDTH+1),
-                    .INPUT_B_WIDTH(`FLL_NUM_WIDTH),
-                    .OUTPUT_WIDTH(`FLL_CONST_RES_WIDTH))
+   //Note: constants are forced positive.//FIXME
+   //FIXME B width should be max of FLL_NUM_WIDTH (dtheta)
+   //FIXME and w_df_dot width.
+   reg [`FLL_CONST_RANGE]                     res_mult_a;
+   reg [`FLL_QUO_RANGE]                       res_mult_b;
+   wire [`FLL_CONST_WIDTH+`FLL_QUO_WIDTH-1:0] res_mult_output;
+   fll_multiplier #(.INPUT_A_WIDTH(`FLL_CONST_WIDTH),
+                    .INPUT_B_WIDTH(`FLL_QUO_WIDTH),
+                    .SIGN("UNSIGNED"))
      res_mult(.clock(clk),
-              .dataa({1'b0,res_mult_a}),
+              .dataa(res_mult_a),
               .datab(res_mult_b),
-              .result(res_mult_result));
+              .result(res_mult_output));
+
+   `KEEP wire [`FLL_CONST_RES_RANGE] res_mult_result;
+   assign res_mult_result = res_mult_output[`FLL_CONST_RES_RANGE];
 
    `PRESERVE reg [`FLL_RES_STATE_RANGE] res_state;
    always @(posedge clk) begin
@@ -331,7 +359,12 @@ module fll(
          case(res_state)
            //Calculate w_df_dot_kp1.
            //w_df_dot_kp1=w_df_dot_k+(FLL_A*dtheta)>>FLL_CONST_SHIFT
-           `FLL_RES_STATE_W_DF_DOT: begin
+           `FLL_RES_STATE_W_DF_DOT_0: begin
+              res_state <= `FLL_RES_STATE_W_DF_DOT_1;
+              res_mult_a <= `FLL_A;
+              res_mult_b <= dtheta;
+           end
+           `FLL_RES_STATE_W_DF_DOT_1: begin
               res_state <= `FLL_RES_STATE_W_DF_0;
               res_mult_a <= `FLL_A;
               res_mult_b <= dtheta;
@@ -345,30 +378,48 @@ module fll(
               res_mult_a <= `FLL_T;
               res_mult_b <= w_df_dot_k;
 
-              w_df_dot_kp1 <= w_df_dot_k+(res_mult_result>>`FLL_CONST_SHIFT);
+              w_df_dot_kp1 <= w_df_dot_k+(dtheta_sign ?
+                                          -(res_mult_result>>`FLL_CONST_SHIFT) :
+                                          (res_mult_result>>`FLL_CONST_SHIFT));
            end
            `FLL_RES_STATE_W_DF_1: begin
-              res_state <= `FLL_RES_STATE_FINISH;
+              res_state <= `FLL_RES_STATE_W_DF_2;
               res_mult_a <= `FLL_B;
               res_mult_b <= dtheta;
+           end
+           `FLL_RES_STATE_W_DF_2: begin
+              res_state <= `FLL_RES_STATE_FINISH;
 
-              w_df_kp1 <= w_df_kp1+(res_mult_result>>`FLL_PER_SHIFT);
+              w_df_kp1 <= w_df_kp1+(w_df_dot_k[`DOPPLER_SHIFT_DOT_WIDTH-1] ?
+                                    -(res_mult_result>>`FLL_PER_SHIFT) :
+                                    (res_mult_result>>`FLL_PER_SHIFT));
            end
            //FIXME Calculate phase increment and get w_df from that?
            //FIXME Or just calculate phase increment separately.
            `FLL_RES_STATE_FINISH: begin
               res_state <= `FLL_RES_STATE_IDLE;
-              w_df_kp1 <= w_df_k+(res_mult_result>>`FLL_CONST_SHIFT);
+              
+              w_df_kp1 <= w_df_k+(dtheta_sign ?
+                                  -(res_mult_result>>`FLL_CONST_SHIFT) :
+                                  (res_mult_result>>`FLL_CONST_SHIFT));
               result_ready <= 1'b1;
            end
            default: begin
               res_state <= div_results_ready ?
-                           `FLL_RES_STATE_W_DF_DOT :
+                           `FLL_RES_STATE_W_DF_DOT_0 :
                            `FLL_RES_STATE_IDLE;
               result_ready <= 1'b0;
            end
          endcase
       end
-   end
+   end // always @ (posedge clk)
+
+   //Delay incoming tag on the division clock.
+   delay #(.DELAY(`FLL_TAG_DELAY),
+           .WIDTH(`CHANNEL_ID_WIDTH))
+     tag_delay(.clk(clk_fll),
+               .reset(reset),
+               .in(tag),
+               .out(result_tag));
    
 endmodule

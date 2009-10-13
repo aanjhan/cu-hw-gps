@@ -467,13 +467,16 @@ set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name FMAX_REQUIREMENT "50 MHz" -section_id CLOCK_50
 set_global_assignment -name FMAX_REQUIREMENT "27 MHz" -section_id CLOCK_27
 set_global_assignment -name FMAX_REQUIREMENT "200 MHz"
-set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
-set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
-set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_instance_assignment -name CLOCK_SETTINGS CLOCK_50 -to CLOCK_50
 set_instance_assignment -name CLOCK_SETTINGS CLOCK_27 -to CLOCK_27
+set_global_assignment -name SIMULATION_MODE FUNCTIONAL
+set_global_assignment -name FMAX_REQUIREMENT "200 MHz" -section_id clk_200
+set_instance_assignment -name CLOCK_SETTINGS clk_200 -to clk
+set_global_assignment -name BASED_ON_CLOCK_SETTINGS clk_200 -section_id clk_20
+set_global_assignment -name MULTIPLY_BASE_CLOCK_PERIOD_BY 10 -section_id clk_20
+set_instance_assignment -name CLOCK_SETTINGS clk_20 -to clk_fll
+set_instance_assignment -name CLOCK_SETTINGS clk_20 -to clk_fll_kmn
+set_global_assignment -name VERILOG_FILE ../components/abs.v
 set_global_assignment -name VERILOG_FILE ../components/delay_1.v
 set_global_assignment -name VERILOG_FILE ../components/delay.v
 set_global_assignment -name VERILOG_FILE ../components/fll_truncate.v
@@ -482,12 +485,11 @@ set_global_assignment -name VERILOG_FILE ../components/fll_multiplier.v
 set_global_assignment -name VERILOG_FILE ../components/fll.v
 set_global_assignment -name VERILOG_FILE ../components/fll_divider.v
 set_global_assignment -name VERILOG_FILE DE2_TOP.v
-set_global_assignment -name SIMULATION_MODE FUNCTIONAL
 set_global_assignment -name VECTOR_WAVEFORM_FILE fll_test.vwf
+set_global_assignment -name VECTOR_WAVEFORM_FILE test.vwf
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE fll_test.vwf
-set_global_assignment -name FMAX_REQUIREMENT "200 MHz" -section_id clk_200
-set_instance_assignment -name CLOCK_SETTINGS clk_200 -to clk
-set_global_assignment -name BASED_ON_CLOCK_SETTINGS clk_200 -section_id clk_20
-set_global_assignment -name MULTIPLY_BASE_CLOCK_PERIOD_BY 10 -section_id clk_20
-set_instance_assignment -name CLOCK_SETTINGS clk_20 -to clk_fll
-set_instance_assignment -name CLOCK_SETTINGS clk_20 -to clk_fll_kmn

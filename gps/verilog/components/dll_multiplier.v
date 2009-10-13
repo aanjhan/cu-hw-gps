@@ -44,7 +44,7 @@ module dll_multiplier (
 
    parameter INPUT_A_WIDTH = 9;
    parameter INPUT_B_WIDTH = 9;
-   parameter OUTPUT_WIDTH = 18;
+   localparam OUTPUT_WIDTH = INPUT_A_WIDTH+INPUT_B_WIDTH;
 
    wire [OUTPUT_WIDTH-1:0] sub_wire0;
    assign result = sub_wire0;

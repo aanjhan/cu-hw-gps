@@ -13,6 +13,7 @@ FLL_PER_SHIFT,12,Accumulation period fixed-point shift.
 FLL_CLK_COUNT,10,Division clock divider (must be even).
 FLL_DIV_SETUP,5,Length (in cycles) of required division setup time.
 FLL_DIV_HOLD,4,Length (in cycles) before division result stabilizes.
+FLL_TAG_DELAY,5,Number of division clock cycles to delay tag for result.
 FLL_MAX_ROT_ANGLE,5,Maximum expected rotation angle (in degrees).
 FLL_BW,10,FLL bandwidth (in Hz).
 
@@ -24,11 +25,11 @@ FLL_CLK_RANGE,range(FLL_CLK_WIDTH),Division clock counter bit range.
 //FLL tuning.
 FLL_A_VAL,fix(((1.89*FLL_BW)^2);FLL_CONST_SHIFT),FLL_A contant value.
 FLL_B_VAL,fix(sqrt(2)*1.89*FLL_BW;FLL_CONST_SHIFT),FLL_B contant value.
-FLL_CONST_WIDTH,max(max_width(FLL_A_VAL);max_width(FLL_B_VAL)),FLL constant width.
+FLL_CONST_WIDTH,max_width(max(FLL_A_VAL;FLL_B_VAL;FLL_T)),FLL constant width.
 FLL_CONST_RANGE,range(FLL_CONST_WIDTH),FLL constant range.
 FLL_A,FLL_CONST_WIDTH'dFLL_A_VAL,A_FLL constant.
 FLL_B,FLL_CONST_WIDTH'dFLL_B_VAL,B_FLL constant.
-FLL_CONST_RES_WIDTH,FLL_NUM_WIDTH+FLL_CONST_WIDTH,FLL result multiplication output width.
+FLL_CONST_RES_WIDTH,max_width(max(FLL_A;FLL_B)*fix(3.1415;ANGLE_SHIFT)),FLL result multiplication output width.
 FLL_CONST_RES_RANGE,range(FLL_CONST_RES_WIDTH),FLL result multiplication output range.
 
 //Accumulation period.
@@ -57,10 +58,12 @@ FLL_OP_WIDTH,ACC_WIDTH_TRACK-FLL_OP_SHIFT,FLL operand width.
 FLL_OP_RANGE,range(FLL_OP_WIDTH),FLL operand range.
 
 //Division operand sizes.
-FLL_NUM_WIDTH,2*FLL_OP_WIDTH+ANGLE_SHIFT,FLL numerator width.
+FLL_NUM_WIDTH,2*FLL_OP_WIDTH+ANGLE_SHIFT,FLL numerator width (before abs).
 FLL_NUM_RANGE,range(FLL_NUM_WIDTH),FLL numerator range.
 FLL_DEN_WIDTH,2*FLL_OP_WIDTH,FLL denominator width.
 FLL_DEN_RANGE,range(FLL_DEN_WIDTH),FLL denominator range.
+FLL_QUO_WIDTH,FLL_NUM_WIDTH-1,FLL quotient wwidthrange.
+FLL_QUO_RANGE,range(FLL_QUO_WIDTH),FLL quotient range.
 
 //Smart-truncation state machine.
 FLL_ST_STATE_MAX_VAL,4,Maximum smart-truncation state value.
@@ -90,7 +93,9 @@ FLL_RES_STATE_MAX_VAL,6,Maximum result computation state value.
 FLL_RES_STATE_WIDTH,max_width(FLL_RES_STATE_MAX_VAL),Result computation state variable width.
 FLL_RES_STATE_RANGE,range(FLL_RES_STATE_WIDTH),Result computation state variable range.
 FLL_RES_STATE_IDLE,FLL_RES_STATE_WIDTH'd0,Result computation idle.
-FLL_RES_STATE_W_DF_DOT,FLL_RES_STATE_WIDTH'd1,Compute w_df_dot_kp1.
-FLL_RES_STATE_W_DF_0,FLL_RES_STATE_WIDTH'd2,Compute w_df_kp1.
-FLL_RES_STATE_W_DF_1,FLL_RES_STATE_WIDTH'd3,Compute w_df_kp1 (second cycle).
-FLL_RES_STATE_FINISH,FLL_RES_STATE_WIDTH'd4,Retrieve final result and flag finished.
+FLL_RES_STATE_W_DF_DOT_0,FLL_RES_STATE_WIDTH'd1,Compute w_df_dot_kp1.
+FLL_RES_STATE_W_DF_DOT_1,FLL_RES_STATE_WIDTH'd2,Compute w_df_dot_kp1 (second cycle).
+FLL_RES_STATE_W_DF_0,FLL_RES_STATE_WIDTH'd3,Compute w_df_kp1.
+FLL_RES_STATE_W_DF_1,FLL_RES_STATE_WIDTH'd4,Compute w_df_kp1 (second cycle).
+FLL_RES_STATE_W_DF_2,FLL_RES_STATE_WIDTH'd5,Compute w_df_kp1 (third cycle).
+FLL_RES_STATE_FINISH,FLL_RES_STATE_WIDTH'd6,Retrieve final result and flag finished.

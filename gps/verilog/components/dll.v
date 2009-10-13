@@ -176,14 +176,16 @@ module dll(
    end
 
    //Perform multiplication div_edge: M=(e-l)*K.
-   `KEEP wire [`DLL_MULT_OUTPUT_RANGE] mult_result;
+   wire [`DLL_OP_WIDTH+`DLL_SCALE_WIDTH-1:0] mult_output;
    dll_multiplier #(.INPUT_A_WIDTH(`DLL_OP_WIDTH),
-                    .INPUT_B_WIDTH(`DLL_SCALE_WIDTH),
-                    .OUTPUT_WIDTH(`DLL_MULT_OUTPUT_WIDTH))
+                    .INPUT_B_WIDTH(`DLL_SCALE_WIDTH))
      mult(.clock(clk),
           .dataa(iq_diff_km1),
           .datab(`DLL_SCALE),
-          .result(mult_result));
+          .result(mult_output));
+   
+   `KEEP wire [`DLL_MULT_OUTPUT_RANGE] mult_result;
+   assign mult_result = mult_output[`DLL_MULT_OUTPUT_RANGE];
 
    `KEEP wire div_edge_km7;
    delay #(.DELAY(3))

@@ -1,7 +1,7 @@
 `include "global.vh"
 `include "sqrt_fixed.vh"
 
-`define DEBUG
+//`define DEBUG
 `include "debug.vh"
 
 //Calculate sqrt(x).
@@ -20,13 +20,13 @@ module sqrt_fixed(
     /********************** Reg and wire declarations ***********************/
 
     // Post-padded input.  The final output y of the module is sqrt(x).
-    wire [`SQRT_INPUT_RANGE] in_padded;
+    wire [`SQRT_INPUT_PADDED_RANGE] in_padded;
     
     /* Logic output wires (Logic evaluated in wires for readability later on) */
     wire [`SQRT_ROOT_RANGE]   root1_lshift_1;            //root1 << 1
     wire [`SQRT_REM_RANGE]    rem1_lshift_WIDTH_m_SHIFT; //rem1 << (WIDTH - SHIFT)
-    wire [`SQRT_INPUT_RANGE]  x1_lshift_2;               //x1 << 2
-    wire [`SQRT_INPUT_RANGE]  x1_rshift_SHIFT_full;      //x1 >> SHIFT
+    wire [`SQRT_INPUT_PADDED_RANGE]  x1_lshift_2;               //x1 << 2
+    wire [`SQRT_INPUT_PADDED_RANGE]  x1_rshift_SHIFT_full;      //x1 >> SHIFT
     wire [`SQRT_REM_RANGE]    x1_rshift_SHIFT;           //x1 >> SHIFT truncated to rem range
     wire [`SQRT_ROOT_RANGE]   root2_lshift_1;            //root2 << 1
     wire [`SQRT_ROOT_RANGE]   root2_rshift_SHIFT_DIV_2;  //root2 >> (SHIFT / 2)
@@ -43,8 +43,8 @@ module sqrt_fixed(
     /* Variable registers.  <name>1 is the first stage of the pipeline,
     * <name2> is the second. */
 
-    `PRESERVE reg [`SQRT_INPUT_RANGE] x1;
-    `PRESERVE reg [`SQRT_INPUT_RANGE] x2;
+    `PRESERVE reg [`SQRT_INPUT_PADDED_RANGE] x1;
+    `PRESERVE reg [`SQRT_INPUT_PADDED_RANGE] x2;
     `PRESERVE reg [`SQRT_REM_RANGE]   rem1;
     `PRESERVE reg [`SQRT_REM_RANGE]   rem2;
     `PRESERVE reg [`SQRT_REM_RANGE]   rem_m_div;
@@ -59,7 +59,7 @@ module sqrt_fixed(
     /************************* Wire assignments *****************************/
     
     //Concatenate SQRT_INPUT_PAD zeros to the left side of the input.
-    assign in_padded = (`SQRT_INPUT_PAD == 0) ? in : {{`SQRT_INPUT_PAD{1'b0}},in}; 
+    assign in_padded = {{`SQRT_INPUT_PAD{1'b0}},in};
 
     //Assign shift wires
     assign root1_lshift_1 = root1 << 1;
@@ -97,7 +97,7 @@ module sqrt_fixed(
         
         //Update x1.  x1 resets to zero.  x1 gets new value in_padded if
         //flag_new_input is high, in_use is zero, and gets x2 otherwise.
-        x1 <= reset ? `SQRT_INPUT_WIDTH'b0 :            //Reset to zero
+        x1 <= reset ? `SQRT_INPUT_PADDED_WIDTH'b0 :            //Reset to zero
               (input_ready && !in_use) ? in_padded :    //If flag_new_input, get new input value
               x2;                                       //Otherwise, get new value from x2
 
@@ -112,8 +112,8 @@ module sqrt_fixed(
 
         //Update x2.  x2 resets to zero.  x2 gets the output of (x << 2)
         //& (2^width - 1).
-        x2 <= reset ? `SQRT_INPUT_WIDTH'b0 :     //Reset to zero
-              x1_lshift_2 & `SQRT_X_ANDMASK;       //Take (x1 << 2) & 2^WIDTH - 1 otherwise
+        x2 <= reset ? `SQRT_INPUT_PADDED_WIDTH'b0 :     //Reset to zero
+              x1_lshift_2;       //Take (x1 << 2) & 2^WIDTH - 1 otherwise
 
         //Update rem2.  rem2 resets to zero.  rem2 gets the output of rem1 <<
         //(WIDTH - SHIFT) | x1 >> SHIFT
@@ -140,7 +140,7 @@ module sqrt_fixed(
         //Update the output out. out resets to zero.  Out gets 
         //root >> (SHIFT/2).
         out <= reset ? `SQRT_OUTPUT_WIDTH'b0 :   //Reset to zero
-               root2_rshift_SHIFT_DIV_2[`SQRT_SHIFT_DIV_BY_2-1:0];         //Take the output of root >> (SHIFT/2) otherwise
+               root2_rshift_SHIFT_DIV_2[`SQRT_OUTPUT_RANGE];         //Take the output of root >> (SHIFT/2) otherwise
 
         //Update output_ready.  output_ready resets to zero.  output_ready is
         //set to zero if loopcounter = 1 and zero otherwise.

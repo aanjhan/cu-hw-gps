@@ -4,6 +4,7 @@
 function root=sqrt_fixed(value)
     root=0;
     rem=0;
+    divisor=0;
     shift=36;
     if mod(shift,2) ~= 0
         error('Shift must be an even number.');
@@ -30,8 +31,13 @@ function root=sqrt_fixed(value)
 %     root=bitshift(root,-1);
     
     while(count>=0)
+%         disp(sprintf('rem = %i',rem));
+%         disp(sprintf('root = %i',root));
+%         disp(sprintf('divisor = %i',divisor));
+%         disp(sprintf('value = %i',value_fixed));
+%         disp('***********************');
         root=bitshift(root,1);
-        rem=bitshift(rem,width-shift)+bitshift(value_fixed,-shift);
+        rem=bitor(bitshift(rem,width-shift), bitshift(value_fixed,-shift));
         
         value_fixed=bitand(bitshift(value_fixed,2),2^width-1);
         
@@ -40,6 +46,13 @@ function root=sqrt_fixed(value)
             rem=rem-divisor;
             root=root+1;
         end
+        
+%         disp(sprintf('rem = %i',rem));
+%         disp(sprintf('root = %i',root));
+%         disp(sprintf('divisor = %i',divisor));
+%         disp(sprintf('value = %i',value_fixed));
+%         disp('***********************');
+%         disp('***********************');
         
         count=count-1;
     end

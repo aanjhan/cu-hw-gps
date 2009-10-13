@@ -287,6 +287,15 @@ public class Expression
                 double shift=Math.ceil(values.get(1));
                 result=val/Math.pow(2,shift);
             }
+            else if(function.equals("pad"))
+            {
+                if(values.size()==1)throw new ExpressionError("missing parameter.");
+                else if(values.size()>2)throw new ExpressionError("unexpected parameters.");
+                double toWidth=values.get(0);
+                double fromWidth=Math.ceil(values.get(1));
+                result=toWidth-fromWidth;
+                if(result<0)result=0;
+            }
             else throw new UnsupportedFunction(function);
 
             return Double.toString(result);

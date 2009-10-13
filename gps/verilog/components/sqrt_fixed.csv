@@ -7,7 +7,7 @@ SQRT_INPUT_PAD,SQRT_INPUT_WIDTH%2,Padding amount to make the input width an even
 SQRT_INPUT_RANGE,SQRT_INPUT_WIDTH+SQRT_INPUT_PAD-1:0,Bit range of sqrt_fixed argument.
 
 //Square root output
-SQRT_OUTPUT_WIDTH,ceil(SQRT_INPUT_WIDTH/2),Bit width of output.
+SQRT_OUTPUT_WIDTH,ceil(SQRT_INPUT_WIDTH/2)-1,Bit width of output.
 SQRT_OUTPUT_RANGE,SQRT_OUTPUT_WIDTH-1:0,Bit range of output.
 
 //Square root shift

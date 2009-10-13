@@ -11,6 +11,7 @@ module sqrt_fixed(
     input reset,
     input input_ready,
     input [`SQRT_INPUT_RANGE] in,
+    output wire flag_new_input,
     output reg output_ready,
     output reg in_use,
     output reg [`SQRT_OUTPUT_RANGE] out
@@ -37,8 +38,6 @@ module sqrt_fixed(
     wire [`SQRT_REM_RANGE]    rem_mux_out;               //Output of rem mux
     wire                      comparator_out;            //Output of divisor <= rem2
     wire [`SQRT_REM_RANGE]    divisor;                   // (rem2 << 1) + 1
-
-    wire flag_new_input;
 
     
     /* Variable registers.  <name>1 is the first stage of the pipeline,

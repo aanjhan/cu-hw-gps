@@ -71,7 +71,9 @@ module dll(
    //the early and late IQ values.
    wire [`DLL_OP_PRE_RANGE] iq_sum_pre_trunc;
    assign iq_sum_pre_trunc = iq_early_padded+iq_late_padded;
-   
+
+   //FIXME This subtraction and subsequent absolute value
+   //FIXME is taking too long. Pipeline an extra time?
    wire [`DLL_OP_PRE_RANGE] iq_diff_pre_trunc;
    assign iq_diff_pre_trunc = iq_early_padded-iq_late_padded;
 

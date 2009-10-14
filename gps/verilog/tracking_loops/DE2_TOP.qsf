@@ -25,7 +25,7 @@
 
 set_global_assignment -name FAMILY "Cyclone II"
 set_global_assignment -name DEVICE EP2C35F672C6
-set_global_assignment -name TOP_LEVEL_ENTITY dll
+set_global_assignment -name TOP_LEVEL_ENTITY tracking_loops
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 8.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "11:32:43  FEBRUARY 28, 2009"
 set_global_assignment -name LAST_QUARTUS_VERSION 8.0
@@ -455,49 +455,54 @@ set_location_assignment PIN_V24 -to GPIO_1[32]
 set_location_assignment PIN_V23 -to GPIO_1[33]
 set_location_assignment PIN_W25 -to GPIO_1[34]
 set_location_assignment PIN_W23 -to GPIO_1[35]
+set_global_assignment -name USE_CONFIGURATION_DEVICE ON
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
 set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
-set_global_assignment -name SIMULATION_MODE FUNCTIONAL
-set_global_assignment -name ENABLE_SIGNALTAP OFF
-set_global_assignment -name USE_SIGNALTAP_FILE data_feed_tap.stp
-set_global_assignment -name ADD_DEFAULT_PINS_TO_SIMULATION_OUTPUT_WAVEFORMS OFF
-set_global_assignment -name SETUP_HOLD_DETECTION OFF
-set_global_assignment -name SAVE_DISK_SPACE OFF
-set_global_assignment -name FMAX_REQUIREMENT "200 MHz"
-set_global_assignment -name SEARCH_PATH ../components/nios/data_feed
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -entity DE2_TOP -section_id Top
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -entity DE2_TOP -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -entity DE2_TOP -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -entity DE2_TOP -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -entity DE2_TOP -section_id "Root Region"
 set_global_assignment -name SMART_RECOMPILE ON
-set_global_assignment -name SIMULATOR_GENERATE_POWERPLAY_VCD_FILE OFF
-set_global_assignment -name FMAX_REQUIREMENT "50 MHz" -section_id "50 MHz"
-set_global_assignment -name FMAX_REQUIREMENT "200 MHz" -section_id "200 MHz"
-set_global_assignment -name FMAX_REQUIREMENT "200 MHz" -section_id "200 MHz Top"
-set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS OFF
-set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE BALANCED
-set_global_assignment -name DUTY_CYCLE 10 -section_id "20 MHz"
-set_global_assignment -name BASED_ON_CLOCK_SETTINGS "200 MHz" -section_id "20 MHz"
-set_global_assignment -name MULTIPLY_BASE_CLOCK_PERIOD_BY 10 -section_id "20 MHz"
-set_global_assignment -name MUX_RESTRUCTURE OFF
-set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
+set_global_assignment -name FMAX_REQUIREMENT "50 MHz" -section_id CLOCK_50
+set_global_assignment -name FMAX_REQUIREMENT "27 MHz" -section_id CLOCK_27
+set_global_assignment -name FMAX_REQUIREMENT "200 MHz"
+set_global_assignment -name SIMULATION_MODE TIMING
+set_global_assignment -name FMAX_REQUIREMENT "200 MHz" -section_id clk_200
+set_global_assignment -name BASED_ON_CLOCK_SETTINGS clk_200 -section_id clk_20
+set_global_assignment -name MULTIPLY_BASE_CLOCK_PERIOD_BY 10 -section_id clk_20
+set_global_assignment -name BASED_ON_CLOCK_SETTINGS clk_200 -section_id clk_20_p4
+set_global_assignment -name MULTIPLY_BASE_CLOCK_PERIOD_BY 10 -section_id clk_20_p4
+set_global_assignment -name OFFSET_FROM_BASE_CLOCK "20 ns" -section_id clk_20_p4
+set_global_assignment -name ADD_DEFAULT_PINS_TO_SIMULATION_OUTPUT_WAVEFORMS OFF
+set_global_assignment -name VERILOG_FILE ../components/sqrt_fixed.v
+set_global_assignment -name VERILOG_FILE ../components/dll.v
+set_global_assignment -name VERILOG_FILE ../components/dll_divider.v
+set_global_assignment -name VERILOG_FILE ../components/dll_multiplier.v
+set_global_assignment -name VERILOG_FILE ../components/dll_priority_enc.v
+set_global_assignment -name VERILOG_FILE ../components/dll_truncate.v
+set_global_assignment -name VERILOG_FILE ../components/tracking_loops.v
+set_global_assignment -name VERILOG_FILE ../components/abs.v
+set_global_assignment -name VERILOG_FILE ../components/delay_1.v
+set_global_assignment -name VERILOG_FILE ../components/delay.v
+set_global_assignment -name VERILOG_FILE ../components/fll_truncate.v
+set_global_assignment -name VERILOG_FILE ../components/fll_priority_enc.v
+set_global_assignment -name VERILOG_FILE ../components/fll_multiplier.v
+set_global_assignment -name VERILOG_FILE ../components/fll.v
+set_global_assignment -name VERILOG_FILE ../components/fll_divider.v
+set_global_assignment -name VERILOG_FILE DE2_TOP.v
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
-set_instance_assignment -name CLOCK_SETTINGS "50 MHz" -to clk_50
-set_instance_assignment -name CLOCK_SETTINGS "200 MHz" -to clk_200
-set_instance_assignment -name CLOCK_SETTINGS "200 MHz Top" -to clk
+set_instance_assignment -name CLOCK_SETTINGS CLOCK_50 -to CLOCK_50
+set_instance_assignment -name CLOCK_SETTINGS CLOCK_27 -to CLOCK_27
+set_instance_assignment -name CLOCK_SETTINGS clk_200 -to clk
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
-set_instance_assignment -name CLOCK_SETTINGS "20 MHz" -to clk_dll
-set_instance_assignment -name CLOCK_SETTINGS "20 MHz" -to clk_dll_kmn
-set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE dll_test.vwf
-set_global_assignment -name VERILOG_FILE ../components/dll_multiplier.v
-set_global_assignment -name VERILOG_FILE ../components/dll_divider.v
-set_global_assignment -name VERILOG_FILE ../components/strobe.v
-set_global_assignment -name VECTOR_WAVEFORM_FILE divide_test.vwf
-set_global_assignment -name VERILOG_FILE ../components/delay_1.v
-set_global_assignment -name VERILOG_FILE ../components/delay.v
-set_global_assignment -name VERILOG_FILE ../components/abs.v
-set_global_assignment -name VERILOG_FILE ../components/dll_truncate.v
-set_global_assignment -name VERILOG_FILE ../components/dll.v
-set_global_assignment -name VERILOG_FILE ../components/dll_priority_enc.v
-set_global_assignment -name VECTOR_WAVEFORM_FILE dll_test.vwf
-set_global_assignment -name ZIP_VECTOR_WAVEFORM_FILE dll_functional.sim.cvwf
-set_global_assignment -name ZIP_VECTOR_WAVEFORM_FILE dll_timing.sim.cvwf
+set_global_assignment -name VECTOR_WAVEFORM_FILE track.vwf
+set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE track.vwf
+set_instance_assignment -name CLOCK_SETTINGS clk_20 -to "dll:dll0|clk_dll"
+set_instance_assignment -name CLOCK_SETTINGS clk_20 -to "fll:fll0|clk_fll"
+set_instance_assignment -name CLOCK_SETTINGS clk_20 -to "fll:fll0|clk_div"
+set_instance_assignment -name CLOCK_SETTINGS clk_20_p4 -to "dll:dll0|clk_dll_kmn"
+set_instance_assignment -name CLOCK_SETTINGS clk_20_p4 -to "fll:fll0|clk_div_kmn"

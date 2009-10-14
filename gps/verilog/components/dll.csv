@@ -28,10 +28,6 @@ DLL_CLK_RANGE,DLL_CLK_WIDTH-1:0,Division clock counter bit range.
 DIV_CLOCK_DELAY,7+DLL_DIV_SETUP,Cycles until divide starts.
 TOTAL_DELAY_LENGTH,DLL_CLK_COUNT+DIV_CLOCK_DELAY+DLL_DIV_STABLE,Total cycles from start to finish.
 
-//Tracking loop parameters.
-IQ_WIDTH,@
-IQ_RANGE,@
-
 //Pre-truncation operand width and index width.
 DLL_OP_PRE_WIDTH,max_width(IQ_MAX_VAL*2),Operand width before truncation.
 DLL_OP_PRE_RANGE,DLL_OP_PRE_WIDTH-1:0,Operand range before truncation.
@@ -55,5 +51,3 @@ DLL_MULT_OUTPUT_RANGE,DLL_MULT_OUTPUT_WIDTH-1:0,Scaled result range, before shif
 //Phase increment offset.
 DLL_DPHI_WIDTH,DLL_MULT_OUTPUT_WIDTH-DLL_SCALE_SHIFT+1,Phase increment offset width (two's complement).
 DLL_DPHI_RANGE,DLL_DPHI_WIDTH-1:0,Phase increment offset range.
-DLL_DPHI_DIR_FWD,1'b0,Forward shift direction.
-DLL_DPHI_DIR_REV,1'b1,Reverse shift direction.

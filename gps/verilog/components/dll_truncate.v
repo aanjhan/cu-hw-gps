@@ -27,7 +27,7 @@ module dll_truncate(
         5'd11: out <= in[11:3];
         5'd10: out <= in[10:2];
         5'd9: out <= in[9:1];
-        default: out <= in[9:0];
+        default: out <= in[8:0];
       endcase
    end
 endmodule

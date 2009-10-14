@@ -1,8 +1,9 @@
 `include "global.vh"
+`include "tracking_loops.vh"
 `include "dll.vh"
 `include "channel__dll.vh"
 
-`define DEBUG
+//`define DEBUG
 `include "debug.vh"
 
 module dll(
@@ -11,6 +12,7 @@ module dll(
     //Control interface.
     input                           start,
     input [`CHANNEL_ID_RANGE]       tag,
+    output wire                     starting,
     //Channel tracking values.
     input [`IQ_RANGE]               iq_early,
     input [`IQ_RANGE]               iq_late,
@@ -42,8 +44,9 @@ module dll(
    //  -Fixed-point shift to final result.
 
    //Generate DLL clock from system clock.
+   //Note: clk_dll is forced to keep for timing constraints.
    reg [`DLL_CLK_RANGE] dll_clk_count;
-   reg clk_dll;
+   (* preserve *) reg clk_dll;
    reg div_edge;
    always @(posedge clk) begin
       dll_clk_count <= reset ? `DLL_CLK_WIDTH'd`DLL_CLK_MAX :
@@ -111,11 +114,15 @@ module dll(
                      .reset(reset),
                      .in(start),
                      .out(start_km1));
+
+   //Assert starting back to the top level
+   //when incoming values are no longer needed.
+   assign starting = div_edge && start_km1;
    
    delay #(.DELAY(`TOTAL_DELAY_LENGTH))
      result_ready_delay(.clk(clk),
                         .reset(reset),
-                        .in(div_edge && start_km1),
+                        .in(starting),
                         .out(result_ready));
 
    //Truncate operands to specified width, starting
@@ -219,7 +226,8 @@ module dll(
 
    //Delay division clock by cycles required for pre-calculation
    //and setup time.
-   `KEEP wire clk_dll_kmn;
+   //Note: the following is forced to keep for timing constraints.
+   (* keep *) wire clk_dll_kmn;
    delay #(.DELAY(`DIV_CLOCK_DELAY))
      div_clk_delay(.clk(clk),
                    .reset(reset),
@@ -238,7 +246,7 @@ module dll(
          .remain(rem));
 
    //Shift division result to produce final value.
-   assign delta_phase_increment = shift_direction==`DLL_DPHI_DIR_FWD ?
+   assign delta_phase_increment = shift_direction==`MIXING_SIGN ?
                                   quo>>`DLL_SCALE_SHIFT :
                                   -(quo>>`DLL_SCALE_SHIFT);
 endmodule

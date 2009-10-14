@@ -1,7 +1,4 @@
-#include !"global.csv"
-#include !"channel.csv"
 #include !"dll.csv"
 
-CHANNEL_ID_RANGE,@
-IQ_RANGE,@
+DLL_DPHI_WIDTH,@
 DLL_DPHI_RANGE,@

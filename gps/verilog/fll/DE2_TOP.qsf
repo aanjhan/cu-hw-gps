@@ -469,7 +469,7 @@ set_global_assignment -name FMAX_REQUIREMENT "27 MHz" -section_id CLOCK_27
 set_global_assignment -name FMAX_REQUIREMENT "200 MHz"
 set_instance_assignment -name CLOCK_SETTINGS CLOCK_50 -to CLOCK_50
 set_instance_assignment -name CLOCK_SETTINGS CLOCK_27 -to CLOCK_27
-set_global_assignment -name SIMULATION_MODE TIMING
+set_global_assignment -name SIMULATION_MODE FUNCTIONAL
 set_global_assignment -name FMAX_REQUIREMENT "200 MHz" -section_id clk_200
 set_instance_assignment -name CLOCK_SETTINGS clk_200 -to clk
 set_global_assignment -name BASED_ON_CLOCK_SETTINGS clk_200 -section_id clk_20

@@ -2,7 +2,7 @@
 `include "tracking_loops.vh"
 `include "fll.vh"
 
-`define DEBUG
+//`define DEBUG
 `include "debug.vh"
 
 module fll(
@@ -29,15 +29,15 @@ module fll(
     output reg [`W_DF_DOT_RANGE]           w_df_dot_kp1);
    
    //Generate FLL clock at speed required for division.
+   //Note: clk_fll is forced to keep for timing constraints.
    `PRESERVE reg [`FLL_CLK_RANGE] fll_clk_count;
-   `PRESERVE reg                  clk_fll;
+   (* preserve*) reg              clk_fll;
    always @(posedge clk) begin
       fll_clk_count <= reset ? `FLL_CLK_WIDTH'd`FLL_CLK_MAX :
                        fll_clk_count==`FLL_CLK_WIDTH'd`FLL_CLK_MAX ? `FLL_CLK_WIDTH'h0 :
                        fll_clk_count+`FLL_CLK_WIDTH'h1;
 
       clk_fll <= reset ? 1'b0 :
-                 fll_clk_count==`FLL_CLK_WIDTH'd`FLL_CLK_MAX && start_div ? 1'b1 :
                  fll_clk_count==`FLL_CLK_WIDTH'd`FLL_CLK_MAX ? ~clk_fll :
                  clk_fll;
    end
@@ -173,10 +173,10 @@ module fll(
    //Assert starting back to the top level after
    //truncation has finished and input values are
    //no longer needed.
-   delay #(.DELAY(3))
+   delay #(.DELAY(4))
      starting_delay(.clk(clk),
                     .reset(reset),
-                    .in(starting_trunc),
+                    .in(continue_trunc),
                     .out(starting));
 
    ////////////////////////////////////////
@@ -285,8 +285,9 @@ module fll(
    wire div_clk_disable;
    assign div_clk_disable = div_clk_edge_pending && !start_div;
    
+   //Note: clk_div is forced to keep for timing constraints.
    `PRESERVE reg [1:0]            div_clk_state;
-   `KEEP reg                  clk_div;
+   (* keep *) reg                  clk_div;
    always @(posedge clk) begin
       if(reset) begin
             div_clk_state <= 2'd3;
@@ -346,7 +347,8 @@ module fll(
       div_sign <= div_clk_edge_pending ? numerator[`FLL_NUM_WIDTH-1] : div_sign;
    end
 
-   `KEEP wire clk_div_kmn;
+   //Note: clk_div_kmn is forced to keep for timing constraints.
+   (* keep *) wire clk_div_kmn;
    delay #(.DELAY(`FLL_DIV_SETUP))
      div_clk_delay(.clk(clk),
                    .reset(reset),

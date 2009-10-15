@@ -38,7 +38,7 @@ module dm9000a_controller(
 
    //Ethernet control signals.
    assign enet_clk = clk_enet;
-   assign enet_rst_n = 1'b1;
+   assign enet_rst_n = ~reset;
    assign enet_cs_n = 1'b0;
 
    //The following signals setup a command issue from
@@ -105,6 +105,8 @@ module dm9000a_controller(
               state <= !issue_ready ? `DM9000A_STATE_IDLE :
                        issue_register==`DM9000A_REG_MEM_RD_INC ? `DM9000A_STATE_RX_SETUP_0 :
                        `DM9000A_STATE_SETUP;
+              
+              rx_fifo_wr_req <= 1'b0;
 
               //Store data if a read just occurred.
               data_out <= ~enet_rd_n ? enet_data : data_out;
@@ -121,7 +123,7 @@ module dm9000a_controller(
            //Setup register index and command type.
            `DM9000A_STATE_SETUP: begin
               data_out <= issue_register;
-              state <= `DM9000A_STATE_SETUP_SPIN;
+              state <= `DM9000A_STATE_SETUP_SPIN_0;
 
               enet_cmd <= `DM9000A_TYPE_INDEX;
               enet_wr_n <= 1'b0;
@@ -129,10 +131,20 @@ module dm9000a_controller(
            end
            //Deassert enable lines for one cycle to meet
            //DM9000A timing specs.
-           `DM9000A_STATE_SETUP_SPIN: begin
+           `DM9000A_STATE_SETUP_SPIN_0: begin
               state <= issue_read ?
-                       `DM9000A_STATE_READ :
+                       (issue_register==`DM9000A_REG_MEM_RD_PF ?
+                        `DM9000A_STATE_SETUP_SPIN_1 :
+                        `DM9000A_STATE_READ) :
                        `DM9000A_STATE_WRITE;
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           //Deassert enable lines for an additional cycle
+           //when performing an RX prefetch read.
+           `DM9000A_STATE_SETUP_SPIN_1: begin
+              state <= `DM9000A_STATE_READ;
 
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
@@ -199,7 +211,7 @@ module dm9000a_controller(
            `DM9000A_STATE_RX_STATUS_1: begin
               state <= `DM9000A_STATE_RX_LEN_0;
 
-              rx_bad_packet <= (enet_data[7:0] & BAD_PACKET_FLAGS)!=8'h0;
+              rx_bad_packet <= (enet_data[`DM9000A_PKT_STATUS_STATUS] & BAD_PACKET_FLAGS)!=8'h0;
 
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
@@ -306,10 +318,10 @@ module dm9000a_controller(
       if(reset) begin
          //Go to PHY spin state after reset in order
          //to let DM9000A power-on-reset finish.
-         //cmd_state <= `DM9000A_CMD_STATE_SPIN;
+         cmd_state <= `DM9000A_CMD_STATE_SPIN;
          cmd_spin_count <= `DM9000A_PHY_SPIN_MAX_COUNT;
          cmd_post_spin_state <= `DM9000A_CMD_STATE_RESET;
-         cmd_state <= `DM9000A_CMD_STATE_NSR;
+         //cmd_state <= `DM9000A_CMD_STATE_NSR;
          //cmd_state <= `DM9000A_CMD_STATE_IDLE;//FIXME
          
          initializing <= 1'b1;
@@ -348,8 +360,6 @@ module dm9000a_controller(
               issue_read <= 1'b0;
               issue_register <= issue_register;
               issue_data <= issue_data;
-              
-              rxp_l <= issue_read ? data_out : rxp_l;//FIXME
            end // case: `DM9000A_CMD_STATE_IDLE
            //Spin for desired number of cycles, then continue.
            `DM9000A_CMD_STATE_SPIN: begin
@@ -422,21 +432,26 @@ module dm9000a_controller(
               
               interrupt_flags <= interrupt_flags & ~(`DM9000A_BIT8_ISR_LNKCHG);
            end
-           //Prefetch packet status and check if a packet
-           //is available to receive. If so, start receiption,
+           //Prefetch packet status word and check if a packet
+           //is available to receive. If so, start reception,
            //otherwise return to dispatch.
            //If a packet is available, the packet ready byte
            //will be 1. If not, it will be 0. Any other value
            //indicates an error and should force a reset.
            //FIXME Add error reset condition.
+           //FIXME In testing the first time the prefetch is performed after
+           //FIXME an interrupt, the status is coming back 0x00, even though
+           //FIXME it is 0x4001 one issue length later. This was tested by
+           //FIXME not having the data_out check for the spin_next condition
+           //FIXME so that a prefetch was issued in the dispatch state.
            `DM9000A_CMD_STATE_RX_PACKET_0: begin
               cmd_state <= ~spin_next ? `DM9000A_CMD_STATE_RX_PACKET_0 :
-                           data_out[15:8]==8'd1 ? `DM9000A_CMD_STATE_RX_PACKET_1 :
-                           //data_out[15:8]!=8'd0 ?  : //FIXME Force reset!
+                           data_out[`DM9000A_PKT_STATUS_READY]==8'd1 ? `DM9000A_CMD_STATE_RX_PACKET_1 :
+                           //data_out[`DM9000A_PKT_STATUS_READY]!=8'd0 ?  : //FIXME Force reset!
                            `DM9000A_CMD_STATE_DISPATCH;
               issue_read <= 1'b1;
               issue_register <= `DM9000A_REG_MEM_RD_PF;
-              spin_next <= 1'b1;
+              spin_next <= ~spin_next || data_out[`DM9000A_PKT_STATUS_READY]!=8'd1;
               
               interrupt_flags <= interrupt_flags & ~(`DM9000A_BIT8_ISR_PR);
            end
@@ -567,8 +582,15 @@ module dm9000a_controller(
               cmd_state <= `DM9000A_CMD_STATE_IDLE;
               issue_read <= 1'b1;
               issue_register <= `DM9000A_REG_RX_PTR_L;
+              spin_next <= 1'b1;
 
               rxp_h <= data_out;
+           end
+           `DM9000A_CMD_STATE_GET_RXPL: begin
+              cmd_state <= `DM9000A_CMD_STATE_IDLE;
+              spin_next <= 1'b0;
+
+              rxp_l <= data_out;
            end
            default: begin
               cmd_state <= `DM9000A_CMD_STATE_IDLE;

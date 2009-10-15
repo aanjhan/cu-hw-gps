@@ -13,6 +13,7 @@ module rt_data_feed(
     inout wire [15:0]  enet_data,
     //Debug signals.
     input              read_one,
+    output wire        link_status,
     output wire        have_data,
     output wire [7:0]  words_available,
     output wire [15:0] data_out,
@@ -44,7 +45,7 @@ module rt_data_feed(
                       .in(read_one),
                       .out(fifo_rd_req));
    
-   assign have_data = fifo_rd_available>8'd3;
+   assign have_data = fifo_wr_full || fifo_rd_available>8'd3;
    assign words_available = fifo_rd_available;
    assign data_out = fifo_rd_data;
 
@@ -59,6 +60,11 @@ module rt_data_feed(
                               .enet_wr_n(enet_wr_n),
                               .enet_rd_n(enet_rd_n),
                               .enet_data(enet_data),
+                              .rx_fifo_full(fifo_wr_full),
+                              .rx_fifo_clk(fifo_wr_clk),
+                              .rx_fifo_wr_req(fifo_wr_req),
+                              .rx_fifo_data(fifo_wr_data),
+                              .link_status(link_status),
                               .rxp_h(rxp_h),
                               .rxp_l(rxp_l));
    

@@ -3,27 +3,28 @@
 /////////////////////////
 
 //Issue/control state variable.
-DM9000A_STATE_MAX_STATE,13,DM9000A control state variable maximum value.
+DM9000A_STATE_MAX_STATE,14,DM9000A control state variable maximum value.
 DM9000A_STATE_WIDTH,max_width(DM9000A_STATE_MAX_STATE),DM9000A control state variable width.
 DM9000A_STATE_RANGE,DM9000A_STATE_WIDTH-1:0,DM9000A control state variable bit range.
 
 //Issue/control states.
 DM9000A_STATE_IDLE,DM9000A_STATE_WIDTH'd0,Control idle state.
 DM9000A_STATE_SETUP,DM9000A_STATE_WIDTH'd1,Command setup state.
-DM9000A_STATE_SETUP_SPIN,DM9000A_STATE_WIDTH'd2,Post-command setup spin state.
-DM9000A_STATE_READ,DM9000A_STATE_WIDTH'd3,Read data state.
-DM9000A_STATE_WRITE,DM9000A_STATE_WIDTH'd4,Write data state.
-DM9000A_STATE_IRQ,DM9000A_STATE_WIDTH'd5,Handle interrupts.
+DM9000A_STATE_SETUP_SPIN_0,DM9000A_STATE_WIDTH'd2,Post-command setup spin state.
+DM9000A_STATE_SETUP_SPIN_1,DM9000A_STATE_WIDTH'd3,Extra spin state for prefetch reads.
+DM9000A_STATE_READ,DM9000A_STATE_WIDTH'd4,Read data state.
+DM9000A_STATE_WRITE,DM9000A_STATE_WIDTH'd5,Write data state.
+DM9000A_STATE_IRQ,DM9000A_STATE_WIDTH'd6,Handle interrupts.
 
 //Receive states.
-DM9000A_STATE_RX_SETUP_0,DM9000A_STATE_WIDTH'd6,Setup index register for RX.
-DM9000A_STATE_RX_SETUP_1,DM9000A_STATE_WIDTH'd7,Spin after RX index setup.
-DM9000A_STATE_RX_STATUS_0,DM9000A_STATE_WIDTH'd8,Assert read for status word.
-DM9000A_STATE_RX_STATUS_1,DM9000A_STATE_WIDTH'd9,Retrieve status word.
-DM9000A_STATE_RX_LEN_0,DM9000A_STATE_WIDTH'd10,Assert read for packet length.
-DM9000A_STATE_RX_LEN_1,DM9000A_STATE_WIDTH'd11,Retrieve packet length.
-DM9000A_STATE_RX_0,DM9000A_STATE_WIDTH'd12,Assert read for packet data word.
-DM9000A_STATE_RX_1,DM9000A_STATE_WIDTH'd13,Retrieve packet data word.
+DM9000A_STATE_RX_SETUP_0,DM9000A_STATE_WIDTH'd7,Setup index register for RX.
+DM9000A_STATE_RX_SETUP_1,DM9000A_STATE_WIDTH'd8,Spin after RX index setup.
+DM9000A_STATE_RX_STATUS_0,DM9000A_STATE_WIDTH'd9,Assert read for status word.
+DM9000A_STATE_RX_STATUS_1,DM9000A_STATE_WIDTH'd10,Retrieve status word.
+DM9000A_STATE_RX_LEN_0,DM9000A_STATE_WIDTH'd11,Assert read for packet length.
+DM9000A_STATE_RX_LEN_1,DM9000A_STATE_WIDTH'd12,Retrieve packet length.
+DM9000A_STATE_RX_0,DM9000A_STATE_WIDTH'd13,Assert read for packet data word.
+DM9000A_STATE_RX_1,DM9000A_STATE_WIDTH'd14,Retrieve packet data word.
 
 ////////////////////
 // Command Control
@@ -47,8 +48,9 @@ DM9000A_CMD_STATE_MAC,DM9000A_CMD_STATE_WIDTH'd6,Set MAC address.
 DM9000A_CMD_STATE_MULTICAST,DM9000A_CMD_STATE_WIDTH'd7,Set multicast address.
 DM9000A_CMD_STATE_RXCR,DM9000A_CMD_STATE_WIDTH'd8,Setup RX control register.
 DM9000A_CMD_STATE_IMR,DM9000A_CMD_STATE_WIDTH'd9,Enable interrupts.
-DM9000A_CMD_STATE_READ_RXPH,DM9000A_CMD_STATE_WIDTH'd14
-DM9000A_CMD_STATE_READ_RXPL,DM9000A_CMD_STATE_WIDTH'd15
+DM9000A_CMD_STATE_READ_RXPH,DM9000A_CMD_STATE_WIDTH'd13
+DM9000A_CMD_STATE_READ_RXPL,DM9000A_CMD_STATE_WIDTH'd14
+DM9000A_CMD_STATE_GET_RXPL,DM9000A_CMD_STATE_WIDTH'd15
 
 //Interrupt handling states.
 DM9000A_CMD_STATE_IRQ,DM9000A_CMD_STATE_WIDTH'd16,Interrupt received - disable interrupts.
@@ -57,12 +59,16 @@ DM9000A_CMD_STATE_IRQ_CLEAR,DM9000A_CMD_STATE_WIDTH'd18,Store/clear interrupt fl
 DM9000A_CMD_STATE_DISPATCH,DM9000A_CMD_STATE_WIDTH'd19,Check interrupt flags and dispatch as needed.
 DM9000A_CMD_STATE_IRQ_FINISH,DM9000A_CMD_STATE_WIDTH'd20,Interrupts handled - enable interrupts.
 DM9000A_CMD_STATE_LINK_CHANGE,DM9000A_CMD_STATE_WIDTH'd21,Link status changed.
-DM9000A_CMD_STATE_RX_PACKET_0,DM9000A_CMD_STATE_WIDTH'd22,Prefetch packet and check packet ready.
+DM9000A_CMD_STATE_RX_PACKET_0,DM9000A_CMD_STATE_WIDTH'd22,Prefetch packet.
 DM9000A_CMD_STATE_RX_PACKET_1,DM9000A_CMD_STATE_WIDTH'd23,Receive packet.
 
 //Command signal values.
 DM9000A_TYPE_INDEX,1'b0,Register index value.
 DM9000A_TYPE_DATA,1'b1,Data I/O value.
+
+//Packet status word positions.
+DM9000A_PKT_STATUS_READY,7:0,Packet ready byte in packet status word.
+DM9000A_PKT_STATUS_STATUS,15:8,Status byte in packet status word.
 
 //Interrupt flag positions.
 DM9000A_ISR_POS_LNKCHG,log2(DM9000A_BIT_ISR_LNKCHG),Link change flag position.

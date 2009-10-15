@@ -3,28 +3,29 @@
 /////////////////////////
 
 //Issue/control state variable.
-DM9000A_STATE_MAX_STATE,14,DM9000A control state variable maximum value.
+DM9000A_STATE_MAX_STATE,15,DM9000A control state variable maximum value.
 DM9000A_STATE_WIDTH,max_width(DM9000A_STATE_MAX_STATE),DM9000A control state variable width.
 DM9000A_STATE_RANGE,DM9000A_STATE_WIDTH-1:0,DM9000A control state variable bit range.
 
 //Issue/control states.
 DM9000A_STATE_IDLE,DM9000A_STATE_WIDTH'd0,Control idle state.
 DM9000A_STATE_SETUP,DM9000A_STATE_WIDTH'd1,Command setup state.
-DM9000A_STATE_SETUP_SPIN_0,DM9000A_STATE_WIDTH'd2,Post-command setup spin state.
-DM9000A_STATE_SETUP_SPIN_1,DM9000A_STATE_WIDTH'd3,Extra spin state for prefetch reads.
-DM9000A_STATE_READ,DM9000A_STATE_WIDTH'd4,Read data state.
-DM9000A_STATE_WRITE,DM9000A_STATE_WIDTH'd5,Write data state.
-DM9000A_STATE_IRQ,DM9000A_STATE_WIDTH'd6,Handle interrupts.
+DM9000A_STATE_SETUP_SPIN,DM9000A_STATE_WIDTH'd2,Post-command setup spin state.
+DM9000A_STATE_READ,DM9000A_STATE_WIDTH'd3,Read data state.
+DM9000A_STATE_WRITE,DM9000A_STATE_WIDTH'd4,Write data state.
+DM9000A_STATE_READ_PF_SPIN_0,DM9000A_STATE_WIDTH'd5,Prefetch read spin cycle 1.
+DM9000A_STATE_READ_PF_SPIN_1,DM9000A_STATE_WIDTH'd6,Prefetch read spin cycle 1.
+DM9000A_STATE_READ_PF,DM9000A_STATE_WIDTH'd7,Read prefetched status word.
 
 //Receive states.
-DM9000A_STATE_RX_SETUP_0,DM9000A_STATE_WIDTH'd7,Setup index register for RX.
-DM9000A_STATE_RX_SETUP_1,DM9000A_STATE_WIDTH'd8,Spin after RX index setup.
-DM9000A_STATE_RX_STATUS_0,DM9000A_STATE_WIDTH'd9,Assert read for status word.
-DM9000A_STATE_RX_STATUS_1,DM9000A_STATE_WIDTH'd10,Retrieve status word.
-DM9000A_STATE_RX_LEN_0,DM9000A_STATE_WIDTH'd11,Assert read for packet length.
-DM9000A_STATE_RX_LEN_1,DM9000A_STATE_WIDTH'd12,Retrieve packet length.
-DM9000A_STATE_RX_0,DM9000A_STATE_WIDTH'd13,Assert read for packet data word.
-DM9000A_STATE_RX_1,DM9000A_STATE_WIDTH'd14,Retrieve packet data word.
+DM9000A_STATE_RX_SETUP_0,DM9000A_STATE_WIDTH'd8,Setup index register for RX.
+DM9000A_STATE_RX_SETUP_1,DM9000A_STATE_WIDTH'd9,Spin after RX index setup.
+DM9000A_STATE_RX_STATUS_0,DM9000A_STATE_WIDTH'd10,Assert read for status word.
+DM9000A_STATE_RX_STATUS_1,DM9000A_STATE_WIDTH'd11,Retrieve status word.
+DM9000A_STATE_RX_LEN_0,DM9000A_STATE_WIDTH'd12,Assert read for packet length.
+DM9000A_STATE_RX_LEN_1,DM9000A_STATE_WIDTH'd13,Retrieve packet length.
+DM9000A_STATE_RX_0,DM9000A_STATE_WIDTH'd14,Assert read for packet data word.
+DM9000A_STATE_RX_1,DM9000A_STATE_WIDTH'd15,Retrieve packet data word.
 
 ////////////////////
 // Command Control

@@ -197,7 +197,7 @@ module DE2_TOP (
    assign OTG_RST_N   = 1'b1;
    assign OTG_WR_N    = 1'b1;
 
-   //Disable SDRAM.
+   //Disable SD card interface.
    assign SD_DAT = 1'bz;
    assign SD_CLK = 1'b0;
 

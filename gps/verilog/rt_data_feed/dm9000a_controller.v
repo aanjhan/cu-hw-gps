@@ -444,6 +444,8 @@ module dm9000a_controller(
            //FIXME it is 0x4001 one issue length later. This was tested by
            //FIXME not having the data_out check for the spin_next condition
            //FIXME so that a prefetch was issued in the dispatch state.
+           //FIXME The driver issues a prefetch read (index+data), then issues
+           //FIXME another data read to get the result. DO THIS!
            `DM9000A_CMD_STATE_RX_PACKET_0: begin
               cmd_state <= ~spin_next ? `DM9000A_CMD_STATE_RX_PACKET_0 :
                            data_out[`DM9000A_PKT_STATUS_READY]==8'd1 ? `DM9000A_CMD_STATE_RX_PACKET_1 :

@@ -15,9 +15,10 @@ module rt_data_feed(
     input              read_one,
     output wire        link_status,
     output wire        have_data,
-    output wire [7:0]  words_available,
+    output wire [8:0]  words_available,
     output wire [15:0] data_out,
     //Crap
+    input              halt,
     output wire [15:0] rxp_h,
     output wire [15:0] rxp_l);
 
@@ -29,8 +30,9 @@ module rt_data_feed(
    wire        fifo_rd_req;
    wire [15:0] fifo_rd_data;
    wire        fifo_rd_empty;
-   wire [7:0]  fifo_rd_available;
-   rx_data_fifo rx_fifo(.wrclk(fifo_wr_clk),
+   wire [8:0]  fifo_rd_available;
+   rx_data_fifo rx_fifo(.aclr(reset),
+                        .wrclk(fifo_wr_clk),
                         .data(fifo_wr_data),
                         .wrreq(fifo_wr_req),
                         .wrfull(fifo_wr_full),
@@ -38,14 +40,14 @@ module rt_data_feed(
                         .rdreq(fifo_rd_req),
                         .q(fifo_rd_data),
                         .rdempty(fifo_rd_empty),
-                        .wrusedw(fifo_rd_available));
+                        .rdusedw(fifo_rd_available));
 
    strobe read_strobe(.clk(clk),
                       .reset(reset),
                       .in(read_one),
                       .out(fifo_rd_req));
    
-   assign have_data = fifo_wr_full || fifo_rd_available>8'd3;
+   assign have_data = fifo_rd_available>8'd3;
    assign words_available = fifo_rd_available;
    assign data_out = fifo_rd_data;
 
@@ -60,7 +62,7 @@ module rt_data_feed(
                               .enet_wr_n(enet_wr_n),
                               .enet_rd_n(enet_rd_n),
                               .enet_data(enet_data),
-                              .rx_fifo_full(fifo_wr_full),
+                              .rx_fifo_full(fifo_wr_full || halt),
                               .rx_fifo_clk(fifo_wr_clk),
                               .rx_fifo_wr_req(fifo_wr_req),
                               .rx_fifo_data(fifo_wr_data),

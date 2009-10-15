@@ -37,6 +37,7 @@
 `timescale 1 ps / 1 ps
 // synopsys translate_on
 module rx_data_fifo (
+	aclr,
 	data,
 	rdclk,
 	rdreq,
@@ -44,9 +45,10 @@ module rx_data_fifo (
 	wrreq,
 	q,
 	rdempty,
-	wrfull,
-	wrusedw);
+	rdusedw,
+	wrfull);
 
+	input	  aclr;
 	input	[15:0]  data;
 	input	  rdclk;
 	input	  rdreq;
@@ -54,48 +56,57 @@ module rx_data_fifo (
 	input	  wrreq;
 	output	[15:0]  q;
 	output	  rdempty;
+	output	[8:0]  rdusedw;
 	output	  wrfull;
-	output	[7:0]  wrusedw;
+`ifndef ALTERA_RESERVED_QIS
+// synopsys translate_off
+`endif
+	tri0	  aclr;
+`ifndef ALTERA_RESERVED_QIS
+// synopsys translate_on
+`endif
 
 	wire  sub_wire0;
-	wire [7:0] sub_wire1;
-	wire  sub_wire2;
-	wire [15:0] sub_wire3;
+	wire  sub_wire1;
+	wire [15:0] sub_wire2;
+	wire [8:0] sub_wire3;
 	wire  rdempty = sub_wire0;
-	wire [7:0] wrusedw = sub_wire1[7:0];
-	wire  wrfull = sub_wire2;
-	wire [15:0] q = sub_wire3[15:0];
+	wire  wrfull = sub_wire1;
+	wire [15:0] q = sub_wire2[15:0];
+	wire [8:0] rdusedw = sub_wire3[8:0];
 
 	dcfifo	dcfifo_component (
 				.wrclk (wrclk),
 				.rdreq (rdreq),
+				.aclr (aclr),
 				.rdclk (rdclk),
 				.wrreq (wrreq),
 				.data (data),
 				.rdempty (sub_wire0),
-				.wrusedw (sub_wire1),
-				.wrfull (sub_wire2),
-				.q (sub_wire3)
+				.wrfull (sub_wire1),
+				.q (sub_wire2),
+				.rdusedw (sub_wire3)
 				// synopsys translate_off
 				,
-				.aclr (),
 				.rdfull (),
-				.rdusedw (),
-				.wrempty ()
+				.wrempty (),
+				.wrusedw ()
 				// synopsys translate_on
 				);
 	defparam
+		dcfifo_component.add_usedw_msb_bit = "ON",
 		dcfifo_component.intended_device_family = "Cyclone II",
 		dcfifo_component.lpm_hint = "RAM_BLOCK_TYPE=M4K",
 		dcfifo_component.lpm_numwords = 256,
 		dcfifo_component.lpm_showahead = "ON",
 		dcfifo_component.lpm_type = "dcfifo",
 		dcfifo_component.lpm_width = 16,
-		dcfifo_component.lpm_widthu = 8,
+		dcfifo_component.lpm_widthu = 9,
 		dcfifo_component.overflow_checking = "ON",
 		dcfifo_component.rdsync_delaypipe = 4,
 		dcfifo_component.underflow_checking = "ON",
 		dcfifo_component.use_eab = "ON",
+		dcfifo_component.write_aclr_synch = "OFF",
 		dcfifo_component.wrsync_delaypipe = 4;
 
 
@@ -124,39 +135,42 @@ endmodule
 // Retrieval info: PRIVATE: UNDERFLOW_CHECKING NUMERIC "0"
 // Retrieval info: PRIVATE: UsedW NUMERIC "1"
 // Retrieval info: PRIVATE: Width NUMERIC "16"
-// Retrieval info: PRIVATE: dc_aclr NUMERIC "0"
+// Retrieval info: PRIVATE: dc_aclr NUMERIC "1"
 // Retrieval info: PRIVATE: diff_widths NUMERIC "0"
-// Retrieval info: PRIVATE: msb_usedw NUMERIC "0"
+// Retrieval info: PRIVATE: msb_usedw NUMERIC "1"
 // Retrieval info: PRIVATE: output_width NUMERIC "16"
 // Retrieval info: PRIVATE: rsEmpty NUMERIC "1"
 // Retrieval info: PRIVATE: rsFull NUMERIC "0"
-// Retrieval info: PRIVATE: rsUsedW NUMERIC "0"
+// Retrieval info: PRIVATE: rsUsedW NUMERIC "1"
 // Retrieval info: PRIVATE: sc_aclr NUMERIC "0"
 // Retrieval info: PRIVATE: sc_sclr NUMERIC "0"
 // Retrieval info: PRIVATE: wsEmpty NUMERIC "0"
 // Retrieval info: PRIVATE: wsFull NUMERIC "1"
-// Retrieval info: PRIVATE: wsUsedW NUMERIC "1"
+// Retrieval info: PRIVATE: wsUsedW NUMERIC "0"
+// Retrieval info: CONSTANT: ADD_USEDW_MSB_BIT STRING "ON"
 // Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "Cyclone II"
 // Retrieval info: CONSTANT: LPM_HINT STRING "RAM_BLOCK_TYPE=M4K"
 // Retrieval info: CONSTANT: LPM_NUMWORDS NUMERIC "256"
 // Retrieval info: CONSTANT: LPM_SHOWAHEAD STRING "ON"
 // Retrieval info: CONSTANT: LPM_TYPE STRING "dcfifo"
 // Retrieval info: CONSTANT: LPM_WIDTH NUMERIC "16"
-// Retrieval info: CONSTANT: LPM_WIDTHU NUMERIC "8"
+// Retrieval info: CONSTANT: LPM_WIDTHU NUMERIC "9"
 // Retrieval info: CONSTANT: OVERFLOW_CHECKING STRING "ON"
 // Retrieval info: CONSTANT: RDSYNC_DELAYPIPE NUMERIC "4"
 // Retrieval info: CONSTANT: UNDERFLOW_CHECKING STRING "ON"
 // Retrieval info: CONSTANT: USE_EAB STRING "ON"
+// Retrieval info: CONSTANT: WRITE_ACLR_SYNCH STRING "OFF"
 // Retrieval info: CONSTANT: WRSYNC_DELAYPIPE NUMERIC "4"
+// Retrieval info: USED_PORT: aclr 0 0 0 0 INPUT GND aclr
 // Retrieval info: USED_PORT: data 0 0 16 0 INPUT NODEFVAL data[15..0]
 // Retrieval info: USED_PORT: q 0 0 16 0 OUTPUT NODEFVAL q[15..0]
 // Retrieval info: USED_PORT: rdclk 0 0 0 0 INPUT NODEFVAL rdclk
 // Retrieval info: USED_PORT: rdempty 0 0 0 0 OUTPUT NODEFVAL rdempty
 // Retrieval info: USED_PORT: rdreq 0 0 0 0 INPUT NODEFVAL rdreq
+// Retrieval info: USED_PORT: rdusedw 0 0 9 0 OUTPUT NODEFVAL rdusedw[8..0]
 // Retrieval info: USED_PORT: wrclk 0 0 0 0 INPUT NODEFVAL wrclk
 // Retrieval info: USED_PORT: wrfull 0 0 0 0 OUTPUT NODEFVAL wrfull
 // Retrieval info: USED_PORT: wrreq 0 0 0 0 INPUT NODEFVAL wrreq
-// Retrieval info: USED_PORT: wrusedw 0 0 8 0 OUTPUT NODEFVAL wrusedw[7..0]
 // Retrieval info: CONNECT: @data 0 0 16 0 data 0 0 16 0
 // Retrieval info: CONNECT: q 0 0 16 0 @q 0 0 16 0
 // Retrieval info: CONNECT: @wrreq 0 0 0 0 wrreq 0 0 0 0
@@ -164,8 +178,9 @@ endmodule
 // Retrieval info: CONNECT: @rdclk 0 0 0 0 rdclk 0 0 0 0
 // Retrieval info: CONNECT: @wrclk 0 0 0 0 wrclk 0 0 0 0
 // Retrieval info: CONNECT: rdempty 0 0 0 0 @rdempty 0 0 0 0
+// Retrieval info: CONNECT: rdusedw 0 0 9 0 @rdusedw 0 0 9 0
 // Retrieval info: CONNECT: wrfull 0 0 0 0 @wrfull 0 0 0 0
-// Retrieval info: CONNECT: wrusedw 0 0 8 0 @wrusedw 0 0 8 0
+// Retrieval info: CONNECT: @aclr 0 0 0 0 aclr 0 0 0 0
 // Retrieval info: LIBRARY: altera_mf altera_mf.altera_mf_components.all
 // Retrieval info: GEN_FILE: TYPE_NORMAL rx_data_fifo.v TRUE
 // Retrieval info: GEN_FILE: TYPE_NORMAL rx_data_fifo.inc FALSE

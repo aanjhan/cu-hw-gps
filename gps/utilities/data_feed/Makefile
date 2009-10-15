@@ -1,0 +1,139 @@
+ifeq ($(TERM),)
+PLATFORM=win
+else
+ifeq ($(TERM),cygwin)
+PLATFORM=win
+else
+ifeq ($(shell uname -s),Darwin)
+PLATFORM=mac
+else
+PLATFORM=unix
+endif
+endif
+endif
+
+# File extnsion. This should only be set in a Windows environment.
+ifeq ($(PLATFORM),win)
+EXT?=.exe
+endif
+
+# Determine whether or not dependencies are needed based on target.
+#
+ifeq (,$(MAKECMDGOALS))
+NEEDDEPS:=all
+else
+ifneq (,$(filter all run debug $(OUTPUT),$(MAKECMDGOALS)))
+NEEDDEPS:=all
+else
+ifneq (,$(filter-out clean info,$(MAKECMDGOALS)))
+NEEDDEPS:=some
+else
+NEEDDEPS:=none
+endif
+endif
+endif
+
+CC?=gcc
+CXX?=g++
+CFLAGS?=-Wall
+ENV?=
+INCLUDES?=-I.
+LDFLAGS?=
+LIBS?=
+LIBDIRS?=
+TARGET?=debug
+RM?=$(if $(PLATFORM)=='win',del /Q,rm -f)
+
+# Debug Target
+ifeq ($(TARGET),debug)
+CFLAGS+=-g
+endif
+
+# Source list.
+SOURCES=main.cpp
+
+# Include subdirectory Makefiles.
+DIRS=
+ifneq ($(DIRS),)
+include $(patsubst %, %/makefile.mk, $(DIRS))
+endif
+
+#Note that the following definitions exist for each environment:
+#  Windows: #define WIN32
+#  OS X: #define __APPLE__
+ifeq ($(PLATFORM),mac)
+INCLUDES+=
+LIBS+= -lpcap
+LIBDIRS+=
+SOURCES+= raw_socket_osx.cpp
+else
+ifeq ($(PLATFORM),win)
+LIBDIRS+=
+LIBS+=
+INCLUDES+=
+SOURCES+= #raw_socket_win.cpp
+else
+LIBDIRS+=
+LIBS+=
+INCLUDES+=
+SOURCES+= #raw_socket_unix.cpp
+endif
+endif
+
+DEPENDENCIES=$(patsubst %.cpp, %.d, $(SOURCES))
+OBJECTS=$(patsubst %.cpp, %.o, $(SOURCES))
+PROJECT=data_feed
+OUTPUT=$(PROJECT)$(EXT)
+
+.PHONY: all
+all: $(OUTPUT)
+
+$(OUTPUT): $(OBJECTS)
+	$(CXX) -o $@ $(CFLAGS) $(INCLUDES) $(LIBDIRS) $^ $(LIBS)
+
+.PHONY: depend
+depend: $(DEPENDENCIES)
+
+%.d: %.cpp
+	@printf "Generating dependency for $<  ->  $@\n"
+	@set -e; \
+	$(CXX) -MM -w  $(CFLAGS) $(INCLUDES) $< \
+	| sed -e "s/^\(.*\)\.o/$(patsubst %/,%\/,$(dir $<))\1.d $(patsubst %/,%\/,$(dir $<))\1.o/" > $@; \
+	[ -s $@ ] || rm -f $@
+
+ifneq ($(NEEDDEPS), none)
+  ifeq ($(NEEDDEPS), all)
+    -include $(DEPENDENCIES)
+  else
+    -include $(patsubst %.o, %.d, $(MAKECMDGOALS))
+  endif
+endif
+
+%.o: %.c
+	$(CC) -o $@ -c $(CFLAGS) $(INCLUDES) $<
+
+%.o: %.cpp
+	$(CXX) -o $@ -c $(CFLAGS) $(INCLUDES) $<
+
+.PHONY: clean
+clean:
+	rm -f $(DEPENDENCIES)
+	rm -f $(OBJECTS)
+	rm -f $(OUTPUT)
+
+.PHONY: run debug
+run: $(OUTPUT)
+	./$(OUTPUT) -gldebug
+debug: $(OUTPUT)
+	gdb $(OUTPUT)
+
+.PHONY: info
+info:
+	@echo Platform: $(PLATFORM)
+	@echo Extension: $(EXT)
+	@echo Sources: $(SOURCES)
+	@echo Dependencies: $(DEPENDENCIES)
+	@echo Objects: $(OBJECTS)
+	@echo Libraries: $(LIBS)
+	@echo Project: $(PROJECT)
+	@echo Output File: $(OUTPUT)

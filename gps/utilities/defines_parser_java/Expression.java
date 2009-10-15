@@ -13,6 +13,8 @@ public class Expression
     private static final Pattern hexValue=Pattern.compile("^([A-Fa-f0-9]+)$");
     private static final Pattern number=Pattern.compile("^(\\d+(\\.\\d+)?)(e(-?\\d+))?$");
     private static final Pattern integer=Pattern.compile("^(\\d+'d)?(\\d+)(\\.0+)? *$");
+    private static final Pattern binInteger=Pattern.compile("^(\\d+'b)?([0-1]+)? *$");
+    private static final Pattern hexInteger=Pattern.compile("^(\\d+'h)?([A-Fa-f0-9]+)? *$");
     private static final Pattern decimal=Pattern.compile("^(\\d+\\.\\d*[1-9])0+ *$");
     
     private String value;
@@ -180,6 +182,14 @@ public class Expression
             {
                 stringValue=m.group(2);
             }
+            else if((m=binInteger.matcher(stringValue)).matches())
+            {
+                stringValue=Integer.toString(Integer.parseInt(m.group(2),2));
+            }
+            else if((m=hexInteger.matcher(stringValue)).matches())
+            {
+                stringValue=Integer.toString(Integer.parseInt(m.group(2),16));
+            }
             else if((m=decimal.matcher(stringValue)).matches())
             {
                 stringValue=m.group(1);
@@ -191,6 +201,14 @@ public class Expression
             if((m=integer.matcher(stringValue)).matches())
             {
                 stringValue=m.group(2);
+            }
+            else if((m=binInteger.matcher(stringValue)).matches())
+            {
+                stringValue=Integer.toString(Integer.parseInt(m.group(2),2));
+            }
+            else if((m=hexInteger.matcher(stringValue)).matches())
+            {
+                stringValue=Integer.toString(Integer.parseInt(m.group(2),16));
             }
         }
         

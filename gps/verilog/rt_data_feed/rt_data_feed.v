@@ -11,6 +11,11 @@ module rt_data_feed(
     output wire        enet_wr_n,
     output wire        enet_rd_n,
     inout wire [15:0]  enet_data,
+    //Debug signals.
+    input              read_one,
+    output wire        have_data,
+    output wire [7:0]  words_available,
+    output wire [15:0] data_out,
     //Crap
     output wire [15:0] rxp_h,
     output wire [15:0] rxp_l);
@@ -34,17 +39,26 @@ module rt_data_feed(
                         .rdempty(fifo_rd_empty),
                         .wrusedw(fifo_rd_available));
 
+   strobe read_strobe(.clk(clk),
+                      .reset(reset),
+                      .in(read_one),
+                      .out(fifo_rd_req));
+   
+   assign have_data = fifo_rd_available>8'd3;
+   assign words_available = fifo_rd_available;
+   assign data_out = fifo_rd_data;
+
    //DM9000A Ethernet controller module.
    dm9000a_controller dm9000a(.clk(clk_50),
-                              .reset(global_reset),
-                              .enet_clk(ENET_CLK),
-                              .enet_int(ENET_INT),
-                              .enet_rst_n(ENET_RST_N),
-                              .enet_cs_n(ENET_CS_N),
-                              .enet_cmd(ENET_CMD),
-                              .enet_wr_n(ENET_WR_N),
-                              .enet_rd_n(ENET_RD_N),
-                              .enet_data(ENET_DATA),
+                              .reset(reset),
+                              .enet_clk(enet_clk),
+                              .enet_int(enet_int),
+                              .enet_rst_n(enet_rst_n),
+                              .enet_cs_n(enet_cs_n),
+                              .enet_cmd(enet_cmd),
+                              .enet_wr_n(enet_wr_n),
+                              .enet_rd_n(enet_rd_n),
+                              .enet_data(enet_data),
                               .rxp_h(rxp_h),
                               .rxp_l(rxp_l));
    

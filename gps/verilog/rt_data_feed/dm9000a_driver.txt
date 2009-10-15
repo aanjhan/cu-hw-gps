@@ -1,0 +1,141 @@
+******************************
+* DM9000A Init Sequence
+* (uCLinux driver - http://lxr.free-electrons.com/source/drivers/net/dm9000.c)
+******************************
+
+Address  R/W  Value                   Description              WTF?
+-------------------------------------------------------------------
+/* GPIO0 on pre-activate PHY */
+GPR       W     0                     Enable PHY
+GPCR      W     1                     Let GPIO0 output         ?
+GPR       W     0                     Enable PHY
+
+/* if DM9000_PLATF_EXT_PHI? */
+NCR       W    0x80                   ?                        ?
+
+/* Program operating register */
+TCR       W     0                     TX polling clear
+BPTR      W    0x3F                   Less 3Kb, 200 us         ?
+FCR       W    0xFF                   Flow control
+SMCR      W     0                     Special mode
+
+/* clear TX status */
+NSR       W    WAKEST|TX2END|TX1END
+ISR       W    ROOS|ROS|PTS|PRS       Clear interrupt status
+
+/* Set address filter table */
+dm9000_hash_table(dev)                ?                        ?
+
+/* Enable TX/RX interrupt mask */
+IMR       W    LNKCHNG|PAR|PTM|PRM    Enable interrupts
+
+******************************
+* DM9000A Reset Sequence
+* (uCLinux driver - http://lxr.free-electrons.com/source/drivers/net/dm9000.c)
+******************************
+1. Set index register to NCR.
+2. Wait 200us.
+3. 0x01 to data register.
+3. Wait 200us.
+
+******************************
+* DM9000A Register Read/Write Sequence
+* (uCLinux driver - http://lxr.free-electrons.com/source/drivers/net/dm9000.c)
+******************************
+1. Set index register
+2. Wait 40ns.
+3. Read/write to data register.
+3. Wait 40ns.
+
+******************************
+* DM9000A RX Sequence
+* (uCLinux driver - http://lxr.free-electrons.com/source/drivers/net/dm9000.c)
+******************************
+1. Issue read to MRCMDX to prefetch data.
+2. Read data register again to get status word.
+3. If packet ready byte is not 0 or 1 flag an error and disable DM9000A interrutps (IMR) and RX (RCR).
+4. If packet ready byte is 0, no packet available.
+5. Set index register to MRCMD.
+6. Read status word ({packet_ready,status}).
+7. Read length word.
+8. Check that length is at least 64B, if not flag bad packet.
+9. Check that length is no greater than DM9000A max packet size.
+10. Check status word for error flags.
+11. Read packet bytes (dump if bad packet).
+12. Repeat from step 1 until step 4 flags no packet available.
+
+******************************
+* DM9000A TX Sequence
+* (uCLinux driver - http://lxr.free-electrons.com/source/drivers/net/dm9000.c)
+******************************
+1. Disable interrupts.
+2. Set index register to MWCMD.
+3. Write data to data register, 16b at a time.
+4. Set TXPLL/TXPLH registers to packet length.
+5. Set TXREQ bit in TCR register to start TX (auto-cleared after TX).
+
+******************************
+* DM9000A Addressing Setup
+* dm9000_hash_table
+* (uCLinux driver - http://lxr.free-electrons.com/source/drivers/net/dm9000.c)
+******************************
+1. Disable interrupts.
+2. Write MAC address bytes to PAR registers.
+3. Write multicast address hash table to MAR registers.
+   -MAR[7] set to 0x80|[hash value] to enable broadcast packets.
+4. Set RCR register, enabling DIS_LONG|DIS_CRC|RX_EN.
+   -ALL optionally enabled to pass all multicast packets.
+   -PRMSC optionally enabled to setup promiscuous mode.
+5. Enable interrupts.
+
+******************************
+* DM9000A Interrupt Sequence
+* (uCLinux driver - http://lxr.free-electrons.com/source/drivers/net/dm9000.c)
+******************************
+1. Disable interrupts.
+2. Save previous register address.
+3. Write PAR to IMR register to disable interrutps on the DM9000A.
+4. Read ISR register.
+5. Write read value back to ISR to clear interrupts.
+6. Execute appropriate interrupts.
+   -Execute RX if PRS status set.
+   -Call tx_done if PTS status set.
+   -Take action if LNKCHNG status set.
+7. Re-enable appropriate IMR bits.
+8. Restore previous register address.
+9. Enable interrupts.
+
+******************************
+* Read/Write PHY Control Register
+* (uCLinux driver - http://lxr.free-electrons.com/source/drivers/net/dm9000.c)
+******************************
+1. Disable interrupts.
+2. Save previous register address.
+3. Write 0x40|[reg address] to EPAR register.
+4. Write data to EPDR_L and EPDR_H registers [write only].
+5. Write EPOS|ERPRR (read) or EPOS|ERPRW (write) to EPCR register.
+6. Restore previous register address.
+7. Enable interrupts.
+8. Wait 1 ms.
+9. Disable interrupts.
+10. Save previous register address.
+11. Write 0x00 to EPCR register.
+12. Read EPDR_L and EPDR_H registers [read only].
+13. Restore previous register address.
+14. Enable interrupts.
+
+******************************
+* DM9000A Power-Up Sequence
+* (uCLinux driver - http://lxr.free-electrons.com/source/drivers/net/dm9000.c)
+******************************
+1. Reset DM9000A.
+2. Run initialization sequence, including address setup.
+
+******************************
+* DM9000A Shutdown Sequence
+* (uCLinux driver - http://lxr.free-electrons.com/source/drivers/net/dm9000.c)
+******************************
+1. Write BMCR_RESET to MII_BMCR PHY register to reset PHY.
+2. Write 0x01 to GPR register to power-down PHY.
+3. Write PAR to IMR to disable interrupts.
+4. Write 0x00 to RCR to disable RX.

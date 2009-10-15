@@ -132,7 +132,7 @@ module DE2_TOP (
    // Turn on all display
    assign LCD_ON    = 1'b1;
    assign LCD_BLON  = 1'b1;
-   assign LEDR = 18'h0;
+   assign LEDR[17:2] = 15'h0;
    assign LEDG[8:1] = 8'h0;
    
    // All inout port turn to tri-state
@@ -152,6 +152,9 @@ module DE2_TOP (
    wire   global_reset;
    assign global_reset = po_reset | ~KEY[0];
 
+   wire have_data;
+   wire [7:0] words_available;
+   wire [15:0] data_out;
    wire [15:0] rxp_h;
    wire [15:0] rxp_l;
    rt_data_feed data_feed(.clk(CLOCK_50),
@@ -165,17 +168,28 @@ module DE2_TOP (
                           .enet_wr_n(ENET_WR_N),
                           .enet_rd_n(ENET_RD_N),
                           .enet_data(ENET_DATA),
+                          .read_one(~KEY[3]),
+                          .have_data(have_data),
+                          .words_available(words_available),
+                          .data_out(data_out),
                           .rxp_h(rxp_h),
                           .rxp_l(rxp_l));
 
+   assign LEDR[1] = ENET_INT;
+   
+   assign LEDR[0] = have_data;
    assign LEDG[0] = global_reset;
    
-   hex_driver hex7(rxp_h[15:12],1'b1,HEX7);
-   hex_driver hex6(rxp_h[11:8],1'b1,HEX6);
-   hex_driver hex5(rxp_h[7:4],1'b1,HEX5);
-   hex_driver hex4(rxp_h[3:0],1'b1,HEX4);
-   hex_driver hex3(rxp_l[15:12],1'b1,HEX3);
-   hex_driver hex2(rxp_l[11:8],1'b1,HEX2);
-   hex_driver hex1(rxp_l[7:4],1'b1,HEX1);
-   hex_driver hex0(rxp_l[3:0],1'b1,HEX0);
+/*   hex_driver hex7(4'h0,1'b0,HEX7);
+   hex_driver hex6(4'h0,1'b0,HEX6);
+   hex_driver hex5(4'h0,1'b0,HEX5);
+   hex_driver hex4(4'h0,1'b0,HEX4);*/
+   hex_driver hex7(SW[17] ? rxp_l[15:12] : rxp_h[15:12],1'b1,HEX7);
+   hex_driver hex6(SW[17] ? rxp_l[11:8] : rxp_h[11:8],1'b1,HEX6);
+   hex_driver hex5(SW[17] ? rxp_l[7:4] : rxp_h[7:4],1'b1,HEX5);
+   hex_driver hex4(SW[17] ? rxp_l[3:0] : rxp_h[3:0],1'b1,HEX4);
+   hex_driver hex3(SW[16] ? data_out[15:12] : 4'h0,1'b0,HEX3);
+   hex_driver hex2(SW[16] ? data_out[11:8] : 4'h0,1'b0,HEX2);
+   hex_driver hex1(SW[16] ? data_out[7:4] : words_available[7:4],1'b1,HEX1);
+   hex_driver hex0(SW[16] ? data_out[3:0] : words_available[3:0],1'b1,HEX0);
 endmodule

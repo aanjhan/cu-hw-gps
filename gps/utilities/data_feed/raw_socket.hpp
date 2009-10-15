@@ -13,28 +13,21 @@ class IRawSocket
 {
 public:
     virtual ~IRawSocket(){}
-
-    /*static virtual void ListDevices(std::vector<std::string> &deviceList)  throw(AccessException,
-                                                                                 InvalidDeviceException,
-                                                                                 SocketStateException) = 0;
     
-    virtual void Open(const char *device="") throw(AccessException,
-                                                   InvalidDeviceException,
-                                                   SocketStateException) = 0;
-    virtual void Open(const std::string &device) throw(AccessException,
-                                                       InvalidDeviceException,
-                                                       SocketStateException)
-    {
-        Open(device.c_str());
-    }
+    //static void ListDevices(std::vector<std::string> &deviceList) throw(IOException) = 0;
+    //static void GetMACAddress(const std::string &deviceName, uint8_t *address) throw(IOException) = 0;
+    
+    virtual void Open(const std::string &deviceName="") throw(IOException,
+                                                              SocketStateException) = 0;
     virtual void Close() = 0;
-    
     virtual bool IsOpen() = 0;
 
-    virtual void Write(const void *buffer, size_t length) throw(SocketStateException) = 0;*/
+    virtual void GetMACAddress(uint8_t *address) throw(IOException) = 0;
+
+    virtual void Write(const void *buffer, size_t length) throw(SocketStateException) = 0;
+    virtual void Write(const uint8_t *dest, const void *buffer, size_t length) throw(SocketStateException) = 0;
 };
 
-//FIXME What is the macro to check Windows vs. Unix?
 #if defined(WIN32)
   #include "raw_socket_win.hpp"
   #define RawSocket RawSocketWin

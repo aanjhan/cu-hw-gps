@@ -113,7 +113,7 @@ void RawSocketOSX::GetMACAddress(uint8_t *address) throw(IOException)
 
 void RawSocketOSX::Write(const void *buffer, size_t length) throw(SocketStateException)
 {
-    uint8_t dest[6]={0x01,0x02,0x03,0x04,0x05,0x06};
+    uint8_t dest[6]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
 
     Write(dest,buffer,length);
 }

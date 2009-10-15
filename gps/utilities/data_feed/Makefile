@@ -62,16 +62,16 @@ endif
 #  Windows: #define WIN32
 #  OS X: #define __APPLE__
 ifeq ($(PLATFORM),mac)
-INCLUDES+=
-LIBS+= -lpcap
 LIBDIRS+=
+LIBS+= -lpcap
+INCLUDES+=
 SOURCES+= raw_socket_osx.cpp
 else
 ifeq ($(PLATFORM),win)
-LIBDIRS+=
-LIBS+=
-INCLUDES+=
-SOURCES+= #raw_socket_win.cpp
+LIBDIRS+= -Lc:/WinPcap/Lib
+LIBS+= -liphlpapi
+INCLUDES+= -Ic:/WinPcap/Include
+SOURCES+= raw_socket_win.cpp
 else
 LIBDIRS+=
 LIBS+=

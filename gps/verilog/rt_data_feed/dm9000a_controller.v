@@ -373,9 +373,7 @@ module dm9000a_controller(
 
            //Idle until an interrupt is received.
            `DM9000A_CMD_STATE_IDLE: begin
-              cmd_state <= enet_int ?
-                            `DM9000A_CMD_STATE_IRQ :
-                            cmd_state;
+              cmd_state <= enet_int ? `DM9000A_CMD_STATE_IRQ : cmd_state;
               initializing <= 1'b0;
               issue_read <= 1'b0;
               issue_register <= issue_register;
@@ -387,7 +385,6 @@ module dm9000a_controller(
                                  cmd_spin_count-`DM9000A_CMD_SPIN_WIDTH'd1 :
                                  cmd_spin_count;
               cmd_state <= cmd_spin_count!=`DM9000A_CMD_SPIN_WIDTH'd0 ? cmd_state :
-                           //cmd_post_spin_state==`DM9000A_CMD_STATE_RESET && !enet_int_en ? cmd_state :
                            cmd_post_spin_state;
               issue_read <= issue_read;
               issue_register <= issue_register;

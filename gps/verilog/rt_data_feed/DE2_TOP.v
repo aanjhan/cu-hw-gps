@@ -128,10 +128,6 @@ module DE2_TOP (
     inout  [35:0] GPIO_0,      // GPIO Connection 0
     inout  [35:0] GPIO_1       // GPIO Connection 1
 );
-
-   //Turn off all displays.
-   assign LEDR[17:3] = 14'h0;
-   assign LEDG[8:2] = 7'h0;
    
    //Set all GPIO to tri-state.
    assign GPIO_0 = 36'hzzzzzzzzz;
@@ -222,12 +218,14 @@ module DE2_TOP (
 
    wire have_data;
    wire link_status;
+   wire [17:0] sample_buffer;
+   wire [2:0] sample_count;
+   wire [2:0] sample_data;
    wire [8:0] words_available;
    wire [15:0] data_out;
    wire [15:0] rxp_h;
    wire [15:0] rxp_l;
-   rt_data_feed data_feed(.clk(CLOCK_50),
-                          .clk_50(CLOCK_50),
+   rt_data_feed data_feed(.clk_50(CLOCK_50),
                           .reset(global_reset),
                           .enet_clk(ENET_CLK),
                           .enet_int(ENET_INT),
@@ -237,7 +235,10 @@ module DE2_TOP (
                           .enet_wr_n(ENET_WR_N),
                           .enet_rd_n(ENET_RD_N),
                           .enet_data(ENET_DATA),
-                          .read_one(~KEY[3]),
+                          .clk_sample(~KEY[3]),
+                          .sample_data(sample_data),
+                          .samp_buffer(sample_buffer),
+                          .samp_count(sample_count),
                           .have_data(have_data),
                           .link_status(link_status),
                           .words_available(words_available),
@@ -246,12 +247,12 @@ module DE2_TOP (
                           .rxp_h(rxp_h),
                           .rxp_l(rxp_l));
 
-   assign LEDR[2] = link_status;
-   assign LEDR[1] = ENET_INT;
-   assign LEDR[0] = have_data;
-
-   assign LEDG[1] = ~KEY[3];
-   assign LEDG[0] = global_reset;
+   assign LEDR = sample_buffer;
+   assign LEDG[8] = link_status;
+   assign LEDG[7:5] = sample_data;
+   assign LEDG[4:2] = sample_count;
+   assign LEDG[1] = have_data;
+   assign LEDG[0] = ~KEY[3];
    
    hex_driver hex7(SW[17] ? rxp_h[15:12] : data_out[15:12] ,1'b1,HEX7);
    hex_driver hex6(SW[17] ? rxp_h[11:8] : data_out[11:8],1'b1,HEX6);

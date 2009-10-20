@@ -1,7 +1,7 @@
 #include "raw_socket_win.hpp"
 #include <pcap.h>
-#include <iphlpapi.h>
 #include <windows.h>
+#include <iphlpapi.h>
 
 using namespace std;
 
@@ -22,7 +22,7 @@ void RawSocketWin::ListDevices(std::vector<std::string> &deviceList) throw(IOExc
     char errbuf[PCAP_ERRBUF_SIZE];
 
     //Find available devices.
-    if(pcap_findalldevs_ex(PCAP_SRC_IF_STRING, NULL, &ifList, errbuf)<0)
+    if(pcap_findalldevs(&ifList, errbuf)<0)
     {
         throw IOException("unable to retrieve interface information");
     }
@@ -50,17 +50,23 @@ void RawSocketWin::GetMACAddress(const std::string &deviceName, uint8_t *address
     DWORD dwBufLen = sizeof(ifList);
 
     //Get device information.
-    if(GetAdaptersInfo(AdapterInfo,&dwBufLen)!=ERROR_SUCESS)
+    if(GetAdaptersInfo(ifList,&dwBufLen)!=0)
     {
         throw IOException("unable to retrieve interface information");
     }
+    
+    //Windows device names are listed as "\Device\NPF_{DEVICE_ID}"
+    //however, GetAdaptersInfo returns adapter names formatted
+    //as "{DEVICE_ID}". Remove the beginning of the device name
+    //before using it.
+    string name=deviceName.substr(deviceName.find_first_of('{'));
 
     //Find specified device, if possible.
     PIP_ADAPTER_INFO ifaddr;
     for(ifaddr=ifList;ifaddr!=NULL;ifaddr=ifaddr->Next)
     {
         //Is this the specified device?
-        if(deviceName!=ifaddr->AdapterName)continue;
+        if(name!=ifaddr->AdapterName)continue;
 
         memcpy(address,ifaddr->Address,6);
         break;
@@ -126,11 +132,20 @@ void RawSocketWin::Write(const uint8_t *dest, const void *buffer, size_t length)
     
     memcpy(writeBuffer,dest,6);
     memcpy(writeBuffer+6,macAddress,6);
-    writeBuffer[12]=0x00;
-    writeBuffer[13]=0x00;
+    writeBuffer[12]=0x12;
+    writeBuffer[13]=0x34;
     memcpy(writeBuffer+14,buffer,length);
+
+    //Runt Ethernet frames are frames less than 64B
+    //(payload size <46B). Pad the frame to avoid
+    //sending a runt frame if necessary.
+    if(length<(64-14))
+    {
+        memset(writeBuffer+14+length,0x00,(64-14)-length);
+        length=64-14;
+    }
     //FIXME Insert CRC if enabled?
     
     //FIXME Error check for socket closing?
-    pcap_inject(device,writeBuffer,14+length);
+    pcap_sendpacket(device,writeBuffer,14+length);
 }

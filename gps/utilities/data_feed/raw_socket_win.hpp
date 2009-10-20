@@ -1,9 +1,8 @@
 #ifndef RAW_SOCKET_WIN_HPP
 #define RAW_SOCKET_WIN_HPP
 
-#include <stdint.h>
-#include <pcap.h>
 #include "raw_socket.hpp"
+#include <pcap.h>
 
 class RawSocketWin : public IRawSocket
 {

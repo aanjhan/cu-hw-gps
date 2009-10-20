@@ -69,7 +69,7 @@ SOURCES+= raw_socket_osx.cpp
 else
 ifeq ($(PLATFORM),win)
 LIBDIRS+= -Lc:/WinPcap/Lib
-LIBS+= -liphlpapi
+LIBS+= -lwpcap -liphlpapi
 INCLUDES+= -Ic:/WinPcap/Include
 SOURCES+= raw_socket_win.cpp
 else

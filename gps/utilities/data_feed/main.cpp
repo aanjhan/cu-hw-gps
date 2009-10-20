@@ -77,8 +77,12 @@ int main(int argc, char *argv[])
         //Open device.
         sock.Open(device_name);
         
-        char data[10]={0,1,2,3,4,5,6,7,8,9};
-        sock.Write(data,10);
+        uint8_t dest[6]={1,2,3,4,5,6};
+        char data[80];
+        int length=69;
+        for(int i=0;i<length;i++)data[i]=i;
+        //sock.Write(dest,data,length);
+        sock.Write(data,length);
 
         //Close device.
         sock.Close();
@@ -101,6 +105,7 @@ void PrintHelp()
         <<"Feed a data log file over the specified Ethernet device"<<endl
         <<"at a constant bit-rate, in fixed-size packets."<<endl
         <<endl
+        <<"  -d             List available devices."<<endl
         <<"  -h [--help]    Display this help message."<<endl
         <<"  -v [--version] Show version information."<<endl
         <<endl

@@ -1,10 +1,14 @@
 #ifndef RAW_SOCKET_HPP
 #define RAW_SOCKET_HPP
 
-#include <sys/types.h>
 #include <vector>
 #include <string>
 #include "socket_exceptions.hpp"
+#include <sys/types.h>
+
+//Note: This must be included AFTER the
+//      C++ libraries for compatibilty.
+#include <stdint.h>
 
 #define RAW_SOCKET_MTU 1500
 #define RAW_SOCKET_BUFFER_LEN (14+RAW_SOCKET_MTU+4)

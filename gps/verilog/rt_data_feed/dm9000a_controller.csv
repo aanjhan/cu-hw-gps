@@ -3,7 +3,7 @@
 /////////////////////////
 
 //Issue/control state variable.
-DM9000A_STATE_MAX_STATE,15,DM9000A control state variable maximum value.
+DM9000A_STATE_MAX_STATE,17,DM9000A control state variable maximum value.
 DM9000A_STATE_WIDTH,max_width(DM9000A_STATE_MAX_STATE),DM9000A control state variable width.
 DM9000A_STATE_RANGE,DM9000A_STATE_WIDTH-1:0,DM9000A control state variable bit range.
 
@@ -18,14 +18,16 @@ DM9000A_STATE_READ_PF_SPIN_1,DM9000A_STATE_WIDTH'd6,Prefetch read spin cycle 1.
 DM9000A_STATE_READ_PF,DM9000A_STATE_WIDTH'd7,Read prefetched status word.
 
 //Receive states.
-DM9000A_STATE_RX_SETUP_0,DM9000A_STATE_WIDTH'd8,Setup index register for RX.
-DM9000A_STATE_RX_SETUP_1,DM9000A_STATE_WIDTH'd9,Spin after RX index setup.
-DM9000A_STATE_RX_STATUS_0,DM9000A_STATE_WIDTH'd10,Assert read for status word.
-DM9000A_STATE_RX_STATUS_1,DM9000A_STATE_WIDTH'd11,Retrieve status word.
-DM9000A_STATE_RX_LEN_0,DM9000A_STATE_WIDTH'd12,Assert read for packet length.
-DM9000A_STATE_RX_LEN_1,DM9000A_STATE_WIDTH'd13,Retrieve packet length.
-DM9000A_STATE_RX_0,DM9000A_STATE_WIDTH'd14,Assert read for packet data word.
-DM9000A_STATE_RX_1,DM9000A_STATE_WIDTH'd15,Retrieve packet data word.
+DM9000A_STATE_RX_SETUP_SPIN,DM9000A_STATE_WIDTH'd8,Spin after RX index setup.
+DM9000A_STATE_RX_STATUS_0,DM9000A_STATE_WIDTH'd9,Assert read for status word.
+DM9000A_STATE_RX_STATUS_1,DM9000A_STATE_WIDTH'd10,Retrieve status word.
+DM9000A_STATE_RX_LEN_0,DM9000A_STATE_WIDTH'd11,Assert read for frame length.
+DM9000A_STATE_RX_LEN_1,DM9000A_STATE_WIDTH'd12,Retrieve frame length.
+DM9000A_STATE_RX_0,DM9000A_STATE_WIDTH'd13,Assert read for frame data word.
+DM9000A_STATE_RX_1,DM9000A_STATE_WIDTH'd14,Retrieve frame data word.
+DM9000A_STATE_RX_CRC_0,DM9000A_STATE_WIDTH'd15,Assert read for CRC word.
+DM9000A_STATE_RX_CRC_1,DM9000A_STATE_WIDTH'd16,Retrieve frame CRC word.
+DM9000A_STATE_RX_CRC_2,DM9000A_STATE_WIDTH'd17,Check frame CRC.
 
 ////////////////////
 // Command Control
@@ -68,6 +70,7 @@ DM9000A_TYPE_INDEX,1'b0,Register index value.
 DM9000A_TYPE_DATA,1'b1,Data I/O value.
 
 //Packet status word positions.
+DM9000A_PKT_STATUS_READY_LOW,1:0,Packet ready low bits in packet status word.
 DM9000A_PKT_STATUS_READY,7:0,Packet ready byte in packet status word.
 DM9000A_PKT_STATUS_STATUS,15:8,Status byte in packet status word.
 

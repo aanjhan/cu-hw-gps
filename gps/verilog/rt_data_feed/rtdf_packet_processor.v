@@ -93,7 +93,10 @@ module rtdf_packet_processor(
            `RTDF_STATE_ETHERTYPE: begin
               packet_state <= `RTDF_STATE_DATA;
 
-              ignore_packet <= rx_fifo_rd_data!=`RTDF_ETHERTYPE;
+              //Note: network byte-order is big endian,
+              //however the Ethernet interface records
+              //in bytes with no knowledge of field sizes.
+              ignore_packet <= {rx_fifo_rd_data[7:0],rx_fifo_rd_data[15:8]}!=`RTDF_ETHERTYPE;
            end
            //Read packet data. If CRC is enabled, go to
            //CRC discard state when packet completes.

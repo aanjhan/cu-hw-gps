@@ -31,6 +31,8 @@ module dm9000a_controller(
 
    parameter MAC_ADDRESS = 48'h010203040506;
    parameter MULTICAST_ADDRESS = 64'h0;
+   parameter PROMISCUOUS_EN = 1'b1;
+   parameter BROADCAST_EN = 1'b1;
 
    //Generate 25MHz control clock from 50MHz reference.
    wire clk_enet;
@@ -73,6 +75,9 @@ module dm9000a_controller(
    //Received packet information.
    reg [15:0] rx_length;
    reg        rx_bad_packet;
+   reg        rx_odd_length;
+   reg [31:0] rx_crc;
+   reg [31:0] rx_crc_value;
 
    //Packet RX ix halted whenever a FIFO halt is
    //asserted and the packet is valid. If the packet
@@ -132,7 +137,6 @@ module dm9000a_controller(
          case(state)
            `DM9000A_STATE_IDLE: begin
               state <= !issue_ready ? `DM9000A_STATE_IDLE :
-                       issue_register==`DM9000A_REG_MEM_RD_INC ? `DM9000A_STATE_RX_SETUP_0 :
                        `DM9000A_STATE_SETUP;
               
               rx_fifo_wr_req <= 1'b0;
@@ -157,7 +161,9 @@ module dm9000a_controller(
            //Setup register index and command type.
            `DM9000A_STATE_SETUP: begin
               data_out <= issue_register;
-              state <= `DM9000A_STATE_SETUP_SPIN;
+              state <= issue_register==`DM9000A_REG_MEM_RD_INC ?
+                       `DM9000A_STATE_RX_SETUP_SPIN :
+                       `DM9000A_STATE_SETUP_SPIN;
 
               enet_cmd <= `DM9000A_TYPE_INDEX;
               enet_wr_n <= 1'b0;
@@ -234,16 +240,8 @@ module dm9000a_controller(
            //  --Retrieve data words (1 cycle).
            //Total time: 6+length cycles.
            
-           //Setup index register to receive.
-           `DM9000A_STATE_RX_SETUP_0: begin
-              data_out <= `DM9000A_REG_MEM_RD_INC;
-              state <= `DM9000A_STATE_RX_SETUP_1;
-
-              enet_cmd <= `DM9000A_TYPE_INDEX;
-              enet_wr_n <= 1'b0;
-              enet_rd_n <= 1'b1;
-           end
-           `DM9000A_STATE_RX_SETUP_1: begin
+           //Spin after index register setup.
+           `DM9000A_STATE_RX_SETUP_SPIN: begin
               state <= `DM9000A_STATE_RX_STATUS_0;
 
               enet_wr_n <= 1'b1;
@@ -282,27 +280,34 @@ module dm9000a_controller(
            `DM9000A_STATE_RX_LEN_1: begin
               state <= `DM9000A_STATE_RX_0;
 
-              //Store the packet length to the RX FIFO
-              //only if the packet is valid.
-              rx_fifo_wr_data <= enet_data;
+              //Store the packet length (without CRC)
+              //to the RX FIFO only if the packet is valid.
+              rx_fifo_wr_data <= enet_data-16'd4;
               rx_fifo_wr_req <= !rx_bad_packet;
-              
-              rx_length <= enet_data;
+
+              //Note: The length reported by the DM9000A
+              //      includes 4B for the Ethernet CRC.
+              //      Also, the length is forced to 64B
+              //      for runt (<64B) packets.
+              rx_length <= enet_data-16'd4;
+
+              rx_odd_length <= enet_data[0];
 
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Receive packet data. Block if the data FIFO
+           //Receive frame data. Block if the data FIFO
            //ever fills up, until space is available.
+           //FIXME This is failing for odd-length packets.
            `DM9000A_STATE_RX_0: begin
-              state <= rx_length==16'd0 ? `DM9000A_STATE_IDLE :
+              state <= rx_length==16'd0 ? `DM9000A_STATE_RX_CRC_0 :
                        rx_halt ? `DM9000A_STATE_RX_0 :
                        `DM9000A_STATE_RX_1;
 
               //Decrement packet length by one word.
-              rx_length <= !rx_halt ?
-                           rx_length-16'd2 :
-                           rx_length;
+              rx_length <= rx_halt ? rx_length :
+                           rx_length==16'd1 ? 16'd0 :
+                           rx_length-16'd2;
               
               rx_fifo_wr_req <= 1'b0;
 
@@ -316,7 +321,43 @@ module dm9000a_controller(
               rx_fifo_wr_data <= enet_data;
               
               //Flag a write to the FIFO if the packet is valid.
+              //FIXME If the DM9000A is appending a CRC, ignore it.
               rx_fifo_wr_req <= !rx_bad_packet;
+
+              //Store the last byte as the LSB of
+              //the CRC in case an odd-length packet
+              //is received.
+              rx_crc_value[7:0] <= enet_data[15:8];
+
+              //FIXME Implement CRC generation.
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           //Receive CRC and verify frame.
+           `DM9000A_STATE_RX_CRC_0: begin
+              state <= `DM9000A_STATE_RX_CRC_1;
+
+              rx_crc_value[7:0] <= rx_odd_length ? rx_crc_value[7:0] : enet_data[7:0];
+              rx_crc_value[15:8] <= rx_odd_length ? enet_data[7:0] : enet_data[15:8];
+              rx_crc_value[23:16] <= rx_odd_length ? enet_data[15:8] : rx_crc_value[23:16];
+              
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= rx_halt;
+           end
+           `DM9000A_STATE_RX_CRC_1: begin
+              state <= `DM9000A_STATE_RX_CRC_2;
+
+              rx_crc_value[23:16] <= rx_odd_length ? rx_crc_value[23:16] : enet_data[7:0];
+              rx_crc_value[31:24] <= rx_odd_length ? enet_data[7:0] : enet_data[15:8];
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           `DM9000A_STATE_RX_CRC_2: begin
+              state <= `DM9000A_STATE_IDLE;
+
+              //FIXME Check CRC. What can we do if it's bad?
 
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
@@ -496,14 +537,11 @@ module dm9000a_controller(
            //will be 1. If not, it will be 0. Any other value
            //indicates an error and should force a reset.
            //FIXME Add error reset condition.
-           //FIXME Not issuing a prefetch after reading a packet,
-           //FIXME but going straight back to RX. Is it necessary
-           //FIXME to have a cycle wait between the issue SM going
-           //FIXME to idle and it reading issue ready?
+           //FIXME If status[1:0] is not 0b00 or 0b01 reset.
            `DM9000A_CMD_STATE_RX_PACKET_0: begin
               cmd_state <= ~spin_next ? `DM9000A_CMD_STATE_RX_PACKET_0 :
                            data_out[`DM9000A_PKT_STATUS_READY]==8'd1 ? `DM9000A_CMD_STATE_RX_PACKET_1 :
-                           //data_out[`DM9000A_PKT_STATUS_READY]!=8'd0 ?  : //FIXME Force reset!
+                           //data_out[`DM9000A_PKT_STATUS_READY_LOW]!=2'd0 ?  : //FIXME Force reset!
                            `DM9000A_CMD_STATE_DISPATCH;
               issue_read <= 1'b1;
               issue_register <= `DM9000A_REG_MEM_RD_PF;
@@ -613,7 +651,8 @@ module dm9000a_controller(
                             address_position==3'd4 ? {8'h0,MULTICAST_ADDRESS[39:32]} :
                             address_position==3'd5 ? {8'h0,MULTICAST_ADDRESS[47:40]} :
                             address_position==3'd6 ? {8'h0,MULTICAST_ADDRESS[55:48]} :
-                            {8'h0,1'b1,MULTICAST_ADDRESS[62:56]};
+                            BROADCAST_EN ? {8'h0,1'b1,MULTICAST_ADDRESS[62:56]} :
+                            {8'h0,MULTICAST_ADDRESS[63:56]};
               address_position <= address_position<3'd7 ?
                                   address_position+3'd1 :
                                   3'd0;
@@ -623,7 +662,9 @@ module dm9000a_controller(
               cmd_state <= `DM9000A_CMD_STATE_IMR;
               issue_read <= 1'b0;
               issue_register <= `DM9000A_REG_RXCR;
-              issue_data <= (`DM9000A_BIT_RXCR_RUNT | `DM9000A_BIT_RXCR_PRMSC | `DM9000A_BIT_RXCR_RXEN);
+              issue_data <= PROMISCUOUS_EN ?
+                            (`DM9000A_BIT_RXCR_PRMSC | `DM9000A_BIT_RXCR_RXEN) :
+                            (`DM9000A_BIT_RXCR_RXEN);
            end
            //Enable read/write pointer auto-wrap, link change, and RX interrupts.
            `DM9000A_CMD_STATE_IMR: begin

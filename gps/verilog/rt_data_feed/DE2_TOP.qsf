@@ -28,10 +28,8 @@ set_global_assignment -name DEVICE EP2C35F672C6
 set_global_assignment -name TOP_LEVEL_ENTITY DE2_TOP
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 8.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "11:32:43  FEBRUARY 28, 2009"
-set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 8.0
 set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
-set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
-set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_location_assignment PIN_N25 -to SW[0]
 set_location_assignment PIN_N26 -to SW[1]
@@ -476,23 +474,7 @@ set_global_assignment -name FMAX_REQUIREMENT "200 MHz" -section_id "200 MHz Top"
 set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS OFF
 set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE BALANCED
 set_global_assignment -name FMAX_REQUIREMENT "50 MHz" -section_id "50 MHz Top"
-set_global_assignment -name VERILOG_FILE rtdf_stream_fifo.v
-set_global_assignment -name VERILOG_FILE rtdf_packet_processor.v
-set_global_assignment -name VERILOG_FILE ../components/strobe.v
-set_global_assignment -name VERILOG_FILE rt_data_feed.v
-set_global_assignment -name VERILOG_FILE ../components/power_on_reset.v
-set_global_assignment -name VERILOG_FILE ../components/hex_driver.v
-set_global_assignment -name VERILOG_FILE DE2_TOP.v
-set_global_assignment -name VERILOG_FILE dm9000a_controller.v
-set_global_assignment -name VERILOG_FILE dm9000a_clk_gen.v
-set_global_assignment -name VECTOR_WAVEFORM_FILE setup.vwf
-set_global_assignment -name SIGNALTAP_FILE tap.stp
-set_global_assignment -name QIP_FILE rx_data_fifo.qip
-set_global_assignment -name VECTOR_WAVEFORM_FILE top_level.vwf
-set_global_assignment -name VECTOR_WAVEFORM_FILE processor.vwf
-set_global_assignment -name VECTOR_WAVEFORM_FILE feed.vwf
 set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE feed.vwf
-set_global_assignment -name QIP_FILE rtdf_stream_fifo.qip
 set_global_assignment -name PARTITION_NETLIST_TYPE POST_FIT -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
@@ -508,7 +490,6 @@ set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to CLOCK_50 -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_INFO=805334528" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_POWER_UP_TRIGGER=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH=0" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ATTRIBUTE_MEM_MODE=OFF" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_FLOW_USE_GENERATED=0" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_BITS=11" -section_id auto_signaltap_0
@@ -572,108 +553,229 @@ set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[24] -t
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=1024" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=2048" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[25] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|fifo_halt" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[26] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_bad_packet" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[27] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[28] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[29] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[30] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[31] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[32] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[33] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[34] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[35] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[36] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[37] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[38] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[39] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[40] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[41] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[42] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[43] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[44] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[45] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[46] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[47] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[48] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[49] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[50] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[51] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[52] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_req" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[53] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_halt" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[54] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[55] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[56] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[57] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[58] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[59] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[60] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[61] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[62] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[63] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[64] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[65] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[66] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[67] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[68] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[69] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[70] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|state[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[71] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|state[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[72] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|state[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[73] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|state[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[74] -to "rt_data_feed:data_feed|enet_clk" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[25] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|fifo_halt" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[26] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_bad_packet" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[27] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[28] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[29] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[30] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[31] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[32] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[33] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[34] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[35] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[36] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[37] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[38] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[39] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[40] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[41] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[42] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[43] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[44] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[45] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[46] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[47] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[48] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[49] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[50] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[51] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[52] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_req" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[53] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_halt" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[54] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[55] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[56] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[57] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[58] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[59] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[60] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[61] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[62] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[63] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[64] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[65] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[66] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[67] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[68] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[69] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[70] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|state[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[71] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|state[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[72] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|state[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[73] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|state[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[74] -to "rt_data_feed:data_feed|enet_clk" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=75" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=75" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=249" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=30807" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=25166" -section_id auto_signaltap_0
+set_global_assignment -name VERILOG_FILE rtdf_stream_fifo.v
+set_global_assignment -name VERILOG_FILE rtdf_packet_processor.v
+set_global_assignment -name VERILOG_FILE rx_data_fifo.v
+set_global_assignment -name VERILOG_FILE dm9000a_controller.v
+set_global_assignment -name VERILOG_FILE dm9000a_clk_gen.v
+set_global_assignment -name VERILOG_FILE rt_data_feed.v
+set_global_assignment -name VERILOG_FILE ../components/strobe.v
+set_global_assignment -name VERILOG_FILE ../components/power_on_reset.v
+set_global_assignment -name VERILOG_FILE ../components/hex_driver.v
+set_global_assignment -name VERILOG_FILE DE2_TOP.v
+set_global_assignment -name VECTOR_WAVEFORM_FILE setup.vwf
+set_global_assignment -name SIGNALTAP_FILE tap.stp
+set_global_assignment -name VECTOR_WAVEFORM_FILE top_level.vwf
+set_global_assignment -name VECTOR_WAVEFORM_FILE processor.vwf
+set_global_assignment -name VECTOR_WAVEFORM_FILE feed.vwf
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[26] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[27] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[28] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[11]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[29] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[12]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[30] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[13]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[31] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[14]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[32] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[15]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[33] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[34] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[35] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[36] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[37] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[38] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[39] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[40] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[41] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[42] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_in_progress" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[43] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_ready" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[44] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_bad_packet" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[45] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[46] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[47] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[48] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[49] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[50] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[51] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[52] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[53] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[54] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_empty" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[55] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_rd_req" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[56] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[57] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[58] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[11]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[59] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[12]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[60] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[13]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[61] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[14]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[62] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[15]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[63] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[64] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[65] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[66] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[67] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[68] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[69] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[70] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[71] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[72] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_req" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[73] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_halt" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[74] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[75] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[76] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[11]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[77] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[12]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[78] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[13]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[79] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[14]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[80] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[15]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[81] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[82] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[83] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[84] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[85] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[86] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[87] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[88] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[89] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[90] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|state[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[91] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|state[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[92] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|state[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[93] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|state[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[94] -to "rt_data_feed:data_feed|enet_clk" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[95] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[96] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[97] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[11]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[98] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[12]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[99] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[13]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[100] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[14]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[101] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[15]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[102] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[103] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[104] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[105] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[106] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[107] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[108] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[109] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[110] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[111] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_req" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[112] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|ignore_packet" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[113] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[114] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[115] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[116] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[117] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[118] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[119] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[120] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[121] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[122] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[123] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[124] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_state[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[125] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_state[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[126] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_state[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[127] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_state[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[26] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[27] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[28] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[11]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[29] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[12]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[30] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[13]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[31] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[14]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[32] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[15]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[33] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[34] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[35] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[36] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[37] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[38] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[39] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[40] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[41] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_data[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[42] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_in_progress" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[43] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|issue_ready" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[44] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_bad_packet" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[45] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[46] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[47] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[48] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[49] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[50] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[51] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[52] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[53] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_available[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[54] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_empty" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[55] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_rd_req" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[56] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[57] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[58] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[11]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[59] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[12]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[60] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[13]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[61] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[14]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[62] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[15]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[63] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[64] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[65] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[66] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[67] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[68] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[69] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[70] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[71] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_data[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[72] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_fifo_wr_req" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[73] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_halt" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[74] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[75] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[76] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[11]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[77] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[12]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[78] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[13]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[79] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[14]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[80] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[15]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[81] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[82] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[83] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[84] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[85] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[86] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[87] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[88] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[89] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|rx_length[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[90] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|state[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[91] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|state[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[92] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|state[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[93] -to "rt_data_feed:data_feed|dm9000a_controller:dm9000a|state[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[94] -to "rt_data_feed:data_feed|enet_clk" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[95] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[96] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[97] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[11]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[98] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[12]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[99] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[13]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[100] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[14]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[101] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[15]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[102] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[103] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[104] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[105] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[106] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[107] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[108] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[109] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[110] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_data[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[111] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|fifo_wr_req" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[112] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|ignore_packet" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[113] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[114] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[10]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[115] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[116] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[117] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[3]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[118] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[4]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[119] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[5]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[120] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[6]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[121] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[7]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[122] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[8]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[123] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_length[9]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[124] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_state[0]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[125] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_state[1]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[126] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_state[2]" -section_id auto_signaltap_0
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[127] -to "rt_data_feed:data_feed|rtdf_packet_processor:processor|packet_state[3]" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=128" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=128" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=408" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=9383" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=20871" -section_id auto_signaltap_0

@@ -1,0 +1,27 @@
+//Packet parameters.
+RTDF_MTU,1500,Ethernet MTU (B).
+RTDF_FRAME_SIZE,6+6+2+RTDF_MTU+4,Ethernet frame size (B).
+RTDF_ETHERTYPE,16'h1234,Real-time data feed Ethernet frame type.
+RTDF_CRC_ENABLE,0,CRC enable [0=no CRC, 1=expect CRC].
+
+//Packet length.
+RTDF_PKT_LENGTH_WIDTH,max_width(RTDF_FRAME_SIZE-1),Packet length width.
+RTDF_PKT_LENGTH_RANGE,range(RTDF_PKT_LENGTH_WIDTH),Packet length range.
+RTDF_PKT_OH_LENGTH,RTDF_PKT_LENGTH_WIDTH'd(6+6+2+RTDF_CRC_ENABLE*4),Packet overhead (B).
+
+//Packet processor state variable.
+RTDF_STATE_MAX_STATE,9,Packet processor state variable maximum value.
+RTDF_STATE_WIDTH,max_width(RTDF_STATE_MAX_STATE),Packet processor state variable width.
+RTDF_STATE_RANGE,RTDF_STATE_WIDTH-1:0,Packet processor state variable bit range.
+
+//Packet processor states.
+RTDF_STATE_LENGTH,RTDF_STATE_WIDTH'd0,Process packet length.
+RTDF_STATE_DEST_0,RTDF_STATE_WIDTH'd1,Process destination MAC address.
+RTDF_STATE_DEST_1,RTDF_STATE_WIDTH'd2,Process destination MAC address (second cycle).
+RTDF_STATE_DEST_2,RTDF_STATE_WIDTH'd3,Process destination MAC address (third cycle).
+RTDF_STATE_SOURCE_0,RTDF_STATE_WIDTH'd4,Process source MAC address.
+RTDF_STATE_SOURCE_1,RTDF_STATE_WIDTH'd5,Process source MAC address (second cycle).
+RTDF_STATE_SOURCE_2,RTDF_STATE_WIDTH'd6,Process source MAC address (third cycle).
+RTDF_STATE_ETHERTYPE,RTDF_STATE_WIDTH'd7,Check packet EtherType.
+RTDF_STATE_DATA,RTDF_STATE_WIDTH'd8,Retrieve packet data.
+RTDF_STATE_CRC,RTDF_STATE_WIDTH'd9,Discard CRC if enabled.

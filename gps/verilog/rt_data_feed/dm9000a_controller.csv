@@ -183,6 +183,7 @@ DM9000A_BIT_TXCR1_TXREQ,16'h01,TX request (auto-clears after transmission comple
 DM9000A_BIT_RXCR_DIS_LONG,16'h20,Discard long packets (>1522B).
 DM9000A_BIT_RXCR_DIS_CRC,16'h10,Discard packets with invalid CRCs.
 DM9000A_BIT_RXCR_ALL,16'h08,Pass all multicast packets.
+DM9000A_BIT_RXCR_RUNT,16'h04,Pass all runt packets (<64B).
 DM9000A_BIT_RXCR_PRMSC,16'h02,Enable promiscuous mode.
 DM9000A_BIT_RXCR_RXEN,16'h01,RX enable.
 

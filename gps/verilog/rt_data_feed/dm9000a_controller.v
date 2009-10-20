@@ -17,11 +17,13 @@ module dm9000a_controller(
     inout wire [15:0]  enet_data,
     output wire [15:0] enet_data_out,//FIXME
     //RX data FIFO interface.
-    input              rx_fifo_full,
-    output wire        rx_fifo_clk,
-    output reg         rx_fifo_wr_req,
-    output reg [15:0]  rx_fifo_data,
-    //Status.
+    input              rx_fifo_rd_clk,
+    input              rx_fifo_rd_req,
+    input [15:0]       rx_fifo_rd_data,
+    output wire        rx_fifo_empty,
+    output wire [8:0]  rx_fifo_available,
+    //Control and status.
+    input              halt,
     output reg         link_status,
     //Crap
     output reg [15:0]  rxp_h,
@@ -34,12 +36,32 @@ module dm9000a_controller(
    wire clk_enet;
    dm9000a_clk_gen clk_gen(.clk(clk),
                            .clk_enet(clk_enet));
-   assign rx_fifo_clk = clk_enet;
 
    //Ethernet control signals.
    assign enet_clk = clk_enet;
    assign enet_rst_n = ~reset;
    assign enet_cs_n = 1'b0;
+
+   //Ethernet data RX FIFO.
+   wire        rx_fifo_full;
+   reg         rx_fifo_wr_req;
+   reg [15:0]  rx_fifo_wr_data;
+   rx_data_fifo rx_fifo(.aclr(reset),
+                        .wrclk(clk_enet),
+                        .data(rx_fifo_wr_data),
+                        .wrreq(rx_fifo_wr_req),
+                        .wrfull(rx_fifo_full),
+                        .rdclk(rx_fifo_rd_clk),
+                        .rdreq(rx_fifo_rd_req),
+                        .q(rx_fifo_rd_data),
+                        .rdempty(rx_fifo_empty),
+                        .rdusedw(rx_fifo_available));
+
+   //A FIFO halt occurs when the FIFO is full
+   //and cannot accept new data, or when halted
+   //by the upper level.
+   wire fifo_halt;
+   assign fifo_halt = rx_fifo_full || halt;
 
    //The following signals setup a command issue from
    //the initialization state machine to the control.
@@ -51,6 +73,13 @@ module dm9000a_controller(
    //Received packet information.
    reg [15:0] rx_length;
    reg        rx_bad_packet;
+
+   //Packet RX ix halted whenever a FIFO halt is
+   //asserted and the packet is valid. If the packet
+   //is bad, it is not placed in the FIFO and is
+   //discarded regardless of the halt condition.
+   wire rx_halt;
+   assign rx_halt = fifo_halt && !rx_bad_packet;
 
    //Enable address cycling, and link change and RX interrupts.
    localparam INTERRUPT_FLAGS = (`DM9000A_BIT_IMR_PAR |
@@ -236,17 +265,28 @@ module dm9000a_controller(
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Read packet length.
+           //Read packet length. Block if the data FIFO
+           //ever fills up, until space is available.
+           //FIXME Does the DM9000A not support packets less
+           //FIXME than 64B? ARP packets (42B) are coming up
+           //FIXME length of 64 (0x40).
            `DM9000A_STATE_RX_LEN_0: begin
-              state <= `DM9000A_STATE_RX_LEN_1;
+              state <= rx_halt ?
+                       `DM9000A_STATE_RX_LEN_0 :
+                       `DM9000A_STATE_RX_LEN_1;
 
               enet_cmd <= `DM9000A_TYPE_DATA;
               enet_wr_n <= 1'b1;
-              enet_rd_n <= 1'b0;
+              enet_rd_n <= rx_halt;
            end
            `DM9000A_STATE_RX_LEN_1: begin
               state <= `DM9000A_STATE_RX_0;
 
+              //Store the packet length to the RX FIFO
+              //only if the packet is valid.
+              rx_fifo_wr_data <= enet_data;
+              rx_fifo_wr_req <= !rx_bad_packet;
+              
               rx_length <= enet_data;
 
               enet_wr_n <= 1'b1;
@@ -256,24 +296,24 @@ module dm9000a_controller(
            //ever fills up, until space is available.
            `DM9000A_STATE_RX_0: begin
               state <= rx_length==16'd0 ? `DM9000A_STATE_IDLE :
-                       rx_fifo_full ? `DM9000A_STATE_RX_0 :
+                       rx_halt ? `DM9000A_STATE_RX_0 :
                        `DM9000A_STATE_RX_1;
 
               //Decrement packet length by one word.
-              rx_length <= !rx_fifo_full ?
+              rx_length <= !rx_halt ?
                            rx_length-16'd2 :
                            rx_length;
               
               rx_fifo_wr_req <= 1'b0;
 
               enet_wr_n <= 1'b1;
-              enet_rd_n <= 1'b0;
+              enet_rd_n <= rx_halt;
            end
            `DM9000A_STATE_RX_1: begin
               state <= `DM9000A_STATE_RX_0;
 
-              //Store data to write to FIFO.
-              rx_fifo_data <= enet_data;
+              //Store data to FIFO.
+              rx_fifo_wr_data <= enet_data;
               
               //Flag a write to the FIFO if the packet is valid.
               rx_fifo_wr_req <= !rx_bad_packet;
@@ -456,6 +496,10 @@ module dm9000a_controller(
            //will be 1. If not, it will be 0. Any other value
            //indicates an error and should force a reset.
            //FIXME Add error reset condition.
+           //FIXME Not issuing a prefetch after reading a packet,
+           //FIXME but going straight back to RX. Is it necessary
+           //FIXME to have a cycle wait between the issue SM going
+           //FIXME to idle and it reading issue ready?
            `DM9000A_CMD_STATE_RX_PACKET_0: begin
               cmd_state <= ~spin_next ? `DM9000A_CMD_STATE_RX_PACKET_0 :
                            data_out[`DM9000A_PKT_STATUS_READY]==8'd1 ? `DM9000A_CMD_STATE_RX_PACKET_1 :
@@ -579,7 +623,7 @@ module dm9000a_controller(
               cmd_state <= `DM9000A_CMD_STATE_IMR;
               issue_read <= 1'b0;
               issue_register <= `DM9000A_REG_RXCR;
-              issue_data <= (`DM9000A_BIT_RXCR_PRMSC | `DM9000A_BIT_RXCR_RXEN);
+              issue_data <= (`DM9000A_BIT_RXCR_RUNT | `DM9000A_BIT_RXCR_PRMSC | `DM9000A_BIT_RXCR_RXEN);
            end
            //Enable read/write pointer auto-wrap, link change, and RX interrupts.
            `DM9000A_CMD_STATE_IMR: begin

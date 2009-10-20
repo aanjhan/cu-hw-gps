@@ -222,6 +222,7 @@ module DE2_TOP (
    wire [2:0] sample_count;
    wire [2:0] sample_data;
    wire [8:0] words_available;
+   wire [8:0] packet_count;
    wire [15:0] data_out;
    wire [15:0] rxp_h;
    wire [15:0] rxp_l;
@@ -242,8 +243,10 @@ module DE2_TOP (
                           .have_data(have_data),
                           .link_status(link_status),
                           .words_available(words_available),
+                          .packet_count(packet_count),
                           .data_out(data_out),
                           .halt(SW[0]),
+                          .halt_packet(SW[1]),
                           .rxp_h(rxp_h),
                           .rxp_l(rxp_l));
 
@@ -259,7 +262,13 @@ module DE2_TOP (
    hex_driver hex5(SW[17] ? rxp_h[7:4] : data_out[7:4],1'b1,HEX5);
    hex_driver hex4(SW[17] ? rxp_h[3:0] : data_out[3:0],1'b1,HEX4);
    hex_driver hex3(SW[17] ? rxp_l[15:12] : 4'h0,SW[17],HEX3);
-   hex_driver hex2(SW[17] ? rxp_l[11:8] : {3'h0,words_available[8]},1'b1,HEX2);
-   hex_driver hex1(SW[17] ? rxp_l[7:4] : words_available[7:4],1'b1,HEX1);
-   hex_driver hex0(SW[17] ? rxp_l[3:0] : words_available[3:0],1'b1,HEX0);
+   hex_driver hex2(SW[17] ? rxp_l[11:8] :
+                   SW[16] ? {3'h0,packet_count[8]} :
+                   {3'h0,words_available[8]},1'b1,HEX2);
+   hex_driver hex1(SW[17] ? rxp_l[7:4] :
+                   SW[16] ? packet_count[7:4] :
+                   words_available[7:4],1'b1,HEX1);
+   hex_driver hex0(SW[17] ? rxp_l[3:0] :
+                   SW[16] ? packet_count[3:0] :
+                   words_available[3:0],1'b1,HEX0);
 endmodule

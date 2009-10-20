@@ -129,8 +129,8 @@ void RawSocketOSX::Write(const uint8_t *dest, const void *buffer, size_t length)
     
     memcpy(writeBuffer,dest,6);
     memcpy(writeBuffer+6,macAddress,6);
-    writeBuffer[12]=0x00;
-    writeBuffer[13]=0x00;
+    writeBuffer[12]=0x12;
+    writeBuffer[13]=0x34;
     memcpy(writeBuffer+14,buffer,length);
     //FIXME Insert CRC if enabled?
     

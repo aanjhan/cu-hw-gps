@@ -19,7 +19,7 @@ module dm9000a_controller(
     //RX data FIFO interface.
     input              rx_fifo_rd_clk,
     input              rx_fifo_rd_req,
-    input [15:0]       rx_fifo_rd_data,
+    output wire [15:0] rx_fifo_rd_data,
     output wire        rx_fifo_empty,
     output wire [8:0]  rx_fifo_available,
     //Control and status.

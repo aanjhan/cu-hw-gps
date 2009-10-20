@@ -19,6 +19,7 @@ module rt_data_feed(
     //Debug signals.
     output wire        link_status,
     output wire        have_data,
+    output wire [8:0]  rx_fifo_available,
     output wire [8:0]  words_available,
     output wire [8:0]  packet_count,
     output wire [15:0] data_out,
@@ -38,7 +39,7 @@ module rt_data_feed(
    wire        rx_fifo_rd_req;
    wire [15:0] rx_fifo_rd_data;
    wire        rx_fifo_empty;
-   wire [8:0]  rx_fifo_available;
+   //wire [8:0]  rx_fifo_available;
    dm9000a_controller dm9000a(.clk(clk_50),
                               .reset(reset),
                               .enet_clk(enet_clk),

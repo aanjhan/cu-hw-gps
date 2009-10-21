@@ -1,6 +1,7 @@
 `include "rtdf_packet_processor.vh"
 
-`define DEBUG
+`undef DEBUG
+//`define DEBUG
 `include "../components/debug.vh"
 
 module rtdf_packet_processor(
@@ -17,6 +18,7 @@ module rtdf_packet_processor(
     output wire [15:0] data,
     //Debug
     output reg [8:0]   packet_count,
+    output reg [8:0]   good_packet_count,
     output wire [8:0]  words_available);
 
    //Post-packet processing stream data FIFO.
@@ -51,7 +53,7 @@ module rtdf_packet_processor(
          packet_state <= packet_state;
          packet_length <= packet_length;
          ignore_packet <= ignore_packet;
-         fifo_wr_req <= packet_state!=`RTDF_STATE_DATA ? 1'b0 : fifo_wr_req;
+         fifo_wr_req <= 1'b0;
       end
       else begin
          case(packet_state)
@@ -97,6 +99,10 @@ module rtdf_packet_processor(
               //however the Ethernet interface records
               //in bytes with no knowledge of field sizes.
               ignore_packet <= {rx_fifo_rd_data[7:0],rx_fifo_rd_data[15:8]}!=`RTDF_ETHERTYPE;
+
+              good_packet_count <= {rx_fifo_rd_data[7:0],rx_fifo_rd_data[15:8]}!=`RTDF_ETHERTYPE ?
+                                   good_packet_count :
+                                   good_packet_count+9'd1;
            end
            //Read packet data. If CRC is enabled, go to
            //CRC discard state when packet completes.

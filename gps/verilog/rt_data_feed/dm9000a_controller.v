@@ -310,7 +310,7 @@ module dm9000a_controller(
               state <= `DM9000A_STATE_RX_0;
 
               //Store data to FIFO.
-              rx_fifo_wr_data <= rx_odd_length ?
+              rx_fifo_wr_data <= rx_length==16'd0 && rx_odd_length ?
                                  {8'h0,enet_data[7:0]} :
                                  enet_data;
               
@@ -365,6 +365,8 @@ module dm9000a_controller(
    ////////////////////
    // Command Control
    ////////////////////
+
+   //FIXME Add a watchdog if possible.
 
    //Command state variable.
    `PRESERVE reg [`DM9000A_CMD_STATE_RANGE] cmd_state;

@@ -19,17 +19,15 @@ module rt_data_feed(
     //Debug signals.
     output wire        link_status,
     output wire        have_data,
-    output wire [8:0]  rx_fifo_available,
     output wire [8:0]  words_available,
     output wire [8:0]  packet_count,
+    output wire [8:0]  good_packet_count,
     output wire [15:0] data_out,
-    //Crap
+    //Debug
     output wire [17:0] samp_buffer,
     output wire [2:0]  samp_count,
     input              halt,
-    input              halt_packet,
-    output wire [15:0] rxp_h,
-    output wire [15:0] rxp_l);
+    input              halt_packet);
 
    /////////////////////////
    // Ethernet Controller
@@ -39,7 +37,7 @@ module rt_data_feed(
    wire        rx_fifo_rd_req;
    wire [15:0] rx_fifo_rd_data;
    wire        rx_fifo_empty;
-   //wire [8:0]  rx_fifo_available;
+   wire [8:0]  rx_fifo_available;
    dm9000a_controller dm9000a(.clk(clk_50),
                               .reset(reset),
                               .enet_clk(enet_clk),
@@ -56,9 +54,7 @@ module rt_data_feed(
                               .rx_fifo_empty(rx_fifo_empty),
                               .rx_fifo_available(rx_fifo_available),
                               .halt(halt),
-                              .link_status(link_status),
-                              .rxp_h(rxp_h),
-                              .rxp_l(rxp_l));
+                              .link_status(link_status));
 
    ////////////////////
    // Packet Processor
@@ -77,7 +73,8 @@ module rt_data_feed(
                                    .read_next(packet_read),
                                    .data(packet_data),
                                    .words_available(words_available),
-                                   .packet_count(packet_count));
+                                   .packet_count(packet_count),
+                                   .good_packet_count(good_packet_count));
    
    assign have_data = !packet_empty;
    assign data_out = packet_data;

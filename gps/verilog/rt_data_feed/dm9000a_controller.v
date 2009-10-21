@@ -310,7 +310,7 @@ module dm9000a_controller(
               rx_fifo_wr_req <= 1'b0;
 
               enet_wr_n <= 1'b1;
-              enet_rd_n <= rx_halt || rx_length==16'd0;
+              enet_rd_n <= rx_halt && rx_length!=16'd0;
            end
            `DM9000A_STATE_RX_1: begin
               state <= `DM9000A_STATE_RX_0;

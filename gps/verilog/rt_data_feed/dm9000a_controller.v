@@ -75,9 +75,6 @@ module dm9000a_controller(
    //Received packet information.
    reg [15:0] rx_length;
    reg        rx_bad_packet;
-   reg        rx_odd_length;
-   reg [31:0] rx_crc;
-   reg [31:0] rx_crc_value;
 
    //Packet RX ix halted whenever a FIFO halt is
    //asserted and the packet is valid. If the packet
@@ -235,9 +232,12 @@ module dm9000a_controller(
            //  --Retrieve status (1 cycle).
            //  --Assert read (1 cycle).
            //  --Retrieve packet length (1 cycle).
-           //  Repeat length/2 times.
+           //  Repeat (length-4)/2 times.
            //  --Assert read (1 cycle).
            //  --Retrieve data words (1 cycle).
+           //  Repeat 2 times.
+           //  --Assert read (1 cycle).
+           //  --Discard CRC word (1 cycle).
            //Total time: 6+length cycles.
            
            //Spin after index register setup.
@@ -291,8 +291,6 @@ module dm9000a_controller(
               //      for runt (<64B) packets.
               rx_length <= enet_data-16'd4;
 
-              rx_odd_length <= enet_data[0];
-
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
@@ -312,7 +310,7 @@ module dm9000a_controller(
               rx_fifo_wr_req <= 1'b0;
 
               enet_wr_n <= 1'b1;
-              enet_rd_n <= rx_halt;
+              enet_rd_n <= rx_halt || rx_length==16'd0;
            end
            `DM9000A_STATE_RX_1: begin
               state <= `DM9000A_STATE_RX_0;
@@ -324,40 +322,24 @@ module dm9000a_controller(
               //FIXME If the DM9000A is appending a CRC, ignore it.
               rx_fifo_wr_req <= !rx_bad_packet;
 
-              //Store the last byte as the LSB of
-              //the CRC in case an odd-length packet
-              //is received.
-              rx_crc_value[7:0] <= enet_data[15:8];
-
-              //FIXME Implement CRC generation.
-
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Receive CRC and verify frame.
+           //Discard CRC (2 words).
            `DM9000A_STATE_RX_CRC_0: begin
               state <= `DM9000A_STATE_RX_CRC_1;
-
-              rx_crc_value[7:0] <= rx_odd_length ? rx_crc_value[7:0] : enet_data[7:0];
-              rx_crc_value[15:8] <= rx_odd_length ? enet_data[7:0] : enet_data[15:8];
-              rx_crc_value[23:16] <= rx_odd_length ? enet_data[15:8] : rx_crc_value[23:16];
               
               enet_wr_n <= 1'b1;
-              enet_rd_n <= rx_halt;
+              enet_rd_n <= 1'b1;
            end
            `DM9000A_STATE_RX_CRC_1: begin
               state <= `DM9000A_STATE_RX_CRC_2;
 
-              rx_crc_value[23:16] <= rx_odd_length ? rx_crc_value[23:16] : enet_data[7:0];
-              rx_crc_value[31:24] <= rx_odd_length ? enet_data[7:0] : enet_data[15:8];
-
               enet_wr_n <= 1'b1;
-              enet_rd_n <= 1'b1;
+              enet_rd_n <= 1'b0;
            end
            `DM9000A_STATE_RX_CRC_2: begin
               state <= `DM9000A_STATE_IDLE;
-
-              //FIXME Check CRC. What can we do if it's bad?
 
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;

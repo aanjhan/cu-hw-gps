@@ -1,6 +1,7 @@
 `include "dm9000a_controller.vh"
 
-`define DEBUG
+`undef DEBUG
+//`define DEBUG
 `include "../components/debug.vh"
 
 module dm9000a_controller(
@@ -15,7 +16,6 @@ module dm9000a_controller(
     output reg         enet_wr_n,
     output reg         enet_rd_n,
     inout wire [15:0]  enet_data,
-    output wire [15:0] enet_data_out,//FIXME
     //RX data FIFO interface.
     input              rx_fifo_rd_clk,
     input              rx_fifo_rd_req,
@@ -24,10 +24,7 @@ module dm9000a_controller(
     output wire [8:0]  rx_fifo_available,
     //Control and status.
     input              halt,
-    output reg         link_status,
-    //Crap
-    output reg [15:0]  rxp_h,
-    output reg [15:0]  rxp_l);
+    output reg         link_status);
 
    parameter MAC_ADDRESS = 48'h010203040506;
    parameter MULTICAST_ADDRESS = 64'h0;
@@ -75,6 +72,7 @@ module dm9000a_controller(
    //Received packet information.
    reg [15:0] rx_length;
    reg        rx_bad_packet;
+   reg        rx_odd_length;
 
    //Packet RX ix halted whenever a FIFO halt is
    //asserted and the packet is valid. If the packet
@@ -109,8 +107,6 @@ module dm9000a_controller(
                    enet_int_en;
       enet_int_km1 <= enet_int;
    end
-
-   //FIXME When reset pin is held interrupt goes off - why?
    
    //DM9000A control state machine - used to issue
    //a single command and send/receive subsequent data.
@@ -265,9 +261,6 @@ module dm9000a_controller(
            end
            //Read packet length. Block if the data FIFO
            //ever fills up, until space is available.
-           //FIXME Does the DM9000A not support packets less
-           //FIXME than 64B? ARP packets (42B) are coming up
-           //FIXME length of 64 (0x40).
            `DM9000A_STATE_RX_LEN_0: begin
               state <= rx_halt ?
                        `DM9000A_STATE_RX_LEN_0 :
@@ -291,20 +284,21 @@ module dm9000a_controller(
               //      for runt (<64B) packets.
               rx_length <= enet_data-16'd4;
 
+              rx_odd_length <= enet_data[0];
+
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
            //Receive frame data. Block if the data FIFO
            //ever fills up, until space is available.
-           //FIXME This is failing for odd-length packets.
            `DM9000A_STATE_RX_0: begin
-              state <= rx_length<16'd2 ? `DM9000A_STATE_RX_CRC_0 :
+              state <= rx_length==16'd0 ? `DM9000A_STATE_RX_CRC_0 :
                        rx_halt ? `DM9000A_STATE_RX_0 :
                        `DM9000A_STATE_RX_1;
 
               //Decrement packet length by one word.
               rx_length <= rx_halt ? rx_length :
-                           rx_length<16'd2 ? rx_length :
+                           rx_length==16'd1 ? 16'd0 :
                            rx_length-16'd2;
               
               rx_fifo_wr_req <= 1'b0;
@@ -316,12 +310,11 @@ module dm9000a_controller(
               state <= `DM9000A_STATE_RX_0;
 
               //Store data to FIFO.
-              rx_fifo_wr_data <= rx_length==16'd1 ?
+              rx_fifo_wr_data <= rx_odd_length ?
                                  {8'h0,enet_data[7:0]} :
                                  enet_data;
               
               //Flag a write to the FIFO if the packet is valid.
-              //FIXME If the DM9000A is appending a CRC, ignore it.
               rx_fifo_wr_req <= !rx_bad_packet;
 
               enet_wr_n <= 1'b1;
@@ -368,9 +361,6 @@ module dm9000a_controller(
    //or writing a data value to the DM9000A.
    assign enet_data = ~enet_wr_n ? data_out :
                       16'hzzzz;
-   //FIXME This is only needed for simulation.
-   assign enet_data_out = ~enet_wr_n ? data_out :
-                          16'hzzzz;
 
    ////////////////////
    // Command Control
@@ -406,8 +396,6 @@ module dm9000a_controller(
          cmd_state <= `DM9000A_CMD_STATE_SPIN;
          cmd_spin_count <= `DM9000A_PHY_SPIN_MAX_COUNT;
          cmd_post_spin_state <= `DM9000A_CMD_STATE_RESET;
-         //cmd_state <= `DM9000A_CMD_STATE_NSR;
-         //cmd_state <= `DM9000A_CMD_STATE_IDLE;//FIXME
          
          initializing <= 1'b1;
          link_status <= 1'b0;
@@ -419,9 +407,6 @@ module dm9000a_controller(
          issue_read <= 1'b0;
          issue_register <= 16'h0;
          issue_data <= 16'h0;
-
-         rxp_h <= 16'h0;
-         rxp_l <= 16'h0;
       end
       else if(issue_in_progress) begin
          cmd_state <= cmd_state;
@@ -501,7 +486,6 @@ module dm9000a_controller(
            end
            //Link status changed. Read network status,
            //then update system with new link status.
-           //FIXME Disable/enable interrupts?
            `DM9000A_CMD_STATE_LINK_CHANGE: begin
               cmd_state <= ~spin_next ?
                            `DM9000A_CMD_STATE_LINK_CHANGE :
@@ -615,6 +599,7 @@ module dm9000a_controller(
            //register write iterations.
            //Note: the MSB of the multicast address is forced to 1
            //      to enable reception of broadcast packets.
+           //FIXME Non-broadcast isn't functioning.
            `DM9000A_CMD_STATE_MULTICAST: begin
               cmd_state <= address_position<3'd7 ?
                             `DM9000A_CMD_STATE_MULTICAST :
@@ -642,6 +627,7 @@ module dm9000a_controller(
                                   3'd0;
            end
            //Enable RX with promiscuous mode.
+           //FIXME Non-promiscuous isn't functioning.
            `DM9000A_CMD_STATE_RXCR: begin
               cmd_state <= `DM9000A_CMD_STATE_IMR;
               issue_read <= 1'b0;
@@ -652,30 +638,10 @@ module dm9000a_controller(
            end
            //Enable read/write pointer auto-wrap, link change, and RX interrupts.
            `DM9000A_CMD_STATE_IMR: begin
-              cmd_state <= `DM9000A_CMD_STATE_READ_RXPH;//FIXME
+              cmd_state <= `DM9000A_CMD_STATE_IDLE;
               issue_read <= 1'b0;
               issue_register <= `DM9000A_REG_IMR;
               issue_data <= INTERRUPT_FLAGS;
-           end
-           //FIXME Remove these.
-           `DM9000A_CMD_STATE_READ_RXPH: begin
-              cmd_state <= `DM9000A_CMD_STATE_READ_RXPL;
-              issue_read <= 1'b1;
-              issue_register <= `DM9000A_REG_RX_PTR_H;
-           end
-           `DM9000A_CMD_STATE_READ_RXPL: begin
-              cmd_state <= `DM9000A_CMD_STATE_IDLE;
-              issue_read <= 1'b1;
-              issue_register <= `DM9000A_REG_RX_PTR_L;
-              spin_next <= 1'b1;
-
-              rxp_h <= data_out;
-           end
-           `DM9000A_CMD_STATE_GET_RXPL: begin
-              cmd_state <= `DM9000A_CMD_STATE_IDLE;
-              spin_next <= 1'b0;
-
-              rxp_l <= data_out;
            end
            default: begin
               cmd_state <= `DM9000A_CMD_STATE_IDLE;

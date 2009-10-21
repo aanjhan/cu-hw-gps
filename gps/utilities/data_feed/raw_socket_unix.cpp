@@ -1,13 +1,7 @@
 #include "raw_socket_unix.hpp"
 #include <pcap.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <ifaddrs.h>
-#include <net/if_dl.h>
-
-//#include <sys/ioctl.h>
-//#include <net/if.h>//FIXME If needed, must be before ifaddrs.h
+#include <sys/ioctl.h>
+#include <net/if.h>
 
 using namespace std;
 
@@ -43,45 +37,12 @@ void RawSocketUnix::ListDevices(std::vector<std::string> &deviceList) throw(IOEx
 
 void RawSocketUnix::GetMACAddress(const std::string &deviceName, uint8_t *address) throw(IOException)
 {
-    /*int sock;
-    struct ifconf ifc;
-    struct ifreq ifr[10];*/
+    int sock;
+    struct ifreq ifr;
     
     if(deviceName=="")throw IOException("no device specified");
 
-    struct ifaddrs *ifList;
-    if(getifaddrs(&ifList)<0)
-    {
-        //FIXME Look at errno (see socket(2)) and throw appropriate exception.
-        throw IOException("unable to retrieve interface information");
-    }
-    
-    struct ifaddrs *ifaddr;
-    for(ifaddr=ifList;ifaddr!=NULL;ifaddr=ifaddr->ifa_next)
-    {
-        //Is this the specified device?
-        if(deviceName!=ifaddr->ifa_name)continue;
-
-        //Is there an address in this record?
-        if(ifaddr->ifa_addr==NULL)continue;
-
-        //Is this a hardware address?
-        if(ifaddr->ifa_addr->sa_family==AF_LINK)
-        {
-            struct sockaddr_dl *dladdr=(struct sockaddr_dl *)ifaddr->ifa_addr;//FIXME Check this.
-            memcpy(address,LLADDR(dladdr),6);
-            break;
-        }
-    }
-    freeifaddrs(ifList);
-
-    //No address found.
-    if(ifaddr==NULL)
-    {
-        throw IOException("device not found");
-    }
-
-    /*//Create socket for ioctl.
+    //Create socket for ioctl.
     if((sock=socket(PF_INET,SOCK_DGRAM,0))<0)
     {
         //FIXME Look at errno (see socket(2)) and throw appropriate exception.
@@ -89,24 +50,18 @@ void RawSocketUnix::GetMACAddress(const std::string &deviceName, uint8_t *addres
     }
 
     //Setup interface config structure.
-    memset(&ifc,0,sizeof(ifc));
-    ifc.ifc_buf=ifr;
-    ifc.ifc_len=sizeof(ifr);
+    memset(&ifr,0,sizeof(ifr));
+    strncpy(ifr.ifr_ifrn.ifrn_name,deviceName.c_str(),IFNAMSIZ);
 
     //Get hardware address.
-    if(ioctl(sock,SIOCGIFCONF,&ifc)==-1)
+    if(ioctl(sock,SIOCGIFHWADDR,&ifr)==-1)
     {
         close(sock);
         throw IOException("unable to retrieve interface configuration");
     }
     else close(sock);
 
-    int numInterfaces=ifc.ifc_len/sizeof(struct ifreq);
-    for(int i=0;i<numInterfaces;i++)
-    {
-    }
-
-    memcpy(address,ifr.ifr_addr.sa_data,6);*/
+    memcpy(address,ifr.ifr_ifru.ifru_hwaddr.sa_data,6);
 }
 
 void RawSocketUnix::Open(const std::string &deviceName) throw(IOException,
@@ -146,8 +101,27 @@ void RawSocketUnix::GetMACAddress(uint8_t *address) throw(IOException)
 
 void RawSocketUnix::Write(const void *buffer, size_t length) throw(SocketStateException)
 {
+    uint8_t dest[6]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+
+    Write(dest,buffer,length);
+}
+
+void RawSocketUnix::Write(const uint8_t *dest, const void *buffer, size_t length) throw(SocketStateException)
+{
+    uint8_t writeBuffer[RAW_SOCKET_BUFFER_LEN];
+    
     if(!IsOpen())throw SocketStateException("socket not open");
 
+    //Limit data to MTU length.
+    if(length>RAW_SOCKET_MTU)length=RAW_SOCKET_MTU;
+    
+    memcpy(writeBuffer,dest,6);
+    memcpy(writeBuffer+6,macAddress,6);
+    writeBuffer[12]=0x12;
+    writeBuffer[13]=0x34;
+    memcpy(writeBuffer+14,buffer,length);
+    //FIXME Insert CRC if enabled?
+    
     //FIXME Error check for socket closing?
-    pcap_inject(device,buffer,length);
+    pcap_inject(device,writeBuffer,14+length);
 }

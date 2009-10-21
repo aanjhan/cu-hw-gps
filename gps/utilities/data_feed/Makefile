@@ -74,9 +74,9 @@ INCLUDES+= -Ic:/WinPcap/Include
 SOURCES+= raw_socket_win.cpp
 else
 LIBDIRS+=
-LIBS+=
+LIBS+= -lpcap
 INCLUDES+=
-SOURCES+= #raw_socket_unix.cpp
+SOURCES+= raw_socket_unix.cpp
 endif
 endif
 

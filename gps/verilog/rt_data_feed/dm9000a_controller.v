@@ -298,13 +298,13 @@ module dm9000a_controller(
            //ever fills up, until space is available.
            //FIXME This is failing for odd-length packets.
            `DM9000A_STATE_RX_0: begin
-              state <= rx_length==16'd0 ? `DM9000A_STATE_RX_CRC_0 :
+              state <= rx_length<16'd2 ? `DM9000A_STATE_RX_CRC_0 :
                        rx_halt ? `DM9000A_STATE_RX_0 :
                        `DM9000A_STATE_RX_1;
 
               //Decrement packet length by one word.
               rx_length <= rx_halt ? rx_length :
-                           rx_length==16'd1 ? 16'd0 :
+                           rx_length<16'd2 ? rx_length :
                            rx_length-16'd2;
               
               rx_fifo_wr_req <= 1'b0;
@@ -316,7 +316,9 @@ module dm9000a_controller(
               state <= `DM9000A_STATE_RX_0;
 
               //Store data to FIFO.
-              rx_fifo_wr_data <= enet_data;
+              rx_fifo_wr_data <= rx_length==16'd1 ?
+                                 {8'h0,enet_data[7:0]} :
+                                 enet_data;
               
               //Flag a write to the FIFO if the packet is valid.
               //FIXME If the DM9000A is appending a CRC, ignore it.

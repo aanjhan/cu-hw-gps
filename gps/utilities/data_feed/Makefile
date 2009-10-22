@@ -71,7 +71,7 @@ else
 ifeq ($(PLATFORM),win)
 LIBDIRS+= -Lc:/WinPcap/Lib -Lc:/boost/lib
 LIBS+= -lwpcap -liphlpapi -lboost_date_time-mgw34-mt -lboost_thread-mgw34-mt -lboost_program_options-mgw34-mt
-INCLUDES+= -Ic:/WinPcap/Include -Ic:/boost/include/boost-1_40
+INCLUDES+= -Ic:/WinPcap/Include -Ic:/boost/include/boost-1_40 -Ic:/stlsoft-1.9.87/include
 SOURCES+= raw_socket_win.cpp
 else
 LIBDIRS+=

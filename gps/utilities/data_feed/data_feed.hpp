@@ -18,17 +18,24 @@ public:
     void Start();
     void Stop();
 
-    void RunFeed();
-
 private:
     bool running;
     RawSocket &socket;
-    boost::thread thread;
 
     int burstSize;
     boost::posix_time::time_duration timeout;
+    
+    boost::thread feedThread;
+    boost::thread dispThread;
+    boost::thread::mutex updateMutex;
 
+    bool updatePending;
     long framesSent;
+    float instRate;
+    float avgRate;
+
+    void UpdateDisplay();
+    void RunFeed();
 };
 
 #endif

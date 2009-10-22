@@ -92,7 +92,7 @@ void RawSocketWin::Open(const std::string &deviceName) throw(IOException,
     GetMACAddress(deviceName,macAddress);
 
     //Create socket.
-    if((device=pcap_open_live(deviceName.c_str(),100,1,100,errbuf))==NULL)
+    if((device=pcap_open_live(deviceName.c_str(),1,1,100,errbuf))==NULL)
     {
         throw IOException(errbuf);
     }

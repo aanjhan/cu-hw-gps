@@ -48,6 +48,7 @@ module rtdf_packet_processor(
          fifo_wr_req <= 1'b0;
 
          packet_count <= 9'd0;
+         good_packet_count <= 9'd0;
       end
       if(rx_fifo_empty) begin
          packet_state <= packet_state;

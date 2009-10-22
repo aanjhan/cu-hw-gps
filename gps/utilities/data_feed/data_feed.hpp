@@ -27,6 +27,8 @@ private:
 
     int burstSize;
     boost::posix_time::time_duration timeout;
+
+    long framesSent;
 };
 
 #endif

@@ -1,8 +1,10 @@
 #include "data_feed.hpp"
-
 #include <iostream>
+#include <string.h>
+#include <platformstl/performance/performance_counter.hpp>
 
 using namespace std;
+typedef platformstl::performance_counter pc;
 
 DataFeed::DataFeed(const std::string &file,
                    RawSocket &socket,
@@ -11,9 +13,10 @@ DataFeed::DataFeed(const std::string &file,
                                     burstSize(burstSize)
 {
     running=false;
+    framesSent=0;
 
     long period=(1000*burstSize)/(bitRate/8);
-    cout<<"rate="<<bitRate<<" bps, size="<<burstSize<<" B/frame"<<endl
+    cout<<"rate="<<bitRate<<" bps, size="<<burstSize<<" B/frame"
         <<"period="<<period<<" ms/frame"<<endl;
     timeout=boost::posix_time::milliseconds(period);
 }
@@ -43,19 +46,53 @@ void DataFeed::RunFeed()
 {
     uint8_t dest[6]={1,2,3,4,5,6};
     char *data=new char[burstSize];
-    //char data[100];
     for(int i=0;i<burstSize;i++)data[i]=i;
-        
+
+    char stats[100];
+
+    pc elapsedTime;
+    pc::epoch_type feedStart;
+    unsigned long dt, totaldt;
+
+    feedStart=pc::get_epoch();
+    
     while(running)
     {
-        cout<<"Sending "<<burstSize<<" bytes..."<<endl;
+        elapsedTime.start();
+        //Send data.
+        if(socket.IsOpen())
+        {
+            //socket.Write(dest,data,length);
+            socket.Write(data,burstSize);
+        }
+
+        //Update statistics.
+        //FIXME Update display in a separate thread to maintain timing.
+        //FIXME Scale rate units based on specified bit rate (pick unit/scaling in constructor).
+        //FIXME Fix average rate calculation (moving window?).
+        framesSent++;
+        if(framesSent>1)
+        {
+            sprintf(stats,
+                    "packets sent=%15ld, %ld, %ld, inst rate=%3.5f Mbps, avg rate=%3.5f Mbps",
+                    framesSent,
+                    dt,
+                    totaldt,
+                    static_cast<float>(burstSize*8)/(static_cast<float>(dt)),
+                    static_cast<float>(burstSize*8)*framesSent/(static_cast<float>(totaldt)));
+            cout<<"\r"<<stats<<flush;
+        }
         
-        //sock.Write(dest,data,length);
-        socket.Write(data,burstSize);
-    
-        cout<<"Waiting..."<<endl;
         boost::this_thread::sleep(timeout);
+        
+        elapsedTime.stop();
+        pc::epoch_type end=pc::get_epoch();
+        
+        dt=elapsedTime.get_microseconds();
+        totaldt=pc::get_microseconds(feedStart,end);
     }
+
+    cout<<"\b\b  "<<endl;
 
     delete[] data;
 }

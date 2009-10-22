@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <boost/program_options.hpp>
+#include <signal.h>
 #include "raw_socket.hpp"
 #include "data_feed.hpp"
 
@@ -18,6 +19,13 @@ const char *AUTHOR_EMAIL = "ams348@cornell.edu";
 const long BIT_RATE = 50400000;//Bit rate (bps).
 const int BURST_SIZE = 60;//Individual burst size (B) - should be a multiple of 6B.
 
+bool running=true;
+
+void Interrupt(int signal)
+{
+    running=false;
+}
+
 void PrintHelp(const po::options_description &options)
 {
     cout<<PROJECT_NAME<<" version "<<VERSION<<"."<<endl
@@ -28,9 +36,6 @@ void PrintHelp(const po::options_description &options)
         <<"at a constant bit-rate, in fixed-size packets."<<endl
         <<endl
         <<options
-        /*<<"  -d             List available devices."<<endl
-        <<"  -h [--help]    Display this help message."<<endl
-        <<"  -v [--version] Show version information."<<endl*/
         <<endl
         <<"Note: "<<PROJECT_NAME<<" must be run as root on Unix-based systems."<<endl
         <<endl
@@ -135,19 +140,20 @@ int main(int argc, char *argv[])
     RawSocket sock;
     try
     {
+        //Register to catch Ctrl-C.
+        signal(SIGINT,Interrupt);
+        
         //Open device.
-        sock.Open(deviceName);
+        //sock.Open(deviceName);
 
+        //Run feed until Ctrl-C is caught.
         DataFeed feed("",sock,bitRate,burstSize);
         feed.Start();
-
-        char c='\0';
-        while(c!=3)cin.get(c);
-
+        while(running);
         feed.Stop();
 
         //Close device.
-        sock.Close();
+        //sock.Close();
     }
     catch(IOException e)
     {

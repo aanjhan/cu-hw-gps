@@ -39,7 +39,7 @@ CFLAGS?=-Wall
 ENV?=
 INCLUDES?=-I.
 LDFLAGS?=
-LIBS?=
+LIBS?= 
 LIBDIRS?=
 TARGET?=debug
 RM?=$(if $(PLATFORM)=='win',del /Q,rm -f)
@@ -50,7 +50,7 @@ CFLAGS+=-g
 endif
 
 # Source list.
-SOURCES=main.cpp
+SOURCES=main.cpp data_feed.cpp
 
 # Include subdirectory Makefiles.
 DIRS=
@@ -68,9 +68,9 @@ INCLUDES+=
 SOURCES+= raw_socket_osx.cpp
 else
 ifeq ($(PLATFORM),win)
-LIBDIRS+= -Lc:/WinPcap/Lib
-LIBS+= -lwpcap -liphlpapi
-INCLUDES+= -Ic:/WinPcap/Include
+LIBDIRS+= -Lc:/WinPcap/Lib -Lc:/boost/lib
+LIBS+= -lwpcap -liphlpapi -lboost_date_time-mgw34-mt -lboost_thread-mgw34-mt -lboost_program_options-mgw34-mt
+INCLUDES+= -Ic:/WinPcap/Include -Ic:/boost/include/boost-1_40
 SOURCES+= raw_socket_win.cpp
 else
 LIBDIRS+=

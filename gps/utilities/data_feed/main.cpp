@@ -1,11 +1,12 @@
 #include <iostream>
-#include <string.h>
+#include <string>
 #include <vector>
+#include <boost/program_options.hpp>
 #include "raw_socket.hpp"
-
-void PrintHelp();
+#include "data_feed.hpp"
 
 using namespace std;
+namespace po = boost::program_options;
 
 const char *PROJECT_NAME = "DataFeed";
 const char *PACKAGE_NAME = "data_feed";
@@ -14,75 +15,136 @@ const char *AUTHOR = "Adam Shapiro";
 const char *AUTHOR_EMAIL = "ams348@cornell.edu";
 
 //FIXME Read these from a config file?
-const int BIT_RATE = 50400000;//Bit rate (bps).
+const long BIT_RATE = 50400000;//Bit rate (bps).
 const int BURST_SIZE = 60;//Individual burst size (B) - should be a multiple of 6B.
+
+void PrintHelp(const po::options_description &options)
+{
+    cout<<PROJECT_NAME<<" version "<<VERSION<<"."<<endl
+        <<endl
+        <<"Usage: "<<PACKAGE_NAME<<" [OPTION]... DEV FILE"<<endl
+        <<endl
+        <<"Feed a data log file over the specified Ethernet device"<<endl
+        <<"at a constant bit-rate, in fixed-size packets."<<endl
+        <<endl
+        <<options
+        /*<<"  -d             List available devices."<<endl
+        <<"  -h [--help]    Display this help message."<<endl
+        <<"  -v [--version] Show version information."<<endl*/
+        <<endl
+        <<"Note: "<<PROJECT_NAME<<" must be run as root on Unix-based systems."<<endl
+        <<endl
+        <<"Written by "<<AUTHOR<<" <"<<AUTHOR_EMAIL<<">."<<endl;
+}
 
 int main(int argc, char *argv[])
 {
-    char *device_name=NULL;
+    long bitRate=BIT_RATE;
+    int burstSize=BURST_SIZE;
+    string deviceName;
+    string file;
+
+    po::options_description allowedOpt("Allowed options");
+    allowedOpt.add_options()
+        ("devices,d","List available devices.")
+        ("help,h","Display help message.")
+        ("rate,r",po::value<int>(),"Data bit-rate (bps).")
+        ("size,s",po::value<int>(),"Burst size (bytes).")
+        ("version,v","Show version information.");
+
+    po::options_description hiddenOpt("Hidden options");
+    hiddenOpt.add_options()
+        ("device",po::value<string>())
+        ("file",po::value<string>());
     
-    for(int i=1;i<argc;i++)
+    po::positional_options_description posOpt;
+    posOpt.add("device",1).add("file",-1);
+
+    po::options_description options;
+    options.add(allowedOpt).add(hiddenOpt);
+
+    po::variables_map vm;
+    po::store(po::command_line_parser(argc,argv).options(options).positional(posOpt).run(), vm);
+    po::notify(vm); 
+
+    if(vm.count("help"))
     {
-        if(strcmp(argv[i],"-h")==0 || strcmp(argv[i],"--help")==0)
+        PrintHelp(allowedOpt);
+        return 0;
+    }
+    else if(vm.count("devices"))
+    {
+        vector<string> deviceList;
+
+        try
         {
-            PrintHelp();
+            RawSocket::ListDevices(deviceList);
+                
+            int numDevices=0;
+            for(vector<string>::iterator itr=deviceList.begin();
+                itr!=deviceList.end();
+                itr++)
+            {
+                cout<<++numDevices<<". "<<(*itr)<<endl;
+            }
+
+            if(numDevices==0)
+            {
+                cout<<"No devices found."<<endl;
+            }
+                
             return 0;
         }
-        //List devices.
-        else if(strcmp(argv[i],"-d")==0)
+        catch(IOException &e)
         {
-            vector<string> deviceList;
-
-            try
-            {
-                RawSocket::ListDevices(deviceList);
-                
-                int numDevices=0;
-                for(vector<string>::iterator itr=deviceList.begin();
-                    itr!=deviceList.end();
-                    itr++)
-                {
-                    cout<<++numDevices<<". "<<(*itr)<<endl;
-                }
-
-                if(numDevices==0)
-                {
-                    cout<<"No devices found."<<endl;
-                }
-                
-                return 0;
-            }
-            catch(IOException &e)
-            {
-                cout<<e.what()<<endl;
-                return -1;
-            }
-        }
-        //Device specified.
-        else if(argv[i][0]!='-' && device_name==NULL)
-        {
-            device_name=argv[i];
+            cout<<e.what()<<endl;
+            return -1;
         }
     }
 
-    if(device_name==NULL)
+    if(vm.count("rate"))
     {
-        PrintHelp();
+        bitRate=(long)vm["rate"].as<int>();
+    }
+
+    if(vm.count("size"))
+    {
+        burstSize=vm["size"].as<int>();
+    }
+    
+    if(vm.count("device"))
+    {
+        deviceName=vm["device"].as<string>();
+    }
+    else
+    {
+        cout<<"Error: missing device name."<<endl;
         return -1;
     }
+    
+    /*if(vm.count("file"))
+    {
+        file=vm["file"].as<string>();
+    }
+    else
+    {
+        cout<<"Error: missing log file."<<endl;
+        return -1;
+    }*/
 
     RawSocket sock;
     try
     {
         //Open device.
-        sock.Open(device_name);
-        
-        uint8_t dest[6]={1,2,3,4,5,6};
-        char data[80];
-        int length=69;
-        for(int i=0;i<length;i++)data[i]=i;
-        //sock.Write(dest,data,length);
-        sock.Write(data,length);
+        sock.Open(deviceName);
+
+        DataFeed feed("",sock,bitRate,burstSize);
+        feed.Start();
+
+        char c='\0';
+        while(c!=3)cin.get(c);
+
+        feed.Stop();
 
         //Close device.
         sock.Close();
@@ -94,22 +156,4 @@ int main(int argc, char *argv[])
     }
 
     return 0;
-}
-
-void PrintHelp()
-{
-    cout<<PROJECT_NAME<<" version "<<VERSION<<"."<<endl
-        <<endl
-        <<"Usage: "<<PACKAGE_NAME<<" [OPTION]... DEV FILE"<<endl
-        <<endl
-        <<"Feed a data log file over the specified Ethernet device"<<endl
-        <<"at a constant bit-rate, in fixed-size packets."<<endl
-        <<endl
-        <<"  -d             List available devices."<<endl
-        <<"  -h [--help]    Display this help message."<<endl
-        <<"  -v [--version] Show version information."<<endl
-        <<endl
-        <<"Note: "<<PROJECT_NAME<<" must be run as root on Unix-based systems."<<endl
-        <<endl
-        <<"Written by "<<AUTHOR<<" <"<<AUTHOR_EMAIL<<">."<<endl;
 }

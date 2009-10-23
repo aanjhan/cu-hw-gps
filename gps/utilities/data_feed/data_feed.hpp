@@ -3,6 +3,7 @@
 
 #include <string>
 #include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
 #include <boost/date_time.hpp>
 #include "raw_socket.hpp"
 
@@ -19,6 +20,8 @@ public:
     void Stop();
 
 private:
+    const static int AVG_WINDOW_SIZE = 100;
+    
     bool running;
     RawSocket &socket;
 
@@ -27,12 +30,12 @@ private:
     
     boost::thread feedThread;
     boost::thread dispThread;
-    boost::thread::mutex updateMutex;
+    boost::mutex updateMutex;
 
     bool updatePending;
     long framesSent;
-    float instRate;
-    float avgRate;
+    unsigned long dt;
+    unsigned long dtHistory[AVG_WINDOW_SIZE];
 
     void UpdateDisplay();
     void RunFeed();

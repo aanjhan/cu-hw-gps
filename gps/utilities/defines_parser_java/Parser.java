@@ -140,7 +140,7 @@ public class Parser
 
     /**
     * Parse next factor.
-    * Factors are defined as: Base [ ^ Sum ]
+    * Factors are defined as: Base [ ^ Base | ^ (Expression) ]
     */
     public TreeNode ParseFactor() throws SyntaxError
     {
@@ -153,8 +153,19 @@ public class Parser
                 tokenizer.ReadNext();//Eat carrot
                 boolean minus=(tokenizer.NextType()==Tokenizer.TokenType.MINUS);//Minus sign?
                 if(minus)tokenizer.ReadNext();//Eat minus
+                
                 TreeNode exponent;
-                exponent=ParseSum();//Get number
+                if(tokenizer.NextType()==Tokenizer.TokenType.LPAREN)
+                {
+                    tokenizer.ReadNext();
+                    exponent=ParseExpression();
+                    if(tokenizer.NextType()!=Tokenizer.TokenType.RPAREN)
+                    {
+                        throw new SyntaxError("unexpected end of expression");
+                    }
+                    tokenizer.ReadNext();
+                }
+                else exponent=ParseBase();
                 
                 if(minus)
                 {

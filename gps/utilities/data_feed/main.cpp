@@ -3,10 +3,12 @@
 #include <vector>
 #include <boost/program_options.hpp>
 #include <signal.h>
+#include "string_helper.hpp"
 #include "raw_socket.hpp"
 #include "data_feed.hpp"
 
 using namespace std;
+using namespace StringHelper;
 namespace po = boost::program_options;
 
 const char *PROJECT_NAME = "DataFeed";
@@ -19,11 +21,11 @@ const char *AUTHOR_EMAIL = "ams348@cornell.edu";
 const long BIT_RATE = 50400000;//Bit rate (bps).
 const int BURST_SIZE = 60;//Individual burst size (B) - should be a multiple of 6B.
 
-bool running=true;
+DataFeed *feed=NULL;
 
 void Interrupt(int signal)
 {
-    running=false;
+    feed->Stop();
 }
 
 void PrintHelp(const po::options_description &options)
@@ -47,7 +49,7 @@ int main(int argc, char *argv[])
     long bitRate=BIT_RATE;
     int burstSize=BURST_SIZE;
     string deviceName;
-    string file;
+    string file="";
 
     po::options_description allowedOpt("Allowed options");
     allowedOpt.add_options()
@@ -120,6 +122,24 @@ int main(int argc, char *argv[])
     if(vm.count("device"))
     {
         deviceName=vm["device"].as<string>();
+        if(IsInt(deviceName))
+        {
+            vector<string> deviceList;
+            unsigned int i;
+            FromString(deviceName,i);
+
+            try
+            {
+                RawSocket::ListDevices(deviceList);
+                if(i>deviceList.size() || i<1)throw IOException("unknown device");
+                deviceName=deviceList[i-1];
+            }
+            catch(IOException &e)
+            {
+                cout<<e.what()<<endl;
+                return -1;
+            }
+        }
     }
     else
     {
@@ -127,7 +147,7 @@ int main(int argc, char *argv[])
         return -1;
     }
     
-    /*if(vm.count("file"))
+    if(vm.count("file"))
     {
         file=vm["file"].as<string>();
     }
@@ -135,25 +155,28 @@ int main(int argc, char *argv[])
     {
         cout<<"Error: missing log file."<<endl;
         return -1;
-    }*/
+    }
 
     RawSocket sock;
     try
     {
+        //Create data feed.
+        feed=new DataFeed(file,sock,bitRate,burstSize);
+        
         //Register to catch Ctrl-C.
         signal(SIGINT,Interrupt);
         
         //Open device.
-        //sock.Open(deviceName);
+        sock.Open(deviceName);
 
         //Run feed until Ctrl-C is caught.
-        DataFeed feed("",sock,bitRate,burstSize);
-        feed.Start();
-        while(running);
-        feed.Stop();
+        feed->Start();
+        while(feed->IsRunning());
+        feed->Stop();
+        delete feed;
 
         //Close device.
-        //sock.Close();
+        sock.Close();
     }
     catch(IOException e)
     {

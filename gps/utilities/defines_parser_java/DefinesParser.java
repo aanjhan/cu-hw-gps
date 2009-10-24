@@ -13,7 +13,7 @@ import OptionsParser.*;
 
 public class DefinesParser {
     public static final String packageName="DefParser";
-    public static final String version="0.11";
+    public static final String version="1.0";
     
     public static void main(String[] args) throws UnexpectedOption {
         OptionsParser o=new OptionsParser();

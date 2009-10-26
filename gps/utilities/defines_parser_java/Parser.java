@@ -184,7 +184,7 @@ public class Parser
     /**
     * Parse next base.
     * Bases are defined as:
-    * Number | Variable | HEX | Function ( Sum [; Sum]... )
+    * [(] Number | Variable | HEX | Function ( Sum [; Sum]... ) [)]
     */
     public TreeNode ParseBase() throws SyntaxError
     {
@@ -201,7 +201,7 @@ public class Parser
                     throw new SyntaxError("expected left paren '('");
                 }
                 tokenizer.ReadNext();//Eat paren
-                TreeNode expression=ParseSum();
+                TreeNode expression=ParseExpression();
                 if(tokenizer.NextType()!=Tokenizer.TokenType.RPAREN)
                 {
                     throw new SyntaxError("expected right paren ')'");

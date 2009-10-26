@@ -12,10 +12,10 @@ public class Expression
 {
     private static final Pattern hexValue=Pattern.compile("^([A-Fa-f0-9]+)$");
     private static final Pattern number=Pattern.compile("^(\\d+(\\.\\d+)?)(e(-?\\d+))?$");
-    private static final Pattern integer=Pattern.compile("^(\\d+'d)?(\\d+)(\\.0+)? *$");
+    private static final Pattern integer=Pattern.compile("^(\\d+'d)?(-?\\d+)(\\.0+)? *$");
     private static final Pattern binInteger=Pattern.compile("^(\\d+'b)?([0-1]+)? *$");
     private static final Pattern hexInteger=Pattern.compile("^(\\d+'h)?([A-Fa-f0-9]+)? *$");
-    private static final Pattern decimal=Pattern.compile("^(\\d+\\.\\d*[1-9])0+ *$");
+    private static final Pattern decimal=Pattern.compile("^(-?\\d+\\.\\d*[1-9])0+ *$");
     
     private String value;
     private boolean evaluated;

@@ -1,7 +1,9 @@
 `include "global.vh"
 `include "channel.vh"
 `include "channel__subchannel.vh"
+`include "channel__ca_upsampler.vh"
 `include "channel__acquisition_controller.vh"
+`include "channel__tracking_loops.vh"
 `include "top__channel.vh"
 
 `define DEBUG
@@ -16,15 +18,30 @@ module channel(
     input                            feed_reset,
     input                            feed_complete,
     input [`INPUT_RANGE]             data,
-    //Carrier control.
-    input [`DOPPLER_INC_RANGE]       doppler_early,
-    input [`DOPPLER_INC_RANGE]       doppler_prompt,
-    input [`DOPPLER_INC_RANGE]       doppler_late,
     //Code control.
     input [4:0]                      prn,
     input                            seek_en,
     input [`CS_RANGE]                seek_target,
     output wire [`CS_RANGE]          code_shift,
+    //Channel history.
+    output wire                      i2q2_valid,
+    output reg [`I2Q2_RANGE]         i2q2_early,
+    output reg [`I2Q2_RANGE]         i2q2_prompt,
+    output reg [`I2Q2_RANGE]         i2q2_late,
+    output reg [`IQ_RANGE]           iq_prompt_km1,
+    output reg [`ACC_RANGE_TRACK]    i_prompt_k,
+    output reg [`ACC_RANGE_TRACK]    q_prompt_k,
+    output reg [`ACC_RANGE_TRACK]    i_prompt_km1,
+    output reg [`ACC_RANGE_TRACK]    q_prompt_km1,
+    output reg [`W_DF_RANGE]         w_df_k,
+    output reg [`W_DF_DOT_RANGE]     w_df_dot_k,
+    //Tracking results.
+    input                            tracking_ready,
+    input [`IQ_RANGE]                iq_prompt_k,
+    input [`DOPPLER_INC_RANGE]       doppler_inc_kp1,
+    input [`W_DF_RANGE]              w_df_kp1,
+    input [`W_DF_DOT_RANGE]          w_df_dot_kp1,
+    input [`CA_PHASE_INC_RANGE]      ca_dphi_kp1,
     //Acquisition results.
     output wire                      acquisition_complete,
     output wire [`I2Q2_RANGE]        acq_peak_i2q2,
@@ -35,14 +52,38 @@ module channel(
     output wire [`ACC_RANGE]         accumulator_i,
     output wire [`ACC_RANGE]         accumulator_q,
     output wire                      accumulation_complete,
-    output wire                      i2q2_valid,
-    output reg [`I2Q2_RANGE]         i2q2_early,
-    output reg [`I2Q2_RANGE]         i2q2_prompt,
-    output reg [`I2Q2_RANGE]         i2q2_late,
     //Debug outputs.
     output wire                      ca_bit,
     output wire                      ca_clk,
     output wire [9:0]                ca_code_shift);
+
+   //Flag a mode switch.
+   wire mode_switch;
+   strobe #(.FLAG_CHANGE(1))
+     mode_switch_strobe(.clk(clk),
+                        .reset(global_reset),
+                        .in(mode),
+                        .out(mode_switch));
+   
+   wire start_acquisition;
+   wire start_tracking;
+   assign start_acquisition = mode_switch && mode==`MODE_ACQ;
+   assign start_tracking = mode_switch && mode==`MODE_TRACK;
+
+   //Generate a feed completion flag for tracking mode.
+   wire track_feed_complete;
+   reg [`SAMPLE_COUNT_RANGE] sample_count;
+   always @(posedge clk) begin
+      sample_count <= start_tracking ? `SAMPLE_COUNT_WIDTH'd0 :
+                      track_feed_complete ? `SAMPLE_COUNT_WIDTH'd0 :
+                      data_available ? sample_count+`SAMPLE_COUNT_WIDTH'd1 :
+                      sample_count;
+   end
+   assign track_feed_complete = sample_count==`SAMPLE_COUNT_MAX;
+   
+   //Current Doppler shift phase increment, initialized by
+   //acquisition and controlled by tracking loops.
+   reg [`DOPPLER_INC_RANGE] doppler_dphi;
 
    //Acquisition controller.
    `KEEP wire [`DOPPLER_INC_RANGE] acq_dopp_early;
@@ -74,19 +115,25 @@ module channel(
                                          .peak_code_shift(acq_peak_code_shift));
 
    //Upsample the C/A code to the incoming sampling rate.
+   reg [`CA_PHASE_INC_RANGE] ca_dphi_total;
    wire ca_bit_early, ca_bit_prompt, ca_bit_late;
    ca_upsampler upsampler(.clk(clk),
                           .reset(global_reset),
                           .enable(data_available),
+                          //Control interface.
                           .prn(prn),
+                          .phase_inc_offset(ca_dphi_total),
+                          //C/A code output interface.
                           .code_shift(code_shift),
                           .out_early(ca_bit_early),
                           .out_prompt(ca_bit_prompt),
                           .out_late(ca_bit_late),
+                          //Seek control.
                           .seek_en(mode==`MODE_ACQ ? acq_seek_en : seek_en),
                           .seek_target(mode==`MODE_ACQ ? acq_seek_target : seek_target),
                           .seeking(seeking),
                           .target_reached(target_reached),
+                          //Debug.
                           .ca_clk(ca_clk),
                           .ca_code_shift(ca_code_shift));
    assign ca_bit = ca_bit_prompt;
@@ -103,9 +150,9 @@ module channel(
                     .global_reset(global_reset),
                     .clear(clear_subchannels),
                     .data_available(data_available),
-                    .feed_complete(feed_complete),
+                    .feed_complete(mode==`MODE_ACQ ? feed_complete : track_feed_complete),
                     .data(data),
-                    .doppler(mode==`MODE_ACQ ? acq_dopp_early : doppler_early),
+                    .doppler(mode==`MODE_ACQ ? acq_dopp_early : doppler_dphi),
                     .ca_bit(mode==`MODE_ACQ ? ca_bit_prompt : ca_bit_early),
                     .accumulator_updating(early_updating),
                     .accumulator_i(acc_i_early),
@@ -119,18 +166,20 @@ module channel(
                      .global_reset(global_reset),
                      .clear(clear_subchannels),
                      .data_available(data_available),
-                     .feed_complete(feed_complete),
+                     .feed_complete(mode==`MODE_ACQ ? feed_complete : track_feed_complete),
                      .data(data),
-                     .doppler(mode==`MODE_ACQ ? acq_dopp_prompt : doppler_prompt),
+                     .doppler(mode==`MODE_ACQ ? acq_dopp_prompt : doppler_dphi),
                      .ca_bit(ca_bit_prompt),
                      .accumulator_updating(prompt_updating),
                      .accumulator_i(acc_i_prompt),
                      .accumulator_q(acc_q_prompt),
                      .accumulation_complete(prompt_complete));
+   assign accumulation_complete = prompt_complete;
+
+   //Debug signals.
    assign accumulator_updating = prompt_updating;
    assign accumulator_i = acc_i_prompt;
    assign accumulator_q = acc_q_prompt;
-   assign accumulation_complete = prompt_complete;
    
    //Late subchannel.
    wire late_updating, late_complete;
@@ -139,9 +188,9 @@ module channel(
                    .global_reset(global_reset),
                    .clear(clear_subchannels),
                    .data_available(data_available),
-                   .feed_complete(feed_complete),
+                   .feed_complete(mode==`MODE_ACQ ? feed_complete : track_feed_complete),
                    .data(data),
-                   .doppler(mode==`MODE_ACQ ? acq_dopp_late : doppler_late),
+                   .doppler(mode==`MODE_ACQ ? acq_dopp_late : doppler_dphi),
                    .ca_bit(mode==`MODE_ACQ ? ca_bit_prompt : ca_bit_late),
                    .accumulator_updating(late_updating),
                    .accumulator_i(acc_i_late),
@@ -300,6 +349,7 @@ module channel(
                           .in(i2q2_complete && i2q2_select_km2==2'h2),
                           .out(i2q2_valid));
 
+   //Store I2Q2 values.
    always @(posedge clk) begin
       i2q2_early <= global_reset ? `I2Q2_WIDTH'h0 :
                     i2q2_complete && i2q2_select_km2==2'h0 ? i2q2_out_km1 :
@@ -312,5 +362,42 @@ module channel(
       i2q2_late <= global_reset ? `I2Q2_WIDTH'h0 :
                    i2q2_complete && i2q2_select_km2==2'h2 ? i2q2_out_km1 :
                    i2q2_late;
+   end // always @ (posedge clk)
+
+   //Store history for tracking loops.
+   always @(posedge clk) begin
+      i_prompt_k <= accumulation_complete ? acc_i_prompt[`ACC_RANGE_TRACK] : i_prompt_k;
+      q_prompt_k <= accumulation_complete ? acc_q_prompt[`ACC_RANGE_TRACK] : q_prompt_k;
+
+      //I/Q history.
+      //Note: IQ history value is initialized to 1 to avoid
+      //      a divide-by-zero in the tracking loops.
+      i_prompt_km1 <= start_tracking ? `ACC_WIDTH_TRACK'd0 :
+                      tracking_ready ? i_prompt_k :
+                      i_prompt_km1;
+      q_prompt_km1 <= start_tracking ? `ACC_WIDTH_TRACK'd0 :
+                      tracking_ready ? q_prompt_k :
+                      q_prompt_km1;
+      iq_prompt_km1 <= start_tracking ? `IQ_WIDTH'd1 :
+                       tracking_ready ? iq_prompt_k :
+                       iq_prompt_km1;
+
+      //Carrier generator.
+      w_df_k <= start_tracking ? `W_DF_WIDTH'd0 : //FIXME Get value from acquisition.
+                tracking_ready ? w_df_kp1 :
+                w_df_k;
+      w_df_dot_k <= start_tracking ? `W_DF_DOT_WIDTH'd0 :
+                    tracking_ready ? w_df_dot_kp1 :
+                    w_df_dot_k;
+      doppler_dphi <= acquisition_complete ? acq_peak_doppler :
+                      tracking_ready ? doppler_inc_kp1 :
+                      doppler_dphi;
+
+      //Code generator.
+      //Note: The DLL outputs a change in phase increment,
+      //      while the carrier loops output a new increment.
+      ca_dphi_total <= start_tracking ? `CA_PHASE_INC_WIDTH'd0 :
+                       tracking_ready ? ca_dphi_total+ca_dphi_kp1 :
+                       ca_dphi_total;
    end
 endmodule

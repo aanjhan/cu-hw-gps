@@ -24,5 +24,7 @@ $(UNDEF_FILE): $(SOURCES)
 
 .phony: clean
 clean:
-	rm -f $(HEADERS)
-	rm -f $(UNDEF_FILE)
+	@for h in $(HEADERS) $(UNDEF_FILE); do \
+	echo Removing $$h...; \
+	rm -f $$h; \
+	done

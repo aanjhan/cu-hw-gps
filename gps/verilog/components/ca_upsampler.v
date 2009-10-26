@@ -1,23 +1,27 @@
 `include "global.vh"
 `include "ca_upsampler.vh"
+`include "channel__ca_upsampler.vh"
 
 module ca_upsampler(
-    input                  clk,
-    input                  reset,
-    input                  enable,
-    input [4:0]            prn,
-    output reg [`CS_RANGE] code_shift,
-    output                 out_early,
-    output                 out_prompt,
-    output                 out_late,
+    input                       clk,
+    input                       reset,
+    input                       enable,
+    //Control interface.
+    input [4:0]                 prn,
+    input [`CA_PHASE_INC_RANGE] phase_inc_offset,
+    //C/A code output interface.
+    output reg [`CS_RANGE]      code_shift,
+    output                      out_early,
+    output                      out_prompt,
+    output                      out_late,
     //Seek control.
-    input                  seek_en,
-    input [`CS_RANGE]      seek_target,
-    output wire            seeking,
-    output wire            target_reached,
+    input                       seek_en,
+    input [`CS_RANGE]           seek_target,
+    output wire                 seeking,
+    output wire                 target_reached,
     //Debug outputs.
-    output wire            ca_clk,
-    output wire [9:0]      ca_code_shift);
+    output wire                 ca_clk,
+    output wire [9:0]           ca_code_shift);
 
    //Determine the next code shift value
    //for seek termination.
@@ -73,7 +77,7 @@ module ca_upsampler(
      ca_clock_gen(.clk(clk),
                   .reset(reset | ca_clk_reset),
                   .enable(ca_clk_en_km1),
-                  .inc(`CA_RATE_INC),
+                  .inc(`CA_RATE_INC+phase_inc_offset),
                   .out(ca_clk_n));
 
    //Strobe C/A clock for 1 cycle.

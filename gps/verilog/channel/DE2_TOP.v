@@ -132,66 +132,125 @@ module DE2_TOP (
     inout  [35:0] GPIO_0,      // GPIO Connection 0
     inout  [35:0] GPIO_1       // GPIO Connection 1
 );
-
-   // Turn on all display
-   assign LCD_ON    = 1'b1;
-   assign LCD_BLON  = 1'b1;
    
-   // All inout port turn to tri-state
-   assign FL_DQ     = 8'hzz;
-   assign SRAM_DQ   = 16'hzzzz;
-   assign OTG_DATA  = 16'hzzzz;
-   assign LCD_DATA  = 8'hzz;
-   assign SD_DAT    = 1'bz;
-   assign ENET_DATA = 16'hzzzz;
-   assign GPIO_0    = 36'hzzzzzzzzz;
-   assign GPIO_1    = 36'hzzzzzzzzz;
+   //Set all GPIO to tri-state.
+   assign GPIO_0 = 36'hzzzzzzzzz;
+   assign GPIO_1 = 36'hzzzzzzzzz;
 
+   //Disable audio codec.
+   assign AUD_DACDAT = 1'b0;
+   assign AUD_XCK    = 1'b0;
+
+   //Disable DRAM.
+   assign DRAM_ADDR  = 12'h0;
+   assign DRAM_BA_0  = 1'b0;
+   assign DRAM_BA_1  = 1'b0;
+   assign DRAM_CAS_N = 1'b1;
+   assign DRAM_CKE   = 1'b0;
+   assign DRAM_CLK   = 1'b0;
+   assign DRAM_CS_N  = 1'b1;
+   assign DRAM_DQ    = 16'hzzzz;
+   assign DRAM_LDQM  = 1'b0;
+   assign DRAM_RAS_N = 1'b1;
+   assign DRAM_UDQM  = 1'b0;
+   assign DRAM_WE_N  = 1'b1;
+
+   //Disable flash.
+   assign FL_ADDR  = 22'h0;
+   assign FL_CE_N  = 1'b1;
+   assign FL_DQ    = 8'hzz;
+   assign FL_OE_N  = 1'b1;
+   assign FL_RST_N = 1'b1;
+   assign FL_WE_N  = 1'b1;
+
+   //Disable LCD.
+   assign LCD_BLON = 1'b0;
+   assign LCD_DATA = 8'hzz;
+   assign LCD_EN   = 1'b0;
+   assign LCD_ON   = 1'b0;
+   assign LCD_RS   = 1'b0;
+   assign LCD_RW   = 1'b0;
+
+   //Disable OTG.
+   assign OTG_ADDR    = 2'h0;
+   assign OTG_CS_N    = 1'b1;
+   assign OTG_DACK0_N = 1'b1;
+   assign OTG_DACK1_N = 1'b1;
+   assign OTG_FSPEED  = 1'b1;
+   assign OTG_DATA    = 16'hzzzz;
+   assign OTG_LSPEED  = 1'b1;
+   assign OTG_RD_N    = 1'b1;
+   assign OTG_RST_N   = 1'b1;
+   assign OTG_WR_N    = 1'b1;
+
+   //Disable SD card interface.
+   assign SD_DAT = 1'bz;
+   assign SD_CLK = 1'b0;
+
+   //Disable SRAM.
+   assign SRAM_ADDR = 18'h0;
+   assign SRAM_CE_N = 1'b1;
+   assign SRAM_DQ   = 16'hzzzz;
+   assign SRAM_LB_N = 1'b1;
+   assign SRAM_OE_N = 1'b1;
+   assign SRAM_UB_N = 1'b1;
+   assign SRAM_WE_N = 1'b1;
+
+   //Disable VGA.
+   assign VGA_CLK   = 1'b0;
+   assign VGA_BLANK = 1'b0;
+   assign VGA_SYNC  = 1'b0;
+   assign VGA_HS    = 1'b0;
+   assign VGA_VS    = 1'b0;
+   assign VGA_R     = 10'h0;
+   assign VGA_G     = 10'h0;
+   assign VGA_B     = 10'h0;
+
+   //Disable all other peripherals.
+   assign I2C_SCLK = 1'b0;
+   assign IRDA_TXD = 1'b0;
+   assign TD_RESET = 1'b0;
+   assign TDO = 1'b0;
+   assign UART_TXD = 1'b0;
+
+   //Generate 200MHz clock and 16.8MHz sample clock.
    wire   clk_200;
-   wire   clk_50, clk_50_m3ns;
+   wire   clk_50;
    wire   clk_16_8;
    wire   pll_locked;
-   assign clk_50 = CLOCK_50;
-   system_pll system_pll0(.inclk0(clk_50),
+   system_pll system_pll0(.inclk0(CLOCK_50),
                           .c0(clk_200),
                           .c1(clk_16_8),
-                          .c2(clk_50_m3ns),
+                          .c2(clk_50),
                           .locked(pll_locked));
 
+   wire po_reset;
+   power_on_reset por(.clk(clk_50),
+                      .reset(po_reset));
+
    wire   global_reset;
-   assign global_reset = ~pll_locked | ~KEY[0];
+   assign global_reset = ~pll_locked | po_reset | ~KEY[0];
 
-   wire [7:0] leds;
-   `KEEP wire [7:0] gps_data;
-   data_feed_nios data_feed(.clk_0(clk_50),
-                            .reset_n(1'b1),
-                            .rxd_to_the_data_uart(UART_RXD),
-                            .txd_from_the_data_uart(UART_TXD),
-                            .out_port_from_the_gps_data(gps_data),
-                            .out_port_from_the_leds(leds),
-                            .zs_addr_from_the_sdram(DRAM_ADDR),
-                            .zs_ba_from_the_sdram({DRAM_BA_1,DRAM_BA_0}),
-                            .zs_cas_n_from_the_sdram(DRAM_CAS_N),
-                            .zs_cke_from_the_sdram(DRAM_CKE),
-                            .zs_cs_n_from_the_sdram(DRAM_CS_N),
-                            .zs_dq_to_and_from_the_sdram(DRAM_DQ),
-                            .zs_dqm_from_the_sdram({DRAM_UDQM, DRAM_LDQM}),
-                            .zs_ras_n_from_the_sdram(DRAM_RAS_N),
-                            .zs_we_n_from_the_sdram(DRAM_WE_N),
-                            .in_port_to_the_start(~KEY[3]));
-   assign DRAM_CLK = clk_50_m3ns;
-
-   wire clk_sample, feed_complete, feed_reset;
-   wire [2:0] data;
-   assign clk_sample = gps_data[3];
-   assign feed_complete = gps_data[6];
-   assign feed_reset = gps_data[7];
-   assign data = gps_data[2:0];
-
-   reg [15:0] count;
-   always @(posedge clk_sample) begin
-      count <= feed_reset ? 'h0 : count+'h1;
-   end
+   //Real-time sample data feed.
+   wire link_status;
+   wire sample_valid;
+   wire [2:0] sample_data;
+   rt_data_feed data_feed(.clk_50(clk_50),
+                          .reset(global_reset),
+                          .enet_clk(ENET_CLK),
+                          .enet_int(ENET_INT),
+                          .enet_rst_n(ENET_RST_N),
+                          .enet_cs_n(ENET_CS_N),
+                          .enet_cmd(ENET_CMD),
+                          .enet_wr_n(ENET_WR_N),
+                          .enet_rd_n(ENET_RD_N),
+                          .enet_data(ENET_DATA),
+                          .clk_sample(clk_16_8),
+                          .sample_valid(sample_valid),
+                          .sample_data(sample_data),
+                          .link_status(link_status),
+                          .halt(1'b0),
+                          .halt_packet(1'b0));
    
    wire [`MODE_RANGE] mode;
    assign mode = SW[5];
@@ -216,8 +275,7 @@ module DE2_TOP (
            .mode(mode),
            .prn(SW[4:0]),
            .clk_sample(clk_sample),
-           .feed_complete(feed_complete),
-           .data(data),
+           .data(sample_data),
            .seek_en(~KEY[1]),
            .seek_target(15'h0),
            .doppler(17'h0),
@@ -258,12 +316,14 @@ module DE2_TOP (
    assign LEDR[14] = ~KEY[0];
    assign LEDR[13] = clk_sample;
    assign LEDR[12] = ca_clk;
-   assign LEDR[11:9] = gps_data[2:0];
+   assign LEDR[11:9] = sample_data;
    assign LEDR[8] = acquisition_complete;
-   assign LEDR[7:6] = 'h0;
+   assign LEDR[7:6] = 2'h0;
    assign LEDR[5] = disp_acq;
    assign LEDR[4:0] = SW[4:0];
-   assign LEDG[8] = global_reset;
+   
+   assign LEDG[8] = link_status;
+   assign LEDG[0] = sample_valid;
    assign LEDG[7:0] = ca_code_shift[7:0];
 
    wire [6:0] hex7_value;
@@ -274,14 +334,14 @@ module DE2_TOP (
                    hex7_value);
    assign HEX7 = disp_i2q2 ? hex7_value :
                  disp_acq ? 7'h7F :
-                 {~gps_data[2],6'h3F};
+                 {1'b1,6'h3F};
    
    hex_driver hex6(feed_reset ? 4'h8 :
                    disp_i2q2 ?
                    (KEY[2] ?
                     i2q2[(`I2Q2_WIDTH-5):(`I2Q2_WIDTH-5-3)] :
                     i2q2[27:24]) :
-                   {2'h0,gps_data[1:0]},
+                   {2'h0,2'd0},
                    ~disp_acq || disp_i2q2,
                    HEX6);
 
@@ -309,7 +369,7 @@ module DE2_TOP (
                     i2q2[(`I2Q2_WIDTH-17):(`I2Q2_WIDTH-17-3)] :
                     i2q2[15:12] ) :
                    disp_shift ? {1'b0,code_shift[14:12]} :
-                   disp_comp ? count[7:4] :
+                   disp_comp ? 4'd0 :
                    (KEY[2] ? accumulator_i[15:12] : accumulator_q[15:12]),
                    1'b1,
                    HEX3);
@@ -320,7 +380,7 @@ module DE2_TOP (
                     i2q2[(`I2Q2_WIDTH-21):(`I2Q2_WIDTH-21-3)] :
                     i2q2[11:8] ) :
                    disp_shift ? code_shift[11:8] :
-                   disp_comp ? count[3:0] :
+                   disp_comp ? 4'd0 :
                    (KEY[2] ? accumulator_i[11:8] : accumulator_q[11:8]),
                    1'b1,
                    HEX2);

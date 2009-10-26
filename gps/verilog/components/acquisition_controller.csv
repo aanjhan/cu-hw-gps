@@ -10,8 +10,8 @@ DOPPLER_INC_WIDTH,@
 DOPP_ACQ_INC,DOPPLER_INC_WIDTH'd(3*DOPP_BIN_INC_VAL),Acquisition Doppler increment (3 bins).
 DOPP_MAX_INC_VAL,round((2^CARRIER_ACC_WIDTH)*F_DOPP_MAX/F_S),Maximum Doppler phase increment value.
 DOPP_MAX_INC,DOPPLER_INC_WIDTH'dDOPP_MAX_INC_VAL,Maximum Doppler phase increment.
-DOPP_EARLY_START,-(DOPPLER_INC_WIDTH'd(DOPP_MAX_INC_VAL-2*DOPP_BIN_INC_VAL)),Early subchannel Doppler shift start value.
-DOPP_PROMPT_START,-(DOPPLER_INC_WIDTH'd(DOPP_MAX_INC_VAL-DOPP_BIN_INC_VAL)),Prompt subchannel Doppler shift start value.
-DOPP_LATE_START,-(DOPPLER_INC_WIDTH'd(DOPP_MAX_INC_VAL)),Late subchannel Doppler shift start value.
+DOPP_EARLY_START,-DOPPLER_INC_WIDTH'd(DOPP_MAX_INC_VAL-2*DOPP_BIN_INC_VAL),Early subchannel Doppler shift start value.
+DOPP_PROMPT_START,-DOPPLER_INC_WIDTH'd(DOPP_MAX_INC_VAL-DOPP_BIN_INC_VAL),Prompt subchannel Doppler shift start value.
+DOPP_LATE_START,-DOPPLER_INC_WIDTH'd(DOPP_MAX_INC_VAL),Late subchannel Doppler shift start value.
 
 I2Q2_WIDTH,@

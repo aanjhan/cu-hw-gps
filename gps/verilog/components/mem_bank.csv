@@ -13,7 +13,7 @@ OFFSET_RANGE,OFFSET_LENGTH-1:0,Bit range for possible word offsets.
 ADDRESS_LENGTH,max_width(NUM_WORDS-1),Number of bits needed for possible addresses.
 ADDRESS_RANGE,ADDRESS_LENGTH-1:0,Bit range for possible addresses.
 
-SAMPLES_PER_ACQ,(ACQ_ACC_LENGTH*0.001)*F_S,Number of samples used for each acquisition time.
+SAMPLES_PER_ACQ,(ACQ_ACC_LENGTH*T_CA_CODE)*F_S,Number of samples used for each acquisition time.
 SAMPLES_PER_ACQ_M1,SAMPLES_PER_ACQ-1,Number of samples used for each acquisition time - 1.
 SAMPLES_PER_ACQ_M3,SAMPLES_PER_ACQ-3,Number of samples used for each acquisition time - 3.
 SAMPLES_PER_ACQ_M4,SAMPLES_PER_ACQ-4,Number of samples used for each acquisition time - 4.

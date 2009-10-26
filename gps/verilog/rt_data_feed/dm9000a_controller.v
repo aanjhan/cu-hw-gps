@@ -21,7 +21,6 @@ module dm9000a_controller(
     input              rx_fifo_rd_req,
     output wire [15:0] rx_fifo_rd_data,
     output wire        rx_fifo_empty,
-    output wire [8:0]  rx_fifo_available,
     //Control and status.
     input              halt,
     output reg         link_status);
@@ -45,16 +44,16 @@ module dm9000a_controller(
    wire        rx_fifo_full;
    reg         rx_fifo_wr_req;
    reg [15:0]  rx_fifo_wr_data;
-   rx_data_fifo rx_fifo(.aclr(reset),
-                        .wrclk(clk_enet),
-                        .data(rx_fifo_wr_data),
-                        .wrreq(rx_fifo_wr_req),
-                        .wrfull(rx_fifo_full),
-                        .rdclk(rx_fifo_rd_clk),
-                        .rdreq(rx_fifo_rd_req),
-                        .q(rx_fifo_rd_data),
-                        .rdempty(rx_fifo_empty),
-                        .rdusedw(rx_fifo_available));
+   rx_data_fifo #(.DEPTH(`DM9000A_RX_FIFO_DEPTH))
+     rx_fifo(.aclr(reset),
+             .wrclk(clk_enet),
+             .data(rx_fifo_wr_data),
+             .wrreq(rx_fifo_wr_req),
+             .wrfull(rx_fifo_full),
+             .rdclk(rx_fifo_rd_clk),
+             .rdreq(rx_fifo_rd_req),
+             .q(rx_fifo_rd_data),
+             .rdempty(rx_fifo_empty));
 
    //A FIFO halt occurs when the FIFO is full
    //and cannot accept new data, or when halted

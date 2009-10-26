@@ -45,8 +45,9 @@ module rx_data_fifo (
 	wrreq,
 	q,
 	rdempty,
-	rdusedw,
 	wrfull);
+
+   parameter DEPTH = 16;
 
 	input	  aclr;
 	input	[15:0]  data;
@@ -56,7 +57,6 @@ module rx_data_fifo (
 	input	  wrreq;
 	output	[15:0]  q;
 	output	  rdempty;
-	output	[8:0]  rdusedw;
 	output	  wrfull;
 `ifndef ALTERA_RESERVED_QIS
 // synopsys translate_off
@@ -69,11 +69,9 @@ module rx_data_fifo (
 	wire  sub_wire0;
 	wire  sub_wire1;
 	wire [15:0] sub_wire2;
-	wire [8:0] sub_wire3;
 	wire  rdempty = sub_wire0;
 	wire  wrfull = sub_wire1;
 	wire [15:0] q = sub_wire2[15:0];
-	wire [8:0] rdusedw = sub_wire3[8:0];
 
 	dcfifo	dcfifo_component (
 				.wrclk (wrclk),
@@ -84,20 +82,20 @@ module rx_data_fifo (
 				.data (data),
 				.rdempty (sub_wire0),
 				.wrfull (sub_wire1),
-				.q (sub_wire2),
-				.rdusedw (sub_wire3)
+				.q (sub_wire2)
 				// synopsys translate_off
 				,
 				.rdfull (),
 				.wrempty (),
-				.wrusedw ()
+				.wrusedw (),
+				.rdusedw ()
 				// synopsys translate_on
 				);
 	defparam
 		dcfifo_component.add_usedw_msb_bit = "ON",
 		dcfifo_component.intended_device_family = "Cyclone II",
 		dcfifo_component.lpm_hint = "RAM_BLOCK_TYPE=M4K",
-		dcfifo_component.lpm_numwords = 256,
+		dcfifo_component.lpm_numwords = DEPTH,
 		dcfifo_component.lpm_showahead = "ON",
 		dcfifo_component.lpm_type = "dcfifo",
 		dcfifo_component.lpm_width = 16,

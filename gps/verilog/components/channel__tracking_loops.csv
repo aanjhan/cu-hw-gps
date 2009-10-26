@@ -1,0 +1,19 @@
+#include !"tracking_loops.csv"
+#include !"channel.csv"
+
+//From channel to tracking loops.
+I2Q2_WIDTH,@
+I2Q2_RANGE,@
+DOPPLER_INC_RANGE,@
+CA_PHASE_INC_WIDTH,@
+CA_PHASE_INC_RANGE,@
+
+//From tracking loops to channel.
+IQ_WIDTH,@
+IQ_RANGE,@
+ACC_WIDTH_TRACK,@
+ACC_RANGE_TRACK,@
+W_DF_WIDTH,@
+W_DF_RANGE,@
+W_DF_DOT_WIDTH,@
+W_DF_DOT_RANGE,@

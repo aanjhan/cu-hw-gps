@@ -15,7 +15,8 @@ module rt_data_feed(
     inout wire [15:0]  enet_data,
     //Sample interface.
     input              clk_sample,
-    output reg [2:0]   sample_data,      
+    output reg         sample_valid,
+    output reg [2:0]   sample_data,
     //Debug signals.
     output wire        link_status,
     output wire        have_data,
@@ -37,7 +38,6 @@ module rt_data_feed(
    wire        rx_fifo_rd_req;
    wire [15:0] rx_fifo_rd_data;
    wire        rx_fifo_empty;
-   wire [8:0]  rx_fifo_available;
    dm9000a_controller dm9000a(.clk(clk_50),
                               .reset(reset),
                               .enet_clk(enet_clk),
@@ -52,7 +52,6 @@ module rt_data_feed(
                               .rx_fifo_rd_req(rx_fifo_rd_req),
                               .rx_fifo_rd_data(rx_fifo_rd_data),
                               .rx_fifo_empty(rx_fifo_empty),
-                              .rx_fifo_available(rx_fifo_available),
                               .halt(halt),
                               .link_status(link_status));
 
@@ -92,6 +91,9 @@ module rt_data_feed(
    `PRESERVE reg [17:0] sample_buffer;
    `PRESERVE reg [1:0]  sample_extra;
    always @(posedge clk_sample) begin
+      //Flag when samples are valid.
+      sample_valid <= sample_count>3'd0;
+        
       //Words contain 5 whole 3b samples, and one extra
       //bit. Increment the sample count by 6 if there
       //are already 2 extra bits available, and by

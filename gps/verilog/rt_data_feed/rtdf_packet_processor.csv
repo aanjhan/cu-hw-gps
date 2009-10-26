@@ -1,3 +1,6 @@
+//Configuration.
+RTDF_FIFO_DEPTH,512,Packet data FIFO depth in 16b words.
+
 //Packet parameters.
 RTDF_MTU,1500,Ethernet MTU (B).
 RTDF_FRAME_SIZE,6+6+2+RTDF_MTU+4,Ethernet frame size (B).

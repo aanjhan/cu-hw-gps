@@ -11,8 +11,8 @@ INPUT_SIGN,INPUT_WIDTH-1,Input sign value.
 INPUT_MAG,INPUT_WIDTH-2:0,Input magniude value.
 
 //Accumulation lengths.
-ACQ_ACC_LENGTH,3,Acquisition accumulation length in ms.
-TRACK_ACC_LENGTH,1,Tracking accumulation length in ms.
+ACQ_ACC_LENGTH,3,Acquisition accumulation length in C/A code lengths.
+TRACK_ACC_LENGTH,1,Tracking accumulation length in C/A code lengths.
 
 //Code replication.
 F_CA,1.023e6,C/A code chipping rate.

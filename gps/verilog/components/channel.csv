@@ -1,4 +1,6 @@
+#include !"global.csv"
 #include !"subchannel.csv"
+#include !"ca_upsampler.csv"
 
 //Channel mode.
 MODE_WIDTH,1,Channel mode width.
@@ -14,3 +16,9 @@ ACC_MAG_RANGE,ACC_MAG_WIDTH-1:0,Accumulator magnitude range.
 I2Q2_MAX_VAL,ACC_MAX_VAL^2,Maximum I^2+Q^2 value.
 I2Q2_WIDTH,max_width(I2Q2_MAX_VAL),I^2+Q^2 width.
 I2Q2_RANGE,I2Q2_WIDTH-1:0,I^2+Q^2 range.
+
+//Tracking-mode sample counter.
+SAMPLE_COUNT_MAX_VAL,TRACK_ACC_LENGTH*T_CA_CODE*F_S,Number of samples in one tracking accumulation.
+SAMPLE_COUNT_WIDTH,max_width(SAMPLE_COUNT_MAX_VAL),Tracking-mode sample counter width.
+SAMPLE_COUNT_RANGE,range(SAMPLE_COUNT_WIDTH),Tracking-mode sample counter range.
+SAMPLE_COUNT_MAX,SAMPLE_COUNT_WIDTH'dSAMPLE_COUNT_MAX_VAL,Maximum tracking-mode sample counter value.

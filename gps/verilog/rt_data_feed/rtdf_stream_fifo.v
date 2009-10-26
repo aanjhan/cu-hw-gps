@@ -48,6 +48,8 @@ module rtdf_stream_fifo (
 	wrfull,
 	wrusedw);
 
+   parameter DEPTH = 16;
+
 	input	  aclr;
 	input	[15:0]  data;
 	input	  rdclk;
@@ -89,7 +91,7 @@ module rtdf_stream_fifo (
 	defparam
 		dcfifo_component.add_usedw_msb_bit = "ON",
 		dcfifo_component.intended_device_family = "Cyclone II",
-		dcfifo_component.lpm_numwords = 256,
+		dcfifo_component.lpm_numwords = DEPTH,
 		dcfifo_component.lpm_showahead = "ON",
 		dcfifo_component.lpm_type = "dcfifo",
 		dcfifo_component.lpm_width = 16,

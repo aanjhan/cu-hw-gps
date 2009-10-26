@@ -25,16 +25,17 @@ module rtdf_packet_processor(
    `KEEP wire        fifo_full;
    `PRESERVE reg         fifo_wr_req;
    `PRESERVE reg [15:0]  fifo_wr_data;
-   rtdf_stream_fifo stream_fifo(.aclr(reset),
-                                .wrclk(clk_rx),
-                                .wrreq(fifo_wr_req),
-                                .data(fifo_wr_data),
-                                .rdclk(clk_read),
-                                .rdreq(read_next),
-                                .q(data),
-                                .rdempty(empty),
-                                .wrfull(fifo_full),
-                                .wrusedw(words_available));
+   rtdf_stream_fifo #(.DEPTH(`RTDF_FIFO_DEPTH))
+     stream_fifo(.aclr(reset),
+                 .wrclk(clk_rx),
+                 .wrreq(fifo_wr_req),
+                 .data(fifo_wr_data),
+                 .rdclk(clk_read),
+                 .rdreq(read_next),
+                 .q(data),
+                 .rdempty(empty),
+                 .wrfull(fifo_full),
+                 .wrusedw(words_available));
 
    //Packet processing state machine.
    `PRESERVE reg [`RTDF_PKT_LENGTH_RANGE] packet_length;

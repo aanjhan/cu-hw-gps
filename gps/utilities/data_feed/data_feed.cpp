@@ -1,6 +1,9 @@
 #include "data_feed.hpp"
-#include <iostream>
 #include <string.h>
+#include <iostream>
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/date_time.hpp>
 #include <platformstl/performance/performance_counter.hpp>
 
 using namespace std;
@@ -29,18 +32,27 @@ DataFeed::DataFeed(const std::string &fileName,
     fileLength=file.tellg();
     file.seekg(0,ios::beg);
 
+    feedThread=NULL;
+    dispThread=NULL;
+    updateMutex=new boost::mutex();
+
     //Determine interrupt period for desired data rate.
     long period=static_cast<long>((1000000*static_cast<float>(burstSize))/(static_cast<float>(bitRate)/8)+0.5);
     cout<<"rate="<<bitRate<<" bps"
         <<", size="<<burstSize<<" B/frame"
         <<", period="<<period<<" us/frame"<<endl;
-    timeout=boost::posix_time::microseconds(period);
+    timeout=new boost::posix_time::microseconds(period);
 }
 
 DataFeed::~DataFeed()
 {
     Stop();
     if(file.is_open())file.close();
+
+    if(feedThread!=NULL)delete feedThread;
+    if(dispThread!=NULL)delete dispThread;
+    if(updateMutex!=NULL)delete updateMutex;
+    if(timeout!=NULL)delete timeout;
 }
 
 void DataFeed::Start()
@@ -48,8 +60,8 @@ void DataFeed::Start()
     if(running)return;
     
     running=true;
-    feedThread=boost::thread(&DataFeed::RunFeed, this);
-    dispThread=boost::thread(&DataFeed::UpdateDisplay, this);
+    feedThread=new boost::thread(&DataFeed::RunFeed, this);
+    dispThread=new boost::thread(&DataFeed::UpdateDisplay, this);
 }
 
 void DataFeed::Stop()
@@ -57,8 +69,13 @@ void DataFeed::Stop()
     if(!running)return;
 
     running=false;
-    dispThread.join();
-    feedThread.join();
+    dispThread->join();
+    feedThread->join();
+
+    delete dispThread;
+    dispThread=NULL;
+    delete feedThread;
+    feedThread=NULL;
 }
 
 void DataFeed::UpdateDisplay()
@@ -68,7 +85,7 @@ void DataFeed::UpdateDisplay()
 
     while(running)
     {
-        updateMutex.lock();
+        updateMutex->lock();
         //Calculate average dt.
         avgdt=0;
         for(int i=0;i<AVG_WINDOW_SIZE;i++)avgdt+=static_cast<float>(dtHistory[i]);
@@ -82,7 +99,7 @@ void DataFeed::UpdateDisplay()
                 static_cast<float>(burstSize*8)/(static_cast<float>(dt)),
                 static_cast<float>(burstSize*8)/avgdt);
         cout<<"\r"<<stats<<flush;
-        updateMutex.unlock();
+        updateMutex->unlock();
         
         boost::this_thread::sleep(boost::posix_time::milliseconds(100));
     }
@@ -143,12 +160,12 @@ void DataFeed::RunFeed()
         }
         frameCount++;
         
-        boost::this_thread::sleep(timeout);
+        boost::this_thread::sleep(*timeout);
         
         elapsedTime.stop();
 
         //Update statistics if possible.
-        if(updateMutex.try_lock())
+        if(updateMutex->try_lock())
         {
             framesSent=frameCount;
 
@@ -157,7 +174,7 @@ void DataFeed::RunFeed()
             if(histIndex==AVG_WINDOW_SIZE)histIndex=0;
             dt=currentdt;
             
-            updateMutex.unlock();
+            updateMutex->unlock();
         }
     }
 

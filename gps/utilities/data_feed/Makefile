@@ -62,7 +62,7 @@ endif
 #  Windows: #define WIN32
 #  OS X: #define __APPLE__
 ifeq ($(PLATFORM),mac)
-CFLAGS+= -D__unix__
+CFLAGS+= -D__unix__ #Force Unix declaration for STLSoft library.
 LIBDIRS+=
 LIBS+= -lpcap -lboost_date_time-xgcc40-mt -lboost_thread-xgcc40-mt -lboost_program_options-xgcc40-mt
 INCLUDES+= -I/usr/local/include/boost-1_36 -I/usr/local/include/stlsoft-1.9.87/include

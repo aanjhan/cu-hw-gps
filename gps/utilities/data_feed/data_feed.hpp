@@ -3,11 +3,22 @@
 
 #include <fstream>
 #include <string>
-#include <boost/thread.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/date_time.hpp>
 #include "exceptions.hpp"
 #include "raw_socket.hpp"
+
+//FIXME This doesn't work because of defines. Is there
+//FIXME a better way to do the generics?
+//class RawSocket;
+
+namespace boost
+{
+    namespace posix_time
+    {
+        class time_duration;
+    }
+    class thread;
+    class mutex;
+}
 
 class DataFeed
 {
@@ -31,15 +42,15 @@ private:
 
     long bitRate;
     int burstSize;
-    boost::posix_time::time_duration timeout;
+    boost::posix_time::time_duration *timeout;
 
     std::string fileName;
     std::ifstream file;
     int fileLength;
     
-    boost::thread feedThread;
-    boost::thread dispThread;
-    boost::mutex updateMutex;
+    boost::thread *feedThread;
+    boost::thread *dispThread;
+    boost::mutex *updateMutex;
 
     bool updatePending;
     long framesSent;

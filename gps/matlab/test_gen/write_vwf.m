@@ -1,7 +1,7 @@
 % SEQUENCE FOR MAKING .vwf FILES:
-% - Run test_gen(<any PRN #>,0)
+% - Run log_gen(<any PRN #>,<length>,<doppler>,0)
 % - Run twos_to_ones(<data>,3)
-% - Run write_vwf
+% - Run write_vwf(<data>,<Verilog subdirectory>,<filename>)
 
 function write_vwf(signal,directory,filename)
     filename=sprintf('../../verilog/%s/%s.vwf',directory,filename);

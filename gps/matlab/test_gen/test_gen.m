@@ -1,90 +1,54 @@
+%test_gen - Generate simulated SV signal.
+%
+%Inputs:
+%  PRN - SV PRN number.
+%  length - Signal length [C/A codes].
+%  doppler - Doppler shift [Hz].
+
 % SEQUENCE FOR MAKING .vwf FILES:
 % - Run test_gen(<any PRN #>,0)
 % - Run twos_to_ones(<data>,3)
 % - Run write_vwf
 
-function [signal,carrier,code,t]=test_gen(PRN,pack,filename,send)
+function [signal,carrier,code,t]=test_gen(PRN,length,doppler)
     constant_h;
     constant_rcx;
     
     %Signal length in C/A codes.
-    acc_length=3;
-    range=1:acc_length*FSAMP_MSEC;
-    %     range=1:4000;
-    t=0:1/FS:acc_length*T-1/FS;
+    range=1:length*FSAMP_MSEC;
+    t=0:1/FS:length*T-1/FS;
     t=t(range);
     
-    if(isnumeric(PRN))
+    %Generate SV signal with specified PRN and Doppler.
+%     if(isnumeric(PRN))
         caCode=cacodegn(PRN);
-        code=digitize_ca_prompt(caCode,acc_length);
+        code=digitize_ca_prompt(caCode,length);
         code=code*2-1;
         code=code(range);
 
-        doppler=200;
         f_carrier=FC+doppler;
         carrier=round(cos(2*pi*f_carrier*t)'*3);
 
         signal=code.*carrier;
-    else
-        code=0;
-        carrier=0;
-        signal=load_gps_data(PRN,0,1);
-        signal=signal(range);
-    end
+%     else
+%         code=0;
+%         carrier=0;
+%         signal=load_gps_data(PRN,0,1);
+%         signal=signal(range);
+%     end
     
-    packedSignal=gps_pack(signal);
-    ones_signal=twos_to_ones(signal,3);
-    
-    if(pack)
-        frame=[hex2dec('FE');
-            hex2dec('ED');
-            1;
-            floor(size(packedSignal,1)/2^8);
-            mod(size(packedSignal,1),2^8);
-            packedSignal];
-    else
-        frame=[hex2dec('FE');
-            hex2dec('ED');
-            2;
-            floor(size(ones_signal,1)/2^8);
-            mod(size(ones_signal,1),2^8);
-            ones_signal];
-    end
+    packed_signal=gps_pack(signal);
+%     ones_signal=twos_to_ones(signal,3);
 
-    if(nargin<3 || isempty(filename))
-        return;
-    elseif(~isnumeric(PRN))
-        filename=sprintf('_%s',filename);
-    end
+    filename=sprintf('prn%d_%dms_%dHz.dat',PRN,length*T*1000,doppler);
     
-    if(isnumeric(PRN))
-        filename=sprintf('prn%d%s',PRN,filename);
-    end
-    
-    file=fopen(sprintf('%s.dat',filename),'wb');
+    file=fopen(filename,'wb');
     if(file<0)
         disp(sprintf('Unable to open file %s.',filename));
         return;
     end
-    fwrite(file,frame);
+    fwrite(file,packed_signal);
     fclose(file);
     
-    write_vwf(ones_signal,'channel',filename);
-    
-    if(nargin>3 && send)
-        if(strcmp(computer,'PCWIN'))
-            bar=waitbar(0,sprintf('Transfer progress: %dB remaining.',size(frame,1)));
-            s=serial('COM4','BaudRate',115200);
-            fopen(s);
-            for i=1:size(frame,1)
-                fwrite(s,frame(i));
-                waitbar(i/size(frame,1),bar,sprintf('Transfer progress: %dB remaining.',size(frame,1)-i));
-            end
-            close(bar);
-            fclose(s);
-        else
-            [status results]=system(sprintf('./transfer /dev/tty.usbserial %s',filename));
-            disp(results);
-        end
-    end
+%     write_vwf(ones_signal,'channel',filename);
 end

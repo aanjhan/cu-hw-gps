@@ -28,7 +28,7 @@ set_global_assignment -name DEVICE EP2C35F672C6
 set_global_assignment -name TOP_LEVEL_ENTITY DE2_TOP
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 8.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "11:32:43  FEBRUARY 28, 2009"
-set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 8.0
 set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_location_assignment PIN_N25 -to SW[0]
@@ -460,7 +460,7 @@ set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS R
 set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
 set_global_assignment -name SIMULATION_MODE FUNCTIONAL
 set_global_assignment -name ENABLE_SIGNALTAP OFF
-set_global_assignment -name USE_SIGNALTAP_FILE rt_tap.stp
+set_global_assignment -name USE_SIGNALTAP_FILE processor_tap.stp
 set_global_assignment -name ADD_DEFAULT_PINS_TO_SIMULATION_OUTPUT_WAVEFORMS OFF
 set_global_assignment -name SETUP_HOLD_DETECTION OFF
 set_global_assignment -name SAVE_DISK_SPACE OFF
@@ -496,7 +496,6 @@ set_global_assignment -name VERILOG_FILE ../components/power_on_reset.v
 set_global_assignment -name VERILOG_FILE ../components/hex_driver.v
 set_global_assignment -name VERILOG_FILE DE2_TOP.v
 set_global_assignment -name VECTOR_WAVEFORM_FILE setup.vwf
-set_global_assignment -name SIGNALTAP_FILE tap.stp
 set_global_assignment -name VECTOR_WAVEFORM_FILE top_level.vwf
 set_global_assignment -name VECTOR_WAVEFORM_FILE processor.vwf
 set_global_assignment -name VECTOR_WAVEFORM_FILE feed.vwf

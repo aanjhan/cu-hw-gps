@@ -1,7 +1,7 @@
 `include "rtdf_packet_processor.vh"
 
-`undef DEBUG
-//`define DEBUG
+//`undef DEBUG
+`define DEBUG
 `include "../components/debug.vh"
 
 module rtdf_packet_processor(
@@ -26,7 +26,7 @@ module rtdf_packet_processor(
    `PRESERVE reg         fifo_wr_req;
    `PRESERVE reg [15:0]  fifo_wr_data;
    rtdf_stream_fifo #(.DEPTH(`RTDF_FIFO_DEPTH))
-     stream_fifo(.aclr(reset),
+     stream_fifo(.sclr(reset),
                  .wrclk(clk_rx),
                  .wrreq(fifo_wr_req),
                  .data(fifo_wr_data),
@@ -51,7 +51,7 @@ module rtdf_packet_processor(
          packet_count <= 9'd0;
          good_packet_count <= 9'd0;
       end
-      if(rx_fifo_empty) begin
+      else if(rx_fifo_empty) begin
          packet_state <= packet_state;
          packet_length <= packet_length;
          ignore_packet <= ignore_packet;

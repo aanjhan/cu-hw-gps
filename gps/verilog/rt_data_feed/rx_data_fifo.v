@@ -37,7 +37,7 @@
 `timescale 1 ps / 1 ps
 // synopsys translate_on
 module rx_data_fifo (
-	aclr,
+	sclr,
 	data,
 	rdclk,
 	rdreq,
@@ -49,7 +49,7 @@ module rx_data_fifo (
 
    parameter DEPTH = 16;
 
-	input	  aclr;
+	input	  sclr;
 	input	[15:0]  data;
 	input	  rdclk;
 	input	  rdreq;
@@ -76,7 +76,7 @@ module rx_data_fifo (
 	dcfifo	dcfifo_component (
 				.wrclk (wrclk),
 				.rdreq (rdreq),
-				.aclr (aclr),
+				.aclr (sclr),
 				.rdclk (rdclk),
 				.wrreq (wrreq),
 				.data (data),
@@ -104,7 +104,7 @@ module rx_data_fifo (
 		dcfifo_component.rdsync_delaypipe = 4,
 		dcfifo_component.underflow_checking = "ON",
 		dcfifo_component.use_eab = "ON",
-		dcfifo_component.write_aclr_synch = "OFF",
+		dcfifo_component.write_aclr_synch = "ON",
 		dcfifo_component.wrsync_delaypipe = 4;
 
 

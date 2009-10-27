@@ -90,7 +90,7 @@ module rt_data_feed(
 
    `PRESERVE reg [17:0] sample_buffer;
    `PRESERVE reg [1:0]  sample_extra;
-   always @(posedge clk_sample) begin
+   always @(posedge clk_sample or posedge reset) begin
       //Flag when samples are valid.
       sample_valid <= reset ? 1'b0 : sample_count>3'd0;
         

@@ -45,7 +45,7 @@ module dm9000a_controller(
    reg         rx_fifo_wr_req;
    reg [15:0]  rx_fifo_wr_data;
    rx_data_fifo #(.DEPTH(`DM9000A_RX_FIFO_DEPTH))
-     rx_fifo(.aclr(reset),
+     rx_fifo(.sclr(reset),
              .wrclk(clk_enet),
              .data(rx_fifo_wr_data),
              .wrreq(rx_fifo_wr_req),

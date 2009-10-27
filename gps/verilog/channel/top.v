@@ -40,6 +40,9 @@ module top(
     output wire [`ACC_RANGE]         accumulator_i,
     output wire [`ACC_RANGE]         accumulator_q,
     //Debug signals.
+    output wire                      data_available,
+    output wire                      track_feed_complete,
+    output wire [`SAMPLE_COUNT_RANGE] sample_count,
     output wire                      ca_bit,
     output wire                      ca_clk,
     output wire [9:0]                ca_code_shift);
@@ -67,7 +70,7 @@ module top(
                      .out(data_sync));
 
    //Data available strobe.
-   `KEEP wire data_available;
+   //`KEEP wire data_available;
 `ifndef HIGH_SPEED
    wire new_sample;
    strobe data_available_strobe(.clk(clk),

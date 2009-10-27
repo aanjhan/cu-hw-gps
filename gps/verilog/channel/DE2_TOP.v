@@ -196,8 +196,17 @@ module DE2_TOP (
    //Disable all other peripherals.
    assign I2C_SCLK = 1'b0;
    assign IRDA_TXD = 1'b0;
-   assign TD_RESET = 1'b0;
    assign TDO = 1'b0;
+
+   //Generate SDRAM clock.
+   wire clk_50;
+   wire clk_50_m3ns;
+   wire sdram_pll_locked;
+   sdram_pll sdram_pll0(.inclk0(CLOCK_27),
+                        .c0(clk_50),
+                        .c1(clk_50_m3ns),
+                        .locked(sdram_pll_locked));
+   assign TD_RESET = 1'b1;
 
    //Generate 200MHz clock and 16.8MHz sample clock.
    wire clk_200;
@@ -207,15 +216,6 @@ module DE2_TOP (
                           .c0(clk_200),
                           .c1(clk_16_8),
                           .locked(system_pll_locked));
-
-   //Generate SDRAM PLL.
-   wire clk_50;
-   wire clk_50_m3ns;
-   wire sdram_pll_locked;
-   sdram_pll sdram_pll0(.inclk0(CLOCK_50),
-                        .c0(clk_50),
-                        .c1(clk_50_m3ns),
-                        .locked(sdram_pll_locked));
 
    wire po_reset;
    power_on_reset por(.clk(clk_50),
@@ -227,10 +227,29 @@ module DE2_TOP (
                          po_reset |
                          ~KEY[0];
 
+   //Generate ~1ms sample clock.
+   reg clk_sample;
+   reg [21:0] sample_clk_count;
+   always @(posedge clk_16_8) begin
+      if(global_reset) begin
+         sample_clk_count <= 22'd0;
+         clk_sample <= 1'b0;
+      end
+      else begin
+         sample_clk_count <= sample_clk_count==22'd0 ?
+                             22'd16800 :
+                             sample_clk_count-22'd1;
+         clk_sample <= sample_clk_count==22'd0 ? ~clk_sample : clk_sample;
+      end
+   end
+
    //Real-time sample data feed.
    wire link_status;
    wire sample_valid;
    wire [2:0] sample_data;
+   wire [8:0] words_available;
+   wire [8:0] pkt_count;
+   wire [8:0] good_pkt_count;
    rt_data_feed data_feed(.clk_50(CLOCK_50),
                           .reset(global_reset),
                           .enet_clk(ENET_CLK),
@@ -241,16 +260,19 @@ module DE2_TOP (
                           .enet_wr_n(ENET_WR_N),
                           .enet_rd_n(ENET_RD_N),
                           .enet_data(ENET_DATA),
-                          .clk_sample(clk_16_8),
+                          .clk_sample(~KEY[3] | clk_sample/*clk_16_8*/),
                           .sample_valid(sample_valid),
                           .sample_data(sample_data),
                           .link_status(link_status),
-                          .halt(1'b0),
-                          .halt_packet(1'b0));
+                          .words_available(words_available),
+                          .packet_count(pkt_count),
+                          .good_packet_count(good_pkt_count),
+                          .halt(SW[1]),
+                          .halt_packet(SW[2]));
 
    //0=Acquisition, 1=Tracking.
    wire [`MODE_RANGE] mode;
-   assign mode = SW[5];
+   assign mode = SW[0];
 
    wire [14:0] code_shift;
    wire        i2q2_valid;
@@ -267,6 +289,9 @@ module DE2_TOP (
    wire [`ACC_RANGE] accumulator_q;
    wire [`DOPPLER_INC_RANGE] acq_peak_doppler;
    wire [`CS_RANGE]          acq_peak_code_shift;
+   wire                      data_available;
+   wire                      track_feed_complete;
+   wire [`SAMPLE_COUNT_RANGE] sample_count;
    wire        ca_bit;
    wire        ca_clk;
    wire [9:0]  ca_code_shift;
@@ -299,39 +324,52 @@ module DE2_TOP (
            //Other.
            .accumulator_i(accumulator_i),
            .accumulator_q(accumulator_q),
+           .data_available(data_available),
+           .track_feed_complete(track_feed_complete),
+           .sample_count(sample_count),
            .ca_bit(ca_bit),
            .ca_clk(ca_clk),
            .ca_code_shift(ca_code_shift));
 
-   receiver_back_end(.clk_0(clk_50),
-                     .reset_n(~global_reset),
-                     .out_port_from_the_heart_beat_led(LEDG[0]),
-                     .in_port_to_the_tracking_ready(tracking_ready),
-                     .in_port_to_the_i_prompt(i_prompt_k),
-                     .in_port_to_the_q_prompt(q_prompt_k),
-                     .in_port_to_the_w_df(w_df_k),
-                     .rxd_to_the_uart_0(UART_RXD),
-                     .txd_from_the_uart_0(UART_TXD),
-                     .zs_addr_from_the_sdram(DRAM_ADDR),
-                     .zs_ba_from_the_sdram({DRAM_BA_1,DRAM_BA_0}),
-                     .zs_cas_n_from_the_sdram(DRAM_CAS_N),
-                     .zs_cke_from_the_sdram(DRAM_CKE),
-                     .zs_cs_n_from_the_sdram(DRAM_CS_N),
-                     .zs_dq_to_and_from_the_sdram(DRAM_DQ),
-                     .zs_dqm_from_the_sdram({DRAM_UDQM, DRAM_LDQM}),
-                     .zs_ras_n_from_the_sdram(DRAM_RAS_N),
-                     .zs_we_n_from_the_sdram(DRAM_WE_N));
+   receiver_back_end be(.clk_0(clk_50),
+                        .reset_n(~global_reset),
+                        .out_port_from_the_heart_beat_led(LEDG[0]),
+                        .in_port_to_the_tracking_ready(tracking_ready),
+                        .in_port_to_the_i_prompt(i_prompt_k),
+                        .in_port_to_the_q_prompt(q_prompt_k),
+                        .in_port_to_the_w_df(w_df_k),
+                        .rxd_to_the_uart_0(UART_RXD),
+                        .txd_from_the_uart_0(UART_TXD),
+                        .zs_addr_from_the_sdram(DRAM_ADDR),
+                        .zs_ba_from_the_sdram({DRAM_BA_1,DRAM_BA_0}),
+                        .zs_cas_n_from_the_sdram(DRAM_CAS_N),
+                        .zs_cke_from_the_sdram(DRAM_CKE),
+                        .zs_cs_n_from_the_sdram(DRAM_CS_N),
+                        .zs_dq_to_and_from_the_sdram(DRAM_DQ),
+                        .zs_dqm_from_the_sdram({DRAM_UDQM, DRAM_LDQM}),
+                        .zs_ras_n_from_the_sdram(DRAM_RAS_N),
+                        .zs_we_n_from_the_sdram(DRAM_WE_N));
    assign DRAM_CLK = clk_50_m3ns;
 
-   wire disp_i_q;
+   wire disp_i_q, disp_words, disp_pkt, disp_pkt_good, disp_count;
    assign disp_i_q = SW[17];
+   assign disp_words = SW[16];
+   assign disp_count = SW[15];
+   assign disp_pkt = SW[14];
+   assign disp_pkt_good = SW[13];
 
    wire [`ACC_RANGE_TRACK] sel_i_q_value;
    assign sel_i_q_value = disp_i_q ? q_prompt_k : i_prompt_k;
 
-   assign LEDR=sel_i_q_value;
+   assign LEDR=disp_words ? {9'h0,words_available} :
+               disp_count ? {3'h0,sample_count} :
+               disp_pkt ? (disp_pkt_good ? {9'h0,good_pkt_count} : {9'h0,pkt_count}) :
+               sel_i_q_value[17:0];
    assign LEDG[8] = link_status;
-   assign LEDG[7:2] = 0;
+   assign LEDG[7] = tracking_ready;
+   assign LEDG[6] = track_feed_complete;
+   assign LEDG[5] = data_available;
+   assign LEDG[4:2] = sample_data;
    assign LEDG[1] = sample_valid;
 
    hex_driver hex7(4'd0,1'b0,HEX7);

@@ -51,6 +51,8 @@ module channel(
     output wire [`ACC_RANGE]         accumulator_q,
     output wire                      accumulation_complete,
     //Debug outputs.
+    output wire                      track_feed_complete,
+    output reg [`SAMPLE_COUNT_RANGE] sample_count,
     output wire                      ca_bit,
     output wire                      ca_clk,
     output wire [9:0]                ca_code_shift);
@@ -70,8 +72,6 @@ module channel(
    assign start_tracking = mode_switch && mode==`MODE_TRACK;
 
    //Generate a feed completion flag for tracking mode.
-   wire track_feed_complete;
-   reg [`SAMPLE_COUNT_RANGE] sample_count;
    always @(posedge clk) begin
       sample_count <= start_tracking ? `SAMPLE_COUNT_WIDTH'd0 :
                       track_feed_complete ? `SAMPLE_COUNT_WIDTH'd0 :

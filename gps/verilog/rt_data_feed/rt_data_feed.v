@@ -92,7 +92,7 @@ module rt_data_feed(
    `PRESERVE reg [1:0]  sample_extra;
    always @(posedge clk_sample) begin
       //Flag when samples are valid.
-      sample_valid <= sample_count>3'd0;
+      sample_valid <= reset ? 1'b0 : sample_count>3'd0;
         
       //Words contain 5 whole 3b samples, and one extra
       //bit. Increment the sample count by 6 if there
@@ -129,7 +129,7 @@ module rt_data_feed(
                         {packet_data,sample_buffer[1:0]});
 
       //Sample data is the lowest 3 bits in the buffer.
-      sample_data <= sample_buffer[2:0];
+      sample_data <= reset ? 3'd0 : sample_buffer[2:0];
    end // always @ (negedge clk_sample)
 
    //FIXME Remove these.

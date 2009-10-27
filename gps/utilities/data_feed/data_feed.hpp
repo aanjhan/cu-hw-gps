@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <string>
+#include <stdint.h>
 #include "exceptions.hpp"
 #include "raw_socket.hpp"
 
@@ -29,20 +30,24 @@ public:
              int burstSize) throw(IOException);
     ~DataFeed();
 
+    void SetLength(int length);
+
     void Start();
+    void StartAndWait();
     void Stop();
 
-    bool IsRunning() const { return running; }
+    bool IsRunning() const;
 
 private:
     const static int AVG_WINDOW_SIZE = 100;
     
     bool running;
-    bool finished;
     RawSocket &socket;
 
     long bitRate;
     int burstSize;
+    uint8_t numSegments;
+    uint16_t finalSegSize;
     boost::posix_time::time_duration *timeout;
 
     std::string fileName;
@@ -59,7 +64,9 @@ private:
     unsigned long dtHistory[AVG_WINDOW_SIZE];
 
     void UpdateDisplay();
-    void RunFeed();
+    
+    void DisplayThread();
+    void FeedThread();
 };
 
 #endif

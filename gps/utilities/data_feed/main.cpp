@@ -19,12 +19,13 @@ const char *AUTHOR_EMAIL = "ams348@cornell.edu";
 
 //FIXME Read these from a config file?
 const long BIT_RATE = 50400000;//Bit rate (bps).
-const int BURST_SIZE = 60;//Individual burst size (B) - should be a multiple of 6B.
+const int BURST_SIZE = 512;//Individual burst size (B) - should be a multiple of 6B.
 
 DataFeed *feed=NULL;
 
 void Interrupt(int signal)
 {
+    //Caught Ctrl-C, stop feed.
     feed->Stop();
 }
 
@@ -55,6 +56,7 @@ int main(int argc, char *argv[])
     allowedOpt.add_options()
         ("devices,d","List available devices.")
         ("help,h","Display help message.")
+        ("length,l",po::value<int>(),"Limit to specified length (bytes).")
         ("rate,r",po::value<int>(),"Data bit-rate (bps).")
         ("size,s",po::value<int>(),"Burst size (bytes).")
         ("version,v","Show version information.");
@@ -162,6 +164,11 @@ int main(int argc, char *argv[])
     {
         //Create data feed.
         feed=new DataFeed(file,sock,bitRate,burstSize);
+
+        if(vm.count("length"))
+        {
+            feed->SetLength(vm["length"].as<int>());
+        }
         
         //Register to catch Ctrl-C.
         signal(SIGINT,Interrupt);
@@ -169,9 +176,8 @@ int main(int argc, char *argv[])
         //Open device.
         sock.Open(deviceName);
 
-        //Run feed until Ctrl-C is caught.
-        feed->Start();
-        while(feed->IsRunning());
+        //Run feed completion.
+        feed->StartAndWait();
         delete feed;
 
         //Close device.

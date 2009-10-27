@@ -1,5 +1,6 @@
 #include "data_feed.hpp"
 #include <string.h>
+#include <math.h>
 #include <iostream>
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
@@ -16,7 +17,6 @@ DataFeed::DataFeed(const std::string &fileName,
                    long bitRate,
                    int burstSize) throw(IOException) :
     running(false),
-    finished(true),
     socket(socket),
     bitRate(bitRate),
     burstSize(burstSize),
@@ -45,6 +45,18 @@ DataFeed::DataFeed(const std::string &fileName,
         <<", size="<<burstSize<<" B/frame"
         <<", period="<<period<<" us/frame"<<endl;
     timeout=new boost::posix_time::microseconds(period);
+    
+    //Determine frame segmenting information.
+    numSegments=static_cast<uint8_t>(burstSize/RAW_SOCKET_MTU)+1;
+    finalSegSize=static_cast<uint16_t>(burstSize%RAW_SOCKET_MTU);
+    cout<<"# segments="<<static_cast<int>(numSegments)
+        <<", MTU="<<RAW_SOCKET_MTU<<" B"
+        <<", final segment size="<<finalSegSize<<" B"<<endl;
+
+    //Print file information.
+    cout<<"file="<<fileName
+        <<", size="<<fileLength<<" B"
+        <<" ("<<ceil(static_cast<float>(fileLength)/burstSize)<<" frames)"<<endl;
 }
 
 DataFeed::~DataFeed()
@@ -58,59 +70,74 @@ DataFeed::~DataFeed()
     SAFE_DELETE(timeout);
 }
 
+void DataFeed::SetLength(int length)
+{
+    fileLength=length;
+}
+
 void DataFeed::Start()
 {
-    if(running)return;
+    if(IsRunning())return;
+
+    Stop();
+    SAFE_DELETE(feedThread);
+    SAFE_DELETE(dispThread);
     
     running=true;
-    finished=false;
-    feedThread=new boost::thread(&DataFeed::RunFeed, this);
-    dispThread=new boost::thread(&DataFeed::UpdateDisplay, this);
+    feedThread=new boost::thread(&DataFeed::FeedThread, this);
+    dispThread=new boost::thread(&DataFeed::DisplayThread, this);
+}
+
+void DataFeed::StartAndWait()
+{
+    Start();
+    feedThread->join();
 }
 
 void DataFeed::Stop()
 {
-    if(!running)return;
-    
-    finished=true;
-    dispThread->join();
-    feedThread->join();
     running=false;
-    
-    SAFE_DELETE(feedThread);
-    SAFE_DELETE(dispThread);
+    if(dispThread!=NULL)dispThread->join();
+    if(feedThread!=NULL)feedThread->join();
+}
+
+bool DataFeed::IsRunning() const
+{
+    return running;
 }
 
 void DataFeed::UpdateDisplay()
 {
     char stats[100];
     float avgdt;
+    
+    updateMutex->lock();
+    //Calculate average dt.
+    avgdt=0;
+    for(int i=0;i<AVG_WINDOW_SIZE;i++)avgdt+=static_cast<float>(dtHistory[i]);
+    avgdt/=(framesSent<AVG_WINDOW_SIZE ? framesSent : AVG_WINDOW_SIZE);
 
-    while(!finished)
-    {
-        updateMutex->lock();
-        //Calculate average dt.
-        avgdt=0;
-        for(int i=0;i<AVG_WINDOW_SIZE;i++)avgdt+=static_cast<float>(dtHistory[i]);
-        avgdt/=AVG_WINDOW_SIZE;
-
-        //Print statistics.
-        //FIXME Scale rate units based on specified bit rate (pick unit/scaling in constructor).
-        sprintf(stats,
-                "bursts sent=%15ld, inst rate=%3.5f Mbps, avg rate=%3.5f Mbps",
-                framesSent,
-                static_cast<float>(burstSize*8)/(static_cast<float>(dt)),
-                static_cast<float>(burstSize*8)/avgdt);
-        cout<<"\r"<<stats<<flush;
-        updateMutex->unlock();
-        
-        boost::this_thread::sleep(boost::posix_time::milliseconds(100));
-    }
-
-    cout<<"\b\b  "<<endl;
+    //Print statistics.
+    //FIXME Scale rate units based on specified bit rate (pick unit/scaling in constructor).
+    sprintf(stats,
+            "bursts sent=%15ld, inst rate=%3.5f Mbps, avg rate=%3.5f Mbps",
+            framesSent,
+            static_cast<float>(burstSize*8)/(static_cast<float>(dt)),
+            static_cast<float>(burstSize*8)/avgdt);
+    cout<<"\r"<<stats<<flush;
+    updateMutex->unlock();
 }
 
-void DataFeed::RunFeed()
+void DataFeed::DisplayThread()
+{
+    while(running)
+    {
+        UpdateDisplay();
+        boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+    }
+}
+
+void DataFeed::FeedThread()
 {
     bool finished=false;
     int histIndex=0;
@@ -119,17 +146,9 @@ void DataFeed::RunFeed()
     int segLength;
     char data[RAW_SOCKET_MTU];
     
-    uint8_t dest[6]={1,2,3,4,5,6};
-
-    //Determine frame segmenting information.
-    uint8_t numSegments=(uint8_t)(burstSize/RAW_SOCKET_MTU)+1;
-    uint16_t finalSegSize=(uint16_t)(burstSize%RAW_SOCKET_MTU);
-
-    cout<<"# segments="<<(int)numSegments
-        <<", MTU="<<RAW_SOCKET_MTU<<" B"
-        <<", final segment size="<<finalSegSize<<" B"<<endl;
+    //uint8_t dest[6]={1,2,3,4,5,6};
     
-    while(!finished)
+    while(running && !finished)
     {
         elapsedTime.start();
         
@@ -179,12 +198,20 @@ void DataFeed::RunFeed()
         }
     }
 
-    //FIXME Interrupt shouldn't be necessary but thread seems to
-    //FIXME deadlock when finished goes true.
-    dispThread->interrupt();
-    dispThread->join();
-    cout<<endl;
-    cout<<"Sent "<<frameCount<<" frames."<<endl;
-    
+    //Kill display thread.
     running=false;
+    dispThread->join();
+
+    //Update statistics.
+    updateMutex->lock();
+    framesSent=frameCount;
+    dtHistory[histIndex]=elapsedTime.get_microseconds();
+    dt=elapsedTime.get_microseconds();
+    updateMutex->unlock();
+
+    //Update statistics display once.
+    UpdateDisplay();
+    cout<<endl;
+    
+    cout<<"Sent "<<frameCount<<" frames."<<endl;
 }

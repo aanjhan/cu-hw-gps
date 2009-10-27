@@ -31,7 +31,6 @@ function [signal,t,carrier,code]=log_gen(PRN,sig_length,doppler,save)
     end
     
     %Specify signal time range.
-    range=1:sig_length*FSAMP_MSEC;
     t=0:1/FS:sig_length*T-1/FS;
     
     %Generate PRN code.

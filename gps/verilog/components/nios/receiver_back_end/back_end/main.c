@@ -15,6 +15,7 @@ typedef struct
     alt_u32 w_df;
 } Tracking;
 
+int heartbeat_led;
 static alt_alarm heartbeat_alarm;
 
 volatile alt_u8 update_ready;
@@ -23,8 +24,8 @@ volatile Tracking tracking_params;
 alt_u32 Heartbeat(void *context)
 {
     //Toggle heartbeat LED.
-    IOWR_ALTERA_AVALON_PIO_DATA(HEART_BEAT_LED_BASE,
-                                ~IORD_ALTERA_AVALON_PIO_DATA(HEART_BEAT_LED_BASE));
+    heartbeat_led=~heartbeat_led;
+    IOWR_ALTERA_AVALON_PIO_DATA(HEART_BEAT_LED_BASE,heartbeat_led);
     return alt_ticks_per_second();
 }
 
@@ -46,6 +47,8 @@ int main(void)
     int uart_fd;
     
     update_ready=0;
+    
+    heartbeat_led=0;
 
     //Open UART for update TX.
     uart_fd=open("/dev/uart_0",O_RDWR,0);

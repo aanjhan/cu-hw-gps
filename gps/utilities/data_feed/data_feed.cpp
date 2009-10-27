@@ -6,6 +6,8 @@
 #include <boost/date_time.hpp>
 #include <platformstl/performance/performance_counter.hpp>
 
+#define SAFE_DELETE(x) if(x!=NULL)delete x; x=NULL;
+
 using namespace std;
 typedef platformstl::performance_counter pc;
 
@@ -14,6 +16,7 @@ DataFeed::DataFeed(const std::string &fileName,
                    long bitRate,
                    int burstSize) throw(IOException) :
     running(false),
+    finished(true),
     socket(socket),
     bitRate(bitRate),
     burstSize(burstSize),
@@ -49,10 +52,10 @@ DataFeed::~DataFeed()
     Stop();
     if(file.is_open())file.close();
 
-    if(feedThread!=NULL)delete feedThread;
-    if(dispThread!=NULL)delete dispThread;
-    if(updateMutex!=NULL)delete updateMutex;
-    if(timeout!=NULL)delete timeout;
+    SAFE_DELETE(feedThread);
+    SAFE_DELETE(dispThread);
+    SAFE_DELETE(updateMutex);
+    SAFE_DELETE(timeout);
 }
 
 void DataFeed::Start()
@@ -60,6 +63,7 @@ void DataFeed::Start()
     if(running)return;
     
     running=true;
+    finished=false;
     feedThread=new boost::thread(&DataFeed::RunFeed, this);
     dispThread=new boost::thread(&DataFeed::UpdateDisplay, this);
 }
@@ -67,15 +71,14 @@ void DataFeed::Start()
 void DataFeed::Stop()
 {
     if(!running)return;
-
-    running=false;
+    
+    finished=true;
     dispThread->join();
     feedThread->join();
-
-    delete dispThread;
-    dispThread=NULL;
-    delete feedThread;
-    feedThread=NULL;
+    running=false;
+    
+    SAFE_DELETE(feedThread);
+    SAFE_DELETE(dispThread);
 }
 
 void DataFeed::UpdateDisplay()
@@ -83,7 +86,7 @@ void DataFeed::UpdateDisplay()
     char stats[100];
     float avgdt;
 
-    while(running)
+    while(!finished)
     {
         updateMutex->lock();
         //Calculate average dt.
@@ -109,26 +112,24 @@ void DataFeed::UpdateDisplay()
 
 void DataFeed::RunFeed()
 {
+    bool finished=false;
     int histIndex=0;
     long frameCount=0;
     pc elapsedTime;
     int segLength;
+    char data[RAW_SOCKET_MTU];
     
     uint8_t dest[6]={1,2,3,4,5,6};
 
     //Determine frame segmenting information.
     uint8_t numSegments=(uint8_t)(burstSize/RAW_SOCKET_MTU)+1;
     uint16_t finalSegSize=(uint16_t)(burstSize%RAW_SOCKET_MTU);
-    uint16_t maxFrameSize=(uint16_t)(numSegments>1 ? RAW_SOCKET_MTU : burstSize);
 
     cout<<"# segments="<<(int)numSegments
         <<", MTU="<<RAW_SOCKET_MTU<<" B"
         <<", final segment size="<<finalSegSize<<" B"<<endl;
-
-    //Create data frame array.
-    char *data=new char[maxFrameSize];
     
-    while(running)
+    while(!finished)
     {
         elapsedTime.start();
         
@@ -138,7 +139,7 @@ void DataFeed::RunFeed()
             for(int i=0;i<numSegments;i++)
             {
                 //Determine segment length.
-                if(i<numSegments-1)segLength=finalSegSize;
+                if(i==numSegments-1)segLength=finalSegSize;
                 else segLength=RAW_SOCKET_MTU;
                 if(segLength>fileLength)segLength=fileLength;
                 
@@ -153,7 +154,7 @@ void DataFeed::RunFeed()
                 //Check for eof.
                 if(fileLength==0)
                 {
-                    running=false;
+                    finished=true;
                     break;
                 }
             }
@@ -178,5 +179,12 @@ void DataFeed::RunFeed()
         }
     }
 
-    delete[] data;
+    //FIXME Interrupt shouldn't be necessary but thread seems to
+    //FIXME deadlock when finished goes true.
+    dispThread->interrupt();
+    dispThread->join();
+    cout<<endl;
+    cout<<"Sent "<<frameCount<<" frames."<<endl;
+    
+    running=false;
 }

@@ -64,8 +64,8 @@ endif
 ifeq ($(PLATFORM),mac)
 CFLAGS+= -D__unix__ #Force Unix declaration for STLSoft library.
 LIBDIRS+=
-LIBS+= -lpcap -lboost_date_time-xgcc40-mt -lboost_thread-xgcc40-mt -lboost_program_options-xgcc40-mt
-INCLUDES+= -I/usr/local/include/boost-1_36 -I/usr/local/include/stlsoft-1.9.87/include
+LIBS+= -lpcap -lboost_date_time -lboost_thread -lboost_program_options
+INCLUDES+= -I/usr/local/include/boost -I/usr/local/include/stlsoft-1.9.87/include
 SOURCES+= raw_socket_osx.cpp
 else
 ifeq ($(PLATFORM),win)

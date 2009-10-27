@@ -38,6 +38,7 @@ private:
     const static int AVG_WINDOW_SIZE = 100;
     
     bool running;
+    bool finished;
     RawSocket &socket;
 
     long bitRate;

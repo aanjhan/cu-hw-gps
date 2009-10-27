@@ -172,7 +172,6 @@ int main(int argc, char *argv[])
         //Run feed until Ctrl-C is caught.
         feed->Start();
         while(feed->IsRunning());
-        feed->Stop();
         delete feed;
 
         //Close device.

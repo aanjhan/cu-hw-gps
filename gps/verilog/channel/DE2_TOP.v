@@ -1,6 +1,7 @@
 `include "../components/global.vh"
 `include "top__channel.vh"
 `include "../components/channel.vh"
+`include "../components/channel__tracking_loops.vh"
 
 `define DEBUG
 `include "../components/debug.vh"
@@ -14,7 +15,7 @@ module DE2_TOP (
     input  [3:0]  KEY,         // Pushbutton[3:0]
     // DPDT Switch
     input  [17:0] SW,          // Toggle Switch[17:0]
-    // 7-SEG Dispaly
+    // 7-SEG Display
     output [6:0]  HEX0,        // Seven Segment Digit 0
     output [6:0]  HEX1,        // Seven Segment Digit 1
     output [6:0]  HEX2,        // Seven Segment Digit 2
@@ -141,20 +142,6 @@ module DE2_TOP (
    assign AUD_DACDAT = 1'b0;
    assign AUD_XCK    = 1'b0;
 
-   //Disable DRAM.
-   assign DRAM_ADDR  = 12'h0;
-   assign DRAM_BA_0  = 1'b0;
-   assign DRAM_BA_1  = 1'b0;
-   assign DRAM_CAS_N = 1'b1;
-   assign DRAM_CKE   = 1'b0;
-   assign DRAM_CLK   = 1'b0;
-   assign DRAM_CS_N  = 1'b1;
-   assign DRAM_DQ    = 16'hzzzz;
-   assign DRAM_LDQM  = 1'b0;
-   assign DRAM_RAS_N = 1'b1;
-   assign DRAM_UDQM  = 1'b0;
-   assign DRAM_WE_N  = 1'b1;
-
    //Disable flash.
    assign FL_ADDR  = 22'h0;
    assign FL_CE_N  = 1'b1;
@@ -211,31 +198,40 @@ module DE2_TOP (
    assign IRDA_TXD = 1'b0;
    assign TD_RESET = 1'b0;
    assign TDO = 1'b0;
-   assign UART_TXD = 1'b0;
 
    //Generate 200MHz clock and 16.8MHz sample clock.
-   wire   clk_200;
-   wire   clk_50;
-   wire   clk_16_8;
-   wire   pll_locked;
+   wire clk_200;
+   wire clk_16_8;
+   wire system_pll_locked;
    system_pll system_pll0(.inclk0(CLOCK_50),
                           .c0(clk_200),
                           .c1(clk_16_8),
-                          .c2(clk_50),
-                          .locked(pll_locked));
+                          .locked(system_pll_locked));
+
+   //Generate SDRAM PLL.
+   wire clk_50;
+   wire clk_50_m3ns;
+   wire sdram_pll_locked;
+   sdram_pll sdram_pll0(.inclk0(CLOCK_50),
+                        .c0(clk_50),
+                        .c1(clk_50_m3ns),
+                        .locked(sdram_pll_locked));
 
    wire po_reset;
    power_on_reset por(.clk(clk_50),
                       .reset(po_reset));
 
    wire   global_reset;
-   assign global_reset = ~pll_locked | po_reset | ~KEY[0];
+   assign global_reset = ~system_pll_locked |
+                         ~sdram_pll_locked |
+                         po_reset |
+                         ~KEY[0];
 
    //Real-time sample data feed.
    wire link_status;
    wire sample_valid;
    wire [2:0] sample_data;
-   rt_data_feed data_feed(.clk_50(clk_50),
+   rt_data_feed data_feed(.clk_50(CLOCK_50),
                           .reset(global_reset),
                           .enet_clk(ENET_CLK),
                           .enet_int(ENET_INT),
@@ -251,157 +247,99 @@ module DE2_TOP (
                           .link_status(link_status),
                           .halt(1'b0),
                           .halt_packet(1'b0));
-   
+
+   //0=Acquisition, 1=Tracking.
    wire [`MODE_RANGE] mode;
    assign mode = SW[5];
 
    wire [14:0] code_shift;
-   wire [9:0]  ca_code_shift;
-   wire        ca_bit;
-   wire        ca_clk;
-   wire [`ACC_RANGE] accumulator_i;
-   wire [`ACC_RANGE] accumulator_q;
    wire        i2q2_valid;
    wire [`I2Q2_RANGE] i2q2_early;
    wire [`I2Q2_RANGE] i2q2_prompt;
    wire [`I2Q2_RANGE] i2q2_late;
+   wire               tracking_ready;
+   wire [`ACC_RANGE_TRACK] i_prompt_k;
+   wire [`ACC_RANGE_TRACK] q_prompt_k;
+   wire [`W_DF_RANGE] w_df_k;
    wire               acquisition_complete;
    wire [`I2Q2_RANGE] acq_peak_i2q2;
+   wire [`ACC_RANGE] accumulator_i;
+   wire [`ACC_RANGE] accumulator_q;
    wire [`DOPPLER_INC_RANGE] acq_peak_doppler;
    wire [`CS_RANGE]          acq_peak_code_shift;
+   wire        ca_bit;
+   wire        ca_clk;
+   wire [9:0]  ca_code_shift;
    top sub(.clk(clk_200),
            .global_reset(global_reset),
-           .feed_reset(feed_reset),
            .mode(mode),
-           .prn(SW[4:0]),
+           //Sample data.
            .clk_sample(clk_sample),
+           .sample_valid(sample_valid),
+           .feed_reset(1'b0),
+           .feed_complete(1'b0),
            .data(sample_data),
-           .seek_en(~KEY[1]),
-           .seek_target(15'h0),
-           .doppler(17'h0),
+           //Code control.
+           .prn(SW[4:0]),
            .code_shift(code_shift),
-           .ca_bit(ca_bit),
-           .ca_clk(ca_clk),
-           .ca_code_shift(ca_code_shift),
-           .accumulator_i(accumulator_i),
-           .accumulator_q(accumulator_q),
+           //Channel history.
            .i2q2_valid(i2q2_valid),
            .i2q2_early(i2q2_early),
            .i2q2_prompt(i2q2_prompt),
            .i2q2_late(i2q2_late),
+           .tracking_ready(tracking_ready),
+           .i_prompt_k(i_prompt_k),
+           .q_prompt_k(q_prompt_k),
+           .w_df_k(w_df_k),
+           //Acquisition results.
            .acquisition_complete(acquisition_complete),
            .acq_peak_i2q2(acq_peak_i2q2),
            .acq_peak_doppler(acq_peak_doppler),
-           .acq_peak_code_shift(acq_peak_code_shift));
+           .acq_peak_code_shift(acq_peak_code_shift),
+           //Other.
+           .accumulator_i(accumulator_i),
+           .accumulator_q(accumulator_q),
+           .ca_bit(ca_bit),
+           .ca_clk(ca_clk),
+           .ca_code_shift(ca_code_shift));
 
-   wire disp_acc, disp_comp, disp_shift, disp_i2q2;
-   wire disp_acq, disp_peak_dopp, disp_peak_cs;
-   assign disp_acq = SW[15];
-   assign disp_acc = !SW[17] && !SW[16];
-   assign disp_comp = SW[17] && !SW[16];
-   assign disp_shift = !SW[17] && SW[16];
-   assign disp_i2q2 = SW[17] && SW[16];
-   assign disp_peak_dopp = disp_acq && disp_acc;
-   assign disp_peak_cs = disp_acq && (disp_comp || disp_shift);
+   receiver_back_end(.clk_0(clk_50),
+                     .reset_n(~global_reset),
+                     .out_port_from_the_heart_beat_led(LEDG[0]),
+                     .in_port_to_the_tracking_ready(tracking_ready),
+                     .in_port_to_the_i_prompt(i_prompt_k),
+                     .in_port_to_the_q_prompt(q_prompt_k),
+                     .in_port_to_the_w_df(w_df_k),
+                     .rxd_to_the_uart_0(UART_RXD),
+                     .txd_from_the_uart_0(UART_TXD),
+                     .zs_addr_from_the_sdram(DRAM_ADDR),
+                     .zs_ba_from_the_sdram({DRAM_BA_1,DRAM_BA_0}),
+                     .zs_cas_n_from_the_sdram(DRAM_CAS_N),
+                     .zs_cke_from_the_sdram(DRAM_CKE),
+                     .zs_cs_n_from_the_sdram(DRAM_CS_N),
+                     .zs_dq_to_and_from_the_sdram(DRAM_DQ),
+                     .zs_dqm_from_the_sdram({DRAM_UDQM, DRAM_LDQM}),
+                     .zs_ras_n_from_the_sdram(DRAM_RAS_N),
+                     .zs_we_n_from_the_sdram(DRAM_WE_N));
+   assign DRAM_CLK = clk_50_m3ns;
 
-   wire [`I2Q2_RANGE] i2q2;
-   assign i2q2 = disp_acq ? acq_peak_i2q2 :
-                 SW[7:6]==2'h0 ? i2q2_early :
-                 SW[7:6]==2'h1 ? i2q2_prompt :
-                 i2q2_late;
-   
-   assign LEDR[17] = ~KEY[3];
-   assign LEDR[16] = ~KEY[2];
-   assign LEDR[15] = ~KEY[1];
-   assign LEDR[14] = ~KEY[0];
-   assign LEDR[13] = clk_sample;
-   assign LEDR[12] = ca_clk;
-   assign LEDR[11:9] = sample_data;
-   assign LEDR[8] = acquisition_complete;
-   assign LEDR[7:6] = 2'h0;
-   assign LEDR[5] = disp_acq;
-   assign LEDR[4:0] = SW[4:0];
-   
+   wire disp_i_q;
+   assign disp_i_q = SW[17];
+
+   wire [`ACC_RANGE_TRACK] sel_i_q_value;
+   assign sel_i_q_value = disp_i_q ? q_prompt_k : i_prompt_k;
+
+   assign LEDR=sel_i_q_value;
    assign LEDG[8] = link_status;
-   assign LEDG[0] = sample_valid;
-   assign LEDG[7:0] = ca_code_shift[7:0];
+   assign LEDG[7:2] = 0;
+   assign LEDG[1] = sample_valid;
 
-   wire [6:0] hex7_value;
-   hex_driver hex7(KEY[2] ?
-                   i2q2[(`I2Q2_WIDTH-1):(`I2Q2_WIDTH-1-3)] :
-                   i2q2[31:28],
-                   1'b1,
-                   hex7_value);
-   assign HEX7 = disp_i2q2 ? hex7_value :
-                 disp_acq ? 7'h7F :
-                 {1'b1,6'h3F};
-   
-   hex_driver hex6(feed_reset ? 4'h8 :
-                   disp_i2q2 ?
-                   (KEY[2] ?
-                    i2q2[(`I2Q2_WIDTH-5):(`I2Q2_WIDTH-5-3)] :
-                    i2q2[27:24]) :
-                   {2'h0,2'd0},
-                   ~disp_acq || disp_i2q2,
-                   HEX6);
-
-   wire [6:0] hex5_value;
-   hex_driver hex5(KEY[2] ?
-                   i2q2[(`I2Q2_WIDTH-9):(`I2Q2_WIDTH-9-3)] :
-                   i2q2[23:20],
-                   hex5_value);
-   assign HEX5 = disp_i2q2 ? hex5_value :
-                 disp_acq ? 7'h7F :
-                 {ca_bit,6'h3F};
-   
-   hex_driver hex4(disp_i2q2 ?
-                   (KEY[2] ?
-                    i2q2[(`I2Q2_WIDTH-13):(`I2Q2_WIDTH-13-3)] :
-                    i2q2[19:16]) :
-                   (KEY[2] ? accumulator_i[19:16] : accumulator_q[19:16]),
-                   ~disp_acq || disp_i2q2,
-                   HEX4);
-   
-   hex_driver hex3(disp_peak_dopp ? acq_peak_doppler[15:12] :
-                   disp_peak_cs ? {1'b0,acq_peak_code_shift[14:12]} :
-                   disp_i2q2 ?
-                   (KEY[2] ?
-                    i2q2[(`I2Q2_WIDTH-17):(`I2Q2_WIDTH-17-3)] :
-                    i2q2[15:12] ) :
-                   disp_shift ? {1'b0,code_shift[14:12]} :
-                   disp_comp ? 4'd0 :
-                   (KEY[2] ? accumulator_i[15:12] : accumulator_q[15:12]),
-                   1'b1,
-                   HEX3);
-   hex_driver hex2(disp_peak_dopp ? acq_peak_doppler[11:8] :
-                   disp_peak_cs ? acq_peak_code_shift[11:8] :
-                   disp_i2q2 ?
-                   (KEY[2] ?
-                    i2q2[(`I2Q2_WIDTH-21):(`I2Q2_WIDTH-21-3)] :
-                    i2q2[11:8] ) :
-                   disp_shift ? code_shift[11:8] :
-                   disp_comp ? 4'd0 :
-                   (KEY[2] ? accumulator_i[11:8] : accumulator_q[11:8]),
-                   1'b1,
-                   HEX2);
-   hex_driver hex1(disp_peak_dopp ? acq_peak_doppler[7:4] :
-                   disp_peak_cs ? acq_peak_code_shift[7:4] :
-                   disp_i2q2 ?
-                   (KEY[2] ?
-                    i2q2[(`I2Q2_WIDTH-25):(`I2Q2_WIDTH-25-3)] :
-                    i2q2[7:4] ) :
-                   disp_shift ? code_shift[7:4] :
-                   (KEY[2] ? accumulator_i[7:4] : accumulator_q[7:4]),
-                   1'b1,
-                   HEX1);
-   hex_driver hex0(disp_peak_dopp ? acq_peak_doppler[3:0] :
-                   disp_peak_cs ? acq_peak_code_shift[3:0] :
-                   disp_i2q2 ?
-                   (KEY[2] ?
-                    i2q2[(`I2Q2_WIDTH-29):(`I2Q2_WIDTH-29-3)] :
-                    i2q2[3:0] ) :
-                   disp_shift ? code_shift[3:0] :
-                   (KEY[2] ? accumulator_i[3:0] : accumulator_q[3:0]),
-                   1'b1,
-                   HEX0);
+   hex_driver hex7(4'd0,1'b0,HEX7);
+   hex_driver hex6(4'd0,1'b0,HEX6);
+   hex_driver hex5(4'd0,1'b0,HEX5);
+   hex_driver hex4({2'b0,sel_i_q_value[17:16]},1'b1,HEX4);
+   hex_driver hex3(sel_i_q_value[15:12],1'b1,HEX3);
+   hex_driver hex2(sel_i_q_value[11:8],1'b1,HEX2);
+   hex_driver hex1(sel_i_q_value[7:4],1'b1,HEX1);
+   hex_driver hex0(sel_i_q_value[3:0],1'b1,HEX0);
 endmodule

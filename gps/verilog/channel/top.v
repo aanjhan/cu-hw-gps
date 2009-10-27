@@ -10,41 +10,39 @@
 `include "../components/subchannel.vh"
 
 module top(
-    input                      clk,
-    input                      global_reset,
-    input [`MODE_RANGE]        mode,
+    input                            clk,
+    input                            global_reset,
+    input [`MODE_RANGE]              mode,
     //Sample data.
-    input                      clk_sample,
-    input                      feed_reset,
-    input                      feed_complete,
-    input [`INPUT_RANGE]       data,
-    //Carrier control.
-    input [`DOPPLER_INC_RANGE] doppler,//FIXME range?
+    input                            clk_sample,
+    input                            sample_valid,
+    input                            feed_reset,
+    input                            feed_complete,
+    input [`INPUT_RANGE]             data,
     //Code control.
-    input [4:0]                prn,
-    input                      seek_en,
-    input [`CS_RANGE]          seek_target,
-    output wire [`CS_RANGE]    code_shift,
+    input [4:0]                      prn,
+    output wire [`CS_RANGE]          code_shift,
     //Channel history.
-    output wire                i2q2_valid,
-    output wire [`I2Q2_RANGE]  i2q2_early,
-    output wire [`I2Q2_RANGE]  i2q2_prompt,
-    output wire [`I2Q2_RANGE]  i2q2_late,
-    output wire [`ACC_RANGE_TRACK] i_prompt_k,
-    output wire [`ACC_RANGE_TRACK] q_prompt_k,
-    output wire [`W_DF_RANGE]      w_df_k,
+    output wire                      i2q2_valid,
+    output wire [`I2Q2_RANGE]        i2q2_early,
+    output wire [`I2Q2_RANGE]        i2q2_prompt,
+    output wire [`I2Q2_RANGE]        i2q2_late,
+    output wire                      tracking_ready,
+    output wire [`ACC_RANGE_TRACK]   i_prompt_k,
+    output wire [`ACC_RANGE_TRACK]   q_prompt_k,
+    output wire [`W_DF_RANGE]        w_df_k,
     //Acquisition results.
     output wire                      acquisition_complete,
     output wire [`I2Q2_RANGE]        acq_peak_i2q2,
     output wire [`DOPPLER_INC_RANGE] acq_peak_doppler,
     output wire [`CS_RANGE]          acq_peak_code_shift,
     //Accumulation debug.
-    output wire [`ACC_RANGE]   accumulator_i,
-    output wire [`ACC_RANGE]   accumulator_q,
+    output wire [`ACC_RANGE]         accumulator_i,
+    output wire [`ACC_RANGE]         accumulator_q,
     //Debug signals.
-    output wire                ca_bit,
-    output wire                ca_clk,
-    output wire [9:0]          ca_code_shift);
+    output wire                      ca_bit,
+    output wire                      ca_clk,
+    output wire [9:0]                ca_code_shift);
 
    //Clock domain crossing.
    `KEEP wire clk_sample_sync;
@@ -71,10 +69,12 @@ module top(
    //Data available strobe.
    `KEEP wire data_available;
 `ifndef HIGH_SPEED
+   wire new_sample;
    strobe data_available_strobe(.clk(clk),
                                 .reset(global_reset),
                                 .in(clk_sample_sync),
-                                .out(data_available));
+                                .out(new_sample));
+   assign data_available = new_sample && sample_valid;
 `else
    reg data_done;
    always @(posedge clk) begin
@@ -90,16 +90,15 @@ module top(
    ///////////////
    
    //Channel history.
-   wire [`IQ_RANGE] iq_prompt_km1;
-   wire [`ACC_RANGE_TRACK] i_prompt_km1;
-   wire [`ACC_RANGE_TRACK] q_prompt_km1;
-   wire [`W_DF_DOT_RANGE]  w_df_dot_k;
+   wire [`IQ_RANGE]           iq_prompt_km1;
+   wire [`ACC_RANGE_TRACK]    i_prompt_km1;
+   wire [`ACC_RANGE_TRACK]    q_prompt_km1;
+   wire [`W_DF_DOT_RANGE]     w_df_dot_k;
    //Tracking results.
-   wire                    tracking_ready;
-   wire [`IQ_RANGE]        iq_prompt_k;
-   wire [`DOPPLER_INC_RANGE] doppler_inc_kp1;
-   wire [`W_DF_RANGE]        w_df_kp1;
-   wire [`W_DF_DOT_RANGE]    w_df_dot_kp1;
+   wire [`IQ_RANGE]           iq_prompt_k;
+   wire [`DOPPLER_INC_RANGE]  doppler_inc_kp1;
+   wire [`W_DF_RANGE]         w_df_kp1;
+   wire [`W_DF_DOT_RANGE]     w_df_dot_kp1;
    wire [`CA_PHASE_INC_RANGE] ca_dphi_kp1;
    //Misc.
    wire accumulator_updating;
@@ -113,8 +112,6 @@ module top(
                      .data(data_sync),
                      //Code control.
                      .prn(prn),
-                     .seek_en(seek_en),
-                     .seek_target(seek_target),
                      .code_shift(code_shift),
                      //Channel history.
                      .i2q2_valid(i2q2_valid),

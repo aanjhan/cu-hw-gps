@@ -20,8 +20,6 @@ module channel(
     input [`INPUT_RANGE]             data,
     //Code control.
     input [4:0]                      prn,
-    input                            seek_en,
-    input [`CS_RANGE]                seek_target,
     output wire [`CS_RANGE]          code_shift,
     //Channel history.
     output wire                      i2q2_valid,
@@ -59,7 +57,8 @@ module channel(
 
    //Flag a mode switch.
    wire mode_switch;
-   strobe #(.FLAG_CHANGE(1))
+   strobe #(.RESET_ZERO(1),
+            .FLAG_CHANGE(1))
      mode_switch_strobe(.clk(clk),
                         .reset(global_reset),
                         .in(mode),
@@ -117,6 +116,8 @@ module channel(
    //Upsample the C/A code to the incoming sampling rate.
    reg [`CA_PHASE_INC_RANGE] ca_dphi_total;
    wire ca_bit_early, ca_bit_prompt, ca_bit_late;
+   reg track_seek_en;
+   reg [`CS_RANGE] track_seek_target;
    ca_upsampler upsampler(.clk(clk),
                           .reset(global_reset),
                           .enable(data_available),
@@ -129,8 +130,8 @@ module channel(
                           .out_prompt(ca_bit_prompt),
                           .out_late(ca_bit_late),
                           //Seek control.
-                          .seek_en(mode==`MODE_ACQ ? acq_seek_en : seek_en),
-                          .seek_target(mode==`MODE_ACQ ? acq_seek_target : seek_target),
+                          .seek_en(mode==`MODE_ACQ ? acq_seek_en : track_seek_en),
+                          .seek_target(mode==`MODE_ACQ ? acq_seek_target : track_seek_target),
                           .seeking(seeking),
                           .target_reached(target_reached),
                           //Debug.
@@ -365,7 +366,13 @@ module channel(
    end // always @ (posedge clk)
 
    //Store history for tracking loops.
+   reg ignore_doppler;
    always @(posedge clk) begin
+      track_seek_en <= start_tracking ? 1'b1 :
+                       target_reached ? 1'b0 :
+                       track_seek_en;
+      track_seek_target <= `CS_WIDTH'd0;
+      
       i_prompt_k <= accumulation_complete ? acc_i_prompt[`ACC_RANGE_TRACK] : i_prompt_k;
       q_prompt_k <= accumulation_complete ? acc_q_prompt[`ACC_RANGE_TRACK] : q_prompt_k;
 
@@ -382,6 +389,12 @@ module channel(
                        tracking_ready ? iq_prompt_k :
                        iq_prompt_km1;
 
+      //Ignore the first Doppler result reported by the FLL.
+      //FIXME How does Brady get around this?
+      ignore_doppler <= start_tracking ? 1'b1 :
+                        tracking_ready ? 1'b0 :
+                        ignore_doppler;
+
       //Carrier generator.
       w_df_k <= start_tracking ? `W_DF_WIDTH'd0 : //FIXME Get value from acquisition.
                 tracking_ready ? w_df_kp1 :
@@ -390,7 +403,7 @@ module channel(
                     tracking_ready ? w_df_dot_kp1 :
                     w_df_dot_k;
       doppler_dphi <= acquisition_complete ? acq_peak_doppler :
-                      tracking_ready ? doppler_inc_kp1 :
+                      tracking_ready && !ignore_doppler ? doppler_inc_kp1 :
                       doppler_dphi;
 
       //Code generator.

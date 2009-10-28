@@ -228,14 +228,17 @@ module DE2_TOP (
                          ~KEY[0];
 
    //Generate ~1ms sample clock.
-   reg clk_sample;
+   reg clk_1k;
    reg [21:0] sample_clk_count;
    always @(posedge clk_16_8) begin
       sample_clk_count <= sample_clk_count==22'd0 ?
-                          22'd16800 :
+                          22'd84 :
                           sample_clk_count-22'd1;
-      clk_sample <= sample_clk_count==22'd0 ? ~clk_sample : clk_sample;
+      clk_1k <= sample_clk_count==22'd0 ? ~clk_1k : clk_1k;
    end
+
+   wire clk_sample;
+   assign clk_sample = SW[1] ? clk_16_8 : clk_1k;
 
    //Real-time sample data feed.
    wire link_status;
@@ -261,8 +264,8 @@ module DE2_TOP (
                           .words_available(words_available),
                           .packet_count(pkt_count),
                           .good_packet_count(good_pkt_count),
-                          .halt(SW[1]),
-                          .halt_packet(SW[2]));
+                          .halt(1'b0),
+                          .halt_packet(1'b0));
 
    //0=Acquisition, 1=Tracking.
    wire [`MODE_RANGE] mode;
@@ -270,9 +273,9 @@ module DE2_TOP (
 
    wire [14:0] code_shift;
    wire        i2q2_valid;
-   wire [`I2Q2_RANGE] i2q2_early;
-   wire [`I2Q2_RANGE] i2q2_prompt;
-   wire [`I2Q2_RANGE] i2q2_late;
+   `KEEP wire [`I2Q2_RANGE] i2q2_early;
+   `KEEP wire [`I2Q2_RANGE] i2q2_prompt;
+   `KEEP wire [`I2Q2_RANGE] i2q2_late;
    wire               tracking_ready;
    wire [`ACC_RANGE_TRACK] i_prompt_k;
    wire [`ACC_RANGE_TRACK] q_prompt_k;
@@ -301,7 +304,7 @@ module DE2_TOP (
            .feed_complete(1'b0),
            .data(sample_data),
            //Code control.
-           .prn(SW[5:1]),
+           .prn(SW[6:2]),
            .code_shift(code_shift),
            //Channel history.
            .i2q2_valid(i2q2_valid),

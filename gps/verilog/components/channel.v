@@ -404,10 +404,10 @@ module channel(
 
       //Carrier generator.
       w_df_k <= start_tracking ? `W_DF_WIDTH'd0 : //FIXME Get value from acquisition.
-                tracking_ready ? w_df_kp1 :
+                tracking_ready && !ignore_doppler ? w_df_kp1 :
                 w_df_k;
       w_df_dot_k <= start_tracking ? `W_DF_DOT_WIDTH'd0 :
-                    tracking_ready ? w_df_dot_kp1 :
+                    tracking_ready && !ignore_doppler ? w_df_dot_kp1 :
                     w_df_dot_k;
       doppler_dphi <= start_tracking ? `DOPPLER_INC_WIDTH'd0 : //FIXME Remove this in favor of acquisiton result below.
                       acquisition_complete ? acq_peak_doppler :

@@ -180,7 +180,7 @@ module tracking_loops(
    always @(posedge clk) begin
       //Flag each loop's completion.
       channel_0_loop_status <= reset ? 2'h0 :
-                               i2q2_valid_0 ? 2'h0 :
+                               tracking_ready_0 ? 2'h0 :
                                fll_result_ready ? channel_0_loop_status | 2'b10 :
                                dll_result_ready ? channel_0_loop_status | 2'b01 :
                                channel_0_loop_status;

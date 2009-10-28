@@ -301,7 +301,7 @@ module DE2_TOP (
            .feed_complete(1'b0),
            .data(sample_data),
            //Code control.
-           .prn(SW[4:0]),
+           .prn(SW[5:1]),
            .code_shift(code_shift),
            //Channel history.
            .i2q2_valid(i2q2_valid),
@@ -373,6 +373,7 @@ module DE2_TOP (
    assign LEDG[7:5] = disp_carrier_i ? carrier_i : carrier_q;
    assign LEDG[4:2] = sample_data;
    assign LEDG[1] = sample_valid;
+   assign LEDG[0] = data_available;
 
    hex_driver hex7(4'd0,1'b0,HEX7);
    hex_driver hex6(4'd0,1'b0,HEX6);

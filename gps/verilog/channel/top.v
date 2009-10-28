@@ -54,6 +54,7 @@ module top(
    synchronizer input_clk_sync(.clk(clk),
                                .in(clk_sample),
                                .out(clk_sample_sync));
+   
    `KEEP wire sample_valid_sync;
    synchronizer input_sample_valid_sync(.clk(clk),
                                         .in(sample_valid),

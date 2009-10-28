@@ -231,16 +231,10 @@ module DE2_TOP (
    reg clk_sample;
    reg [21:0] sample_clk_count;
    always @(posedge clk_16_8) begin
-      if(global_reset) begin
-         sample_clk_count <= 22'd0;
-         clk_sample <= 1'b0;
-      end
-      else begin
-         sample_clk_count <= sample_clk_count==22'd0 ?
-                             22'd16800 :
-                             sample_clk_count-22'd1;
-         clk_sample <= sample_clk_count==22'd0 ? ~clk_sample : clk_sample;
-      end
+      sample_clk_count <= sample_clk_count==22'd0 ?
+                          22'd16800 :
+                          sample_clk_count-22'd1;
+      clk_sample <= sample_clk_count==22'd0 ? ~clk_sample : clk_sample;
    end
 
    //Real-time sample data feed.
@@ -292,6 +286,8 @@ module DE2_TOP (
    wire                      data_available;
    wire                      track_feed_complete;
    wire [`SAMPLE_COUNT_RANGE] sample_count;
+   wire [2:0]                 carrier_i;
+   wire [2:0]                 carrier_q;
    wire        ca_bit;
    wire        ca_clk;
    wire [9:0]  ca_code_shift;
@@ -327,11 +323,13 @@ module DE2_TOP (
            .data_available(data_available),
            .track_feed_complete(track_feed_complete),
            .sample_count(sample_count),
+           .carrier_i(carrier_i),
+           .carrier_q(carrier_q),
            .ca_bit(ca_bit),
            .ca_clk(ca_clk),
            .ca_code_shift(ca_code_shift));
 
-   receiver_back_end be(.clk_0(clk_50),
+   /*receiver_back_end be(.clk_0(clk_50),
                         .reset_n(~global_reset),
                         .out_port_from_the_heart_beat_led(LEDG[0]),
                         .in_port_to_the_tracking_ready(tracking_ready),
@@ -348,36 +346,40 @@ module DE2_TOP (
                         .zs_dq_to_and_from_the_sdram(DRAM_DQ),
                         .zs_dqm_from_the_sdram({DRAM_UDQM, DRAM_LDQM}),
                         .zs_ras_n_from_the_sdram(DRAM_RAS_N),
-                        .zs_we_n_from_the_sdram(DRAM_WE_N));
+                        .zs_we_n_from_the_sdram(DRAM_WE_N));*/
    assign DRAM_CLK = clk_50_m3ns;
 
-   wire disp_i_q, disp_words, disp_pkt, disp_pkt_good, disp_count;
-   assign disp_i_q = SW[17];
-   assign disp_words = SW[16];
-   assign disp_count = SW[15];
-   assign disp_pkt = SW[14];
-   assign disp_pkt_good = SW[13];
+   wire disp_acc, disp_i_q, disp_cs, disp_carrier_i,
+        disp_words, disp_pkt, disp_pkt_good, disp_count;
+   assign disp_acc = SW[17];
+   assign disp_i_q = SW[16];
+   assign disp_cs = SW[15];
+   assign disp_words = SW[14];
+   assign disp_count = SW[13];
+   assign disp_pkt = SW[12];
+   assign disp_pkt_good = SW[11];
+   assign disp_carrier_i = ~SW[10];
 
    wire [`ACC_RANGE_TRACK] sel_i_q_value;
-   assign sel_i_q_value = disp_i_q ? q_prompt_k : i_prompt_k;
+   assign sel_i_q_value = disp_acc ?
+                          (disp_i_q ? accumulator_q[`ACC_RANGE_TRACK] : accumulator_i[`ACC_RANGE_TRACK]) :
+                          (disp_i_q ? q_prompt_k : i_prompt_k);
 
    assign LEDR=disp_words ? {9'h0,words_available} :
                disp_count ? {3'h0,sample_count} :
                disp_pkt ? (disp_pkt_good ? {9'h0,good_pkt_count} : {9'h0,pkt_count}) :
                sel_i_q_value[17:0];
    assign LEDG[8] = link_status;
-   assign LEDG[7] = tracking_ready;
-   assign LEDG[6] = track_feed_complete;
-   assign LEDG[5] = data_available;
+   assign LEDG[7:5] = disp_carrier_i ? carrier_i : carrier_q;
    assign LEDG[4:2] = sample_data;
    assign LEDG[1] = sample_valid;
 
    hex_driver hex7(4'd0,1'b0,HEX7);
    hex_driver hex6(4'd0,1'b0,HEX6);
    hex_driver hex5(4'd0,1'b0,HEX5);
-   hex_driver hex4({2'b0,sel_i_q_value[17:16]},1'b1,HEX4);
-   hex_driver hex3(sel_i_q_value[15:12],1'b1,HEX3);
-   hex_driver hex2(sel_i_q_value[11:8],1'b1,HEX2);
-   hex_driver hex1(sel_i_q_value[7:4],1'b1,HEX1);
-   hex_driver hex0(sel_i_q_value[3:0],1'b1,HEX0);
+   hex_driver hex4({2'b0,sel_i_q_value[17:16]},!disp_cs,HEX4);
+   hex_driver hex3(disp_cs ? {1'b0,code_shift[14:12]} : sel_i_q_value[15:12],1'b1,HEX3);
+   hex_driver hex2(disp_cs ? code_shift[11:8] : sel_i_q_value[11:8],1'b1,HEX2);
+   hex_driver hex1(disp_cs ? code_shift[7:4] : sel_i_q_value[7:4],1'b1,HEX1);
+   hex_driver hex0(disp_cs ? code_shift[3:0] : sel_i_q_value[3:0],1'b1,HEX0);
 endmodule

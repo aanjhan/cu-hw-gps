@@ -51,8 +51,10 @@ module channel(
     output wire [`ACC_RANGE]         accumulator_q,
     output wire                      accumulation_complete,
     //Debug outputs.
-    output wire                      track_feed_complete,
+    output reg                       track_feed_complete,
     output reg [`SAMPLE_COUNT_RANGE] sample_count,
+    output wire [2:0]                carrier_i,
+    output wire [2:0]                carrier_q,
     output wire                      ca_bit,
     output wire                      ca_clk,
     output wire [9:0]                ca_code_shift);
@@ -74,11 +76,14 @@ module channel(
    //Generate a feed completion flag for tracking mode.
    always @(posedge clk) begin
       sample_count <= start_tracking ? `SAMPLE_COUNT_WIDTH'd0 :
+                      !data_available ? sample_count :
                       track_feed_complete ? `SAMPLE_COUNT_WIDTH'd0 :
-                      data_available ? sample_count+`SAMPLE_COUNT_WIDTH'd1 :
-                      sample_count;
+                      sample_count+`SAMPLE_COUNT_WIDTH'd1;
+      
+      track_feed_complete <= start_tracking ? 1'b0 :
+                             sample_count==`SAMPLE_COUNT_MAX ? 1'b1 :
+                             1'b0;
    end
-   assign track_feed_complete = sample_count==`SAMPLE_COUNT_MAX;
    
    //Current Doppler shift phase increment, initialized by
    //acquisition and controlled by tracking loops.
@@ -174,7 +179,9 @@ module channel(
                      .accumulator_updating(prompt_updating),
                      .accumulator_i(acc_i_prompt),
                      .accumulator_q(acc_q_prompt),
-                     .accumulation_complete(prompt_complete));
+                     .accumulation_complete(prompt_complete),
+                     .carrier_i(carrier_i),
+                     .carrier_q(carrier_q));
    assign accumulation_complete = prompt_complete;
 
    //Debug signals.
@@ -402,7 +409,8 @@ module channel(
       w_df_dot_k <= start_tracking ? `W_DF_DOT_WIDTH'd0 :
                     tracking_ready ? w_df_dot_kp1 :
                     w_df_dot_k;
-      doppler_dphi <= acquisition_complete ? acq_peak_doppler :
+      doppler_dphi <= start_tracking ? `DOPPLER_INC_WIDTH'd0 : //FIXME Remove this in favor of acquisiton result below.
+                      acquisition_complete ? acq_peak_doppler :
                       tracking_ready && !ignore_doppler ? doppler_inc_kp1 :
                       doppler_dphi;
 

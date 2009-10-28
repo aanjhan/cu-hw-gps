@@ -43,6 +43,8 @@ module top(
     output wire                      data_available,
     output wire                      track_feed_complete,
     output wire [`SAMPLE_COUNT_RANGE] sample_count,
+    output wire [2:0]                 carrier_i,
+    output wire [2:0]                 carrier_q,
     output wire                      ca_bit,
     output wire                      ca_clk,
     output wire [9:0]                ca_code_shift);
@@ -52,6 +54,10 @@ module top(
    synchronizer input_clk_sync(.clk(clk),
                                .in(clk_sample),
                                .out(clk_sample_sync));
+   `KEEP wire sample_valid_sync;
+   synchronizer input_sample_valid_sync(.clk(clk),
+                                        .in(sample_valid),
+                                        .out(sample_valid_sync));
    
    `KEEP wire feed_reset_sync;
    synchronizer input_feed_reset_sync(.clk(clk),
@@ -77,7 +83,7 @@ module top(
                                 .reset(global_reset),
                                 .in(clk_sample_sync),
                                 .out(new_sample));
-   assign data_available = new_sample && sample_valid;
+   assign data_available = new_sample && sample_valid_sync;
 `else
    reg data_done;
    always @(posedge clk) begin
@@ -145,6 +151,10 @@ module top(
                      .accumulator_i(accumulator_i),
                      .accumulator_q(accumulator_q),
                      //Debug outputs.
+                     .track_feed_complete(track_feed_complete),
+                     .sample_count(sample_count),
+                     .carrier_i(carrier_i),
+                     .carrier_q(carrier_q),
                      .ca_bit(ca_bit),
                      .ca_clk(ca_clk),
                      .ca_code_shift(ca_code_shift));

@@ -24,7 +24,10 @@ module subchannel(
     output wire                accumulator_updating,
     output wire [`ACC_RANGE]   accumulator_i,
     output wire [`ACC_RANGE]   accumulator_q,
-    output wire                accumulation_complete);
+    output wire                accumulation_complete,
+    //Debug.
+    output wire [`CARRIER_LUT_RANGE] carrier_i,
+    output wire [`CARRIER_LUT_RANGE] carrier_q);
 
    //Delay accumulation 3 cycles to allow
    //for C/A upsampler to update. Delay 1
@@ -87,7 +90,7 @@ module subchannel(
                        .out(carrier_index));
 
    //Generate in-phase carrier-wiped signal.
-   `KEEP wire [`CARRIER_LUT_RANGE] carrier_i;
+   //`KEEP wire [`CARRIER_LUT_RANGE] carrier_i;
 `ifdef DISABLE_CARRIER
    assign carrier_i = `CARRIER_LUT_WIDTH'h1;
 `else
@@ -101,7 +104,7 @@ module subchannel(
                       .out(sig_no_carrier_i));
 
    //Generate quadrature carrier-wiped signal.
-   `KEEP wire [`CARRIER_LUT_RANGE] carrier_q;
+   //`KEEP wire [`CARRIER_LUT_RANGE] carrier_q;
 `ifdef DISABLE_CARRIER
    assign carrier_q = `CARRIER_LUT_WIDTH'h0;
 `else

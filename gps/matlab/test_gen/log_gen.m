@@ -66,6 +66,7 @@ function [signal,t,carrier,code]=log_gen(PRN,sig_length,doppler,save)
             strDoppler=sprintf('%dHz',doppler);
         end
         filename=sprintf('prn%d_%s_%s.dat',PRN,strTime,strDoppler);
+        fprintf('Log saved to ''%s''.\n',filename);
         
         file=fopen(filename,'wb');
         if(file<0)

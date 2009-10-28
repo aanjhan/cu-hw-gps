@@ -54,7 +54,12 @@ function [signal,t,carrier,code]=log_gen(PRN,sig_length,doppler,save)
 
     %Save file.
     if(save)
-        strTime=sprintf('%dms',sig_length*T*1000);
+        time=sig_length*T*1000;
+        if(round(time)==time)
+            strTime=sprintf('%dms',time);
+        else
+            strTime=sprintf('%0.2fms',time);
+        end
         if(length(doppler)==2)
             strDoppler=sprintf('%d-%dHz',doppler(1),doppler(2));
         else

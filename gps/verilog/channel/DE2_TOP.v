@@ -337,10 +337,23 @@ module DE2_TOP (
            .ca_clk(ca_clk),
            .ca_code_shift(ca_code_shift));
 
-   /*receiver_back_end be(.clk_0(clk_50),
-                        .reset_n(~global_reset),
+   reg tracking_ready_flag;
+   reg [3:0] tracking_ready_count;
+   always @(posedge clk_200) begin
+      tracking_ready_flag <= global_reset ? 1'b0 :
+                             tracking_ready ? 1'b1 :
+                             tracking_ready_count==4'd0 ? 1'b0 :
+                             tracking_ready_flag;
+
+      tracking_ready_count <= global_reset ? 4'd0 :
+                              tracking_ready ? 4'd7 :
+                              tracking_ready_count==4'd0 ? 4'd0 :
+                              tracking_ready_count-4'd1;
+   end
+   receiver_back_end be(.clk_0(clk_50),
+                        .reset_n(1'b1),
                         .out_port_from_the_heart_beat_led(LEDG[0]),
-                        .in_port_to_the_tracking_ready(tracking_ready),
+                        .in_port_to_the_tracking_ready(tracking_ready_flag),
                         .in_port_to_the_i_prompt(i_prompt_k),
                         .in_port_to_the_q_prompt(q_prompt_k),
                         .in_port_to_the_w_df(w_df_k),
@@ -354,7 +367,7 @@ module DE2_TOP (
                         .zs_dq_to_and_from_the_sdram(DRAM_DQ),
                         .zs_dqm_from_the_sdram({DRAM_UDQM, DRAM_LDQM}),
                         .zs_ras_n_from_the_sdram(DRAM_RAS_N),
-                        .zs_we_n_from_the_sdram(DRAM_WE_N));*/
+                        .zs_we_n_from_the_sdram(DRAM_WE_N));
    assign DRAM_CLK = clk_50_m3ns;
 
    wire disp_acc, disp_i_q, disp_cs, disp_carrier_i,
@@ -381,7 +394,6 @@ module DE2_TOP (
    assign LEDG[7:5] = disp_carrier_i ? carrier_i : carrier_q;
    assign LEDG[4:2] = sample_data;
    assign LEDG[1] = sample_valid;
-   assign LEDG[0] = data_available;
 
    hex_driver hex7(4'd0,1'b0,HEX7);
    hex_driver hex6(4'd0,1'b0,HEX6);

@@ -209,11 +209,12 @@ module DE2_TOP (
    assign TD_RESET = 1'b1;
 
    //Generate 200MHz clock and 16.8MHz sample clock.
-   wire clk_200;
-   wire clk_16_8;
+   `KEEP wire clk_200;
+   `KEEP wire clk_16_8;
    wire system_pll_locked;
    system_pll system_pll0(.inclk0(CLOCK_50),
-                          .c0(clk_200),
+                          //.c0(clk_200),
+                          .c2(clk_200),//87.5 MHz
                           .c1(clk_16_8),
                           .locked(system_pll_locked));
 
@@ -227,18 +228,18 @@ module DE2_TOP (
                          po_reset |
                          ~KEY[0];
 
-   //Generate ~1ms sample clock.
-   reg clk_1k;
+   //Generate 200kHz sample clock.
+   reg clk_200k;
    reg [21:0] sample_clk_count;
    always @(posedge clk_16_8) begin
       sample_clk_count <= sample_clk_count==22'd0 ?
                           22'd84 :
                           sample_clk_count-22'd1;
-      clk_1k <= sample_clk_count==22'd0 ? ~clk_1k : clk_1k;
+      clk_200k <= sample_clk_count==22'd0 ? ~clk_200k : clk_200k;
    end
 
    wire clk_sample;
-   assign clk_sample = SW[1] ? clk_16_8 : clk_1k;
+   assign clk_sample = SW[1] ? clk_16_8 : clk_200k;
 
    //Real-time sample data feed.
    wire link_status;
@@ -294,6 +295,7 @@ module DE2_TOP (
    wire        ca_bit;
    wire        ca_clk;
    wire [9:0]  ca_code_shift;
+   wire [3:0]  track_count;
    top sub(.clk(clk_200),
            .global_reset(global_reset),
            .mode(mode),
@@ -324,6 +326,9 @@ module DE2_TOP (
            .accumulator_i(accumulator_i),
            .accumulator_q(accumulator_q),
            .data_available(data_available),
+           .track_carrier_en(SW[8]),
+           .track_code_en(SW[7]),
+           .track_count(track_count),
            .track_feed_complete(track_feed_complete),
            .sample_count(sample_count),
            .carrier_i(carrier_i),
@@ -353,12 +358,12 @@ module DE2_TOP (
    assign DRAM_CLK = clk_50_m3ns;
 
    wire disp_acc, disp_i_q, disp_cs, disp_carrier_i,
-        disp_words, disp_pkt, disp_pkt_good, disp_count;
+        disp_words, disp_pkt, disp_pkt_good, disp_track_count;
    assign disp_acc = SW[17];
    assign disp_i_q = SW[16];
    assign disp_cs = SW[15];
    assign disp_words = SW[14];
-   assign disp_count = SW[13];
+   assign disp_track_count = SW[13];
    assign disp_pkt = SW[12];
    assign disp_pkt_good = SW[11];
    assign disp_carrier_i = ~SW[10];
@@ -369,7 +374,7 @@ module DE2_TOP (
                           (disp_i_q ? q_prompt_k : i_prompt_k);
 
    assign LEDR=disp_words ? {9'h0,words_available} :
-               disp_count ? {3'h0,sample_count} :
+               disp_track_count ? {14'h0,track_count} :
                disp_pkt ? (disp_pkt_good ? {9'h0,good_pkt_count} : {9'h0,pkt_count}) :
                sel_i_q_value[17:0];
    assign LEDG[8] = link_status;

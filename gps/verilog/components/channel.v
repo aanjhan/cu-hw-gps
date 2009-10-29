@@ -51,6 +51,9 @@ module channel(
     output wire [`ACC_RANGE]         accumulator_q,
     output wire                      accumulation_complete,
     //Debug outputs.
+    input                            track_carrier_en,
+    input                            track_code_en,
+    output reg [3:0]                 track_count,
     output reg                       track_feed_complete,
     output reg [`SAMPLE_COUNT_RANGE] sample_count,
     output wire [2:0]                carrier_i,
@@ -380,6 +383,10 @@ module channel(
                        track_seek_en;
       track_seek_target <= `CS_WIDTH'd0;
       
+      track_count <= start_tracking ? 4'd0 :
+                     tracking_ready ? track_count+4'd1 :
+                     track_count;
+      
       i_prompt_k <= accumulation_complete ? acc_i_prompt[`ACC_RANGE_TRACK] : i_prompt_k;
       q_prompt_k <= accumulation_complete ? acc_q_prompt[`ACC_RANGE_TRACK] : q_prompt_k;
 
@@ -404,13 +411,16 @@ module channel(
 
       //Carrier generator.
       w_df_k <= start_tracking ? `W_DF_WIDTH'd0 : //FIXME Get value from acquisition.
+                !track_carrier_en ? w_df_k :
                 tracking_ready && !ignore_doppler ? w_df_kp1 :
                 w_df_k;
       w_df_dot_k <= start_tracking ? `W_DF_DOT_WIDTH'd0 :
+                    !track_carrier_en ? w_df_dot_k :
                     tracking_ready && !ignore_doppler ? w_df_dot_kp1 :
                     w_df_dot_k;
       doppler_dphi <= start_tracking ? `DOPPLER_INC_WIDTH'd0 : //FIXME Remove this in favor of acquisiton result below.
-                      acquisition_complete ? acq_peak_doppler :
+                      !track_carrier_en ? doppler_dphi :
+                      acquisition_complete && mode==`MODE_ACQ ? acq_peak_doppler :
                       tracking_ready && !ignore_doppler ? doppler_inc_kp1 :
                       doppler_dphi;
 
@@ -418,6 +428,7 @@ module channel(
       //Note: The DLL outputs a change in phase increment,
       //      while the carrier loops output a new increment.
       ca_dphi_total <= start_tracking ? `CA_PHASE_INC_WIDTH'd0 :
+                       !track_code_en ? ca_dphi_total :
                        tracking_ready ? ca_dphi_total+ca_dphi_kp1 :
                        ca_dphi_total;
    end

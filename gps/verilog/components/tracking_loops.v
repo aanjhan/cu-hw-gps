@@ -178,7 +178,7 @@ module tracking_loops(
    //FIXME Update everything for multi-channel.
    `PRESERVE reg [1:0] channel_0_loop_status;
    always @(posedge clk) begin
-      //Flag each loop's completion.
+      //Flag each loop's completion for one cycle.
       channel_0_loop_status <= reset ? 2'h0 :
                                tracking_ready_0 ? 2'h0 :
                                fll_result_ready ? channel_0_loop_status | 2'b10 :
@@ -190,7 +190,7 @@ module tracking_loops(
       
       //Flag tracking complete for one cycle
       //as soon as all tracking loops finish.
-      tracking_ready_0 <= channel_0_loop_status==2'b11;
+      tracking_ready_0 <= channel_0_loop_status==2'b11 && !tracking_ready_0;
 
       //FLL results.
       if(fll_result_ready) begin

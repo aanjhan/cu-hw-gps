@@ -40,6 +40,9 @@ module top(
     output wire [`ACC_RANGE]         accumulator_i,
     output wire [`ACC_RANGE]         accumulator_q,
     //Debug signals.
+    input                            track_carrier_en,
+    input                            track_code_en,
+    output wire [3:0]                track_count,
     output wire                      data_available,
     output wire                      track_feed_complete,
     output wire [`SAMPLE_COUNT_RANGE] sample_count,
@@ -152,6 +155,9 @@ module top(
                      .accumulator_i(accumulator_i),
                      .accumulator_q(accumulator_q),
                      //Debug outputs.
+                     .track_carrier_en(track_carrier_en),
+                     .track_code_en(track_code_en),
+                     .track_count(track_count),
                      .track_feed_complete(track_feed_complete),
                      .sample_count(sample_count),
                      .carrier_i(carrier_i),

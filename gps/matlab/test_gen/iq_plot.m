@@ -6,7 +6,8 @@ function iq_plot(data)
     
     xmax=max(abs(data(:,1)));
     ymax=max(abs(data(:,2)));
+    axis_limit=max(xmax,ymax);
     
-    axis([-xmax xmax -ymax ymax]);
+    axis([-axis_limit axis_limit -axis_limit axis_limit]);
     
     return;

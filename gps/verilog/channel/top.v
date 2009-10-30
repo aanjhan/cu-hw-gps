@@ -31,6 +31,9 @@ module top(
     output wire [`ACC_RANGE_TRACK]   i_prompt_k,
     output wire [`ACC_RANGE_TRACK]   q_prompt_k,
     output wire [`W_DF_RANGE]        w_df_k,
+    output wire [`W_DF_DOT_RANGE]    w_df_dot_k,
+    output wire [`DOPPLER_INC_RANGE] doppler_dphi,
+    output wire [`CA_PHASE_INC_RANGE] ca_dphi_total,
     //Acquisition results.
     output wire                      acquisition_complete,
     output wire [`I2Q2_RANGE]        acq_peak_i2q2,
@@ -106,7 +109,6 @@ module top(
    wire [`IQ_RANGE]           iq_prompt_km1;
    wire [`ACC_RANGE_TRACK]    i_prompt_km1;
    wire [`ACC_RANGE_TRACK]    q_prompt_km1;
-   wire [`W_DF_DOT_RANGE]     w_df_dot_k;
    //Tracking results.
    wire [`IQ_RANGE]           iq_prompt_k;
    wire [`DOPPLER_INC_RANGE]  doppler_inc_kp1;
@@ -138,6 +140,8 @@ module top(
                      .q_prompt_km1(q_prompt_km1),
                      .w_df_k(w_df_k),
                      .w_df_dot_k(w_df_dot_k),
+                     .doppler_dphi(doppler_dphi),
+                     .ca_dphi_total(ca_dphi_total),
                      //Tracking results.
                      .tracking_ready(tracking_ready),
                      .iq_prompt_k(iq_prompt_k),

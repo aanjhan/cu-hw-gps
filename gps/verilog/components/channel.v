@@ -33,6 +33,9 @@ module channel(
     output reg [`ACC_RANGE_TRACK]    q_prompt_km1,
     output reg [`W_DF_RANGE]         w_df_k,
     output reg [`W_DF_DOT_RANGE]     w_df_dot_k,
+               
+    output reg [`DOPPLER_INC_RANGE]  doppler_dphi,
+    output reg [`CA_PHASE_INC_RANGE] ca_dphi_total,
     //Tracking results.
     input                            tracking_ready,
     input [`IQ_RANGE]                iq_prompt_k,
@@ -90,7 +93,7 @@ module channel(
    
    //Current Doppler shift phase increment, initialized by
    //acquisition and controlled by tracking loops.
-   reg [`DOPPLER_INC_RANGE] doppler_dphi;
+   //reg [`DOPPLER_INC_RANGE] doppler_dphi;
 
    //Acquisition controller.
    `KEEP wire [`DOPPLER_INC_RANGE] acq_dopp_early;
@@ -122,7 +125,7 @@ module channel(
                                          .peak_code_shift(acq_peak_code_shift));
 
    //Upsample the C/A code to the incoming sampling rate.
-   reg [`CA_PHASE_INC_RANGE] ca_dphi_total;
+   //reg [`CA_PHASE_INC_RANGE] ca_dphi_total;
    wire ca_bit_early, ca_bit_prompt, ca_bit_late;
    reg track_seek_en;
    reg [`CS_RANGE] track_seek_target;
@@ -404,7 +407,6 @@ module channel(
                        iq_prompt_km1;
 
       //Ignore the first Doppler result reported by the FLL.
-      //FIXME How does Brady get around this?
       ignore_doppler <= start_tracking ? 1'b1 :
                         tracking_ready ? 1'b0 :
                         ignore_doppler;
@@ -425,11 +427,9 @@ module channel(
                       doppler_dphi;
 
       //Code generator.
-      //Note: The DLL outputs a change in phase increment,
-      //      while the carrier loops output a new increment.
       ca_dphi_total <= start_tracking ? `CA_PHASE_INC_WIDTH'd0 :
                        !track_code_en ? ca_dphi_total :
-                       tracking_ready ? ca_dphi_total+ca_dphi_kp1 :
+                       tracking_ready ? ca_dphi_kp1 :
                        ca_dphi_total;
    end
 endmodule

@@ -5,7 +5,7 @@
 #include !"ca_upsampler.csv"
 
 //Fixed-point configuration.
-FLL_OP_SHIFT,11,Amount to which IQ values are shifted before operation.
+FLL_OP_SHIFT,4,Amount to which IQ values are shifted before operation.
 FLL_CONST_SHIFT,2,FLL parameter fixed-point shift.
 FLL_PER_SHIFT,12,Accumulation period fixed-point shift.
 

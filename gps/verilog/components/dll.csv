@@ -5,7 +5,7 @@
 #include !"ca_upsampler.csv"
 
 //Operating parameters.
-DLL_IQ_SHIFT,9,Amount to which IQ values are shifted before operation.
+DLL_IQ_SHIFT,5,Amount to which IQ values are shifted before operation.
 DLL_CLK_COUNT,6,Division clock divider (must be even).
 DLL_DIV_SETUP,4,Length (in cycles) of required division setup time.
 DLL_DIV_STABLE,3,Length (in cycles) before division result stabilizes.

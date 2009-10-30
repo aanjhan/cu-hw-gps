@@ -281,6 +281,9 @@ module DE2_TOP (
    wire [`ACC_RANGE_TRACK] i_prompt_k;
    wire [`ACC_RANGE_TRACK] q_prompt_k;
    wire [`W_DF_RANGE] w_df_k;
+   wire [`W_DF_DOT_RANGE] w_df_dot_k;
+   wire [`DOPPLER_INC_RANGE] doppler_dphi;
+   wire [`CA_PHASE_INC_RANGE] ca_dphi_total;
    wire               acquisition_complete;
    wire [`I2Q2_RANGE] acq_peak_i2q2;
    wire [`ACC_RANGE] accumulator_i;
@@ -317,6 +320,9 @@ module DE2_TOP (
            .i_prompt_k(i_prompt_k),
            .q_prompt_k(q_prompt_k),
            .w_df_k(w_df_k),
+           .w_df_dot_k(w_df_dot_k),
+           .doppler_dphi(doppler_dphi),
+           .ca_dphi_total(ca_dphi_total),
            //Acquisition results.
            .acquisition_complete(acquisition_complete),
            .acq_peak_i2q2(acq_peak_i2q2),
@@ -352,11 +358,14 @@ module DE2_TOP (
    end
    receiver_back_end be(.clk_0(clk_50),
                         .reset_n(1'b1),
-                        .out_port_from_the_heart_beat_led(LEDG[0]),
+                        .out_port_from_the_heartbeat_led(LEDG[0]),
                         .in_port_to_the_tracking_ready(tracking_ready_flag),
                         .in_port_to_the_i_prompt(i_prompt_k),
                         .in_port_to_the_q_prompt(q_prompt_k),
                         .in_port_to_the_w_df(w_df_k),
+                        .in_port_to_the_w_df_dot(w_df_dot_k),
+                        .in_port_to_the_doppler_dphi(doppler_dphi),
+                        .in_port_to_the_ca_dphi(ca_dphi_total),
                         .rxd_to_the_uart_0(UART_RXD),
                         .txd_from_the_uart_0(UART_TXD),
                         .zs_addr_from_the_sdram(DRAM_ADDR),

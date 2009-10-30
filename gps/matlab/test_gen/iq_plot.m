@@ -1,6 +1,13 @@
 function iq_plot(data)
-    plot(data(:,1),data(:,2),'x');
-    title('I/Q Accumulation Plot');
+    figure('Name','I/Q Accumulation Plot','Numbertitle','off');
+    hold on;
+    for i=1:size(data,1)
+        plot(data(i,1),data(i,2),'x',...
+            'color',[i / size(data,1) 0 1-(i / size(data,1))],...
+            'linewidth',1.5);
+    end
+    hold off;
+    title({'I/Q Accumulation Plot';'Varies from blue to red with increasing t.'});
     xlabel('In-Phase (I)');
     ylabel('Quadrature (Q)');
     

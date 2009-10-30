@@ -546,7 +546,7 @@ set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_
 set_global_assignment -name FMAX_REQUIREMENT "16.8 MHz" -section_id clk_16_8
 set_instance_assignment -name CLOCK_SETTINGS clk_16_8 -to clk_16_8
 set_global_assignment -name BASED_ON_CLOCK_SETTINGS clk_16_8 -section_id clk_200k
-set_global_assignment -name MULTIPLY_BASE_CLOCK_PERIOD_BY 84 -section_id clk_200k
+set_global_assignment -name MULTIPLY_BASE_CLOCK_PERIOD_BY 42 -section_id clk_200k
 set_instance_assignment -name CLOCK_SETTINGS clk_200k -to clk_200k
 set_global_assignment -name SIGNALTAP_FILE acc_tap.stp
 set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0

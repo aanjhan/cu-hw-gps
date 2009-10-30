@@ -228,18 +228,18 @@ module DE2_TOP (
                          po_reset |
                          ~KEY[0];
 
-   //Generate 200kHz sample clock.
-   reg clk_200k;
+   //Generate 400kHz sample clock.
+   reg clk_400k;
    reg [21:0] sample_clk_count;
    always @(posedge clk_16_8) begin
       sample_clk_count <= sample_clk_count==22'd0 ?
-                          22'd84 :
+                          22'd42 :
                           sample_clk_count-22'd1;
-      clk_200k <= sample_clk_count==22'd0 ? ~clk_200k : clk_200k;
+      clk_400k <= sample_clk_count==22'd0 ? ~clk_400k : clk_400k;
    end
 
    wire clk_sample;
-   assign clk_sample = SW[1] ? clk_16_8 : clk_200k;
+   assign clk_sample = clk_400k;
 
    //Real-time sample data feed.
    wire link_status;

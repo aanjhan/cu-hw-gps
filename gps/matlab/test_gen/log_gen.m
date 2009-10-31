@@ -31,7 +31,7 @@ function [signal,t,carrier,code]=log_gen(PRN,sig_length,doppler,save)
     end
     
     %Specify signal time range.
-    t=0:1/FS:sig_length*T-1/FS;
+    t=(0:1/FS:sig_length*T-1/FS)';
     
     %Generate PRN code.
     caCode=cacodegn(PRN);
@@ -40,13 +40,13 @@ function [signal,t,carrier,code]=log_gen(PRN,sig_length,doppler,save)
     
     %Generate carrier.
     if(length(doppler)==2)
-        f_carrier=FC+linspace(doppler(1),doppler(2),length(t));
+        f_carrier=FC+MIXING_SIGN*linspace(doppler(1),doppler(2),length(t));
     elseif(length(doppler)==1)
-        f_carrier=FC+doppler;
+        f_carrier=FC+MIXING_SIGN*doppler;
     else
         error('Invalid Doppler shift vector.');
     end
-    carrier=round(cos(2*pi*f_carrier.*t)'*3);
+    carrier=round(cos(2*pi*f_carrier.*t)*3);
     
     %Generate signal.
     signal=code.*carrier;

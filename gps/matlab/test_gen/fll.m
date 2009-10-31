@@ -4,6 +4,7 @@ function fll(i_prompt_k,q_prompt_k,...
     ACC_WIDTH_TRACK=19;
     CARRIER_ACC_WIDTH=27;
     F_S=16.8e6;
+    MIXING_SIGN=-1;
     
     IQ_SHIFT=4;
     PER_SHIFT=12;
@@ -42,7 +43,7 @@ function fll(i_prompt_k,q_prompt_k,...
     %Floating point truth value.
     num=q_prompt_k*i_prompt_km1-i_prompt_k*q_prompt_km1;
     den=iq_prompt_k*iq_prompt_km1;
-    dtheta=num/den;
+    dtheta=MIXING_SIGN*num/den;
     w_df_dot_kp1=w_df_dot_k+FLL_A*dtheta;
     w_df_kp1=(w_df_k/2^ANGLE_SHIFT)+w_df_dot_k*T+FLL_B*dtheta;
     dopp_inc_kp1=(w_df_kp1/2^ANGLE_SHIFT)*W_DF_TO_INC;
@@ -58,7 +59,7 @@ function fll(i_prompt_k,q_prompt_k,...
     %for speed increase and circuit complexity reduction.
     num=(q_prompt_k*i_prompt_km1-i_prompt_k*q_prompt_km1)*2^ANGLE_SHIFT;
     den=iq_prompt_k*iq_prompt_km1;
-    s=sign(num);
+    s=MIXING_SIGN*sign(num);
     num=abs(num);
     div_result=floor(num/den);
     dtheta=div_result/2^ANGLE_SHIFT;
@@ -86,7 +87,7 @@ function fll(i_prompt_k,q_prompt_k,...
     
     num=(q_prompt_k*i_prompt_km1-i_prompt_k*q_prompt_km1)*2^ANGLE_SHIFT;
     den=iq_prompt_k*iq_prompt_km1;
-    s=sign(num);
+    s=MIXING_SIGN*sign(num);
     num=abs(num);
     div_result=floor(num/den);
     dtheta=div_result/2^ANGLE_SHIFT;

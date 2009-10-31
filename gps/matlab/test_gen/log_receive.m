@@ -1,7 +1,7 @@
 function log=log_receive(device)
 global running;
 
-fclose(instrfind);
+fclose all;
 s=serial(device,'baudrate',115200,'timeout',0.2);
 fopen(s);
 

@@ -33,7 +33,7 @@ FLL_B,FLL_CONST_WIDTH'dFLL_B_VAL,B_FLL constant.
 FLL_T,fix(TRACK_ACC_LENGTH*T_CA_CODE;FLL_PER_SHIFT),Fixed-point accumulation period.
 
 //FLL smart-truncation.
-FLL_INDEX_WIDTH,max_width(ACC_WIDTH_TRACK),FLL smart-truncation index width.
+FLL_INDEX_WIDTH,max_width(IQ_WIDTH),FLL smart-truncation index width.
 FLL_INDEX_RANGE,range(FLL_INDEX_WIDTH),FLL smart-truncation index range.
 FLL_OP_WIDTH,ACC_WIDTH_TRACK-FLL_OP_SHIFT,FLL operand width.
 FLL_OP_RANGE,range(FLL_OP_WIDTH),FLL operand range.

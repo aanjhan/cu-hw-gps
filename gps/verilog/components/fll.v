@@ -344,7 +344,7 @@ module fll(
    always @(posedge clk) begin
       numerator_in <= div_clk_edge_pending ? numerator_abs : numerator_in;
       denominator_in <= div_clk_edge_pending ? denominator : denominator_in;
-      div_sign <= div_clk_edge_pending ? numerator[`FLL_NUM_WIDTH-1] : div_sign;
+      div_sign <= div_clk_edge_pending ? `MIXING_SIGN^numerator[`FLL_NUM_WIDTH-1] : div_sign;
    end
 
    //Note: clk_div_kmn is forced to keep for timing constraints.

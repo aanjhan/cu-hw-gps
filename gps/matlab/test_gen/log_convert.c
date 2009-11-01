@@ -73,7 +73,6 @@ int main(int argc, char *argv[])
             //    --Sign: 0=positive, 1=negative
             //  --Output foramt: {-3,-1,1,3} {sign (1b), magnitude (1b)}
             //    --Sign: 0=negative, 1=positive
-            if(mag==2 || mag==0)mag=1;
             sign=!sign;
             mag>>=1;
 

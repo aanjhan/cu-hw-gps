@@ -83,7 +83,6 @@ void WriteSWFormat(FILE *file, double *samples, mwSize numSamples)
         //      as compared to hardware receiver.
         sign=samples[i]>=0;
         mag=!sign ? (uint8_t)(-samples[i]) : (uint8_t)samples[i];
-        if(mag==2 || mag==0)mag=1;
         mag>>=1;
 
         //Append sample to output word.

@@ -69,6 +69,16 @@ module subchannel(
                          .reset(global_reset),
                          .in(feed_complete && data_available),
                          .out(accumulation_complete));
+   
+   //FIXME Does the sign of the Doppler here (whether it is added or
+   //FIXME subtracted) depend on the mixing sign? In the software receiver
+   //FIXME w_if_k=W_FC-w_df_k (signal_tracking.m line 122).
+   
+   //FIXME Keep track of the signal phase phi_kp1=phi_k+tau_k*w_df_k as
+   //FIXME in signal_tracking.m line 137?
+
+   //FIXME Should the sign of the quadrature carrier (sin) be changed
+   //FIXME with the mixing sign as in ca_correlator.m line 73?
 
    //Carrier value is front-end intermediate frequency plus
    //sign-extended version of two's complement Doppler shift.

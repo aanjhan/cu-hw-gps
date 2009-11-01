@@ -1,0 +1,11 @@
+Does the sign of the Doppler here (whether it is added or
+subtracted) depend on the mixing sign? In the software receiver
+w_if_k=W_FC-w_df_k (signal_tracking.m line 122).
+
+Keep track of the signal phase phi_kp1=phi_k+tau_k*w_df_k as
+in signal_tracking.m line 137?
+
+Should the sign of the quadrature carrier (sin) be changed
+with the mixing sign as in ca_correlator.m line 73?
+
+Carrier lock/bit transition location needs arccos to compute theta (angle between I/Q vectors). Is it possible to either use the FLL/PLL's rotation angle computation (maybe not because of small-angle approximation) or avoid the arccos altogether since you only need to compare abs(theta)<THRESHOLD||abs(theta-pi)<THRESHOLD for carrier lock and abs(theta)>pi/2 for bit extraction. Can the carrier threshold and pi/2 be cast into the cos(theta) space, using some combination of cos(theta) magnitude and sign?

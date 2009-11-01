@@ -40,7 +40,7 @@ function [signal,t,carrier,code]=log_gen(PRN,sig_length,doppler,save)
     
     %Generate carrier.
     if(length(doppler)==2)
-        f_carrier=FC+MIXING_SIGN*linspace(doppler(1),doppler(2),length(t));
+        f_carrier=FC+MIXING_SIGN*linspace(doppler(1),doppler(2),length(t))';
     elseif(length(doppler)==1)
         f_carrier=FC+MIXING_SIGN*doppler;
     else
@@ -51,29 +51,19 @@ function [signal,t,carrier,code]=log_gen(PRN,sig_length,doppler,save)
     %Generate signal.
     signal=code.*carrier;
     
-
     %Save file.
     if(save)
         time=sig_length*T*1000;
-        if(round(time)==time)
-            strTime=sprintf('%dms',time);
-        else
-            strTime=sprintf('%0.2fms',time);
-        end
+        strTime=sprintf('%sms',string_format(time,1));
         if(length(doppler)==2)
-            strDoppler=sprintf('%d-%dHz',doppler(1),doppler(2));
+            strDoppler=sprintf('%s-%sHz',string_format(doppler(1),1),string_format(doppler(2),1));
         else
-            strDoppler=sprintf('%dHz',doppler);
+            strDoppler=sprintf('%sHz',string_format(doppler,1));
         end
         filename=sprintf('prn%d_%s_%s.dat',PRN,strTime,strDoppler);
-        fprintf('Log saved to ''%s''.\n',filename);
         
-        file=fopen(filename,'wb');
-        if(file<0)
-            error('Unable to open file %s.',filename);
-        end
-        fwrite(file,gps_pack(signal));
-        fclose(file);
+        log_write(signal,filename);
+        fprintf('Log saved to ''%s''.\n',filename);
     end
     
 %     write_vwf(ones_signal,'channel',filename);

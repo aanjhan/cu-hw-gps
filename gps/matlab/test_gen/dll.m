@@ -1,36 +1,36 @@
 function dll(iqe,iql)
-    chips_eml=0.5;
-    iq_shift=9;
-    iq_width=18;
-    op_width=iq_width-iq_shift;
+    CHIPS_EML=0.5;
+    IQ_SHIFT=9;
+    IQ_WIDTH=18;
+    op_width=IQ_WIDTH-IQ_SHIFT;
     
-    ca_acc_width=25;
-    f_ca=1.023e6;
-    f_s=16.8e6;
+    CA_ACC_WIDTH=25;
+    F_CA=1.023e6;
+    F_S=16.8e6;
     HNUM=5.8e-7;
     
     %eml=(iqe-iql)
     %epl=(iqe+iql)
-    %tau_prime=(iqe-iql)/(iqe+iql)*(2-chips_eml)/2
-    %         =eml/epl*((2-chips_eml)/2)
-    %tau_prime_up=tau_prime*f_s/f_ca
-    %            =eml/epl*((2-chips_eml)*f_s/f_ca/2)
-    %dphi=tau_prime_up*2^ca_acc_width*HNUM
-    %    =eml/epl*(2^ca_acc_width*(2-chips_eml)*f_s/f_ca/2*HNUM)
+    %tau_prime=(iqe-iql)/(iqe+iql)*(2-CHIPS_EML)/2
+    %         =eml/epl*((2-CHIPS_EML)/2)
+    %tau_prime_up=tau_prime*F_S/F_CA
+    %            =eml/epl*((2-CHIPS_EML)*F_S/F_CA/2)
+    %dphi=tau_prime_up*2^CA_ACC_WIDTH*HNUM
+    %    =eml/epl*(2^CA_ACC_WIDTH*(2-CHIPS_EML)*F_S/F_CA/2*HNUM)
     %    =eml/epl*C
     %    =(eml/epl*K)>>kshift
-    %C=2^ca_acc_width*HNUM*(2-chips_eml)*f_s/f_ca/2
+    %C=2^CA_ACC_WIDTH*HNUM*(2-CHIPS_EML)*F_S/F_CA/2
     %K=C*2^kshift (fixed-point)
     
-    inc_to_chips=1/(2^ca_acc_width*HNUM);
-    C=2^ca_acc_width*HNUM*(2-chips_eml)*f_s/f_ca/2;
+    inc_to_chips=1/(2^CA_ACC_WIDTH*HNUM);
+    C=2^CA_ACC_WIDTH*HNUM*(2-CHIPS_EML)*F_S/F_CA/2;
     kshift=0;
     K=round(C*2^kshift);
     eml=iqe-iql;
     epl=iqe+iql;
     
     %Print parameters.
-    disp(sprintf('DLL Parameters: chips_eml=%.1f, iq_shift=%d, k_shift=%d, HNUM=%e',chips_eml,iq_shift,kshift,HNUM));
+    disp(sprintf('DLL Parameters: CHIPS_EML=%.1f, IQ_SHIFT=%d, k_shift=%d, HNUM=%e',CHIPS_EML,IQ_SHIFT,kshift,HNUM));
     
     %Floating point truth value.
     dphi=eml/epl*C;
@@ -71,7 +71,7 @@ function dll(iqe,iql)
         shift,chips,chipsf,dphi,eml,epl,mult_result,div_result));
     
     %Plot amplitude triangle.
-    amp=(iqe+iql)/(2-chips_eml);
+    amp=(iqe+iql)/(2-CHIPS_EML);
     x=linspace(-16.8,16.8,10000);
     tri=[linspace(0,amp,length(x)/2) linspace(amp,0,length(x)/2)];
     plot(x,tri,'b');

@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
     uint16_t outMag;
     uint16_t outSign;
     uint8_t outPos;
+    uint8_t outByte[2];
     
     if(argc!=3)
     {
@@ -29,15 +30,12 @@ int main(int argc, char *argv[])
     if(in==NULL)
     {
         printf("Unable to open file '%s'.\n",argv[1]);
-        fclose(in);
-        fclose(out);
         return -1;
     }
     else if(out==NULL)
     {
         printf("Unable to open file '%s'.\n",argv[2]);
         fclose(in);
-        fclose(out);
         return -1;
     }
 
@@ -62,9 +60,10 @@ int main(int argc, char *argv[])
             }
             else if(bitPos==7)
             {
-                mag=mag&0x01 | bytes[byteIndex]&0x01;
+                mag=mag&0x01 | (bytes[byteIndex]&0x01)<<1;
                 sign=(bytes[byteIndex]&0x02)>>1;
             }
+            if(sign)sign=1;
 
             //Update bit position.
             bitPos=(bitPos+3)&0x7;
@@ -74,6 +73,7 @@ int main(int argc, char *argv[])
             //    --Sign: 0=positive, 1=negative
             //  --Output foramt: {-3,-1,1,3} {sign (1b), magnitude (1b)}
             //    --Sign: 0=negative, 1=positive
+            if(mag==2 || mag==0)mag=1;
             sign=!sign;
             mag>>=1;
 
@@ -87,8 +87,12 @@ int main(int argc, char *argv[])
             if(++outPos==16)
             {
                 outPos=0;
-                fwrite(&outMag,2,1,out);
-                fwrite(&outSign,2,1,out);
+                outByte[0]=(outMag>>8)&0xFF;
+                outByte[1]=outMag&0xFF;
+                fwrite(outByte,1,2,out);
+                outByte[0]=(outSign>>8)&0xFF;
+                outByte[1]=outSign&0xFF;
+                fwrite(outByte,1,2,out);
             }
         }
     }
@@ -98,8 +102,12 @@ int main(int argc, char *argv[])
     {
         outMag<<=(15-outPos);
         outSign<<=(15-outPos);
-        fwrite(&outMag,2,1,out);
-        fwrite(&outSign,2,1,out);
+        outByte[0]=(outMag>>8)&0xFF;
+        outByte[1]=outMag&0xFF;
+        fwrite(outByte,1,2,out);
+        outByte[0]=(outSign>>8)&0xFF;
+        outByte[1]=outSign&0xFF;
+        fwrite(outByte,1,2,out);
     }
             
     fclose(in);

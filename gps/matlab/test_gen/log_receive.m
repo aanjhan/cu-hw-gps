@@ -1,9 +1,5 @@
-function log=log_receive(device)
+function log=log_receive(device_name)
 global running;
-
-fclose all;
-s=serial(device,'baudrate',115200,'timeout',0.2);
-fopen(s);
 
 btn=uicontrol('style','pushbutton',...
     'string','Stop!',...
@@ -11,6 +7,8 @@ btn=uicontrol('style','pushbutton',...
 
 numValues=6;
 data=zeros(1,numValues);
+
+device=serial_open(device_name);
 
 %Disable timeout warning.
 warning off MATLAB:serial:fread:unsuccessfulRead;
@@ -23,13 +21,13 @@ while(running==1)
     
     %Start byte 0 (0xDE).
     if(state==0)
-        b=fread(s,1,'uint8');
+        b=serial_read(device,1,'uint8');
         if(b==hex2dec('DE'))
             state=1;
         end
     %Start byte 1 (0xAD).
     elseif(state==1)
-        b=fread(s,1,'uint8');
+        b=serial_read(device,1,'uint8');
         if(b==hex2dec('AD'))
             state=2;
         else
@@ -39,7 +37,7 @@ while(running==1)
         i=0;
     %Start byte 2 (0xBE).
     elseif(state==2)
-        b=fread(s,1,'uint8');
+        b=serial_read(device,1,'uint8');
         if(b==hex2dec('BE'))
             state=3;
         else
@@ -49,7 +47,7 @@ while(running==1)
         i=0;
     %Start byte 3 (0xEF).
     elseif(state==3)
-        b=fread(s,1,'uint8');
+        b=serial_read(device,1,'uint8');
         if(b==hex2dec('EF'))
             state=4;
         else
@@ -58,7 +56,7 @@ while(running==1)
         
         i=0;
     else
-        data(i+1)=fread(s,1,'int32');
+        data(i+1)=serial_read(device,1,'int32');
         
         i=i+1;
         if(i==numValues)
@@ -68,7 +66,7 @@ while(running==1)
     end
 end
 
-fclose(s);
+serial_close(device);
 
 %Re-enable timeout warning.
 warning on MATLAB:serial:fread:unsuccessfulRead;

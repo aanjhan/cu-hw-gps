@@ -187,7 +187,7 @@ stop = floor(length(in_sig)-4*FSAMP_MSEC)*TP + t0;
 
 %we now have to iterate over the total number of seconds specified by the 
 %user in GPS_SW_RCX.m at line number 82
-while(fileNo-1 < Nfiles)
+while(fileNo-1 <= Nfiles)
     if(loadFile)  %if we arrived at the end of the current 1 sec of data
         %load the next second of data
         %update the wait bar
@@ -308,6 +308,28 @@ while(fileNo-1 < Nfiles)
         %Now run either the PLL/DLL or the FLL/DLL filters
         %%If USE_PLL = 1 and the code start time is greater than the
         %%PLL_switch_time, run the PLL
+%         if(USE_PLL && (code_start_time_k > PLL_SWITCH_TIME))
+%             if(INITIALIZE_PLL)
+%                 %these need to be initialized properly for the PLL to lock
+%                 %in
+%                 INITIALIZE_PLL = 0;
+%                 w_df_km1 = w_df_k;
+%                 err_phs_km1 = 0;
+%                 err_phs_km2 = 0;
+%             end
+%             %run the PLL/DLL
+%             [chip_rate_kp1, err_phs_k, err_code_k, w_df_kp1] = plldll(I_prompt_k, Q_prompt_k,...
+%                 I_early_k, Q_early_k, I_late_k, Q_late_k, err_phs_km1, err_phs_km2, w_df_k, w_df_km1);
+%         else
+%             %run the FLL/DLL
+% %             [chip_rate_kp1, err_phs_k, err_code_k, w_df_kp1, w_df_dot_kp1] = flldll_fixed(I_prompt_k, Q_prompt_k,...
+% %                 I_early_k, Q_early_k, I_late_k, Q_late_k, w_df_k, w_df_dot_k, I_prompt_km1, Q_prompt_km1, CNo_k, CNo_km1);
+%             [chip_rate_kp1, err_phs_k, err_code_k, w_df_kp1, w_df_dot_kp1] = flldll(I_prompt_k, Q_prompt_k,...
+%                 I_early_k, Q_early_k, I_late_k, Q_late_k, w_df_k, w_df_dot_k, I_prompt_km1, Q_prompt_km1, CNo_k, CNo_km1);
+%         end
+
+        %Execute tracking loops. DLL must be run after FLL,
+        %as it needs the new w_df value for carrier-aiding.
         if(USE_PLL && (code_start_time_k > PLL_SWITCH_TIME))
             if(INITIALIZE_PLL)
                 %these need to be initialized properly for the PLL to lock
@@ -321,12 +343,30 @@ while(fileNo-1 < Nfiles)
             [chip_rate_kp1, err_phs_k, err_code_k, w_df_kp1] = plldll(I_prompt_k, Q_prompt_k,...
                 I_early_k, Q_early_k, I_late_k, Q_late_k, err_phs_km1, err_phs_km2, w_df_k, w_df_km1);
         else
-            %run the FLL/DLL
-            [chip_rate_kp1, err_phs_k, err_code_k, w_df_kp1, w_df_dot_kp1] = flldll_fixed(I_prompt_k, Q_prompt_k,...
-                I_early_k, Q_early_k, I_late_k, Q_late_k, w_df_k, w_df_dot_k, I_prompt_km1, Q_prompt_km1, CNo_k, CNo_km1);
-%             [chip_rate_kp1, err_phs_k, err_code_k, w_df_kp1, w_df_dot_kp1] = flldll(I_prompt_k, Q_prompt_k,...
-%                 I_early_k, Q_early_k, I_late_k, Q_late_k, w_df_k, w_df_dot_k, I_prompt_km1, Q_prompt_km1, CNo_k, CNo_km1);
+            %Run the FLL.
+            if(USE_FLL_FIXED)
+                [w_df_kp1, w_df_dot_kp1, err_phs_k]=fll_fixed(I_prompt_k, Q_prompt_k,...
+                                                              w_df_k, w_df_dot_k,...
+                                                              I_prompt_km1, Q_prompt_km1,...
+                                                              CNo_k, CNo_km1);
+            else
+                [w_df_kp1, w_df_dot_kp1, err_phs_k]=fll_float(I_prompt_k, Q_prompt_k,...
+                                                              w_df_k, w_df_dot_k,...
+                                                              I_prompt_km1, Q_prompt_km1,...
+                                                              CNo_k, CNo_km1);
+            end
         end
+        %Run the DLL.
+        if(USE_DLL_FIXED)
+            [chip_rate_kp1, err_code_k]=dll_fixed(I_early_k,Q_early_k,...
+                                                  I_late_k,Q_late_k,...
+                                                  w_df_kp1);
+        else
+            [chip_rate_kp1,err_code_k]=dll_float(I_early_k,Q_early_k,...
+                                                 I_late_k,Q_late_k,...
+                                                 w_df_kp1);
+        end
+
         % record time k data into history vectors
         index = index+1;
         cst_overall_hist(start+index,1) = code_start_time_k;

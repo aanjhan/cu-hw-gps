@@ -10,7 +10,17 @@ function [ip,qp,w_df]=plot_track(prn,ip,qp,w_df,time,iqplot)
         ip=ip(1:sampleEnd);
         qp=qp(1:sampleEnd);
         figure;
-        plot(ip,qp,'.');
+        hold on;
+        for i=1:size(ip,1)
+            plot(ip(i),qp(i),'x',...
+                'color',[i / size(ip,1) 0 1-(i / size(ip,1))],...
+                'linewidth',1.5);
+        end
+        hold off;
+        maxi=max(abs(ip));
+        maxq=max(abs(qp));
+        maxiq=max(maxi,maxq);
+        axis([-maxiq maxiq -maxiq maxiq]);
         set(title(sprintf('I vs. Q - PRN %d',prn)),'FontSize',13);
         set(xlabel('I'),'FontSize',13);
         set(ylabel('Q'),'FontSize',13);

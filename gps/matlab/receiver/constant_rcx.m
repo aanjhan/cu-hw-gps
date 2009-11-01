@@ -40,6 +40,10 @@
  PLL_BANDWIDTH = 5;    % This the PLL Bandwidth
  T = 1e-3;              % Duration of a C/A Code Period, in seconds
  USE_FFT = 0;           %To use FFT-based acquisition set this to 1
+
+ USE_PLL_FIXED=0;
+ USE_FLL_FIXED=1;
+ USE_DLL_FIXED=1;
  
  if(PLL_LOOP_ORDER == 2)
     damping = 1/sqrt(2);

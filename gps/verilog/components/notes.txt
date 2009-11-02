@@ -4,6 +4,11 @@ w_if_k=W_FC-w_df_k (signal_tracking.m line 122).
 
 Keep track of the signal phase phi_kp1=phi_k+tau_k*w_df_k as
 in signal_tracking.m line 137?
+-->This is done inherently by the DDS updating continuously over
+   the accumulation period. Instead, need to adjust accumulation
+   length (tracking sample count) according to chipping rate to
+   allow the accumulation start to line up with the start of the
+   C/A code.
 
 Should the sign of the quadrature carrier (sin) be changed
 with the mixing sign as in ca_correlator.m line 73?

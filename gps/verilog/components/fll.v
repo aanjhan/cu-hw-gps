@@ -2,7 +2,7 @@
 `include "tracking_loops.vh"
 `include "fll.vh"
 
-//`define DEBUG
+`define DEBUG
 `include "debug.vh"
 
 module fll(
@@ -179,6 +179,14 @@ module fll(
                     .in(continue_trunc),
                     .out(starting));
 
+   //Pipe values necessary for calculation.
+   reg [`W_DF_RANGE]     w_df_k_post_trunc;
+   reg [`W_DF_DOT_RANGE] w_df_dot_k_post_trunc;
+   always @(posedge clk) begin
+      w_df_k_post_trunc <= starting ? w_df_k : w_df_k_post_trunc;
+      w_df_dot_k_post_trunc <= starting ? w_df_dot_k : w_df_dot_k_post_trunc;
+   end
+
    ////////////////////////////////////////
    // Numerator/Denominator Computation
    ////////////////////////////////////////
@@ -229,7 +237,7 @@ module fll(
               mult_a <= i_k_trunc;
               mult_b <= q_km1_trunc;
 
-              //Numerator is in *:`FLL_OP_SHIFT fixed-point.
+              //Numerator is in *:`ANGLE_SHIFT fixed-point.
               numerator <= {mult_result,{`ANGLE_SHIFT{1'b0}}};
            end
            `FLL_OP_STATE_MULT_3: begin
@@ -243,7 +251,7 @@ module fll(
               mult_a <= iq_k_trunc;
               mult_b <= iq_km1_trunc;
 
-              //Numerator is in *:`FLL_OP_SHIFT fixed-point.
+              //Numerator is in *:`ANGLE_SHIFT fixed-point.
               numerator <= numerator-{mult_result,{`ANGLE_SHIFT{1'b0}}};
            end
            `FLL_OP_STATE_MULT_5: begin
@@ -270,6 +278,16 @@ module fll(
                       start_div;
       end
    end // always @ (clk)
+
+   //Pipe values necessary for calculation.
+   //Note: This requires that the above computation
+   //      complete before the next truncation completes.
+   reg [`W_DF_RANGE]     w_df_k_post_comp;
+   reg [`W_DF_DOT_RANGE] w_df_dot_k_post_comp;
+   always @(posedge clk) begin
+      w_df_k_post_comp <= start_div ? w_df_k_post_trunc : w_df_k_post_comp;
+      w_df_dot_k_post_comp <= start_div ? w_df_dot_k_post_trunc : w_df_dot_k_post_comp;
+   end
 
    ////////////////////
    // Division
@@ -398,6 +416,30 @@ module fll(
       dtheta_sign <= div_results_ready ? div_sign_km2 : dtheta_sign;
    end
 
+   wire div_clk_negedge;
+   strobe div_clk_strobe(.clk(clk),
+                         .reset(reset),
+                         .in(~clk_div),
+                         .out(div_clk_negedge));
+   
+   //Pipe values necessary for calculation.
+   `PRESERVE reg [`W_DF_RANGE]     w_df_k_post_div_0;
+   `PRESERVE reg [`W_DF_DOT_RANGE] w_df_dot_k_post_div_0;
+   `PRESERVE reg [`W_DF_RANGE]     w_df_k_post_div_1;
+   `PRESERVE reg [`W_DF_DOT_RANGE] w_df_dot_k_post_div_1;
+   `PRESERVE reg [`W_DF_RANGE]     w_df_k_post_div_2;
+   `PRESERVE reg [`W_DF_DOT_RANGE] w_df_dot_k_post_div_2;
+   always @(posedge clk) begin
+      if(div_clk_negedge) begin
+         w_df_k_post_div_0 <= w_df_k_post_comp;
+         w_df_dot_k_post_div_0 <= w_df_dot_k_post_comp;
+         w_df_k_post_div_1 <= w_df_k_post_div_0;
+         w_df_dot_k_post_div_1 <= w_df_dot_k_post_div_0;
+         w_df_k_post_div_2 <= w_df_k_post_div_1;
+         w_df_dot_k_post_div_2 <= w_df_dot_k_post_div_1;
+      end
+   end
+
    /////////////////////////
    // Result Computation
    /////////////////////////
@@ -432,9 +474,9 @@ module fll(
            `FLL_RES_STATE_W_DF_0: begin
               res_state <= `FLL_RES_STATE_W_DF_1;
               res_mult_a <= `FLL_T;
-              res_mult_b <= w_df_dot_k[`W_DF_DOT_WIDTH-1] ?
-                            {{`FLL_RES_W_DF_DOT_PAD{1'b0}},-w_df_dot_k} :
-                            {{`FLL_RES_W_DF_DOT_PAD{1'b0}},w_df_dot_k};
+              res_mult_b <= w_df_dot_k_post_div_2[`W_DF_DOT_WIDTH-1] ?
+                            {{`FLL_RES_W_DF_DOT_PAD{1'b0}},-w_df_dot_k_post_div_2} :
+                            {{`FLL_RES_W_DF_DOT_PAD{1'b0}},w_df_dot_k_post_div_2};
            end
            `FLL_RES_STATE_W_DF_1: begin
               res_state <= `FLL_RES_STATE_W_DF_2;
@@ -444,10 +486,10 @@ module fll(
            `FLL_RES_STATE_W_DF_2: begin
               res_state <= `FLL_RES_STATE_W_DF_DOT_0;
 
-              if(w_df_dot_k[`W_DF_DOT_WIDTH-1])
-                w_df_kp1 <= w_df_k-res_mult_result[`FLL_RES_T_RANGE];
+              if(w_df_dot_k_post_div_2[`W_DF_DOT_WIDTH-1])
+                w_df_kp1 <= w_df_k_post_div_2-res_mult_result[`FLL_RES_T_RANGE];
               else
-                w_df_kp1 <= w_df_k+res_mult_result[`FLL_RES_T_RANGE];
+                w_df_kp1 <= w_df_k_post_div_2+res_mult_result[`FLL_RES_T_RANGE];
            end
            //Calculate w_df_dot_kp1.
            //w_df_dot_kp1=w_df_dot_k+(FLL_A*dtheta)>>FLL_CONST_SHIFT
@@ -474,9 +516,9 @@ module fll(
                             {{`FLL_RES_W_DF_PAD{1'b0}},w_df_kp1};
 
               if(dtheta_sign)
-                w_df_dot_kp1 <= w_df_dot_k-res_mult_result[`FLL_RES_A_RANGE];
+                w_df_dot_kp1 <= w_df_dot_k_post_div_2-res_mult_result[`FLL_RES_A_RANGE];
               else
-                w_df_dot_kp1 <= w_df_dot_k+res_mult_result[`FLL_RES_A_RANGE];
+                w_df_dot_kp1 <= w_df_dot_k_post_div_2+res_mult_result[`FLL_RES_A_RANGE];
            end
            `FLL_RES_STATE_INC_1: begin
               res_state <= `FLL_RES_STATE_FINISH;

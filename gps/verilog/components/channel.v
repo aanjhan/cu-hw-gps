@@ -56,6 +56,8 @@ module channel(
     //Debug outputs.
     input                            track_carrier_en,
     input                            track_code_en,
+    input                            f_carrier_sign,
+    input                            sin_sign,
     output reg [3:0]                 track_count,
     output reg                       track_feed_complete,
     output reg [`SAMPLE_COUNT_RANGE] sample_count,
@@ -169,7 +171,9 @@ module channel(
                     .accumulator_updating(early_updating),
                     .accumulator_i(acc_i_early),
                     .accumulator_q(acc_q_early),
-                    .accumulation_complete(early_complete));
+                    .accumulation_complete(early_complete),
+                    .f_carrier_sign(f_carrier_sign),
+                    .sin_sign(sin_sign));
    
    //Prompt subchannel.
    `KEEP wire prompt_updating, prompt_complete;
@@ -187,7 +191,9 @@ module channel(
                      .accumulator_q(acc_q_prompt),
                      .accumulation_complete(prompt_complete),
                      .carrier_i(carrier_i),
-                     .carrier_q(carrier_q));
+                     .carrier_q(carrier_q),
+                    .f_carrier_sign(f_carrier_sign),
+                    .sin_sign(sin_sign));
    assign accumulation_complete = prompt_complete;
 
    //Debug signals.
@@ -209,7 +215,9 @@ module channel(
                    .accumulator_updating(late_updating),
                    .accumulator_i(acc_i_late),
                    .accumulator_q(acc_q_late),
-                   .accumulation_complete(late_complete));
+                   .accumulation_complete(late_complete),
+                    .f_carrier_sign(f_carrier_sign),
+                    .sin_sign(sin_sign));
 
    //Take the absolute value of I and Q accumulations.
    wire [`ACC_MAG_RANGE] i_early_mag;

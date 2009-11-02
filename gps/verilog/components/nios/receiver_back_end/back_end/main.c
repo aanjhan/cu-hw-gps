@@ -37,7 +37,7 @@ inline void SignFix32(volatile alt_32 *value, alt_u8 width)
 {
     if((*value)&(1<<(width-1)))
     {
-        (*value)|=0xFFFFFFFF-((1<<width)-1);
+        (*value)|=~((1<<width)-1);
     }
 }
 
@@ -56,7 +56,7 @@ void TrackingUpdate(void *context, alt_u32 id)
     SignFix32(&tracking_params.i_prompt,I_PROMPT_DATA_WIDTH);
     SignFix32(&tracking_params.q_prompt,Q_PROMPT_DATA_WIDTH);
     SignFix32(&tracking_params.w_df,W_DF_DATA_WIDTH);
-    SignFix32(&tracking_params.w_df_dot,W_DF_DATA_WIDTH);
+    SignFix32(&tracking_params.w_df_dot,W_DF_DOT_DATA_WIDTH);
     SignFix32(&tracking_params.doppler_dphi,DOPPLER_DPHI_DATA_WIDTH);
     SignFix32(&tracking_params.ca_dphi,CA_DPHI_DATA_WIDTH);
 

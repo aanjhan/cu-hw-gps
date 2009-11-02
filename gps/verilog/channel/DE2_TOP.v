@@ -309,7 +309,7 @@ module DE2_TOP (
            .feed_complete(1'b0),
            .data(sample_data),
            //Code control.
-           .prn(SW[6:2]),
+           .prn(5'd0),
            .code_shift(code_shift),
            //Channel history.
            .i2q2_valid(i2q2_valid),
@@ -334,6 +334,8 @@ module DE2_TOP (
            .data_available(data_available),
            .track_carrier_en(SW[8]),
            .track_code_en(SW[7]),
+           .f_carrier_sign(SW[6]),
+           .sin_sign(SW[5]),
            .track_count(track_count),
            .track_feed_complete(track_feed_complete),
            .sample_count(sample_count),

@@ -45,6 +45,8 @@ module top(
     //Debug signals.
     input                            track_carrier_en,
     input                            track_code_en,
+    input                            f_carrier_sign,
+    input                            sin_sign,
     output wire [3:0]                track_count,
     output wire                      data_available,
     output wire                      track_feed_complete,
@@ -161,6 +163,8 @@ module top(
                      //Debug outputs.
                      .track_carrier_en(track_carrier_en),
                      .track_code_en(track_code_en),
+                     .f_carrier_sign(f_carrier_sign),
+                     .sin_sign(sin_sign),
                      .track_count(track_count),
                      .track_feed_complete(track_feed_complete),
                      .sample_count(sample_count),

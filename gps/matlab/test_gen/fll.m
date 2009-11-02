@@ -41,15 +41,21 @@ function fll(i_prompt_k,q_prompt_k,...
     disp(sprintf('                iq_prompt_k=%d, iq_prompt_km1=%d',iq_prompt_k,iq_prompt_km1));
     
     %Floating point truth value.
+    w_df_k=w_df_k/2^ANGLE_SHIFT;
+    w_df_dot_k=w_df_dot_k/2^ANGLE_SHIFT;
+    
     num=q_prompt_k*i_prompt_km1-i_prompt_k*q_prompt_km1;
     den=iq_prompt_k*iq_prompt_km1;
     dtheta=MIXING_SIGN*num/den;
     w_df_dot_kp1=w_df_dot_k+FLL_A*dtheta;
-    w_df_kp1=(w_df_k/2^ANGLE_SHIFT)+w_df_dot_k*T+FLL_B*dtheta;
-    dopp_inc_kp1=(w_df_kp1/2^ANGLE_SHIFT)*W_DF_TO_INC;
+    w_df_kp1=w_df_k+w_df_dot_k*T+FLL_B*dtheta;
+    dopp_inc_kp1=w_df_kp1*W_DF_TO_INC;
     fprintf('Truth: dtheta=%f, dopp_inc_kp1=%f\n',dtheta,dopp_inc_kp1);
     fprintf('       w_df_dot_kp1=%f (%d), w_df_kp1=%f (%d)\n',...
         w_df_dot_kp1,round(w_df_dot_kp1*2^ANGLE_SHIFT),w_df_kp1,round(w_df_kp1*2^ANGLE_SHIFT));
+    
+    w_df_k=w_df_k*2^ANGLE_SHIFT;
+    w_df_dot_k=w_df_dot_k*2^ANGLE_SHIFT;
     
     %Setup fixed-point parameters.
     FLL_A=round(FLL_A*2^FLL_CONST_SHIFT);

@@ -131,11 +131,11 @@ void mexFunction(int nlhs, mxArray *plhs[],
     
     if(nrhs<2)
     {
-        msgErrMsgTxt("Not enough arguments.");
+        mexErrMsgTxt("Not enough arguments.");
     }
     else if(nrhs>3)
     {
-        msgErrMsgTxt("Too many arguments.");
+        mexErrMsgTxt("Too many arguments.");
     }
 
     if(nrhs==3)

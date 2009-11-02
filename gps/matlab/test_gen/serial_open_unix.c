@@ -16,11 +16,11 @@ void mexFunction(int nlhs, mxArray *plhs[],
     
     if(nrhs<1)
     {
-        msgErrMsgTxt("Missing device name.");
+        mexErrMsgTxt("Missing device name.");
     }
     else if(nrhs>1)
     {
-        msgErrMsgTxt("Too many arguments.");
+        mexErrMsgTxt("Too many arguments.");
     }
 
     //Get device name.
@@ -35,7 +35,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
     mxFree(deviceName);
     if(device==-1)
     {
-        msgErrMsgTxt("Unable to open device.\n");
+        mexErrMsgTxt("Unable to open device.\n");
     }
     
     //Specify baud rate.
@@ -44,7 +44,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
        cfsetospeed(&options,B115200)!=0)
     {
         close(device);
-        msgErrMsgTxt("Unable to set baud rate to 115200.\n");
+        mexErrMsgTxt("Unable to set baud rate to 115200.\n");
     }
 
     //Local mode flags.
@@ -70,7 +70,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
     if(tcsetattr(device,TCSANOW,&options)!=0)
     {
         close(device);
-        msgErrMsgTxt("Unable to change device settings.\n");
+        mexErrMsgTxt("Unable to change device settings.\n");
     }
 
     //Return device descriptor.

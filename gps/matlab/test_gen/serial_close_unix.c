@@ -12,11 +12,11 @@ void mexFunction(int nlhs, mxArray *plhs[],
     
     if(nrhs<1)
     {
-        msgErrMsgTxt("Missing device descriptor.");
+        mexErrMsgTxt("Missing device descriptor.");
     }
     else if(nrhs>1)
     {
-        msgErrMsgTxt("Too many arguments.");
+        mexErrMsgTxt("Too many arguments.");
     }
 
     //Get device descriptor.

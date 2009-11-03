@@ -15,7 +15,8 @@ function write_vwf(signal,directory,filename)
     t_s=1/f_s;
     t_step=t_s*1e9;
     t_sys_step=1/f_system*1e9;
-    start_time=40;
+    start_cycles=8;
+    start_time=start_cycles*t_sys_step;
     extra_cycles=200;
     data_end=start_time+length(signal)*t_step;
     end_time=data_end+extra_cycles*t_sys_step;
@@ -72,6 +73,22 @@ function write_vwf(signal,directory,filename)
     fwrite(file,sprintf('}\n'));
     fwrite(file,sprintf('\n'));
     
+    %Add time bars at each code interval.
+    %Note: Time bars are described in ps.
+    for t=start_time:floor(t_step*16800):data_end
+        fwrite(file,sprintf('TIME_BAR\n'));
+        fwrite(file,sprintf('{\n'));
+        fwrite(file,sprintf('\tTIME = %d;\n',t*1e3));
+        if(t==start_time)
+            fwrite(file,sprintf('\tMASTER = TRUE;\n'));
+        else
+            fwrite(file,sprintf('\tMASTER = FALSE;\n'));
+        end
+        fwrite(file,sprintf('}\n'));
+        fwrite(file,sprintf('\n'));
+    end
+    
+    %Write data.
     for i=2:-1:0
         bit=bitand(bitshift(signal,-i),1);
         

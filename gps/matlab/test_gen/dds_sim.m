@@ -10,8 +10,12 @@ function out=dds_sim(width,inc,samples,lut)
     acc=0;
     out=zeros(samples,1);
     for i=1:samples
-        index=bitshift(acc,-(M-K));
-        out(i)=lut(index+1);
+        if(nargin==4)
+            index=bitshift(acc,-(M-K));
+            out(i)=lut(index+1);
+        else
+            out(i)=acc;
+        end
 
         acc=mod(acc+inc,2^M);
     end

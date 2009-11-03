@@ -2,6 +2,9 @@
 `include "ca_upsampler.vh"
 `include "channel__ca_upsampler.vh"
 
+`define DEBUG
+`include "debug.vh"
+
 module ca_upsampler(
     input                       clk,
     input                       reset,
@@ -33,7 +36,7 @@ module ca_upsampler(
    //Target is coming up if it is the next shift
    //value and the shift is enabled.
    wire target_upcoming;
-   assign target_upcoming = next_code_shift==seek_target && ca_clk_en_km1;
+   assign target_upcoming = next_code_shift==seek_target && seek_en;
 
    //The seek target has been reached when
    //the current code shift is equal to
@@ -42,24 +45,37 @@ module ca_upsampler(
 
    //We are seeking when seeking has been
    //enabled and the target has not been reached.
-   assign seeking = seek_en && !(target_upcoming | target_reached);
+   assign seeking = seek_en && !target_reached;
 
    //Advance the clock when the system is
    //enabled (data available) or when seeking.
-   wire ca_clk_en;
-   assign ca_clk_en = ((~seek_en) & enable) | seeking;
+   `KEEP wire ca_clk_en;
+   assign ca_clk_en = ((~seek_en) & enable) | (seeking && !target_upcoming);
 
    //Pipe clock enable signal for 1 cycle
    //to meet timing requirements.
-   wire ca_clk_en_km1;
+   //FIXME Is this still needed? If so, change the pl_update_en
+   //FIXME delay to use this, but be careful of the target_upcoming
+   //FIXME condition with the added delay. If this is enabled,
+   //FIXME add 1 to CA_UPSAMPLER_DELAY in subchannel.v.
+   /*wire ca_clk_en_km1;
    delay ca_clock_delay(.clk(clk),
                         .reset(reset),
                         .in(ca_clk_en),
-                        .out(ca_clk_en_km1));
+                        .out(ca_clk_en_km1));*/
+
+   //Delay prompt and late updates by one cycle
+   //to account for extra cycle when updating
+   //DDS and C/A generator.
+   wire pl_update_en;
+   delay bit_clk_delay(.clk(clk),
+                       .reset(reset),
+                       .in(ca_clk_en),
+                       .out(pl_update_en));
 
    always @(posedge clk) begin
       code_shift <= reset ? `CS_RESET_VALUE :
-                    !ca_clk_en_km1 ? code_shift :
+                    !pl_update_en ? code_shift :
                     next_code_shift;
    end
 
@@ -75,8 +91,8 @@ module ca_upsampler(
          .PHASE_INC_WIDTH(`CA_PHASE_INC_WIDTH),
          .OUTPUT_WIDTH(1))
      ca_clock_gen(.clk(clk),
-                  .reset(reset | ca_clk_reset),
-                  .enable(ca_clk_en_km1),
+                  .reset(reset),
+                  .enable(ca_clk_en),
                   .inc(`CA_RATE_INC+phase_inc_offset),
                   .out(ca_clk_n));
 
@@ -98,14 +114,14 @@ module ca_upsampler(
    delay_en #(.DELAY(`CHIPS_LEAD_LAG))
      bit_delay_prompt(.clk(clk),
                       .reset(reset),
-                      .enable(ca_clk_en_km1),
+                      .enable(pl_update_en),
                       .in(out_early),
                       .out(out_prompt));
    
    delay_en #(.DELAY(`CHIPS_LEAD_LAG))
      bit_delay_late(.clk(clk),
                     .reset(reset),
-                    .enable(ca_clk_en_km1),
+                    .enable(pl_update_en),
                     .in(out_prompt),
                     .out(out_late));
 endmodule

@@ -105,7 +105,7 @@ module channel(
    `KEEP wire [`CS_RANGE]          acq_seek_target;
    `KEEP wire                      seeking;
    `KEEP wire                      target_reached;
-   acquisition_controller acq_controller(.clk(clk),
+   /*acquisition_controller acq_controller(.clk(clk),
                                          .global_reset(global_reset),
                                          .mode(mode),
                                          .feed_reset(feed_reset),
@@ -124,7 +124,10 @@ module channel(
                                          .acquisition_complete(acquisition_complete),
                                          .peak_i2q2(acq_peak_i2q2),
                                          .peak_doppler(acq_peak_doppler),
-                                         .peak_code_shift(acq_peak_code_shift));
+                                         .peak_code_shift(acq_peak_code_shift));*/
+   //FIXME Remove these and uncomment acq controller.
+   assign acquisition_complete = 1'b0;
+   assign acq_seek_en = 1'b0;
 
    //Upsample the C/A code to the incoming sampling rate.
    //reg [`CA_PHASE_INC_RANGE] ca_dphi_total;

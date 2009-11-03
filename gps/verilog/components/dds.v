@@ -9,6 +9,7 @@ module dds(
    parameter PHASE_INC_WIDTH = 1;
    parameter OUTPUT_WIDTH = 1;
    parameter PIPELINE = 0;
+   parameter [(ACC_WIDTH-1):0] ACC_RESET_VALUE = {ACC_WIDTH{1'b0}};
 
    //Increment by zero to implement disable.
    wire [(PHASE_INC_WIDTH-1):0] inc_value;
@@ -37,9 +38,9 @@ module dds(
 
    reg [(ACC_WIDTH-1):0] accumulator;
    always @(posedge clk) begin
-      //accumulator <= reset ? {ACC_WIDTH{1'b0}} :
-      //               accumulator+inc_extended;
-      accumulator <= next_value & {ACC_WIDTH{~reset}};
+      accumulator <= reset ? ACC_RESET_VALUE :
+                     next_value;
+      //accumulator <= next_value & {ACC_WIDTH{~reset}};
    end
 
    //Output is the top bits of the phase accumulator.

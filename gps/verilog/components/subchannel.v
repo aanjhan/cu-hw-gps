@@ -31,11 +31,14 @@ module subchannel(
     input                            f_carrier_sign,
     input                            sin_sign);
 
-   //Delay accumulation 3 cycles to allow
+   //Delay accumulation 2 cycles to allow
    //for C/A upsampler to update. Delay 1
    //cycle to meet timing from the C/A bit
    //to the track accumulator.
-   localparam DATA_DELAY = 4;
+   //FIXME Pipe for timing: add 1 to DATA_DELAY
+   //FIXME and uncomment ca_bit_kmn delay.
+   localparam CA_UPSAMPLER_DELAY = 2;
+   localparam DATA_DELAY = CA_UPSAMPLER_DELAY+0;
    `KEEP wire data_available_kmnm1;
    delay #(.DELAY(DATA_DELAY-1))
      data_available_delay(.clk(clk),
@@ -58,10 +61,19 @@ module subchannel(
                 .out(data_kmn));
    
    `KEEP wire ca_bit_kmn;
-   delay ca_bit_delay(.clk(clk),
+   assign ca_bit_kmn = ca_bit;
+   /*delay ca_bit_delay(.clk(clk),
                       .reset(global_reset),
                       .in(ca_bit),
-                      .out(ca_bit_kmn));
+                      .out(ca_bit_kmn));*/
+   /*`KEEP wire data_available_kmnm1;
+   `KEEP wire data_available_kmn;
+   `KEEP wire [`INPUT_RANGE] data_kmn;
+   `KEEP wire ca_bit_kmn;
+   assign data_available_kmnm1 = data_available;
+   assign data_available_kmn = data_available;
+   assign data_kmn = data;
+   assign ca_bit_kmn = ca_bit;*/
 
    //Delay feed complete signal for C/A upsampler
    //update length, plus post-mixing timing delay below,
@@ -134,27 +146,27 @@ module subchannel(
                       .out(sig_no_carrier_q));
 
    //Pipe post-carrier wipe signals to meet timing.
-   wire [`SIG_NO_CARRIER_RANGE] sig_no_carrier_i_km1;
+   `KEEP wire [`SIG_NO_CARRIER_RANGE] sig_no_carrier_i_km1;
    delay #(.WIDTH(`SIG_NO_CARRIER_WIDTH))
      post_carrier_i_delay(.clk(clk),
                           .reset(global_reset),
                           .in(sig_no_carrier_i),
                           .out(sig_no_carrier_i_km1));
    
-   wire [`SIG_NO_CARRIER_RANGE] sig_no_carrier_q_km1;
+   `KEEP wire [`SIG_NO_CARRIER_RANGE] sig_no_carrier_q_km1;
    delay #(.WIDTH(`SIG_NO_CARRIER_WIDTH))
      post_carrier_q_delay(.clk(clk),
                           .reset(global_reset),
                           .in(sig_no_carrier_q),
                           .out(sig_no_carrier_q_km1));
 
-   wire track_ca_bit;
+   `KEEP wire track_ca_bit;
    delay post_carrier_ca_delay(.clk(clk),
                                .reset(global_reset),
                                .in(ca_bit_kmn),
                                .out(track_ca_bit));
 
-   wire track_data_available;
+   `KEEP wire track_data_available;
    delay post_carrier_available_delay(.clk(clk),
                                       .reset(global_reset),
                                       .in(data_available_kmn),
@@ -170,7 +182,8 @@ module subchannel(
    track #(.INPUT_WIDTH(`SIG_NO_CARRIER_WIDTH),
            .OUTPUT_WIDTH(`ACC_WIDTH))
      track_i(.clk(clk),
-             .reset(global_reset || clear),
+             .reset(global_reset),
+             .clear(clear),
              .data_available(track_data_available),
              .baseband_input(sig_no_carrier_i_km1),
              .ca_bit(track_ca_bit),
@@ -179,7 +192,8 @@ module subchannel(
    track #(.INPUT_WIDTH(`SIG_NO_CARRIER_WIDTH),
            .OUTPUT_WIDTH(`ACC_WIDTH))
      track_q(.clk(clk),
-             .reset(global_reset || clear),
+             .reset(global_reset),
+             .clear(clear),
              .data_available(track_data_available),
              .baseband_input(sig_no_carrier_q_km1),
              .ca_bit(track_ca_bit),

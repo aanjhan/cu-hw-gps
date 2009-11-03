@@ -3,6 +3,7 @@
 module track(
     input                           clk,
     input                           reset,
+    input                           clear,
     input                           data_available,
     input [(INPUT_WIDTH-1):0]       baseband_input,
     input                           ca_bit,
@@ -16,7 +17,7 @@ module track(
 
    //Wipe off C/A code.
    wire [(INPUT_WIDTH-1):0] wiped_input;
-   assign wiped_input[INPUT_SIGN] = ~(baseband_input[INPUT_SIGN]^ca_bit);
+   assign wiped_input[INPUT_SIGN] = baseband_input[INPUT_SIGN]^(~ca_bit);
    assign wiped_input[INPUT_MAG_MSB:0] = baseband_input[INPUT_MAG_MSB:0];
 
    //Sign-extend value and convert to two's complement.
@@ -43,7 +44,9 @@ module track(
    //Accumulate input value.
    always @(posedge clk) begin
       accumulator <= reset ? {OUTPUT_WIDTH{1'b0}} :
-                     data_available_km1 ? accumulator+input2c_km1 :
+                     data_available_km1 ? (clear ? input2c_km1 :
+                                           accumulator+input2c_km1) :
+                     clear ? {OUTPUT_WIDTH{1'b0}} :
                      accumulator;
    end
 endmodule

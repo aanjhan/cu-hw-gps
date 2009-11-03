@@ -89,7 +89,7 @@ module channel(
                       sample_count+`SAMPLE_COUNT_WIDTH'd1;
       
       track_feed_complete <= start_tracking ? 1'b0 :
-                             sample_count==`SAMPLE_COUNT_MAX ? 1'b1 :
+                             sample_count==`SAMPLE_COUNT_MAX-`SAMPLE_COUNT_WIDTH'd1 ? 1'b1 :
                              1'b0;
    end
    

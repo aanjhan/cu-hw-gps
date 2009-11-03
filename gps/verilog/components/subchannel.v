@@ -78,7 +78,7 @@ module subchannel(
    //Delay feed complete signal for C/A upsampler
    //update length, plus post-mixing timing delay below,
    //plus two cycles for accumulator update.
-   delay #(.DELAY(DATA_DELAY+3))
+   delay #(.DELAY(DATA_DELAY+2))
      feed_complete_delay(.clk(clk),
                          .reset(global_reset),
                          .in(feed_complete && data_available),

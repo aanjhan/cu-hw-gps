@@ -1,5 +1,5 @@
 //Configuration.
-RTDF_BUFFER_DEPTH,512,Packet data buffer depth in 16b words.
+RTDF_BUFFER_DEPTH,1024,Packet data buffer depth in 16b words.
 RTDF_FIFO_DEPTH,round(1.5*RTDF_BUFFER_DEPTH),Packet data FIFO depth in 16b words.
 
 //Packet parameters.

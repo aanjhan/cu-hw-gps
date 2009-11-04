@@ -233,7 +233,7 @@ module DE2_TOP (
    reg [21:0] sample_clk_count;
    always @(posedge clk_16_8) begin
       sample_clk_count <= sample_clk_count==22'd0 ?
-                          22'd84 :
+                          22'd8 :
                           sample_clk_count-22'd1;
       clk_400k <= sample_clk_count==22'd0 ? ~clk_400k : clk_400k;
    end

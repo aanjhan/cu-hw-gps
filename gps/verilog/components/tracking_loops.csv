@@ -17,9 +17,9 @@ IQ_RANGE,IQ_WIDTH-1:0,IQ range when tracking.
 
 //Carrier parameters.
 ANGLE_SHIFT,9,Fixed-point angle shift.
-W_DF_WIDTH,max_width((F_DOPP_MAX*PI/180)*2^ANGLE_SHIFT)+1,Doppler shift width [rad/s] (two's complement).
+W_DF_WIDTH,max_width((F_DOPP_MAX*2*PI)*2^ANGLE_SHIFT)+1,Doppler shift width [rad/s] (two's complement).
 W_DF_RANGE,range(W_DF_WIDTH),Doppler shift range.
-W_DF_DOT_MAX,60*180/PI,Maximum expected Doppler shift rate [rad/s^2] - empirical.
+W_DF_DOT_MAX,4000*(2*PI),Maximum expected Doppler shift rate [rad/s^2] - empirical (200Hz/50ms).
 W_DF_DOT_MAX_VAL,fix(W_DF_DOT_MAX;ANGLE_SHIFT),Approximate expected maximum w_df_dot value [rad/s^2].
 W_DF_DOT_WIDTH,max_width(W_DF_DOT_MAX_VAL)+1,Expected maximum w_df_dot width [rad/s^2] (two's complement).
 W_DF_DOT_RANGE,range(W_DF_DOT_WIDTH),Expected maximum w_df_dot range.
@@ -27,7 +27,7 @@ DOPPLER_INC_WIDTH,@
 DOPPLER_INC_RANGE,@
 
 //Doppler to phase increment conversion.
-W_DF_TO_INC_SHIFT,8,Doppler conversion factor fixed-point shift.
-W_DF_TO_INC_VAL,fix((2^(CARRIER_ACC_WIDTH-ANGLE_SHIFT))/(2*PI)/F_S;W_DF_TO_INC_SHIFT),Doppler shift [rad/s] to carrier phase increment conversion factor value.
+W_DF_TO_INC_SHIFT,12,Doppler conversion factor fixed-point shift.
+W_DF_TO_INC_VAL,fix((2^(CARRIER_ACC_WIDTH-ANGLE_SHIFT))/(2*PI*F_S);W_DF_TO_INC_SHIFT),Doppler shift [rad/s] to carrier phase increment conversion factor value.
 W_DF_TO_INC_WIDTH,max_width(W_DF_TO_INC_VAL),Doppler shift [rad/s] to carrier phase increment conversion width.
 W_DF_TO_INC,W_DF_TO_INC_WIDTH'dW_DF_TO_INC_VAL,Doppler shift [rad/s] to carrier phase increment conversion factor.

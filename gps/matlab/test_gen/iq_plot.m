@@ -16,5 +16,6 @@ function iq_plot(data)
     axis_limit=max(xmax,ymax);
     
     axis([-axis_limit axis_limit -axis_limit axis_limit]);
+    axis square;
     
     return;

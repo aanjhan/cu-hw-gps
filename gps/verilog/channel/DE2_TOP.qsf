@@ -25,10 +25,10 @@
 
 set_global_assignment -name FAMILY "Cyclone II"
 set_global_assignment -name DEVICE EP2C35F672C6
-set_global_assignment -name TOP_LEVEL_ENTITY top
+set_global_assignment -name TOP_LEVEL_ENTITY DE2_TOP
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 8.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "11:32:43  FEBRUARY 28, 2009"
-set_global_assignment -name LAST_QUARTUS_VERSION 8.0
+set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP1"
 set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
 set_location_assignment PIN_N25 -to SW[0]
 set_location_assignment PIN_N26 -to SW[1]
@@ -529,9 +529,10 @@ set_global_assignment -name SIGNALTAP_FILE tracking_tap.stp
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 set_global_assignment -name QIP_FILE system_pll.qip
 set_global_assignment -name FMAX_REQUIREMENT "16.8 MHz" -section_id clk_16_8
-set_global_assignment -name BASED_ON_CLOCK_SETTINGS clk_16_8 -section_id clk_200k
-set_global_assignment -name MULTIPLY_BASE_CLOCK_PERIOD_BY 42 -section_id clk_200k
 set_global_assignment -name SIGNALTAP_FILE acc_tap.stp
+set_global_assignment -name ZIP_VECTOR_WAVEFORM_FILE tracking.sim.cvwf
+set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE tracking.vwf
+set_global_assignment -name ZIP_VECTOR_WAVEFORM_FILE tracking2.sim.cvwf
 set_global_assignment -name PARTITION_NETLIST_TYPE POST_FIT -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
@@ -547,6 +548,6 @@ set_instance_assignment -name CLOCK_SETTINGS clk_fll -to "top:sub|tracking_loops
 set_instance_assignment -name CLOCK_SETTINGS clk_fll -to "top:sub|tracking_loops:loops_0|fll:fll0|clk_fll"
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_instance_assignment -name CLOCK_SETTINGS clk_16_8 -to clk_16_8
-set_instance_assignment -name CLOCK_SETTINGS clk_200k -to clk_200k
-set_global_assignment -name ZIP_VECTOR_WAVEFORM_FILE tracking.sim.cvwf
-set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE tracking.vwf
+set_global_assignment -name BASED_ON_CLOCK_SETTINGS clk_16_8 -section_id clk_400k
+set_global_assignment -name MULTIPLY_BASE_CLOCK_PERIOD_BY 42 -section_id clk_400k
+set_instance_assignment -name CLOCK_SETTINGS clk_400k -to clk_400k

@@ -48,7 +48,7 @@ module top(
     input                            f_carrier_sign,
     input                            sin_sign,
     output wire [3:0]                track_count,
-    output wire                      data_available,
+    output reg                       data_available,
     output wire                      track_feed_complete,
     output wire [`SAMPLE_COUNT_RANGE] sample_count,
     output wire [2:0]                 carrier_i,
@@ -63,11 +63,6 @@ module top(
                                .in(clk_sample),
                                .out(clk_sample_sync));
    
-   `KEEP wire sample_valid_sync;
-   synchronizer input_sample_valid_sync(.clk(clk),
-                                        .in(sample_valid),
-                                        .out(sample_valid_sync));
-   
    `KEEP wire feed_reset_sync;
    synchronizer input_feed_reset_sync(.clk(clk),
                                       .in(feed_reset),
@@ -78,21 +73,40 @@ module top(
                                          .in(feed_complete),
                                          .out(feed_complete_sync));
    
+   /*`KEEP wire sample_valid_sync;
+   synchronizer input_sample_valid_sync(.clk(clk),
+                                        .in(sample_valid),
+                                        .out(sample_valid_sync));
+   
    `KEEP wire [`INPUT_RANGE] data_sync;
    synchronizer #(.WIDTH(`INPUT_WIDTH))
      input_data_sync(.clk(clk),
                      .in(data),
-                     .out(data_sync));
+                     .out(data_sync));*/
+
+   wire new_sample;
+   `PRESERVE reg sample_valid_sync;
+   `PRESERVE reg [`INPUT_RANGE] data_sync;
+   always @(posedge clk) begin
+      if(new_sample) begin
+         sample_valid_sync <= sample_valid;
+         data_sync <= data;
+         data_available <= sample_valid;
+      end
+      else begin
+         data_available <= 1'b0;
+      end
+   end
 
    //Data available strobe.
    //`KEEP wire data_available;
 `ifndef HIGH_SPEED
-   wire new_sample;
+   //wire new_sample;
    strobe data_available_strobe(.clk(clk),
                                 .reset(global_reset),
                                 .in(clk_sample_sync),
                                 .out(new_sample));
-   assign data_available = new_sample && sample_valid_sync;
+   //assign data_available = new_sample && sample_valid_sync;
 `else
    reg data_done;
    always @(posedge clk) begin

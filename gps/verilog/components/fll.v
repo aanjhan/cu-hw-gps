@@ -507,7 +507,7 @@ module fll(
               res_state <= `FLL_RES_STATE_INC_0;
            end
            //Calculate Doppler phase increment.
-           //dopp_inc_kp1=w_df_kp1*(180*2^(CARRIER_ACC_WIDTH-ANGLE_SHIFT)/PI/F_S)
+           //dopp_inc_kp1=w_df_kp1*(2^(CARRIER_ACC_WIDTH-ANGLE_SHIFT)/(2*PI)/F_S)
            `FLL_RES_STATE_INC_0: begin
               res_state <= `FLL_RES_STATE_INC_1;
               res_mult_a <= `W_DF_TO_INC;

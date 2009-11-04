@@ -69,8 +69,13 @@ freq_arg = w_if_k*time+phi_if_k;
 %generate 1 msec. w/ 1*5714 samples for
 %CA code and sine wave mixing
 %note that modulationsin is NEGATIVE because of aliasing
-modulationcos = AMP*cos(freq_arg);   
-modulationsin = -AMP*sin(freq_arg);
+if(USE_HW_CARRIER)
+    modulationcos = round((2^CARRIER_WIDTH-1)*cos(freq_arg));
+    modulationsin = -round((2^CARRIER_WIDTH-1)*sin(freq_arg));
+else
+    modulationcos = AMP*cos(freq_arg);
+    modulationsin = -AMP*sin(freq_arg);
+end
 
 %baseband mix the signal with I and Q local carrier replicas
 IC = in_sig(samp_index+1).*modulationcos;

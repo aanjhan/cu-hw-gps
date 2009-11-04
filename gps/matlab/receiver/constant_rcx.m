@@ -45,6 +45,9 @@
  USE_FLL_FIXED=1;
  USE_DLL_FIXED=1;
  
+ USE_HW_CARRIER=1;
+ CARRIER_WIDTH=2;
+ 
  if(PLL_LOOP_ORDER == 2)
     damping = 1/sqrt(2);
     wn = 8*PLL_BANDWIDTH*damping/(4*damping.^2+1);

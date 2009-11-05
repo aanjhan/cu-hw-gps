@@ -474,9 +474,11 @@ module fll(
            `FLL_RES_STATE_W_DF_0: begin
               res_state <= `FLL_RES_STATE_W_DF_1;
               res_mult_a <= `FLL_T;
-              res_mult_b <= w_df_dot_k_post_div_2[`W_DF_DOT_WIDTH-1] ?
-                            {{`FLL_RES_W_DF_DOT_PAD{1'b0}},-w_df_dot_k_post_div_2} :
-                            {{`FLL_RES_W_DF_DOT_PAD{1'b0}},w_df_dot_k_post_div_2};
+              //FIXME THE POST_DIV_* SIGNALS ARE A VERY DANGEROUS HACK.
+              //FIXME Find a better way to delay the post_div values than this.
+              res_mult_b <= w_df_dot_k_post_div_1[`W_DF_DOT_WIDTH-1] ?
+                            {{`FLL_RES_W_DF_DOT_PAD{1'b0}},-w_df_dot_k_post_div_1} :
+                            {{`FLL_RES_W_DF_DOT_PAD{1'b0}},w_df_dot_k_post_div_1};
            end
            `FLL_RES_STATE_W_DF_1: begin
               res_state <= `FLL_RES_STATE_W_DF_2;
@@ -486,10 +488,10 @@ module fll(
            `FLL_RES_STATE_W_DF_2: begin
               res_state <= `FLL_RES_STATE_W_DF_DOT_0;
 
-              if(w_df_dot_k_post_div_2[`W_DF_DOT_WIDTH-1])
-                w_df_kp1 <= w_df_k_post_div_2-res_mult_result[`FLL_RES_T_RANGE];
+              if(w_df_dot_k_post_div_1[`W_DF_DOT_WIDTH-1])
+                w_df_kp1 <= w_df_k_post_div_1-res_mult_result[`FLL_RES_T_RANGE];
               else
-                w_df_kp1 <= w_df_k_post_div_2+res_mult_result[`FLL_RES_T_RANGE];
+                w_df_kp1 <= w_df_k_post_div_1+res_mult_result[`FLL_RES_T_RANGE];
            end
            //Calculate w_df_dot_kp1.
            //w_df_dot_kp1=w_df_dot_k+(FLL_A*dtheta)>>FLL_CONST_SHIFT

@@ -354,7 +354,7 @@ module DE2_TOP (
                              tracking_ready_flag;
 
       tracking_ready_count <= global_reset ? 4'd0 :
-                              tracking_ready ? 4'd7 :
+                              tracking_ready ? 4'd15 :
                               tracking_ready_count==4'd0 ? 4'd0 :
                               tracking_ready_count-4'd1;
    end

@@ -27,7 +27,8 @@ module tracking_loops(
     output reg [`DOPPLER_INC_RANGE]   doppler_inc_kp1_0,
     output reg [`W_DF_RANGE]          w_df_kp1_0,
     output reg [`W_DF_DOT_RANGE]      w_df_dot_kp1_0,
-    output reg [`CA_PHASE_INC_RANGE]  ca_dphi_kp1_0);
+    output reg [`CA_PHASE_INC_RANGE]  ca_dphi_kp1_0,
+    output reg [`DLL_TAU_RANGE]       tau_prime_kp1_0);
 
    `KEEP wire channel_0_starting;
    `PRESERVE reg channel_0_pending;
@@ -208,6 +209,7 @@ module tracking_loops(
       //FLL results.
       if(dll_result_ready) begin
          ca_dphi_kp1_0 <= ca_dphi_kp1;
+         tau_prime_kp1_0 <= tau_prime_kp1;
       end
    end // always @ (posedge clk)
 

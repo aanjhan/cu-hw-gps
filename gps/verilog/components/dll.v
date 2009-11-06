@@ -155,16 +155,17 @@ module dll(
    `KEEP wire [`DLL_OP_INDEX_RANGE] iq_index_val;
    assign iq_index_val = iq_sum_index>iq_diff_index ? iq_sum_index : iq_diff_index;
 
-   `KEEP wire div_edge_km1;
-   delay div_edge_delay_1(.clk(clk),
-                          .reset(reset),
-                          .in(div_edge),
-                          .out(div_edge_km1));
+   `KEEP wire div_edge_km3;
+   delay #(.DELAY(3))
+     div_edge_delay_3(.clk(clk),
+                      .reset(reset),
+                      .in(div_edge),
+                      .out(div_edge_km3));
 
    //Pipe index to truncators for timing.
    reg [`DLL_OP_INDEX_RANGE] iq_index;
    always @(posedge clk) begin
-      iq_index <= div_edge_km1 ? iq_index_val : iq_index;
+      iq_index <= div_edge_km3 ? iq_index_val : iq_index;
    end
 
    //Next truncate the input values to the operand width,
@@ -185,6 +186,12 @@ module dll(
                 .in(iq_diff_pre_post_sum),
                 .out(iq_diff));
 
+   `KEEP wire trunc_complete;
+   delay trunc_complete_delay(.clk(clk),
+                              .reset(reset),
+                              .in(div_edge_km3),
+                              .out(trunc_complete));
+
    //Pipe sum and difference values after truncation
    //to synchronize pipeline with divider.
    //Note: This assumes that the truncation finishes
@@ -198,7 +205,7 @@ module dll(
    
    `KEEP wire div_edge_setup;
    always @(posedge clk) begin
-      if(div_edge_setup) begin
+      if(trunc_complete) begin
          iq_sum_post_trunc <= iq_sum;
          iq_diff_post_trunc <= iq_diff;
       
@@ -213,8 +220,9 @@ module dll(
    /////////////////////////
 
    //Delay division clock to establish setup time.
+   //FIXME Delay should be (SETUP+4)%CLOCK_DIV.
    (* keep *) wire clk_dll_kmn;
-   delay #(.DELAY(`DLL_CLK_COUNT-`DLL_DIV_SETUP))
+   delay #(.DELAY(`DLL_DIV_SETUP+4))
      div_clk_delay(.clk(clk),
                    .reset(reset),
                    .in(clk_dll),

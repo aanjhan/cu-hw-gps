@@ -13,7 +13,7 @@ DLL_B_SHIFT,2,Phase increment coefficient fixed-point shift.
 DOPP_AID_SHIFT,16,Doppler aiding coefficient fixed-point shift.
 
 //Clock divider counter.
-DLL_CLK_COUNT,6,Division clock divider (must be even).
+DLL_CLK_COUNT,8,Division clock divider (must be even).
 DLL_DIV_SETUP,4,Length (in cycles) of required division setup time.
 DLL_DIV_HOLD,3,Length (in cycles) before division result stabilizes.
 DLL_CLK_MAX,ceil(DLL_CLK_COUNT/2)-1,Division clock counter max value.

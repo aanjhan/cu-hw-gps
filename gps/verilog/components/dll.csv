@@ -5,28 +5,20 @@
 #include !"ca_upsampler.csv"
 
 //Operating parameters.
-DLL_IQ_SHIFT,5,Amount to which IQ values are shifted before operation.
-DLL_CLK_COUNT,6,Division clock divider (must be even).
-DLL_DIV_SETUP,4,Length (in cycles) of required division setup time.
-DLL_DIV_STABLE,3,Length (in cycles) before division result stabilizes.
-DLL_SCALE_SHIFT,0,DLL fixed-point scale factor shift.
 DLL_HNUM,5.8e-7,DLL convergence factor.
+DLL_IQ_SHIFT,8,Amount to which IQ values are shifted before operation.
+DLL_SHIFT,6,DLL fixed-point multiplication shift.
+DLL_A_SHIFT,1,Tau-prime coefficient fixed-point shift.
+DLL_B_SHIFT,2,Phase increment coefficient fixed-point shift.
+DOPP_AID_SHIFT,16,Doppler aiding coefficient fixed-point shift.
 
 //Clock divider counter.
+DLL_CLK_COUNT,6,Division clock divider (must be even).
+DLL_DIV_SETUP,4,Length (in cycles) of required division setup time.
+DLL_DIV_HOLD,3,Length (in cycles) before division result stabilizes.
 DLL_CLK_MAX,ceil(DLL_CLK_COUNT/2)-1,Division clock counter max value.
 DLL_CLK_WIDTH,max_width(DLL_CLK_MAX),Division clock counter width.
 DLL_CLK_RANGE,DLL_CLK_WIDTH-1:0,Division clock counter bit range.
-
-//Sequence cycle times:
-//  --Operand (eml,epl) calculation = 1 cycle
-//  --Priority encoder = 3 cycles
-//  --Truncation = 1 cycle
-//  --Multiplication = 2 cycles
-//  --Division setup = DLL_DIV_SETUP cycles
-//  --Division = DLL_CLK_COUNT cycles
-//  --Division stabilization = DLL_DIV_STABLE cycles
-DIV_CLOCK_DELAY,7+DLL_DIV_SETUP,Cycles until divide starts.
-TOTAL_DELAY_LENGTH,DLL_CLK_COUNT+DIV_CLOCK_DELAY+DLL_DIV_STABLE,Total cycles from start to finish.
 
 //Pre-truncation operand width and index width.
 DLL_OP_PRE_WIDTH,max_width(IQ_MAX_VAL*2),Operand width before truncation.
@@ -35,19 +27,62 @@ DLL_OP_INDEX_WIDTH,max_width(DLL_OP_PRE_WIDTH-1),Operand bit index width.
 DLL_OP_INDEX_RANGE,DLL_OP_INDEX_WIDTH-1:0,Operand bit index range.
 
 //IQ value truncation.
-DLL_OP_WIDTH,IQ_WIDTH-DLL_IQ_SHIFT,IQ sum and difference operand widths.
+DLL_OP_WIDTH,DLL_OP_PRE_WIDTH-DLL_IQ_SHIFT,IQ sum and difference operand widths.
 DLL_OP_RANGE,DLL_OP_WIDTH-1:0,IQ operand bit range.
-DLL_TRUNC_RANGE,IQ_WIDTH-1:IQ_WIDTH-DLL_IQ_SHIFT,Truncated bit range for operands.
 
-//Fixed-point DLL amplitude scale factor.
-DLL_SCALE_VAL,round((2^CA_ACC_WIDTH)*(2-CHIPS_EML)*F_S/F_CA/2*DLL_HNUM*2^DLL_SCALE_SHIFT),Amplitude scale factor.
-DLL_SCALE_WIDTH,max_width(DLL_SCALE_VAL),Amplitude scale factor width.
-DLL_SCALE,DLL_SCALE_WIDTH'dDLL_SCALE_VAL,Amplitude scale factor constant.
+//Division numerator.
+DLL_DIV_NUM_WIDTH,DLL_OP_WIDTH+DLL_SHIFT,Division numerator width (fixed-point shifted by DLL_SHIFT).
+DLL_DIV_NUM_RANGE,range(DLL_DIV_NUM_WIDTH),Division numerator range.
 
-//Multiplication result width.
-DLL_MULT_OUTPUT_WIDTH,DLL_OP_WIDTH+DLL_SCALE_WIDTH,Scaled result width, before shift.
-DLL_MULT_OUTPUT_RANGE,DLL_MULT_OUTPUT_WIDTH-1:0,Scaled result range, before shift.
+//Multiplier input range/padding.
+DLL_MULT_INPUT_WIDTH,max(DLL_DIV_NUM_WIDTH;W_DF_WIDTH),Multiplier input width.
+DLL_MULT_INPUT_RANGE,range(DLL_MULT_INPUT_WIDTH),Multiplier input range.
+DLL_MULT_PAD_QUO,DLL_MULT_INPUT_WIDTH-DLL_DIV_NUM_WIDTH,Multiplier quotient input padding.
+DLL_MULT_PAD_DOPP,DLL_MULT_INPUT_WIDTH-W_DF_WIDTH,Multiplier Doppler input padding.
+
+//Multiplicative constants.
+DLL_A,(2-CHIPS_EML)*F_S/F_CA/2,Tau-prime coefficient.
+DLL_A_FIX_VAL,fix(DLL_A;DLL_A_SHIFT),Tau-prime coefficient value (fixed-point).
+DLL_A_FIX,DLL_MULT_CONST_WIDTH'dDLL_A_FIX_VAL,Tau-prime coefficient (fixed-point).
+DLL_B,DLL_A*2^CA_ACC_WIDTH*DLL_HNUM,Phase increment coefficient.
+DLL_B_FIX_VAL,fix(DLL_B;DLL_B_SHIFT),Phase increment coefficient value (fixed-point).
+DLL_B_FIX,DLL_MULT_CONST_WIDTH'dDLL_B_FIX_VAL,Phase increment coefficient (fixed-point).
+DOPP_AID_COEFF_VAL,fix(2^CARRIER_ACC_WIDTH/F_S*F_CA/2/PI/F_L1;DOPP_AID_SHIFT),Doppler aiding coefficient value.
+DOPP_AID_COEFF,DLL_MULT_CONST_WIDTH'dDOPP_AID_COEFF_VAL,Doppler aiding coefficient.
+DLL_MULT_CONST_WIDTH,max_width(max(DLL_A_FIX_VAL;DLL_B_FIX_VAL;DOPP_AID_COEFF_VAL)),Multiplication constant width.
+DLL_MULT_CONST_RANGE,range(DLL_MULT_CONST_WIDTH),Multiplication constant bit range.
+DLL_MULT_RES_WIDTH,DLL_MULT_INPUT_WIDTH+DLL_MULT_CONST_WIDTH,Multiplication result width.
+DLL_MULT_RES_RANGE,range(DLL_MULT_RES_WIDTH),Multiplication result range.
+
+//Multiplication rounding constants (1/2).
+DLL_A_HALF,DLL_MULT_RES_WIDTH'dfix(0.5;DLL_SHIFT+DLL_A_SHIFT),1/2 in DLL_A result fixed-point.
+DLL_B_HALF,DLL_MULT_RES_WIDTH'dfix(0.5;DLL_SHIFT+DLL_B_SHIFT),1/2 in DLL_B result fixed-point.
+DOPP_AID_HALF,DLL_MULT_RES_WIDTH'dfix(0.5;DLL_SHIFT+DOPP_AID_SHIFT),1/2 in Doppler aiding result fixed-point.
+
+//Multiplication result ranges.
+DLL_RES_TAU_RANGE,(DLL_TAU_WIDTH-1)+(DLL_SHIFT+DLL_A_SHIFT)-1:(DLL_SHIFT+DLL_A_SHIFT),Tau-prime multiplication result range.
+DLL_RES_DPHI_RANGE,(DLL_DPHI_WIDTH-1)+(DLL_SHIFT+DLL_B_SHIFT)-1:(DLL_SHIFT+DLL_B_SHIFT),Phase increment multiplication result range.
+DLL_RES_AID_RANGE,DLL_AID_WIDTH+DOPP_AID_SHIFT-1:DOPP_AID_SHIFT,Doppler aiding multiplication result range.
+DLL_RES_AID_PAD,pad(DLL_DPHI_WIDTH;DLL_AID_WIDTH),Doppler aiding result padding width.
 
 //Phase increment offset.
-DLL_DPHI_WIDTH,DLL_MULT_OUTPUT_WIDTH-DLL_SCALE_SHIFT+1,Phase increment offset width (two's complement).
+DLL_TAU_WIDTH,max_width(round(F_S/F_CA))+1,Tau-prime is the number of upsampled chips the code\nis off by, maximum of 1 C/A chip (two's complement).
+DLL_TAU_RANGE,range(DLL_TAU_WIDTH),Tau-prime bit range.
+//FIXME This width should be more formally defined from
+//FIXME maximum expected chipping rate offset.
+DLL_DPHI_WIDTH,max_width(round((2^(DLL_DIV_NUM_WIDTH-DLL_SHIFT)-1)*DLL_B))+1,Phase increment offset width (two's complement).
 DLL_DPHI_RANGE,DLL_DPHI_WIDTH-1:0,Phase increment offset range.
+DLL_AID_WIDTH,max_width(round(float((2*PI*F_DOPP_MAX)*DOPP_AID_COEFF;DOPP_AID_SHIFT))),Doppler aiding value width.
+
+//Result computation state machine.
+DLL_RES_STATE_MAX_VAL,7,Maximum result computation state value.
+DLL_RES_STATE_WIDTH,max_width(DLL_RES_STATE_MAX_VAL),Result computation state variable width.
+DLL_RES_STATE_RANGE,range(DLL_RES_STATE_WIDTH),Result computation state variable range.
+DLL_RES_STATE_IDLE,DLL_RES_STATE_WIDTH'd0,Result computation idle.
+DLL_RES_STATE_TAU_0,DLL_RES_STATE_WIDTH'd1,Setup tau-prime multiply.
+DLL_RES_STATE_TAU_1,DLL_RES_STATE_WIDTH'd2,Retrive tau-prime value.
+DLL_RES_STATE_DPHI_0,DLL_RES_STATE_WIDTH'd3,Setup phase increment multiply.
+DLL_RES_STATE_DPHI_1,DLL_RES_STATE_WIDTH'd4,Retrive phase increment value.
+DLL_RES_STATE_AID_0,DLL_RES_STATE_WIDTH'd5,Setup Doppler aiding multiply.
+DLL_RES_STATE_AID_1,DLL_RES_STATE_WIDTH'd6,Wait for Doppler aiding value.
+DLL_RES_STATE_AID_2,DLL_RES_STATE_WIDTH'd7,Retrive Doppler aiding value.

@@ -477,14 +477,9 @@ set_global_assignment -name BASED_ON_CLOCK_SETTINGS "200 MHz" -section_id "20 MH
 set_global_assignment -name MULTIPLY_BASE_CLOCK_PERIOD_BY 10 -section_id "20 MHz"
 set_global_assignment -name MUX_RESTRUCTURE OFF
 set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
-set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
-set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
-set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_instance_assignment -name CLOCK_SETTINGS "50 MHz" -to clk_50
 set_instance_assignment -name CLOCK_SETTINGS "200 MHz" -to clk_200
 set_instance_assignment -name CLOCK_SETTINGS "200 MHz Top" -to clk
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_instance_assignment -name CLOCK_SETTINGS "20 MHz" -to clk_dll
 set_instance_assignment -name CLOCK_SETTINGS "20 MHz" -to clk_dll_kmn
 set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE dll_test.vwf
@@ -501,3 +496,8 @@ set_global_assignment -name VERILOG_FILE ../components/dll_priority_enc.v
 set_global_assignment -name VECTOR_WAVEFORM_FILE dll_test.vwf
 set_global_assignment -name ZIP_VECTOR_WAVEFORM_FILE dll_functional.sim.cvwf
 set_global_assignment -name ZIP_VECTOR_WAVEFORM_FILE dll_timing.sim.cvwf
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

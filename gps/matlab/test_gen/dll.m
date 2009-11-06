@@ -1,6 +1,6 @@
 function dll(iqe,iql)
     CHIPS_EML=0.5;
-    IQ_SHIFT=9;
+    IQ_SHIFT=8;
     IQ_WIDTH=18;
     op_width=IQ_WIDTH-IQ_SHIFT;
     
@@ -9,66 +9,87 @@ function dll(iqe,iql)
     F_S=16.8e6;
     HNUM=5.8e-7;
     
+    DLL_SHIFT=6;
+    DLL_A_SHIFT=1;
+    DLL_B_SHIFT=2;
+    
     %eml=(iqe-iql)
     %epl=(iqe+iql)
+    %div_result=(eml<<DLL_SHIFT)/epl
+    %FIXME Instead of shifting by DLL_SHIFT, just reduce
+    %FIXME truncation amount on eml by DLL_SHIFT?
+    %
     %tau_prime=(iqe-iql)/(iqe+iql)*(2-CHIPS_EML)/2
     %         =eml/epl*((2-CHIPS_EML)/2)
     %tau_prime_up=tau_prime*F_S/F_CA
     %            =eml/epl*((2-CHIPS_EML)*F_S/F_CA/2)
+    %            =eml/epl*A
+    %            =(eml/epl*A_FIX)>>DLL_A_SHIFT
+    %            =(dll_result*A_FIX)>>(DLL_SHIFT+DLL_A_SHIFT)
+    %A=(2-CHIPS_EML)*F_S/F_CA/2
+    %A_FIX=round(A*2^DLL_A_SHIFT)
+    %
     %dphi=tau_prime_up*2^CA_ACC_WIDTH*HNUM
-    %    =eml/epl*(2^CA_ACC_WIDTH*(2-CHIPS_EML)*F_S/F_CA/2*HNUM)
-    %    =eml/epl*C
-    %    =(eml/epl*K)>>kshift
-    %C=2^CA_ACC_WIDTH*HNUM*(2-CHIPS_EML)*F_S/F_CA/2
-    %K=C*2^kshift (fixed-point)
+    %    =eml/epl*(A*2^CA_ACC_WIDTH*HNUM)
+    %    =eml/epl*B
+    %    =(div_result*B_FIX)>>(DLL_SHIFT+DLL_B_SHIFT)
+    %B=A*2^CA_ACC_WIDTH*HNUM
+    %B_FIX=round(B*2^DLL_B_SHIFT)
     
-    inc_to_chips=1/(2^CA_ACC_WIDTH*HNUM);
-    C=2^CA_ACC_WIDTH*HNUM*(2-CHIPS_EML)*F_S/F_CA/2;
-    kshift=0;
-    K=round(C*2^kshift);
-    eml=iqe-iql;
-    epl=iqe+iql;
+    A=(2-CHIPS_EML)*F_S/F_CA/2;
+    A_FIX=round(A*2^DLL_A_SHIFT);
+    B=A*2^CA_ACC_WIDTH*HNUM;
+    B_FIX=round(B*2^DLL_B_SHIFT);
     
     %Print parameters.
-    disp(sprintf('DLL Parameters: CHIPS_EML=%.1f, IQ_SHIFT=%d, k_shift=%d, HNUM=%e',CHIPS_EML,IQ_SHIFT,kshift,HNUM));
+    fprintf('DLL Parameters: CHIPS_EML=%.1f, IQ_SHIFT=%d, A_SHIFT=%d, B_SHIFT=%d, HNUM=%e\n',...
+        CHIPS_EML,IQ_SHIFT,DLL_A_SHIFT,DLL_B_SHIFT,HNUM);
     
     %Floating point truth value.
-    dphi=eml/epl*C;
-    chipsf=dphi*inc_to_chips;
-    chips=round(chipsf);
-    disp(sprintf('Truth: shift by %d (%.10f) chips - dphi=%.6f.',chips,chipsf,dphi));
+    eml=iqe-iql;
+    epl=iqe+iql;
+    div_result=eml/epl;
+    tau_prime_up=div_result*A;
+    dphi=div_result*B;
+    chips=round(tau_prime_up);
+    fprintf('Truth: shift by %d (%.10f) chips - dphi=%.6f.\n',chips,tau_prime_up,dphi);
     
     %Fixed-point without truncating IQ values
     %for speed increase and circuit complexity reduction.
+    eml=iqe-iql;
+    epl=iqe+iql;
     s=sign(eml);
     eml=abs(eml);
-    mult_result=eml*K;
-    div_result=floor(mult_result/epl);
-    dphi=s*floor(div_result/2^kshift);
-    chips=s*floor(div_result/2^kshift*inc_to_chips);
-    chipsf=s*(eml*K/epl)/2^kshift*inc_to_chips;
-    disp(sprintf('No truncate: shift by %d (%.10f) chips - dphi=%.6f. [eml=%d, epl=%d, mult=%d, div=%d]',...
-        chips,chipsf,dphi,eml,epl,mult_result,div_result));
+    div_result=floor((eml*2^DLL_SHIFT)/epl);
+    tau_prime_up=s*floor((div_result*A_FIX+2^(DLL_SHIFT+DLL_A_SHIFT-1))/2^(DLL_SHIFT+DLL_A_SHIFT));
+    dphi=s*floor((div_result*B_FIX+2^(DLL_SHIFT+DLL_B_SHIFT-1))/2^(DLL_SHIFT+DLL_B_SHIFT));
+    chipsf=s*(div_result*A_FIX)/2^(DLL_SHIFT+DLL_A_SHIFT);
+    fprintf('No truncate: shift by %d (%.10f) chips - dphi=%.6f.\n',...
+        tau_prime_up,chipsf,dphi);
+    fprintf('             [eml=%d, epl=%d, div=%d]\n',...
+        eml,epl,div_result);
     
     %Fixed-point with IQ sum/diff truncation.
     eml=iqe-iql;
     epl=iqe+iql;
+    s=sign(eml);
+    eml=abs(eml);
     diff_index=ceil(log2(eml))-1;
     sum_index=ceil(log2(epl))-1;
     index=max(sum_index,diff_index);
     shift=index-op_width+1;
     if(shift<0)shift=0; end
-    s=sign(eml);
-    eml=abs(eml);
     eml=floor(eml/2^shift);
     epl=floor(epl/2^shift);
-    mult_result=eml*K;
-    div_result=floor(mult_result/epl);
-    dphi=s*floor(div_result/2^kshift);
-    chips=s*floor(div_result/2^kshift*inc_to_chips);
-    chipsf=s*(eml*K/epl)/2^kshift*inc_to_chips;
-    disp(sprintf('Truncate (%db): shift by %d (%.10f) chips - dphi=%.6f. [eml=%d, epl=%d, mult=%d, div=%d]',...
-        shift,chips,chipsf,dphi,eml,epl,mult_result,div_result));
+    
+    div_result=floor((eml*2^DLL_SHIFT)/epl);
+    tau_prime_up=s*floor((div_result*A_FIX+2^(DLL_SHIFT+DLL_A_SHIFT-1))/2^(DLL_SHIFT+DLL_A_SHIFT));
+    dphi=s*floor((div_result*B_FIX+2^(DLL_SHIFT+DLL_B_SHIFT-1))/2^(DLL_SHIFT+DLL_B_SHIFT));
+    chipsf=s*(div_result*A_FIX)/2^(DLL_SHIFT+DLL_A_SHIFT);
+    fprintf('No truncate: shift by %d (%.10f) chips - dphi=%.6f.\n',...
+        tau_prime_up,chipsf,dphi);
+    fprintf('             [eml=%d, epl=%d, div=%d]\n',...
+        eml,epl,div_result);
     
     %Plot amplitude triangle.
     amp=(iqe+iql)/(2-CHIPS_EML);

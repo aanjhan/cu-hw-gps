@@ -151,9 +151,12 @@ module tracking_loops(
             .w_df_dot_kp1(w_df_dot_kp1));
 
    //Delay-locked loop.
-   `KEEP wire                      dll_result_ready;
-   `KEEP wire [`CHANNEL_ID_RANGE]  dll_result_tag;
-   `KEEP wire [`DLL_DPHI_RANGE]    dphi_kp1;
+   `KEEP wire                     dll_result_ready;
+   `KEEP wire [`CHANNEL_ID_RANGE] dll_result_tag;
+   `KEEP wire [`DLL_DPHI_RANGE]   dll_dphi_kp1;
+   wire [`DLL_TAU_RANGE]          tau_prime_kp1;
+   wire                           w_df_ready;
+   wire [`W_DF_RANGE]             w_df_kp1_to_dll;
    dll dll0(.clk(clk),
             .reset(reset),
             .start(loop_start_status[0]),
@@ -161,15 +164,18 @@ module tracking_loops(
             .starting(dll_starting),
             .iq_early(iq_early_k),
             .iq_late(iq_late_k),
+            .w_df_ready(w_df_ready),
+            .w_df_kp1(w_df_kp1_to_dll),
             .result_ready(dll_result_ready),
             .result_tag(dll_result_tag),
-            .delta_phase_increment(dphi_kp1));
+            .ca_dphi(dll_dphi_kp1),
+            .tau_prime(tau_prime_kp1));
 
-   //FIXME Add carrier aiding to DLL results.
    //Sign-extend DLL phase increment to CA increment width.
+   //FIXME Remove this and resize ca_dphi in DLL.
    wire [`CA_PHASE_INC_RANGE] ca_dphi_kp1;
-   assign ca_dphi_kp1 = {{(`CA_PHASE_INC_WIDTH-`DLL_DPHI_WIDTH){dphi_kp1[`DLL_DPHI_WIDTH-1]}},dphi_kp1};
-   
+   assign ca_dphi_kp1 = {{(`CA_PHASE_INC_WIDTH-`DLL_DPHI_WIDTH){dll_dphi_kp1[`DLL_DPHI_WIDTH-1]}},dll_dphi_kp1};
+
    ////////////////////
    // Report Results
    ////////////////////
@@ -204,5 +210,8 @@ module tracking_loops(
          ca_dphi_kp1_0 <= ca_dphi_kp1;
       end
    end // always @ (posedge clk)
+
+   assign w_df_ready = channel_0_loop_status[1];
+   assign w_df_kp1_to_dll = w_df_kp1_0;
    
 endmodule

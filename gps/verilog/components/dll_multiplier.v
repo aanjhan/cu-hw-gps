@@ -57,7 +57,7 @@ module dll_multiplier (
 				.clken (1'b1),
 				.sum (1'b0));
    defparam lpm_mult_component.lpm_hint = "MAXIMIZE_SPEED=9",
-	    lpm_mult_component.lpm_pipeline = 2,
+	    lpm_mult_component.lpm_pipeline = 1,
 	    lpm_mult_component.lpm_representation = "UNSIGNED",
 	    lpm_mult_component.lpm_type = "LPM_MULT",
 	    lpm_mult_component.lpm_widtha = INPUT_A_WIDTH,

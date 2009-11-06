@@ -1,4 +1,6 @@
 #include !"dll.csv"
 
+DLL_TAU_WIDTH,@
+DLL_TAU_RANGE,@
 DLL_DPHI_WIDTH,@
 DLL_DPHI_RANGE,@

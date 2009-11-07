@@ -5,7 +5,7 @@ btn=uicontrol('style','pushbutton',...
     'string','Stop!',...
     'callback','global running;running=0;clear running;close');
 
-numValues=6;
+numValues=10;
 data=zeros(1,numValues);
 
 device=serial_open(device_name);
@@ -55,8 +55,12 @@ while(running==1)
         end
         
         i=0;
-    else
+    elseif(i<7)
         data(i+1)=serial_read(device,1,'int32');
+        
+        i=i+1;
+    else
+        data(i+1)=serial_read(device,1,'uint32');
         
         i=i+1;
         if(i==numValues)

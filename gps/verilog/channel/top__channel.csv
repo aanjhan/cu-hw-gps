@@ -1,8 +1,10 @@
 #include !"../components/channel__subchannel.csv"
+#include !"../components/channel__tracking_loops.csv"
 #include !"../components/channel.csv"
 
 MODE_RANGE,@
 I2Q2_RANGE,@
 ACC_RANGE,@
 DOPPLER_INC_RANGE,@
+CA_PHASE_INC_RANGE,@
 SAMPLE_COUNT_RANGE,@

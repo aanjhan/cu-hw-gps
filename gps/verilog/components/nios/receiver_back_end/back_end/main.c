@@ -17,6 +17,10 @@ typedef struct
     alt_32 w_df_dot;
     alt_32 doppler_dphi;
     alt_32 ca_dphi;
+    alt_32 tau_prime;
+    alt_u32 i2q2_early;
+    alt_u32 i2q2_prompt;
+    alt_u32 i2q2_late;
 } Tracking;
 
 int heartbeat_led;
@@ -26,6 +30,7 @@ volatile alt_u8 bad_value;
 volatile alt_u8 updates_ready;
 volatile Tracking tracking_params[4];
 volatile int param_head;
+volatile int prev=0;
 int param_tail; 
 
 alt_u32 Heartbeat(void *context)
@@ -47,14 +52,14 @@ inline void SignFix32(volatile alt_32 *value, alt_u8 width)
 void TrackingUpdate(void *context, alt_u32 id)
 {
     volatile Tracking *params;
-    alt_8 prev;
+    volatile Tracking *prev_params;
+    alt_u32 diff;
     
     IOWR_ALTERA_AVALON_PIO_IRQ_MASK(TRACKING_READY_BASE,0x00);
-    
-    prev=param_head-1;
-    if(prev<0)prev=3;
-    
+        
     params=&tracking_params[param_head];
+    prev_params=&tracking_params[prev];
+    prev=param_head;
     if(++param_head>3)param_head=0;
     
     //Read tracking parameters.
@@ -64,6 +69,10 @@ void TrackingUpdate(void *context, alt_u32 id)
     params->w_df_dot=IORD_ALTERA_AVALON_PIO_DATA(W_DF_DOT_BASE);
     params->doppler_dphi=IORD_ALTERA_AVALON_PIO_DATA(DOPPLER_DPHI_BASE);
     params->ca_dphi=IORD_ALTERA_AVALON_PIO_DATA(CA_DPHI_BASE);
+    params->tau_prime=IORD_ALTERA_AVALON_PIO_DATA(TAU_PRIME_BASE);
+    params->i2q2_early=IORD_ALTERA_AVALON_PIO_DATA(I2Q2_EARLY_BASE);
+    params->i2q2_prompt=IORD_ALTERA_AVALON_PIO_DATA(I2Q2_PROMPT_BASE);
+    params->i2q2_late=IORD_ALTERA_AVALON_PIO_DATA(I2Q2_LATE_BASE);
     
     //Correct signed values.
     SignFix32(&params->i_prompt,I_PROMPT_DATA_WIDTH);
@@ -73,9 +82,9 @@ void TrackingUpdate(void *context, alt_u32 id)
     SignFix32(&params->doppler_dphi,DOPPLER_DPHI_DATA_WIDTH);
     SignFix32(&params->ca_dphi,CA_DPHI_DATA_WIDTH);
     
-    if((tracking_params[prev].w_df-params->w_df)>(tracking_params[prev].w_df>>4) ||
-       (tracking_params[prev].w_df-params->w_df)<-(tracking_params[prev].w_df>>4) ||
-       params->doppler_dphi<10)
+    diff=prev_params->w_df-params->w_df;
+    if(diff<0)diff=-diff;
+    if(diff>(prev_params->w_df>>4))
     {
        bad_value=1;
     }

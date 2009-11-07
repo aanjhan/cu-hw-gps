@@ -31,7 +31,7 @@ module fll(
    //Generate FLL clock at speed required for division.
    //Note: clk_fll is forced to keep for timing constraints.
    `PRESERVE reg [`FLL_CLK_RANGE] fll_clk_count;
-   (* preserve*) reg              clk_fll;
+   (* preserve *) reg             clk_fll;
    always @(posedge clk) begin
       fll_clk_count <= reset ? `FLL_CLK_WIDTH'd`FLL_CLK_MAX :
                        fll_clk_count==`FLL_CLK_WIDTH'd`FLL_CLK_MAX ? `FLL_CLK_WIDTH'h0 :

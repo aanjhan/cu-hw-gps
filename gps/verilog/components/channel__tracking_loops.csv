@@ -1,5 +1,6 @@
 #include !"tracking_loops.csv"
 #include !"channel.csv"
+#include !"channel__dll.csv"
 
 //From channel to tracking loops.
 I2Q2_WIDTH,@
@@ -17,3 +18,5 @@ W_DF_WIDTH,@
 W_DF_RANGE,@
 W_DF_DOT_WIDTH,@
 W_DF_DOT_RANGE,@
+DLL_TAU_WIDTH,@
+DLL_TAU_RANGE,@

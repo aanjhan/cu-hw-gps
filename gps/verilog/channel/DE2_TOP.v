@@ -248,6 +248,7 @@ module DE2_TOP (
    wire [8:0] words_available;
    wire [8:0] pkt_count;
    wire [8:0] good_pkt_count;
+   wire [8:0] missed_count;
    rt_data_feed data_feed(.clk_50(CLOCK_50),
                           .reset(global_reset),
                           .enet_clk(ENET_CLK),
@@ -265,6 +266,7 @@ module DE2_TOP (
                           .words_available(words_available),
                           .packet_count(pkt_count),
                           .good_packet_count(good_pkt_count),
+                          .missed_count(missed_count),
                           .halt(1'b0),
                           .halt_packet(1'b0));
 
@@ -282,8 +284,9 @@ module DE2_TOP (
    wire [`ACC_RANGE_TRACK] q_prompt_k;
    wire [`W_DF_RANGE] w_df_k;
    wire [`W_DF_DOT_RANGE] w_df_dot_k;
-   wire [`DOPPLER_INC_RANGE] doppler_dphi;
-   wire [`CA_PHASE_INC_RANGE] ca_dphi_total;
+   wire [`DOPPLER_INC_RANGE] carrier_dphi_k;
+   wire [`CA_PHASE_INC_RANGE] ca_dphi_k;
+   wire [`SAMPLE_COUNT_RANGE] tau_prime_k;
    wire               acquisition_complete;
    wire [`I2Q2_RANGE] acq_peak_i2q2;
    wire [`ACC_RANGE] accumulator_i;
@@ -321,8 +324,9 @@ module DE2_TOP (
            .q_prompt_k(q_prompt_k),
            .w_df_k(w_df_k),
            .w_df_dot_k(w_df_dot_k),
-           .doppler_dphi(doppler_dphi),
-           .ca_dphi_total(ca_dphi_total),
+           .carrier_dphi_k(carrier_dphi_k),
+           .ca_dphi_k(ca_dphi_k),
+           .tau_prime_k(tau_prime_k),
            //Acquisition results.
            .acquisition_complete(acquisition_complete),
            .acq_peak_i2q2(acq_peak_i2q2),
@@ -366,8 +370,12 @@ module DE2_TOP (
                         .in_port_to_the_q_prompt(q_prompt_k),
                         .in_port_to_the_w_df(w_df_k),
                         .in_port_to_the_w_df_dot(w_df_dot_k),
-                        .in_port_to_the_doppler_dphi(doppler_dphi),
-                        .in_port_to_the_ca_dphi(ca_dphi_total),
+                        .in_port_to_the_doppler_dphi(carrier_dphi_k),
+                        .in_port_to_the_ca_dphi(ca_dphi_k),
+                        .in_port_to_the_tau_prime(tau_prime_k),
+                        .in_port_to_the_i2q2_early(i2q2_early[`I2Q2_WIDTH-1:`I2Q2_WIDTH-32]),
+                        .in_port_to_the_i2q2_prompt(i2q2_prompt[`I2Q2_WIDTH-1:`I2Q2_WIDTH-32]),
+                        .in_port_to_the_i2q2_late(i2q2_late[`I2Q2_WIDTH-1:`I2Q2_WIDTH-32]),
                         .rxd_to_the_uart_0(UART_RXD),
                         .txd_from_the_uart_0(UART_TXD),
                         .zs_addr_from_the_sdram(DRAM_ADDR),
@@ -399,7 +407,7 @@ module DE2_TOP (
 
    assign LEDR=disp_words ? {9'h0,words_available} :
                disp_track_count ? {14'h0,track_count} :
-               disp_pkt ? (disp_pkt_good ? {9'h0,good_pkt_count} : {9'h0,pkt_count}) :
+               disp_pkt ? (disp_pkt_good ? {9'h0,good_pkt_count} : {9'h0,missed_count}) :
                sel_i_q_value[17:0];
    assign LEDG[8] = link_status;
    assign LEDG[7:5] = disp_carrier_i ? carrier_i : carrier_q;

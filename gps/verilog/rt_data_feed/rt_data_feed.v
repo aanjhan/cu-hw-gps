@@ -41,6 +41,7 @@ module rt_data_feed(
     output wire [8:0]  words_available,
     output wire [8:0]  packet_count,
     output wire [8:0]  good_packet_count,
+    output wire [8:0]  missed_count,
     output wire [15:0] data_out,
     //Debug
     output wire [17:0] samp_buffer,
@@ -96,7 +97,8 @@ module rt_data_feed(
                                    .data(packet_data),
                                    .words_available(words_available),
                                    .packet_count(packet_count),
-                                   .good_packet_count(good_packet_count));
+                                   .good_packet_count(good_packet_count),
+                                   .missed_count(missed_count));
    
    assign have_data = !packet_empty;
    assign data_out = packet_data;

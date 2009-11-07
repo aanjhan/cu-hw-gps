@@ -37,6 +37,7 @@ module rtdf_packet_processor(
     //Debug
     output reg [8:0]   packet_count,
     output reg [8:0]   good_packet_count,
+    output reg [8:0]   missed_count,
     output wire [8:0]  words_available);
 
    //Post-packet processing stream data FIFO.
@@ -59,6 +60,8 @@ module rtdf_packet_processor(
    `PRESERVE reg [`RTDF_PKT_LENGTH_RANGE] packet_length;
    `PRESERVE reg [`RTDF_STATE_RANGE]      packet_state;
    `PRESERVE reg                          ignore_packet;
+   reg [15:0]          next_seq;
+   reg                 need_seq;
    always @(posedge clk_rx) begin
       if(reset) begin
          packet_state <= `RTDF_STATE_LENGTH;
@@ -68,6 +71,9 @@ module rtdf_packet_processor(
 
          packet_count <= 9'd0;
          good_packet_count <= 9'd0;
+
+         next_seq <= 16'd1;
+         missed_count <= 9'd0;
       end
       else if(rx_fifo_empty) begin
          packet_state <= packet_state;
@@ -123,6 +129,8 @@ module rtdf_packet_processor(
               good_packet_count <= {rx_fifo_rd_data[7:0],rx_fifo_rd_data[15:8]}!=`RTDF_ETHERTYPE ?
                                    good_packet_count :
                                    good_packet_count+9'd1;
+
+              need_seq <= 1'b1;
            end
            //Read packet data. If CRC is enabled, go to
            //CRC discard state when packet completes.
@@ -132,8 +140,15 @@ module rtdf_packet_processor(
                               `RTDF_CRC_ENABLE ? `RTDF_STATE_CRC :
                               `RTDF_STATE_LENGTH;
               
-              fifo_wr_req <= !ignore_packet && !fifo_full;
+              fifo_wr_req <= !need_seq &&
+                             !ignore_packet && !fifo_full;
               fifo_wr_data <= rx_fifo_rd_data;
+
+              need_seq <= 1'b0;
+              missed_count <= !need_seq || ignore_packet ? missed_count :
+                              {rx_fifo_rd_data[7:0],rx_fifo_rd_data[15:8]}!=next_seq ? missed_count+9'd1 :
+                              missed_count;
+              next_seq <= need_seq && !ignore_packet ? {rx_fifo_rd_data[7:0],rx_fifo_rd_data[15:8]}+16'd1 : next_seq;
 
               packet_length <= fifo_full ? packet_length :
                                packet_length==`RTDF_PKT_LENGTH_WIDTH'd1 ? `RTDF_PKT_LENGTH_WIDTH'd0 :

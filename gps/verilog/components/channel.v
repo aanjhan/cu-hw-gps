@@ -34,8 +34,9 @@ module channel(
     output reg [`W_DF_RANGE]         w_df_k,
     output reg [`W_DF_DOT_RANGE]     w_df_dot_k,
                
-    output reg [`DOPPLER_INC_RANGE]  doppler_dphi,
-    output reg [`CA_PHASE_INC_RANGE] ca_dphi_total,
+    output reg [`DOPPLER_INC_RANGE]  carrier_dphi_k,
+    output reg [`CA_PHASE_INC_RANGE] ca_dphi_k,
+    output reg [`SAMPLE_COUNT_RANGE] tau_prime_k,
     //Tracking results.
     input                            tracking_ready,
     input [`IQ_RANGE]                iq_prompt_k,
@@ -43,6 +44,7 @@ module channel(
     input [`W_DF_RANGE]              w_df_kp1,
     input [`W_DF_DOT_RANGE]          w_df_dot_kp1,
     input [`CA_PHASE_INC_RANGE]      ca_dphi_kp1,
+    input [`DLL_TAU_RANGE]           tau_prime_kp1,
     //Acquisition results.
     output wire                      acquisition_complete,
     output wire [`I2Q2_RANGE]        acq_peak_i2q2,
@@ -89,13 +91,13 @@ module channel(
                       sample_count+`SAMPLE_COUNT_WIDTH'd1;
       
       track_feed_complete <= start_tracking ? 1'b0 :
-                             sample_count==`SAMPLE_COUNT_MAX-`SAMPLE_COUNT_WIDTH'd1 ? 1'b1 :
+                             sample_count==tau_prime_k-`SAMPLE_COUNT_WIDTH'd1 ? 1'b1 :
                              1'b0;
    end
    
    //Current Doppler shift phase increment, initialized by
    //acquisition and controlled by tracking loops.
-   //reg [`DOPPLER_INC_RANGE] doppler_dphi;
+   //reg [`DOPPLER_INC_RANGE] carrier_dphi_k;
 
    //Acquisition controller.
    `KEEP wire [`DOPPLER_INC_RANGE] acq_dopp_early;
@@ -130,7 +132,7 @@ module channel(
    assign acq_seek_en = 1'b0;
 
    //Upsample the C/A code to the incoming sampling rate.
-   //reg [`CA_PHASE_INC_RANGE] ca_dphi_total;
+   //reg [`CA_PHASE_INC_RANGE] ca_dphi_k;
    wire ca_bit_early, ca_bit_prompt, ca_bit_late;
    reg track_seek_en;
    reg [`CS_RANGE] track_seek_target;
@@ -139,7 +141,7 @@ module channel(
                           .enable(data_available),
                           //Control interface.
                           .prn(prn),
-                          .phase_inc_offset(ca_dphi_total),
+                          .phase_inc_offset(ca_dphi_k),
                           //C/A code output interface.
                           .code_shift(code_shift),
                           .out_early(ca_bit_early),
@@ -169,7 +171,7 @@ module channel(
                     .data_available(data_available),
                     .feed_complete(mode==`MODE_ACQ ? feed_complete : track_feed_complete),
                     .data(data),
-                    .doppler(mode==`MODE_ACQ ? acq_dopp_early : doppler_dphi),
+                    .doppler(mode==`MODE_ACQ ? acq_dopp_early : carrier_dphi_k),
                     .ca_bit(mode==`MODE_ACQ ? ca_bit_prompt : ca_bit_early),
                     .accumulator_updating(early_updating),
                     .accumulator_i(acc_i_early),
@@ -187,7 +189,7 @@ module channel(
                      .data_available(data_available),
                      .feed_complete(mode==`MODE_ACQ ? feed_complete : track_feed_complete),
                      .data(data),
-                     .doppler(mode==`MODE_ACQ ? acq_dopp_prompt : doppler_dphi),
+                     .doppler(mode==`MODE_ACQ ? acq_dopp_prompt : carrier_dphi_k),
                      .ca_bit(ca_bit_prompt),
                      .accumulator_updating(prompt_updating),
                      .accumulator_i(acc_i_prompt),
@@ -213,7 +215,7 @@ module channel(
                    .data_available(data_available),
                    .feed_complete(mode==`MODE_ACQ ? feed_complete : track_feed_complete),
                    .data(data),
-                   .doppler(mode==`MODE_ACQ ? acq_dopp_late : doppler_dphi),
+                   .doppler(mode==`MODE_ACQ ? acq_dopp_late : carrier_dphi_k),
                    .ca_bit(mode==`MODE_ACQ ? ca_bit_prompt : ca_bit_late),
                    .accumulator_updating(late_updating),
                    .accumulator_i(acc_i_late),
@@ -431,16 +433,20 @@ module channel(
                     !track_carrier_en ? w_df_dot_k :
                     tracking_ready && !ignore_doppler ? w_df_dot_kp1 :
                     w_df_dot_k;
-      doppler_dphi <= start_tracking ? `DOPPLER_INC_WIDTH'd0 : //FIXME Remove this in favor of acquisiton result below.
-                      !track_carrier_en ? doppler_dphi :
-                      acquisition_complete && mode==`MODE_ACQ ? acq_peak_doppler :
-                      tracking_ready && !ignore_doppler ? doppler_inc_kp1 :
-                      doppler_dphi;
+      carrier_dphi_k <= start_tracking ? `DOPPLER_INC_WIDTH'd0 : //FIXME Remove this in favor of acquisiton result below.
+                        !track_carrier_en ? carrier_dphi_k :
+                        acquisition_complete && mode==`MODE_ACQ ? acq_peak_doppler :
+                        tracking_ready && !ignore_doppler ? doppler_inc_kp1 :
+                        carrier_dphi_k;
 
       //Code generator.
-      ca_dphi_total <= start_tracking ? `CA_PHASE_INC_WIDTH'd0 :
-                       !track_code_en ? ca_dphi_total :
-                       tracking_ready ? ca_dphi_kp1 :
-                       ca_dphi_total;
+      ca_dphi_k <= start_tracking ? `CA_PHASE_INC_WIDTH'd0 :
+                   !track_code_en ? ca_dphi_k :
+                   tracking_ready ? ca_dphi_kp1 :
+                   ca_dphi_k;
+      tau_prime_k <= start_tracking ? `SAMPLE_COUNT_MAX :
+                     !track_code_en ? tau_prime_k :
+                     tracking_ready ? `SAMPLE_COUNT_MAX+{{(`SAMPLE_COUNT_WIDTH-`DLL_TAU_WIDTH){tau_prime_kp1[`DLL_TAU_WIDTH-1]}},tau_prime_kp1} :
+                     tau_prime_k;
    end
 endmodule

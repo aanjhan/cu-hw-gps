@@ -1,19 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><system name="receiver_back_end">
     <parameter name="bonusData">bonusData 
 {
-   element timer_0.s1
-   {
-      datum baseAddress
-      {
-         value = "16781312";
-         type = "long";
-      }
-   }
-   element uart_0
+   element i_prompt
    {
       datum _sortIndex
       {
-         value = "13";
+         value = "3";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -22,11 +14,138 @@
          type = "String";
       }
    }
-   element jtag_uart_0
+   element receiver_back_end
+   {
+   }
+   element q_prompt.s1
+   {
+      datum baseAddress
+      {
+         value = "16781392";
+         type = "long";
+      }
+   }
+   element i2q2_late.s1
+   {
+      datum baseAddress
+      {
+         value = "96";
+         type = "long";
+      }
+   }
+   element w_df_dot.s1
+   {
+      datum baseAddress
+      {
+         value = "0";
+         type = "long";
+      }
+   }
+   element q_prompt
+   {
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element i2q2_prompt.s1
+   {
+      datum baseAddress
+      {
+         value = "80";
+         type = "long";
+      }
+   }
+   element tau_prime.s1
+   {
+      datum baseAddress
+      {
+         value = "48";
+         type = "long";
+      }
+   }
+   element doppler_dphi.s1
+   {
+      datum baseAddress
+      {
+         value = "16";
+         type = "long";
+      }
+   }
+   element jtag_uart_0.avalon_jtag_slave
+   {
+      datum baseAddress
+      {
+         value = "16781456";
+         type = "long";
+      }
+   }
+   element heartbeat_led
    {
       datum _sortIndex
       {
          value = "12";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element tracking_ready.s1
+   {
+      datum baseAddress
+      {
+         value = "16781424";
+         type = "long";
+      }
+   }
+   element doppler_dphi
+   {
+      datum _sortIndex
+      {
+         value = "7";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element sdram.s1
+   {
+      datum baseAddress
+      {
+         value = "8388608";
+         type = "long";
+      }
+   }
+   element ca_dphi
+   {
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element i2q2_prompt
+   {
+      datum _sortIndex
+      {
+         value = "16";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -48,20 +167,25 @@
          type = "String";
       }
    }
-   element jtag_uart_0.avalon_jtag_slave
+   element uart_0
    {
-      datum baseAddress
+      datum _sortIndex
       {
-         value = "16781456";
-         type = "long";
+         value = "14";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
       }
    }
-   element heartbeat_led.s1
+   element clk_0
    {
-      datum baseAddress
+      datum _sortIndex
       {
-         value = "16781440";
-         type = "long";
+         value = "11";
+         type = "int";
       }
    }
    element tracking_ready
@@ -69,135 +193,6 @@
       datum _sortIndex
       {
          value = "2";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element w_df
-   {
-      datum _sortIndex
-      {
-         value = "5";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element tracking_ready.s1
-   {
-      datum baseAddress
-      {
-         value = "16781424";
-         type = "long";
-      }
-   }
-   element ca_dphi
-   {
-      datum _sortIndex
-      {
-         value = "8";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element w_df_dot.s1
-   {
-      datum baseAddress
-      {
-         value = "0";
-         type = "long";
-      }
-   }
-   element heartbeat_led
-   {
-      datum _sortIndex
-      {
-         value = "11";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element receiver_back_end
-   {
-   }
-   element uart_0.s1
-   {
-      datum baseAddress
-      {
-         value = "16781344";
-         type = "long";
-      }
-   }
-   element cpu_0.jtag_debug_module
-   {
-      datum baseAddress
-      {
-         value = "16779264";
-         type = "long";
-      }
-   }
-   element sdram.s1
-   {
-      datum baseAddress
-      {
-         value = "8388608";
-         type = "long";
-      }
-   }
-   element timer_0
-   {
-      datum _sortIndex
-      {
-         value = "9";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element q_prompt
-   {
-      datum _sortIndex
-      {
-         value = "4";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element q_prompt.s1
-   {
-      datum baseAddress
-      {
-         value = "16781392";
-         type = "long";
-      }
-   }
-   element doppler_dphi
-   {
-      datum _sortIndex
-      {
-         value = "7";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -214,53 +209,35 @@
          type = "long";
       }
    }
-   element w_df.s1
+   element i2q2_early.s1
    {
       datum baseAddress
       {
-         value = "16781408";
+         value = "64";
          type = "long";
       }
    }
-   element clk_0
+   element cpu_0.jtag_debug_module
    {
-      datum _sortIndex
+      datum baseAddress
       {
-         value = "10";
-         type = "int";
+         value = "16779264";
+         type = "long";
       }
    }
-   element i_prompt
+   element heartbeat_led.s1
    {
-      datum _sortIndex
+      datum baseAddress
       {
-         value = "3";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
+         value = "16781440";
+         type = "long";
       }
    }
-   element w_df_dot
+   element w_df
    {
       datum _sortIndex
       {
-         value = "6";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element sdram
-   {
-      datum _sortIndex
-      {
-         value = "1";
+         value = "5";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -277,11 +254,118 @@
          type = "long";
       }
    }
-   element doppler_dphi.s1
+   element jtag_uart_0
+   {
+      datum _sortIndex
+      {
+         value = "13";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element i2q2_late
+   {
+      datum _sortIndex
+      {
+         value = "17";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element uart_0.s1
    {
       datum baseAddress
       {
-         value = "16";
+         value = "16781344";
+         type = "long";
+      }
+   }
+   element sdram
+   {
+      datum _sortIndex
+      {
+         value = "1";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element i2q2_early
+   {
+      datum _sortIndex
+      {
+         value = "15";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element timer_0
+   {
+      datum _sortIndex
+      {
+         value = "10";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element tau_prime
+   {
+      datum _sortIndex
+      {
+         value = "9";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element timer_0.s1
+   {
+      datum baseAddress
+      {
+         value = "16781312";
+         type = "long";
+      }
+   }
+   element w_df_dot
+   {
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element w_df.s1
+   {
+      datum baseAddress
+      {
+         value = "16781408";
          type = "long";
       }
    }
@@ -292,8 +376,8 @@
     <parameter name="hardcopyCompatible" value="false" />
     <parameter name="hdlLanguage" value="VERILOG" />
     <parameter name="projectName" value="" />
-    <parameter name="systemHash" value="23435351660" />
-    <parameter name="timeStamp" value="1257372223695" />
+    <parameter name="systemHash" value="27862871218" />
+    <parameter name="timeStamp" value="1257528538868" />
     <module name="clk_0" kind="clock_source" version="8.0" enabled="1">
         <parameter name="clockFrequency" value="50000000" />
         <parameter name="clockFrequencyKnown" value="true" />
@@ -523,6 +607,54 @@
         <parameter name="bitClearingEdgeCapReg" value="false" />
         <parameter name="irqType" value="LEVEL" />
     </module>
+    <module name="tau_prime" kind="altera_avalon_pio" version="8.0" enabled="1">
+        <parameter name="simDrivenValue" value="0" />
+        <parameter name="simDoTestBenchWiring" value="false" />
+        <parameter name="edgeType" value="RISING" />
+        <parameter name="resetValue" value="0" />
+        <parameter name="direction" value="Input" />
+        <parameter name="width" value="15" />
+        <parameter name="generateIRQ" value="false" />
+        <parameter name="captureEdge" value="false" />
+        <parameter name="bitClearingEdgeCapReg" value="false" />
+        <parameter name="irqType" value="LEVEL" />
+    </module>
+    <module name="i2q2_early" kind="altera_avalon_pio" version="8.0" enabled="1">
+        <parameter name="simDrivenValue" value="0" />
+        <parameter name="simDoTestBenchWiring" value="false" />
+        <parameter name="edgeType" value="RISING" />
+        <parameter name="resetValue" value="0" />
+        <parameter name="direction" value="Input" />
+        <parameter name="width" value="32" />
+        <parameter name="generateIRQ" value="false" />
+        <parameter name="captureEdge" value="false" />
+        <parameter name="bitClearingEdgeCapReg" value="false" />
+        <parameter name="irqType" value="LEVEL" />
+    </module>
+    <module name="i2q2_prompt" kind="altera_avalon_pio" version="8.0" enabled="1">
+        <parameter name="simDrivenValue" value="0" />
+        <parameter name="simDoTestBenchWiring" value="false" />
+        <parameter name="edgeType" value="RISING" />
+        <parameter name="resetValue" value="0" />
+        <parameter name="direction" value="Input" />
+        <parameter name="width" value="32" />
+        <parameter name="generateIRQ" value="false" />
+        <parameter name="captureEdge" value="false" />
+        <parameter name="bitClearingEdgeCapReg" value="false" />
+        <parameter name="irqType" value="LEVEL" />
+    </module>
+    <module name="i2q2_late" kind="altera_avalon_pio" version="8.0" enabled="1">
+        <parameter name="simDrivenValue" value="0" />
+        <parameter name="simDoTestBenchWiring" value="false" />
+        <parameter name="edgeType" value="RISING" />
+        <parameter name="resetValue" value="0" />
+        <parameter name="direction" value="Input" />
+        <parameter name="width" value="32" />
+        <parameter name="generateIRQ" value="false" />
+        <parameter name="captureEdge" value="false" />
+        <parameter name="bitClearingEdgeCapReg" value="false" />
+        <parameter name="irqType" value="LEVEL" />
+    </module>
     <connection kind="clock" version="8.0" start="clk_0.clk" end="sdram.clk" />
     <connection kind="clock" version="8.0" start="clk_0.clk" end="cpu_0.clk" />
     <connection kind="avalon" version="6.1" start="cpu_0.instruction_master" end="cpu_0.jtag_debug_module">
@@ -607,5 +739,25 @@
     <connection kind="avalon" version="6.1" start="cpu_0.data_master" end="ca_dphi.s1">
         <parameter name="arbitrationPriority" value="1" />
         <parameter name="baseAddress" value="0x0020" />
+    </connection>
+    <connection kind="clock" version="8.0" start="clk_0.clk" end="tau_prime.clk" />
+    <connection kind="avalon" version="6.1" start="cpu_0.data_master" end="tau_prime.s1">
+        <parameter name="arbitrationPriority" value="1" />
+        <parameter name="baseAddress" value="0x0030" />
+    </connection>
+    <connection kind="clock" version="8.0" start="clk_0.clk" end="i2q2_early.clk" />
+    <connection kind="avalon" version="6.1" start="cpu_0.data_master" end="i2q2_early.s1">
+        <parameter name="arbitrationPriority" value="1" />
+        <parameter name="baseAddress" value="0x0040" />
+    </connection>
+    <connection kind="clock" version="8.0" start="clk_0.clk" end="i2q2_prompt.clk" />
+    <connection kind="avalon" version="6.1" start="cpu_0.data_master" end="i2q2_prompt.s1">
+        <parameter name="arbitrationPriority" value="1" />
+        <parameter name="baseAddress" value="0x0050" />
+    </connection>
+    <connection kind="clock" version="8.0" start="clk_0.clk" end="i2q2_late.clk" />
+    <connection kind="avalon" version="6.1" start="cpu_0.data_master" end="i2q2_late.s1">
+        <parameter name="arbitrationPriority" value="1" />
+        <parameter name="baseAddress" value="0x0060" />
     </connection>
 </system>

@@ -146,6 +146,8 @@ void DataFeed::FeedThread()
     int segLength;
     char data[RAW_SOCKET_MTU];
     
+    static uint16_t seq=0;
+    
     //uint8_t dest[6]={1,2,3,4,5,6};
     
     while(running && !finished)
@@ -163,12 +165,16 @@ void DataFeed::FeedThread()
                 if(segLength>fileLength)segLength=fileLength;
                 
                 //Read next data segment.
-                file.read(data,segLength);
+                file.read(data+2,segLength);
                 fileLength-=segLength;
+
+                seq++;
+                data[0]=(seq>>8)&0xFF;
+                data[1]=seq&0xFF;
 
                 //Write data.
                 //socket.Write(dest,data,segLength);
-                socket.Write(data,segLength);
+                socket.Write(data,segLength+2);
 
                 //Check for eof.
                 if(fileLength==0)

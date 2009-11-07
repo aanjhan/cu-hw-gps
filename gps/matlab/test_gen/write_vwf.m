@@ -15,7 +15,7 @@ function write_vwf(signal,directory,filename)
     t_s=1/f_s;
     t_step=t_s*1e9;
     t_sys_step=1/f_system*1e9;
-    start_cycles=8;
+    start_cycles=20;
     start_time=start_cycles*t_sys_step;
     extra_cycles=200;
     data_end=start_time+length(signal)*t_step;

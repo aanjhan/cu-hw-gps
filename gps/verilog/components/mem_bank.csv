@@ -13,6 +13,13 @@ OFFSET_RANGE,OFFSET_LENGTH-1:0,Bit range for possible word offsets.
 ADDRESS_LENGTH,max_width(NUM_WORDS-1),Number of bits needed for possible addresses.
 ADDRESS_RANGE,ADDRESS_LENGTH-1:0,Bit range for possible addresses.
 
+MEM_BANK_WAIT_WIDTH,max_width(MEM_BANK_WAIT_CYCLES),Wait counter width.
+MEM_BANK_WAIT_RANGE,range(MEM_BANK_WAIT_WIDTH),Wait counter range.
+MEM_BANK_WAIT_MAX,MEM_BANK_WAIT_WIDTH'dMEM_BANK_WAIT_CYCLES,Maximum wait value before restarting feed.
+
+//FIXME The memory bank only feeds properly when
+//FIXME SAMPLES_PER_ACQ is a multiple of 8. Fix this
+//FIXME issue, or ensure that this is true.
 SAMPLES_PER_ACQ,(ACQ_ACC_LENGTH*T_CA_CODE)*F_S,Number of samples used for each acquisition time.
 SAMPLES_PER_ACQ_M1,SAMPLES_PER_ACQ-1,Number of samples used for each acquisition time - 1.
 SAMPLES_PER_ACQ_M3,SAMPLES_PER_ACQ-3,Number of samples used for each acquisition time - 3.
@@ -25,6 +32,3 @@ DATA_OUT_RANGE,WORD_LENGTH-1:WORD_LENGTH-INPUT_WIDTH,Range for grabbing the top 
 DATA_IN_RANGE,WORD_LENGTH-1-INPUT_WIDTH:0,Range for shifting in a new sample to the word buffer.
 BUFFER_MAX_OFFSET,OFFSET_LENGTH'dSAMPLES_PER_WORD-1,Maximum value of sample buffer offset.
 BUFFER_MAX_OFFSET_M2,OFFSET_LENGTH'dSAMPLES_PER_WORD-3,Maximum sample buffer offset - 2.
-
-
-

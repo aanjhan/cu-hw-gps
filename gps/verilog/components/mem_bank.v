@@ -53,7 +53,8 @@ module mem_bank (
                                   .reset(reset),
                                   .in(data_available && (offset == `BUFFER_MAX_OFFSET)),
                                   .out(m4k_wren));
-   
+
+   reg [`MEM_BANK_WAIT_RANGE] wait_count;
    always @ (posedge clk) begin
       
       if (reset) begin
@@ -63,6 +64,7 @@ module mem_bank (
          addr <= addr;
          start_addr <= start_addr;
          sample_counter <= `SAMPLE_COUNT_WIDTH'd0;
+         wait_count <= `MEM_BANK_WAIT_WIDTH'd0;
          
       end
       
@@ -73,12 +75,18 @@ module mem_bank (
          addr <= (mode == `MODE_PLAYBACK) ? start_addr : `ADDRESS_LENGTH'h0;
          start_addr <= (mode == `MODE_PLAYBACK) ? start_addr : `ADDRESS_LENGTH'h0;
          sample_counter <= (mode == `MODE_PLAYBACK) ? `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M3 : `SAMPLE_COUNT_WIDTH'd0;
+         wait_count <= `MEM_BANK_WAIT_WIDTH'd0;
          
       end
       
       else begin
-         
-         if (mode == `MODE_PLAYBACK) begin
+
+         if (wait_count!=`MEM_BANK_WAIT_WIDTH'd0) begin
+            wait_count <= wait_count==`MEM_BANK_WAIT_MAX ?
+                          `MEM_BANK_WAIT_WIDTH'd0 :
+                          wait_count+`MEM_BANK_WAIT_WIDTH'd1;
+         end
+         else if (mode == `MODE_PLAYBACK) begin
             
             buffer <= (offset == `BUFFER_MAX_OFFSET || sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M1) ? m4k_out : 
                       {buffer[`DATA_IN_RANGE],`OFFSET_LENGTH'h0};//FIXME This is 25b and gets truncated to 24b.
@@ -87,6 +95,8 @@ module mem_bank (
                     (offset != `OFFSET_LENGTH'd1) ? addr :
                     (addr == `ADDRESS_LENGTH'd`NUM_WORDS_M1) ? `ADDRESS_LENGTH'd0 :
                     addr + `ADDRESS_LENGTH'd1 ;
+
+            wait_count <= sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M1 ? `MEM_BANK_WAIT_WIDTH'd1 : wait_count;
             
             start_addr <= start_addr;
             sample_counter <= (sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M1) ? `SAMPLE_COUNT_WIDTH'h0 : sample_counter + `SAMPLE_COUNT_WIDTH'h1;
@@ -100,11 +110,11 @@ module mem_bank (
                     (addr == `ADDRESS_LENGTH'd`NUM_WORDS_M1) ? `ADDRESS_LENGTH'd0 :
                     addr + `ADDRESS_LENGTH'd1;
             
-            start_addr <= !m4k_wren || (sample_counter != `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ) ? start_addr :
+            start_addr <= !m4k_wren || (sample_counter != `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M1) ? start_addr :
                           start_addr == `ADDRESS_LENGTH'd`NUM_WORDS_M1 ? `ADDRESS_LENGTH'd0 : 
                           start_addr + `ADDRESS_LENGTH'd1;
             
-            sample_counter <= !data_available || (sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ) ? sample_counter : sample_counter + `SAMPLE_COUNT_WIDTH'h1;
+            sample_counter <= !data_available || (sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M1) ? sample_counter : sample_counter + `SAMPLE_COUNT_WIDTH'h1;
             
          end
       end
@@ -117,9 +127,13 @@ module mem_bank (
                          .in(mode),
                          .out(mode_change));
    
-   assign ready = (mode == `MODE_WRITING) && (sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ) || (mode == `MODE_PLAYBACK);
-   assign frame_start = (mode == `MODE_PLAYBACK) && (sample_counter == `SAMPLE_COUNT_WIDTH'd0);
+   assign ready = (mode == `MODE_WRITING) && (sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M1) || (mode == `MODE_PLAYBACK);
+   assign frame_start = (mode == `MODE_PLAYBACK) &&
+                        (sample_counter == `SAMPLE_COUNT_WIDTH'd0) &&
+                         wait_count==`MEM_BANK_WAIT_WIDTH'd0;
    assign frame_end = (mode == `MODE_PLAYBACK) && (sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M1);
-   assign sample_valid = (mode == `MODE_PLAYBACK) && (!mode_change);
+   assign sample_valid = (mode == `MODE_PLAYBACK) &&
+                         (!mode_change) &&
+                         wait_count==`MEM_BANK_WAIT_WIDTH'd0;
    
 endmodule

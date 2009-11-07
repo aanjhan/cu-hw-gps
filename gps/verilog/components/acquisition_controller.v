@@ -28,6 +28,7 @@ module acquisition_controller(
     input                           global_reset,
     //Acquisiton control.
     input [`MODE_RANGE]             mode,
+    input                           start_acquisition,
     input                           feed_reset,
     output reg [`DOPPLER_INC_RANGE] doppler_early,
     output reg [`DOPPLER_INC_RANGE] doppler_prompt,
@@ -51,25 +52,18 @@ module acquisition_controller(
    //Prompt an acquisition start when the channel mode
    //is switched to acquisition. Wait until data feed
    //resets to start.
-   `KEEP wire start_acq;
-   strobe #(.RESET_ZERO(1))
-     start_acq_strobe(.clk(clk),
-                      .reset(global_reset),
-                      .in(mode==`MODE_ACQ),
-                      .out(start_acq));
-
    `KEEP wire restarting;
    flag start_flag(.clk(clk),
                    .reset(global_reset),
                    .clear(accumulation_complete),
-                   .set(start_acq),
+                   .set(start_acquisition),
                    .out(restarting));
 
    `KEEP wire acq_active;
    flag acq_active_flag(.clk(clk),
                         .reset(global_reset),
-                        .clear(acquisition_complete && !start_acq),
-                        .set(start_acq),
+                        .clear(acquisition_complete && !start_acquisition),
+                        .set(start_acquisition),
                         .out(acq_active));
 
    wire acc_complete_km1;
@@ -113,7 +107,7 @@ module acquisition_controller(
    //when inactive.
    always @(posedge clk) begin
       seek_en <= target_reached ? 1'b0 :
-                 start_acq ? 1'b1 :
+                 start_acquisition ? 1'b1 :
                  accumulation_complete ? 1'b1 :
                  seek_complete ? 1'b0 :
                  seek_en;

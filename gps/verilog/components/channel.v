@@ -13,11 +13,14 @@ module channel(
     input                            clk,
     input                            global_reset,
     input [`MODE_RANGE]              mode,
-    //Sample data.
+    //Real-time sample interface.
     input                            data_available,
-    input                            feed_reset,
-    input                            feed_complete,
     input [`INPUT_RANGE]             data,
+    //Memory bank sample interface.
+    input                            mem_data_available,
+    input [`INPUT_RANGE]             mem_data,
+    input                            frame_start,
+    input                            frame_end,
     //Code control.
     input [4:0]                      prn,
     output wire [`CS_RANGE]          code_shift,
@@ -36,7 +39,7 @@ module channel(
                
     output reg [`DOPPLER_INC_RANGE]  carrier_dphi_k,
     output reg [`CA_PHASE_INC_RANGE] ca_dphi_k,
-    output reg [`SAMPLE_COUNT_RANGE] tau_prime_k,
+    output reg [`SAMPLE_COUNT_TRACK_RANGE] tau_prime_k,
     //Tracking results.
     input                            tracking_ready,
     input [`IQ_RANGE]                iq_prompt_k,
@@ -58,20 +61,15 @@ module channel(
     //Debug outputs.
     input                            track_carrier_en,
     input                            track_code_en,
-    input                            f_carrier_sign,
-    input                            sin_sign,
     output reg [3:0]                 track_count,
     output reg                       track_feed_complete,
-    output reg [`SAMPLE_COUNT_RANGE] sample_count,
-    output wire [2:0]                carrier_i,
-    output wire [2:0]                carrier_q,
     output wire                      ca_bit,
     output wire                      ca_clk,
     output wire [9:0]                ca_code_shift);
 
    //Flag a mode switch.
    wire mode_switch;
-   strobe #(.RESET_ZERO(1),
+   strobe #(.STROBE_AFTER_RESET(1),
             .FLAG_CHANGE(1))
      mode_switch_strobe(.clk(clk),
                         .reset(global_reset),
@@ -84,14 +82,17 @@ module channel(
    assign start_tracking = mode_switch && mode==`MODE_TRACK;
 
    //Generate a feed completion flag for tracking mode.
+   reg [`SAMPLE_COUNT_TRACK_RANGE] sample_count;
+   reg track_seek_en;
    always @(posedge clk) begin
-      sample_count <= start_tracking ? `SAMPLE_COUNT_WIDTH'd0 :
+      sample_count <= start_tracking ? `SAMPLE_COUNT_TRACK_WIDTH'd0 :
                       !data_available ? sample_count :
-                      track_feed_complete ? `SAMPLE_COUNT_WIDTH'd0 :
-                      sample_count+`SAMPLE_COUNT_WIDTH'd1;
+                      track_seek_en ? sample_count :
+                      track_feed_complete ? `SAMPLE_COUNT_TRACK_WIDTH'd0 :
+                      sample_count+`SAMPLE_COUNT_TRACK_WIDTH'd1;
       
       track_feed_complete <= start_tracking ? 1'b0 :
-                             sample_count==tau_prime_k-`SAMPLE_COUNT_WIDTH'd1 ? 1'b1 :
+                             sample_count==tau_prime_k-`SAMPLE_COUNT_TRACK_WIDTH'd1 ? 1'b1 :
                              1'b0;
    end
    
@@ -107,10 +108,10 @@ module channel(
    `KEEP wire [`CS_RANGE]          acq_seek_target;
    `KEEP wire                      seeking;
    `KEEP wire                      target_reached;
-   /*acquisition_controller acq_controller(.clk(clk),
+   acquisition_controller acq_controller(.clk(clk),
                                          .global_reset(global_reset),
-                                         .mode(mode),
-                                         .feed_reset(feed_reset),
+                                         .start_acquisition(start_acquisition),
+                                         .feed_reset(frame_start),
                                          .doppler_early(acq_dopp_early),
                                          .doppler_prompt(acq_dopp_prompt),
                                          .doppler_late(acq_dopp_late),
@@ -126,22 +127,18 @@ module channel(
                                          .acquisition_complete(acquisition_complete),
                                          .peak_i2q2(acq_peak_i2q2),
                                          .peak_doppler(acq_peak_doppler),
-                                         .peak_code_shift(acq_peak_code_shift));*/
-   //FIXME Remove these and uncomment acq controller.
-   assign acquisition_complete = 1'b0;
-   assign acq_seek_en = 1'b0;
+                                         .peak_code_shift(acq_peak_code_shift));
 
    //Upsample the C/A code to the incoming sampling rate.
    //reg [`CA_PHASE_INC_RANGE] ca_dphi_k;
    wire ca_bit_early, ca_bit_prompt, ca_bit_late;
-   reg track_seek_en;
    reg [`CS_RANGE] track_seek_target;
    ca_upsampler upsampler(.clk(clk),
                           .reset(global_reset),
-                          .enable(data_available),
+                          .enable(mode==`MODE_ACQ ? mem_data_available : data_available),
                           //Control interface.
                           .prn(prn),
-                          .phase_inc_offset(ca_dphi_k),
+                          .phase_inc_offset(mode==`MODE_ACQ ? `CA_PHASE_INC_WIDTH'd0 : ca_dphi_k),
                           //C/A code output interface.
                           .code_shift(code_shift),
                           .out_early(ca_bit_early),
@@ -168,17 +165,15 @@ module channel(
    subchannel early(.clk(clk),
                     .global_reset(global_reset),
                     .clear(clear_subchannels),
-                    .data_available(data_available),
-                    .feed_complete(mode==`MODE_ACQ ? feed_complete : track_feed_complete),
-                    .data(data),
+                    .data_available(mode==`MODE_ACQ ? mem_data_available : data_available),
+                    .feed_complete(mode==`MODE_ACQ ? frame_end : track_feed_complete),
+                    .data(mode==`MODE_ACQ ? mem_data :data),
                     .doppler(mode==`MODE_ACQ ? acq_dopp_early : carrier_dphi_k),
                     .ca_bit(mode==`MODE_ACQ ? ca_bit_prompt : ca_bit_early),
                     .accumulator_updating(early_updating),
                     .accumulator_i(acc_i_early),
                     .accumulator_q(acc_q_early),
-                    .accumulation_complete(early_complete),
-                    .f_carrier_sign(f_carrier_sign),
-                    .sin_sign(sin_sign));
+                    .accumulation_complete(early_complete));
    
    //Prompt subchannel.
    `KEEP wire prompt_updating, prompt_complete;
@@ -186,19 +181,15 @@ module channel(
    subchannel prompt(.clk(clk),
                      .global_reset(global_reset),
                      .clear(clear_subchannels),
-                     .data_available(data_available),
-                     .feed_complete(mode==`MODE_ACQ ? feed_complete : track_feed_complete),
-                     .data(data),
+                     .data_available(mode==`MODE_ACQ ? mem_data_available : data_available),
+                     .feed_complete(mode==`MODE_ACQ ? frame_end : track_feed_complete),
+                     .data(mode==`MODE_ACQ ? mem_data :data),
                      .doppler(mode==`MODE_ACQ ? acq_dopp_prompt : carrier_dphi_k),
                      .ca_bit(ca_bit_prompt),
                      .accumulator_updating(prompt_updating),
                      .accumulator_i(acc_i_prompt),
                      .accumulator_q(acc_q_prompt),
-                     .accumulation_complete(prompt_complete),
-                     .carrier_i(carrier_i),
-                     .carrier_q(carrier_q),
-                    .f_carrier_sign(f_carrier_sign),
-                    .sin_sign(sin_sign));
+                     .accumulation_complete(prompt_complete));
    assign accumulation_complete = prompt_complete;
 
    //Debug signals.
@@ -212,17 +203,15 @@ module channel(
    subchannel late(.clk(clk),
                    .global_reset(global_reset),
                    .clear(clear_subchannels),
-                   .data_available(data_available),
-                   .feed_complete(mode==`MODE_ACQ ? feed_complete : track_feed_complete),
-                   .data(data),
+                   .data_available(mode==`MODE_ACQ ? mem_data_available : data_available),
+                   .feed_complete(mode==`MODE_ACQ ? frame_end : track_feed_complete),
+                   .data(mode==`MODE_ACQ ? mem_data :data),
                    .doppler(mode==`MODE_ACQ ? acq_dopp_late : carrier_dphi_k),
                    .ca_bit(mode==`MODE_ACQ ? ca_bit_prompt : ca_bit_late),
                    .accumulator_updating(late_updating),
                    .accumulator_i(acc_i_late),
                    .accumulator_q(acc_q_late),
-                   .accumulation_complete(late_complete),
-                    .f_carrier_sign(f_carrier_sign),
-                    .sin_sign(sin_sign));
+                   .accumulation_complete(late_complete));
 
    //Take the absolute value of I and Q accumulations.
    wire [`ACC_MAG_RANGE] i_early_mag;
@@ -394,10 +383,14 @@ module channel(
    //Store history for tracking loops.
    reg ignore_doppler;
    always @(posedge clk) begin
+      //FIXME Don't start accepting tracking loop updates
+      //FIXME until after the seek has completed.
       track_seek_en <= start_tracking ? 1'b1 :
                        target_reached ? 1'b0 :
                        track_seek_en;
-      track_seek_target <= `CS_WIDTH'd0;
+      track_seek_target <= start_tracking ?
+                           acq_peak_code_shift ://`CS_WIDTH'd0 :
+                           track_seek_target;
       
       track_count <= start_tracking ? 4'd0 :
                      tracking_ready ? track_count+4'd1 :
@@ -425,6 +418,8 @@ module channel(
                         ignore_doppler;
 
       //Carrier generator.
+      //FIXME Remove w_df completely and use carrier_dphi,
+      //FIXME so that the results from acquisition work.
       w_df_k <= start_tracking ? `W_DF_WIDTH'd0 : //FIXME Get value from acquisition.
                 !track_carrier_en ? w_df_k :
                 tracking_ready && !ignore_doppler ? w_df_kp1 :
@@ -433,7 +428,8 @@ module channel(
                     !track_carrier_en ? w_df_dot_k :
                     tracking_ready && !ignore_doppler ? w_df_dot_kp1 :
                     w_df_dot_k;
-      carrier_dphi_k <= start_tracking ? `DOPPLER_INC_WIDTH'd0 : //FIXME Remove this in favor of acquisiton result below.
+      carrier_dphi_k <= start_tracking ? acq_peak_doppler :
+                        //start_tracking ? `DOPPLER_INC_WIDTH'd0 : //FIXME Remove this in favor of acquisiton result below.
                         !track_carrier_en ? carrier_dphi_k :
                         acquisition_complete && mode==`MODE_ACQ ? acq_peak_doppler :
                         tracking_ready && !ignore_doppler ? doppler_inc_kp1 :
@@ -444,9 +440,9 @@ module channel(
                    !track_code_en ? ca_dphi_k :
                    tracking_ready ? ca_dphi_kp1 :
                    ca_dphi_k;
-      tau_prime_k <= start_tracking ? `SAMPLE_COUNT_MAX :
+      tau_prime_k <= start_tracking ? `SAMPLE_COUNT_TRACK_MAX :
                      !track_code_en ? tau_prime_k :
-                     tracking_ready ? `SAMPLE_COUNT_MAX+{{(`SAMPLE_COUNT_WIDTH-`DLL_TAU_WIDTH){tau_prime_kp1[`DLL_TAU_WIDTH-1]}},tau_prime_kp1} :
+                     tracking_ready ? `SAMPLE_COUNT_TRACK_MAX+{{(`SAMPLE_COUNT_TRACK_WIDTH-`DLL_TAU_WIDTH){tau_prime_kp1[`DLL_TAU_WIDTH-1]}},tau_prime_kp1} :
                      tau_prime_k;
    end
 endmodule

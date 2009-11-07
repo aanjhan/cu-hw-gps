@@ -15,6 +15,7 @@ SOURCES+=$(COMPONENTS_DIR)/ca_upsampler.csv \
 	$(COMPONENTS_DIR)/dll.csv \
 	$(COMPONENTS_DIR)/channel__dll.csv \
 	$(COMPONENTS_DIR)/channel__tracking_loops.csv \
+	$(COMPONENTS_DIR)/mem_bank.csv \
 	top__channel.csv \
 	../rt_data_feed/dm9000a_controller.csv \
 	../rt_data_feed/rtdf_packet_processor.csv

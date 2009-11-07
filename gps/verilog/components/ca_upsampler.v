@@ -26,6 +26,21 @@ module ca_upsampler(
     output wire                 ca_clk,
     output wire [9:0]           ca_code_shift);
 
+   //Force the code to asdvance on reset such that
+   //the prompt code is at code shift 0.
+   reg resetting;
+   always @(posedge clk) begin
+      resetting <= reset ? 1'b1 :
+                   code_shift==`CS_WIDTH'd0 ? 1'b0 :
+                   resetting;
+   end
+
+   //Internal seek signals, used to allow reset advances.
+   wire seek_en_int;
+   wire [`CS_RANGE] seek_target_int;
+   assign seek_en_int = resetting ? 1'b1 : seek_en;
+   assign seek_target_int = resetting ? `CS_WIDTH'd0 : seek_target;
+
    //Determine the next code shift value
    //for seek termination.
    wire [`CS_RANGE] next_code_shift;
@@ -36,21 +51,21 @@ module ca_upsampler(
    //Target is coming up if it is the next shift
    //value and the shift is enabled.
    wire target_upcoming;
-   assign target_upcoming = next_code_shift==seek_target && seek_en;
+   assign target_upcoming = next_code_shift==seek_target_int && seek_en_int;
 
    //The seek target has been reached when
    //the current code shift is equal to
    //the target value.
-   assign target_reached = code_shift==seek_target;
+   assign target_reached = code_shift==seek_target_int;
 
    //We are seeking when seeking has been
    //enabled and the target has not been reached.
-   assign seeking = seek_en && !target_reached;
+   assign seeking = seek_en_int && !target_reached;
 
    //Advance the clock when the system is
    //enabled (data available) or when seeking.
    `KEEP wire ca_clk_en;
-   assign ca_clk_en = ((~seek_en) & enable) | (seeking && !target_upcoming);
+   assign ca_clk_en = ((~seek_en_int) & enable) | (seeking && !target_upcoming);
 
    //Pipe clock enable signal for 1 cycle
    //to meet timing requirements.

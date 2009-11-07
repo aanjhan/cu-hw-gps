@@ -274,6 +274,10 @@ module DE2_TOP (
    wire [`MODE_RANGE] mode;
    assign mode = SW[0];
 
+   //0=Playback, 1=Writing.
+   wire [`MODE_RANGE] mem_mode;
+   assign mem_mode = SW[1];
+
    wire [14:0] code_shift;
    wire        i2q2_valid;
    `KEEP wire [`I2Q2_RANGE] i2q2_early;
@@ -286,7 +290,7 @@ module DE2_TOP (
    wire [`W_DF_DOT_RANGE] w_df_dot_k;
    wire [`DOPPLER_INC_RANGE] carrier_dphi_k;
    wire [`CA_PHASE_INC_RANGE] ca_dphi_k;
-   wire [`SAMPLE_COUNT_RANGE] tau_prime_k;
+   wire [`SAMPLE_COUNT_TRACK_RANGE] tau_prime_k;
    wire               acquisition_complete;
    wire [`I2Q2_RANGE] acq_peak_i2q2;
    wire [`ACC_RANGE] accumulator_i;
@@ -295,9 +299,6 @@ module DE2_TOP (
    wire [`CS_RANGE]          acq_peak_code_shift;
    wire                      data_available;
    wire                      track_feed_complete;
-   wire [`SAMPLE_COUNT_RANGE] sample_count;
-   wire [2:0]                 carrier_i;
-   wire [2:0]                 carrier_q;
    wire        ca_bit;
    wire        ca_clk;
    wire [9:0]  ca_code_shift;
@@ -305,11 +306,10 @@ module DE2_TOP (
    top sub(.clk(clk_200),
            .global_reset(global_reset),
            .mode(mode),
+           .mem_mode(mem_mode),
            //Sample data.
            .clk_sample(clk_sample),
            .sample_valid(sample_valid),
-           .feed_reset(1'b0),
-           .feed_complete(1'b0),
            .data(sample_data),
            //Code control.
            .prn(5'd0),
@@ -338,13 +338,8 @@ module DE2_TOP (
            .data_available(data_available),
            .track_carrier_en(SW[8]),
            .track_code_en(SW[7]),
-           .f_carrier_sign(SW[6]),
-           .sin_sign(SW[5]),
            .track_count(track_count),
            .track_feed_complete(track_feed_complete),
-           .sample_count(sample_count),
-           .carrier_i(carrier_i),
-           .carrier_q(carrier_q),
            .ca_bit(ca_bit),
            .ca_clk(ca_clk),
            .ca_code_shift(ca_code_shift));
@@ -353,7 +348,7 @@ module DE2_TOP (
    reg [3:0] tracking_ready_count;
    always @(posedge clk_200) begin
       tracking_ready_flag <= global_reset ? 1'b0 :
-                             tracking_ready ? 1'b1 :
+                             tracking_ready && mode==`MODE_TRACK ? 1'b1 :
                              tracking_ready_count==4'd0 ? 1'b0 :
                              tracking_ready_flag;
 
@@ -389,37 +384,62 @@ module DE2_TOP (
                         .zs_we_n_from_the_sdram(DRAM_WE_N));
    assign DRAM_CLK = clk_50_m3ns;
 
-   wire disp_acc, disp_i_q, disp_cs, disp_carrier_i,
-        disp_words, disp_pkt, disp_pkt_good, disp_track_count;
+   wire disp_acc, disp_i_q,
+        disp_pkt, disp_pkt_good;
+   wire disp_acq, disp_cs,
+        disp_acq_i2q2, disp_acq_dopp, disp_acq_cs;
    assign disp_acc = SW[17];
    assign disp_i_q = SW[16];
+   assign disp_pkt = SW[11];
+   assign disp_pkt_good = SW[10];
+   
    assign disp_cs = SW[15];
-   assign disp_words = SW[14];
-   assign disp_track_count = SW[13];
-   assign disp_pkt = SW[12];
-   assign disp_pkt_good = SW[11];
-   assign disp_carrier_i = ~SW[10];
+   assign disp_acq = SW[14];
+   assign disp_acq_i2q2 = disp_acq && !disp_acq_dopp && !disp_acq_cs;
+   assign disp_acq_dopp = disp_acq && SW[13:12]==2'd1;
+   assign disp_acq_cs = disp_acq && SW[13:12]==2'd2;
 
    wire [`ACC_RANGE_TRACK] sel_i_q_value;
    assign sel_i_q_value = disp_acc ?
                           (disp_i_q ? accumulator_q[`ACC_RANGE_TRACK] : accumulator_i[`ACC_RANGE_TRACK]) :
                           (disp_i_q ? q_prompt_k : i_prompt_k);
 
-   assign LEDR=disp_words ? {9'h0,words_available} :
-               disp_track_count ? {14'h0,track_count} :
-               disp_pkt ? (disp_pkt_good ? {9'h0,good_pkt_count} : {9'h0,missed_count}) :
+   assign LEDR=disp_pkt ? (disp_pkt_good ? {9'h0,good_pkt_count} : {9'h0,missed_count}) :
                sel_i_q_value[17:0];
    assign LEDG[8] = link_status;
-   assign LEDG[7:5] = disp_carrier_i ? carrier_i : carrier_q;
-   assign LEDG[4:2] = sample_data;
+   assign LEDG[7:3] = 5'h0;
+   assign LEDG[2] = acquisition_complete;
    assign LEDG[1] = sample_valid;
 
-   hex_driver hex7(4'd0,1'b0,HEX7);
-   hex_driver hex6(4'd0,1'b0,HEX6);
-   hex_driver hex5(4'd0,1'b0,HEX5);
-   hex_driver hex4({2'b0,sel_i_q_value[17:16]},!disp_cs,HEX4);
-   hex_driver hex3(disp_cs ? {1'b0,code_shift[14:12]} : sel_i_q_value[15:12],1'b1,HEX3);
-   hex_driver hex2(disp_cs ? code_shift[11:8] : sel_i_q_value[11:8],1'b1,HEX2);
-   hex_driver hex1(disp_cs ? code_shift[7:4] : sel_i_q_value[7:4],1'b1,HEX1);
-   hex_driver hex0(disp_cs ? code_shift[3:0] : sel_i_q_value[3:0],1'b1,HEX0);
+   hex_driver hex7(acq_peak_i2q2[37:34],disp_acq_i2q2,HEX7);
+   hex_driver hex6(acq_peak_i2q2[33:30],disp_acq_i2q2,HEX6);
+   hex_driver hex5(acq_peak_i2q2[29:26],disp_acq_i2q2,HEX5);
+   hex_driver hex4(disp_acq_i2q2 ? acq_peak_i2q2[25:22] :
+                   disp_acq_dopp ? {3'b0,acq_peak_doppler[16]} :
+                   {2'b0,sel_i_q_value[17:16]},
+                   !disp_cs && !disp_acq_cs,HEX4);
+   hex_driver hex3(disp_acq_i2q2 ? acq_peak_i2q2[21:18] :
+                   disp_acq_dopp ? acq_peak_doppler[15:12] :
+                   disp_acq_cs ? {1'b0,acq_peak_code_shift[14:12]} :
+                   disp_cs ? {1'b0,code_shift[14:12]} :
+                   sel_i_q_value[15:12],
+                   1'b1,HEX3);
+   hex_driver hex2(disp_acq_i2q2 ? acq_peak_i2q2[17:14] :
+                   disp_acq_dopp ? acq_peak_doppler[11:8] :
+                   disp_acq_cs ? {1'b0,acq_peak_code_shift[11:8]} :
+                   disp_cs ? code_shift[11:8] :
+                   sel_i_q_value[11:8],
+                   1'b1,HEX2);
+   hex_driver hex1(disp_acq_i2q2 ? acq_peak_i2q2[13:10] :
+                   disp_acq_dopp ? acq_peak_doppler[7:4] :
+                   disp_acq_cs ? {1'b0,acq_peak_code_shift[7:4]} :
+                   disp_cs ? code_shift[7:4] :
+                   sel_i_q_value[7:4],
+                   1'b1,HEX1);
+   hex_driver hex0(disp_acq_i2q2 ? acq_peak_i2q2[9:6] :
+                   disp_acq_dopp ? acq_peak_doppler[3:0] :
+                   disp_acq_cs ? {1'b0,acq_peak_code_shift[3:0]} :
+                   disp_cs ? code_shift[3:0] :
+                   sel_i_q_value[3:0],
+                   1'b1,HEX0);
 endmodule

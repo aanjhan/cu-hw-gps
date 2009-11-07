@@ -13,11 +13,10 @@ module top(
     input                            clk,
     input                            global_reset,
     input [`MODE_RANGE]              mode,
+    input                            mem_mode,
     //Sample data.
     input                            clk_sample,
     input                            sample_valid,
-    input                            feed_reset,
-    input                            feed_complete,
     input [`INPUT_RANGE]             data,
     //Code control.
     input [4:0]                      prn,
@@ -35,7 +34,7 @@ module top(
            
     output wire [`DOPPLER_INC_RANGE] carrier_dphi_k,
     output wire [`CA_PHASE_INC_RANGE] ca_dphi_k,
-    output wire [`SAMPLE_COUNT_RANGE] tau_prime_k,
+    output wire [`SAMPLE_COUNT_TRACK_RANGE] tau_prime_k,
     //Acquisition results.
     output wire                      acquisition_complete,
     output wire [`I2Q2_RANGE]        acq_peak_i2q2,
@@ -47,44 +46,21 @@ module top(
     //Debug signals.
     input                            track_carrier_en,
     input                            track_code_en,
-    input                            f_carrier_sign,
-    input                            sin_sign,
     output wire [3:0]                track_count,
     output reg                       data_available,
     output wire                      track_feed_complete,
-    output wire [`SAMPLE_COUNT_RANGE] sample_count,
     output wire [2:0]                 carrier_i,
     output wire [2:0]                 carrier_q,
     output wire                      ca_bit,
     output wire                      ca_clk,
     output wire [9:0]                ca_code_shift);
 
-   //Clock domain crossing.
+   //Clock domain crossing usiung a mux recirculation
+   //synchronizer, triggered on the sample clock edge.
    `KEEP wire clk_sample_sync;
    synchronizer input_clk_sync(.clk(clk),
                                .in(clk_sample),
                                .out(clk_sample_sync));
-   
-   `KEEP wire feed_reset_sync;
-   synchronizer input_feed_reset_sync(.clk(clk),
-                                      .in(feed_reset),
-                                      .out(feed_reset_sync));
-   
-   `KEEP wire feed_complete_sync;
-   synchronizer input_feed_complete_sync(.clk(clk),
-                                         .in(feed_complete),
-                                         .out(feed_complete_sync));
-   
-   /*`KEEP wire sample_valid_sync;
-   synchronizer input_sample_valid_sync(.clk(clk),
-                                        .in(sample_valid),
-                                        .out(sample_valid_sync));
-   
-   `KEEP wire [`INPUT_RANGE] data_sync;
-   synchronizer #(.WIDTH(`INPUT_WIDTH))
-     input_data_sync(.clk(clk),
-                     .in(data),
-                     .out(data_sync));*/
 
    wire new_sample;
    `PRESERVE reg sample_valid_sync;
@@ -101,15 +77,13 @@ module top(
    end
 
    //Data available strobe.
-   //`KEEP wire data_available;
 `ifndef HIGH_SPEED
-   //wire new_sample;
    strobe data_available_strobe(.clk(clk),
                                 .reset(global_reset),
                                 .in(clk_sample_sync),
                                 .out(new_sample));
-   //assign data_available = new_sample && sample_valid_sync;
 `else
+   //FIXME High speed mode no longer works. Not necessary?
    reg data_done;
    always @(posedge clk) begin
       data_done <= global_reset || feed_reset_sync ? 1'b0 :
@@ -117,7 +91,28 @@ module top(
                    data_done;
    end
    assign data_available = !(global_reset || feed_reset_sync) && !data_done;
-`endif
+`endif // !`ifndef HIGH_SPEED
+
+   ///////////////
+   // Memory Bank
+   ///////////////
+
+   //Memory bank.
+   `KEEP wire mem_bank_ready;
+   `KEEP wire mem_bank_frame_start;
+   `KEEP wire mem_bank_frame_end;
+   `KEEP wire mem_bank_sample_valid;
+   `KEEP wire [`INPUT_RANGE] mem_bank_data;
+   mem_bank bank_0(.clk(clk),
+                   .reset(global_reset),
+                   .mode(mem_mode),
+                   .data_available(data_available),
+                   .data_in(data_sync),
+                   .ready(mem_bank_ready),
+                   .frame_start(mem_bank_frame_start),
+                   .frame_end(mem_bank_frame_end),
+                   .sample_valid(mem_bank_sample_valid),
+                   .data_out(mem_bank_data));
 
    ///////////////
    // Channel 0
@@ -138,11 +133,14 @@ module top(
    channel channel_0(.clk(clk),
                      .global_reset(global_reset),
                      .mode(mode),
-                     //Sample data.
+                     //Real-time sample interface.
                      .data_available(data_available),
-                     .feed_reset(feed_reset_sync),
-                     .feed_complete(feed_complete_sync),
                      .data(data_sync),
+                     //Memory bank sample interface.
+                     .mem_data_available(mem_bank_sample_valid),
+                     .mem_data(mem_bank_data),
+                     .frame_start(mem_bank_frame_start),
+                     .frame_end(mem_bank_frame_end),
                      //Code control.
                      .prn(prn),
                      .code_shift(code_shift),
@@ -180,13 +178,8 @@ module top(
                      //Debug outputs.
                      .track_carrier_en(track_carrier_en),
                      .track_code_en(track_code_en),
-                     .f_carrier_sign(f_carrier_sign),
-                     .sin_sign(sin_sign),
                      .track_count(track_count),
                      .track_feed_complete(track_feed_complete),
-                     .sample_count(sample_count),
-                     .carrier_i(carrier_i),
-                     .carrier_q(carrier_q),
                      .ca_bit(ca_bit),
                      .ca_clk(ca_clk),
                      .ca_code_shift(ca_code_shift));

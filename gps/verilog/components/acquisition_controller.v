@@ -27,7 +27,6 @@ module acquisition_controller(
     input                           clk,
     input                           global_reset,
     //Acquisiton control.
-    input [`MODE_RANGE]             mode,
     input                           start_acquisition,
     input                           feed_reset,
     output reg [`DOPPLER_INC_RANGE] doppler_early,
@@ -59,10 +58,18 @@ module acquisition_controller(
                    .set(start_acquisition),
                    .out(restarting));
 
+   //Flag when the last bin is waiting for I2Q2 results.
+   `KEEP wire last_bin_pending;
+   assign last_bin_pending = code_shift==`MAX_CODE_SHIFT &&
+                             doppler_early>=`DOPP_MAX_INC;
+
+   //Acquisition 
    `KEEP wire acq_active;
    flag acq_active_flag(.clk(clk),
                         .reset(global_reset),
-                        .clear(acquisition_complete && !start_acquisition),
+                        .clear(last_bin_pending &&
+                               accumulation_complete &&
+                               !start_acquisition),
                         .set(start_acquisition),
                         .out(acq_active));
 
@@ -94,7 +101,9 @@ module acquisition_controller(
    //Only advance the current code shift and Doppler
    //when a currently active accumulation finishes.
    `KEEP wire advance;
-   assign advance = active && accumulation_complete;
+   assign advance = active &&
+                    accumulation_complete &&
+                    !last_bin_pending;
 
    //Reset code shift after hitting maximum value.
    wire cs_reset;
@@ -106,10 +115,9 @@ module acquisition_controller(
    //right away to stop the code generator from updating
    //when inactive.
    always @(posedge clk) begin
-      seek_en <= target_reached ? 1'b0 :
+      seek_en <= target_reached && feed_reset ? 1'b0 :
                  start_acquisition ? 1'b1 :
                  accumulation_complete ? 1'b1 :
-                 seek_complete ? 1'b0 :
                  seek_en;
       
       code_shift <= restarting ? `CS_WIDTH'h0 :
@@ -148,17 +156,7 @@ module acquisition_controller(
       prev_doppler_late <= advance ? doppler_late : prev_doppler_late;
    end
 
-   //If the search wasn't active ignore the returned
-   //I2Q2 values.
-   /*`PRESERVE reg ignore_update;
-   always @(posedge clk) begin
-      ignore_update <= global_reset ? 1'b0 :
-                       restarting ? 1'b1 :
-                       !active && accumulation_complete ? 1'b1 :
-                       i2q2_valid ? 1'b0 :
-                       ignore_update;
-   end*/
-
+   //If the search wasn't active ignore the returned values.
    `KEEP wire peak_update_pending;
    flag peak_update_flag(.clk(clk),
                          .reset(global_reset),
@@ -244,8 +242,8 @@ module acquisition_controller(
    flag acq_complete_flag(.clk(clk),
                           .reset(global_reset),
                           .clear(restarting),
-                          .set(prev_code_shift==`MAX_CODE_SHIFT &&
-                               prev_doppler_early>=`DOPP_MAX_INC &&
+                          .set(last_bin_pending &&
+                               !acq_active &&
                                update_complete),
                           .out(acquisition_complete));
 endmodule // acquisition_controller

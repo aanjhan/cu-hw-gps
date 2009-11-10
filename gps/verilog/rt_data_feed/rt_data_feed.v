@@ -44,8 +44,7 @@ module rt_data_feed(
     output wire [8:0]  missed_count,
     output wire [15:0] data_out,
     //Debug
-    output wire [17:0] samp_buffer,
-    output wire [2:0]  samp_count,
+    output reg [31:0]  total_sample_count,
     input              halt,
     input              halt_packet);
 
@@ -122,10 +121,16 @@ module rt_data_feed(
          sample_extra <= 2'd0;
          sample_buffer <= 18'h0;
          sample_data <= 3'd0;
+
+         total_sample_count <= 32'd0;
       end
       else if(!halt) begin
          //Flag when samples are valid.
          sample_valid <= sample_count>3'd0;
+
+         total_sample_count <= sample_count>3'd0 ?
+                               total_sample_count+32'd1 :
+                               total_sample_count;
          
          //Words contain 5 whole 3b samples, and one extra
          //bit. Increment the sample count by 6 if there
@@ -162,9 +167,5 @@ module rt_data_feed(
          sample_data <= sample_buffer[2:0];
       end
    end // always @ (negedge clk_sample)
-
-   //FIXME Remove these.
-   assign samp_buffer = sample_buffer;
-   assign samp_count = sample_count;
    
 endmodule

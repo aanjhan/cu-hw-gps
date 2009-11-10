@@ -46,6 +46,7 @@ module top(
     //Debug signals.
     input                            track_carrier_en,
     input                            track_code_en,
+    output reg [31:0]                sample_count,
     output wire [3:0]                track_count,
     output reg                       data_available,
     output wire                      track_feed_complete,
@@ -92,6 +93,12 @@ module top(
    end
    assign data_available = !(global_reset || feed_reset_sync) && !data_done;
 `endif // !`ifndef HIGH_SPEED
+
+   always @(posedge clk) begin
+      sample_count <= global_reset ? 32'd0 :
+                      data_available ? sample_count+32'd1 :
+                      sample_count;
+   end
 
    ///////////////
    // Memory Bank

@@ -27,7 +27,7 @@ DOPPLER_INC_WIDTH,@
 DOPPLER_INC_RANGE,@
 
 //Doppler to phase increment conversion.
-W_DF_TO_INC_SHIFT,12,Doppler conversion factor fixed-point shift.
+W_DF_TO_INC_SHIFT,20,Doppler conversion factor fixed-point shift.
 W_DF_TO_INC_VAL,fix((2^(CARRIER_ACC_WIDTH-ANGLE_SHIFT))/(2*PI*F_S);W_DF_TO_INC_SHIFT),Doppler shift [rad/s] to carrier phase increment conversion factor value.
 W_DF_TO_INC_WIDTH,max_width(W_DF_TO_INC_VAL),Doppler shift [rad/s] to carrier phase increment conversion width.
 W_DF_TO_INC,W_DF_TO_INC_WIDTH'dW_DF_TO_INC_VAL,Doppler shift [rad/s] to carrier phase increment conversion factor.

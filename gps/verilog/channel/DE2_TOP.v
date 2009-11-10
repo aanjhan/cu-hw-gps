@@ -249,6 +249,7 @@ module DE2_TOP (
    wire [8:0] pkt_count;
    wire [8:0] good_pkt_count;
    wire [8:0] missed_count;
+   wire [31:0] sample_count;
    rt_data_feed data_feed(.clk_50(CLOCK_50),
                           .reset(global_reset),
                           .enet_clk(ENET_CLK),
@@ -267,6 +268,7 @@ module DE2_TOP (
                           .packet_count(pkt_count),
                           .good_packet_count(good_pkt_count),
                           .missed_count(missed_count),
+                          .total_sample_count(sample_count),
                           .halt(1'b0),
                           .halt_packet(1'b0));
 
@@ -303,6 +305,7 @@ module DE2_TOP (
    wire        ca_clk;
    wire [9:0]  ca_code_shift;
    wire [3:0]  track_count;
+   wire [31:0] sample_count_sync;
    top sub(.clk(clk_200),
            .global_reset(global_reset),
            .mode(mode),
@@ -338,6 +341,7 @@ module DE2_TOP (
            .data_available(data_available),
            .track_carrier_en(SW[8]),
            .track_code_en(SW[7]),
+           .sample_count(sample_count_sync),
            .track_count(track_count),
            .track_feed_complete(track_feed_complete),
            .ca_bit(ca_bit),
@@ -386,7 +390,7 @@ module DE2_TOP (
 
    wire disp_acc, disp_i_q,
         disp_pkt, disp_pkt_good;
-   wire disp_acq, disp_cs,
+   wire disp_acq, disp_cs, disp_count, disp_sync_count,
         disp_acq_i2q2, disp_acq_dopp, disp_acq_cs;
    assign disp_acc = SW[17];
    assign disp_i_q = SW[16];
@@ -394,6 +398,8 @@ module DE2_TOP (
    assign disp_pkt_good = SW[10];
    
    assign disp_cs = SW[15];
+   assign disp_count = SW[4];
+   assign disp_sync_count = SW[3];
    assign disp_acq = SW[14];
    assign disp_acq_i2q2 = disp_acq && !disp_acq_dopp && !disp_acq_cs;
    assign disp_acq_dopp = disp_acq && SW[13:12]==2'd1;
@@ -411,32 +417,46 @@ module DE2_TOP (
    assign LEDG[2] = acquisition_complete;
    assign LEDG[1] = sample_valid;
 
-   hex_driver hex7(acq_peak_i2q2[37:34],disp_acq_i2q2,HEX7);
-   hex_driver hex6(acq_peak_i2q2[33:30],disp_acq_i2q2,HEX6);
-   hex_driver hex5(acq_peak_i2q2[29:26],disp_acq_i2q2,HEX5);
-   hex_driver hex4(disp_acq_i2q2 ? acq_peak_i2q2[25:22] :
+   wire [31:0] sel_sample_count;
+   assign      sel_sample_count = disp_sync_count ? sample_count_sync : sample_count;
+
+   hex_driver hex7(disp_count ? sel_sample_count[31:28] :
+                   acq_peak_i2q2[37:34],
+                   disp_count || disp_acq_i2q2,HEX7);
+   hex_driver hex6(disp_count ? sel_sample_count[27:24] :
+                   acq_peak_i2q2[33:30],
+                   disp_count || disp_acq_i2q2,HEX6);
+   hex_driver hex5(disp_count ? sel_sample_count[23:20] :
+                   acq_peak_i2q2[29:26],
+                   disp_count || disp_acq_i2q2,HEX5);
+   hex_driver hex4(disp_count ? sel_sample_count[19:16] :
+                   disp_acq_i2q2 ? acq_peak_i2q2[25:22] :
                    disp_acq_dopp ? {3'b0,acq_peak_doppler[16]} :
                    {2'b0,sel_i_q_value[17:16]},
-                   !disp_cs && !disp_acq_cs,HEX4);
-   hex_driver hex3(disp_acq_i2q2 ? acq_peak_i2q2[21:18] :
+                   disp_count || (!disp_cs && !disp_acq_cs),HEX4);
+   hex_driver hex3(disp_count ? sel_sample_count[15:12] :
+                   disp_acq_i2q2 ? acq_peak_i2q2[21:18] :
                    disp_acq_dopp ? acq_peak_doppler[15:12] :
                    disp_acq_cs ? {1'b0,acq_peak_code_shift[14:12]} :
                    disp_cs ? {1'b0,code_shift[14:12]} :
                    sel_i_q_value[15:12],
                    1'b1,HEX3);
-   hex_driver hex2(disp_acq_i2q2 ? acq_peak_i2q2[17:14] :
+   hex_driver hex2(disp_count ? sel_sample_count[11:8] :
+                   disp_acq_i2q2 ? acq_peak_i2q2[17:14] :
                    disp_acq_dopp ? acq_peak_doppler[11:8] :
                    disp_acq_cs ? {1'b0,acq_peak_code_shift[11:8]} :
                    disp_cs ? code_shift[11:8] :
                    sel_i_q_value[11:8],
                    1'b1,HEX2);
-   hex_driver hex1(disp_acq_i2q2 ? acq_peak_i2q2[13:10] :
+   hex_driver hex1(disp_count ? sel_sample_count[7:4] :
+                   disp_acq_i2q2 ? acq_peak_i2q2[13:10] :
                    disp_acq_dopp ? acq_peak_doppler[7:4] :
                    disp_acq_cs ? {1'b0,acq_peak_code_shift[7:4]} :
                    disp_cs ? code_shift[7:4] :
                    sel_i_q_value[7:4],
                    1'b1,HEX1);
-   hex_driver hex0(disp_acq_i2q2 ? acq_peak_i2q2[9:6] :
+   hex_driver hex0(disp_count ? sel_sample_count[3:0] :
+                   disp_acq_i2q2 ? acq_peak_i2q2[9:6] :
                    disp_acq_dopp ? acq_peak_doppler[3:0] :
                    disp_acq_cs ? {1'b0,acq_peak_code_shift[3:0]} :
                    disp_cs ? code_shift[3:0] :

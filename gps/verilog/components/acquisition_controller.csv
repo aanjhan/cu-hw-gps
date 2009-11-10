@@ -2,9 +2,6 @@
 #include !"channel.csv"
 #include !"subchannel.csv"
 
-//Channel mode.
-MODE_ACQ,@
-
 //Doppler control.
 DOPPLER_INC_WIDTH,@
 DOPP_ACQ_INC,DOPPLER_INC_WIDTH'd(3*DOPP_BIN_INC_VAL),Acquisition Doppler increment (3 bins).
@@ -14,4 +11,12 @@ DOPP_EARLY_START,-DOPPLER_INC_WIDTH'd(DOPP_MAX_INC_VAL-2*DOPP_BIN_INC_VAL),Early
 DOPP_PROMPT_START,-DOPPLER_INC_WIDTH'd(DOPP_MAX_INC_VAL-DOPP_BIN_INC_VAL),Prompt subchannel Doppler shift start value.
 DOPP_LATE_START,-DOPPLER_INC_WIDTH'd(DOPP_MAX_INC_VAL),Late subchannel Doppler shift start value.
 
-I2Q2_WIDTH,@
+//Update state machine.
+ACQ_STATE_MAX_VAL,4,Maximum update state machine value.
+ACQ_STATE_WIDTH,max_width(ACQ_STATE_MAX_VAL),Update state machine state variable width.
+ACQ_STATE_RANGE,range(ACQ_STATE_WIDTH),Update state machine state variable range.
+ACQ_STATE_IDLE,ACQ_STATE_WIDTH'd0,Update state machine idle.
+ACQ_STATE_EARLY_PROMPT,ACQ_STATE_WIDTH'd1,Compare early and prompt I2Q2 values.
+ACQ_STATE_EP_LATE,ACQ_STATE_WIDTH'd2,Compare previous result with late I2Q2 value.
+ACQ_STATE_PEAK,ACQ_STATE_WIDTH'd3,Check result to current peak value.
+ACQ_STATE_UPDATE,ACQ_STATE_WIDTH'd4,Update peak values if necessary.

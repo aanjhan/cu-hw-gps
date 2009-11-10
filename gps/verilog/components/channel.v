@@ -106,18 +106,16 @@ module channel(
    `KEEP wire [`DOPPLER_INC_RANGE] acq_dopp_late;
    `KEEP wire                      acq_seek_en;
    `KEEP wire [`CS_RANGE]          acq_seek_target;
-   `KEEP wire                      seeking;
    `KEEP wire                      target_reached;
    acquisition_controller acq_controller(.clk(clk),
                                          .global_reset(global_reset),
                                          .start_acquisition(start_acquisition),
-                                         .feed_reset(frame_start),
+                                         .frame_start(frame_start),
                                          .doppler_early(acq_dopp_early),
                                          .doppler_prompt(acq_dopp_prompt),
                                          .doppler_late(acq_dopp_late),
                                          .seek_en(acq_seek_en),
                                          .code_shift(acq_seek_target),
-                                         .seeking(seeking),
                                          .target_reached(target_reached),
                                          .accumulation_complete(accumulation_complete),
                                          .i2q2_valid(i2q2_valid),
@@ -133,6 +131,7 @@ module channel(
    //reg [`CA_PHASE_INC_RANGE] ca_dphi_k;
    wire ca_bit_early, ca_bit_prompt, ca_bit_late;
    reg [`CS_RANGE] track_seek_target;
+   wire seeking;
    ca_upsampler upsampler(.clk(clk),
                           .reset(global_reset),
                           .enable(mode==`MODE_ACQ ? mem_data_available : data_available),
@@ -167,7 +166,7 @@ module channel(
                     .clear(clear_subchannels),
                     .data_available(mode==`MODE_ACQ ? mem_data_available : data_available),
                     .feed_complete(mode==`MODE_ACQ ? frame_end : track_feed_complete),
-                    .data(mode==`MODE_ACQ ? mem_data :data),
+                    .data(mode==`MODE_ACQ ? mem_data : data),
                     .doppler(mode==`MODE_ACQ ? acq_dopp_early : carrier_dphi_k),
                     .ca_bit(mode==`MODE_ACQ ? ca_bit_prompt : ca_bit_early),
                     .accumulator_updating(early_updating),
@@ -183,7 +182,7 @@ module channel(
                      .clear(clear_subchannels),
                      .data_available(mode==`MODE_ACQ ? mem_data_available : data_available),
                      .feed_complete(mode==`MODE_ACQ ? frame_end : track_feed_complete),
-                     .data(mode==`MODE_ACQ ? mem_data :data),
+                     .data(mode==`MODE_ACQ ? mem_data : data),
                      .doppler(mode==`MODE_ACQ ? acq_dopp_prompt : carrier_dphi_k),
                      .ca_bit(ca_bit_prompt),
                      .accumulator_updating(prompt_updating),
@@ -205,7 +204,7 @@ module channel(
                    .clear(clear_subchannels),
                    .data_available(mode==`MODE_ACQ ? mem_data_available : data_available),
                    .feed_complete(mode==`MODE_ACQ ? frame_end : track_feed_complete),
-                   .data(mode==`MODE_ACQ ? mem_data :data),
+                   .data(mode==`MODE_ACQ ? mem_data : data),
                    .doppler(mode==`MODE_ACQ ? acq_dopp_late : carrier_dphi_k),
                    .ca_bit(mode==`MODE_ACQ ? ca_bit_prompt : ca_bit_late),
                    .accumulator_updating(late_updating),

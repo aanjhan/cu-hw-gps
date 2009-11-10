@@ -36,7 +36,7 @@ CHANNEL_ID_RANGE,CHANNEL_ID_WIDTH-1:0,Channel ID range.
 
 //Memory bank parameters.
 NUM_BANKS,4,Number of individual banks in memory bank.
-MEM_BANK_WAIT_CYCLES,2,Number of cycles to wait before restarting an acquisition feed.
+MEM_BANK_WAIT_CYCLES,5,Number of cycles to wait before restarting an acquisition feed.
 
 //Tracking parameters.
 CHIPS_EML,0.5,Code chips between early and late subchannels.

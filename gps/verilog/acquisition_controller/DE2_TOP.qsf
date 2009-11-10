@@ -28,7 +28,7 @@ set_global_assignment -name DEVICE EP2C35F672C6
 set_global_assignment -name TOP_LEVEL_ENTITY acquisition_controller
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 8.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "11:32:43  FEBRUARY 28, 2009"
-set_global_assignment -name LAST_QUARTUS_VERSION 8.0
+set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP1"
 set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
 set_location_assignment PIN_N25 -to SW[0]
 set_location_assignment PIN_N26 -to SW[1]
@@ -460,9 +460,7 @@ set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATE
 set_global_assignment -name SIMULATION_MODE FUNCTIONAL
 set_global_assignment -name FMAX_REQUIREMENT "200 MHz"
 set_global_assignment -name ADD_DEFAULT_PINS_TO_SIMULATION_OUTPUT_WAVEFORMS OFF
-set_global_assignment -name VERILOG_FILE ../components/flag.v
 set_global_assignment -name VERILOG_FILE ../components/acquisition_controller.v
-set_global_assignment -name VERILOG_FILE ../components/strobe.v
 set_global_assignment -name VERILOG_FILE ../components/delay_1.v
 set_global_assignment -name VERILOG_FILE ../components/delay.v
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top

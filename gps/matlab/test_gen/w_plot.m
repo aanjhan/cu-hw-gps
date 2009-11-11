@@ -18,15 +18,15 @@ plot(f_df,'b');
 plot(f_dphi,'g');
 plot(smooth(f_df,15,'loess'),'--r');
 hold off;
-title('Doppler Shift Plot');
-xlabel('Time (ms)');
-ylabel('Doppler Shift (Hz)');
+set(title('Doppler Shift'),'FontSize',14);;
+set(xlabel('Time (ms)'),'FontSize',14);;
+set(ylabel('Doppler Shift (Hz)'),'FontSize',14);;
 legend('w_df','dphi','w_df_avg');
 
 subplot(2,1,2);
 plot(w_df_dot/2/pi/2^ANGLE_SHIFT,'r');
-title('Doppler Rate Plot');
-xlabel('Time (ms)');
-ylabel('Doppler Rate (Hz/s)');
+set(title('Doppler Rate'),'FontSize',14);;
+set(xlabel('Time (ms)'),'FontSize',14);;
+set(ylabel('Doppler Rate (Hz/s)'),'FontSize',14);;
 
 return;

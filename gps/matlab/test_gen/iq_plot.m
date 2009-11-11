@@ -7,9 +7,9 @@ function iq_plot(data)
             'linewidth',1.5);
     end
     hold off;
-    title({'I/Q Accumulation Plot';'Varies from blue to red with increasing t.'});
-    xlabel('In-Phase (I)');
-    ylabel('Quadrature (Q)');
+    set(title({'I/Q Accumulation Plot';'Varies from blue to red with increasing t.'}),'FontSize',14);;
+    set(xlabel('In-Phase (I)'),'FontSize',14);;
+    set(ylabel('Quadrature (Q)'),'FontSize',14);;
     
     xmax=max(abs(data(:,1)));
     ymax=max(abs(data(:,2)));

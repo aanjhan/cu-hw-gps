@@ -90,7 +90,7 @@ module rt_data_feed(
                                    .rx_fifo_rd_data(rx_fifo_rd_data),
                                    .rx_fifo_empty(rx_fifo_empty || halt_packet),
                                    .rx_fifo_rd_req(rx_fifo_rd_req),
-                                   .clk_read(clk_sample),
+                                   .clk_read(~clk_sample),
                                    .empty(packet_empty),
                                    .read_next(packet_read),
                                    .data(packet_data),
@@ -114,7 +114,7 @@ module rt_data_feed(
 
    `PRESERVE reg [17:0] sample_buffer;
    `PRESERVE reg [1:0]  sample_extra;
-   always @(posedge clk_sample) begin
+   always @(negedge clk_sample) begin
       if(reset) begin
          sample_valid <= 1'b0;
          sample_count <= 3'd0;

@@ -5,8 +5,6 @@
 `define DEBUG
 `include "../components/debug.vh"
 
-//`define HIGH_SPEED
-
 `include "../components/subchannel.vh"
 
 module top(
@@ -56,19 +54,37 @@ module top(
     output wire                      ca_clk,
     output wire [9:0]                ca_code_shift);
 
-   //Clock domain crossing usiung a mux recirculation
-   //synchronizer, triggered on the sample clock edge.
+   ///////////////////////////////////
+   // Clock Domain Synchronization
+   ///////////////////////////////////
+
+   //Clock domain crossing usiung a mux synchronizer,
+   //triggered on the sample clock edge.
    `KEEP wire clk_sample_sync;
    synchronizer input_clk_sync(.clk(clk),
                                .in(clk_sample),
                                .out(clk_sample_sync));
 
+   //Data available strobe.
+   wire sample_edge;
+   strobe data_available_strobe(.clk(clk),
+                                .reset(global_reset),
+                                .in(clk_sample_sync),
+                                .out(sample_edge));
+
+   //Delay data available strobe to establish
+   //hold time and ensure that all data bits
+   //are stable before using them.
    wire new_sample;
-   `PRESERVE reg sample_valid_sync;
+   delay #(.DELAY(2))
+     sync_hold_delay(.clk(clk),
+                     .reset(global_reset),
+                     .in(sample_edge),
+                     .out(new_sample));
+
    `PRESERVE reg [`INPUT_RANGE] data_sync;
    always @(posedge clk) begin
       if(new_sample) begin
-         sample_valid_sync <= sample_valid;
          data_sync <= data;
          data_available <= sample_valid;
       end
@@ -76,23 +92,6 @@ module top(
          data_available <= 1'b0;
       end
    end
-
-   //Data available strobe.
-`ifndef HIGH_SPEED
-   strobe data_available_strobe(.clk(clk),
-                                .reset(global_reset),
-                                .in(clk_sample_sync),
-                                .out(new_sample));
-`else
-   //FIXME High speed mode no longer works. Not necessary?
-   reg data_done;
-   always @(posedge clk) begin
-      data_done <= global_reset || feed_reset_sync ? 1'b0 :
-                   feed_complete_sync ? 1'b1 :
-                   data_done;
-   end
-   assign data_available = !(global_reset || feed_reset_sync) && !data_done;
-`endif // !`ifndef HIGH_SPEED
 
    always @(posedge clk) begin
       sample_count <= global_reset ? 32'd0 :

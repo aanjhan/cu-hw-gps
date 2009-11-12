@@ -44,6 +44,7 @@ for i in range(1,`NUM_CHANNELS + 1):
     print("default: chan_" + `i` + " = ad_passthrough;", "\n")
     print("endcase\n\n")
 ?>
+
 end
 
 endmodule

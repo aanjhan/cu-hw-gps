@@ -31,6 +31,8 @@ module mem_bank (
    `KEEP wire [`WORD_RANGE] m4k_in;
    
    wire mode_change;
+//   wire frame_start_predelay;
+//   wire frame_end_predelay;
    
    `KEEP wire m4k_wren;
    mem_bank_ram #(.WORD_LENGTH(`WORD_LENGTH),
@@ -91,7 +93,7 @@ module mem_bank (
                buffer <= (offset == `BUFFER_MAX_OFFSET || sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M1) ? m4k_out : 
                          {buffer[`DATA_IN_RANGE],`OFFSET_LENGTH'h0};//FIXME This is 25b and gets truncated to 24b.
                offset <= offset + `OFFSET_LENGTH'd1;
-               addr <= (sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M4) ? start_addr :
+               addr <= (sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M3) ? start_addr :
                        (offset != `OFFSET_LENGTH'd1) ? addr :
                        (addr == `ADDRESS_LENGTH'd`NUM_WORDS_M1) ? `ADDRESS_LENGTH'd0 :
                        addr + `ADDRESS_LENGTH'd1 ;
@@ -128,6 +130,18 @@ module mem_bank (
                          .in(mode),
                          .out(mode_change));
    
+//   delay frame_start_delay (
+//                            .clk(clk),
+//                            .reset(reset),
+//                            .in(frame_start_predelay),
+//                            .out(frame_start));
+//                            
+//   delay frame_end_delay (
+//                         .clk(clk),
+//                         .reset(reset),
+//                         .in(frame_end_predelay),
+//                         .out(frame_end));                            
+   
    assign ready = (mode == `MODE_WRITING) && (sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M1) || (mode == `MODE_PLAYBACK);
    assign frame_start = (mode == `MODE_PLAYBACK) &&
                         (sample_counter == `SAMPLE_COUNT_WIDTH'd0) &&
@@ -136,5 +150,8 @@ module mem_bank (
    assign sample_valid = (mode == `MODE_PLAYBACK) &&
                          (!mode_change) &&
                          wait_count==`MEM_BANK_WAIT_WIDTH'd0;
+   
+//   assign frame_start = frame_start_predelay;
+//   assign frame_end = frame_end_predelay;
    
 endmodule

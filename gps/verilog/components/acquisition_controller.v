@@ -7,8 +7,8 @@
 //`define DEBUG
 
 `ifdef DEBUG
- `undef MAX_CODE_SHIFT
- `define MAX_CODE_SHIFT `CS_WIDTH'h0
+ //`undef MAX_CODE_SHIFT
+ //`define MAX_CODE_SHIFT `CS_WIDTH'h0
 
  `undef DOPP_MAX_INC
  `define DOPP_MAX_INC `DOPPLER_INC_WIDTH'd6392
@@ -144,6 +144,7 @@ module acquisition_controller(
    reg [`DOPPLER_INC_RANGE] prev_doppler_late;
    reg [`CS_RANGE]          prev_code_shift;
    reg                      prev_ignore_update;
+   reg                      prev_acq_active;
    always @(posedge clk) begin
       if(accumulation_complete) begin
          prev_doppler_early <= doppler_early;
@@ -151,6 +152,7 @@ module acquisition_controller(
          prev_doppler_late <= doppler_late;
          prev_code_shift <= code_shift;
          prev_ignore_update <= ignore_next_update;
+         prev_acq_active <= acq_active;
       end
    end
    
@@ -216,7 +218,9 @@ module acquisition_controller(
            end
            //Idle. Wait for next valid accumulation to complete.
            default: begin
-              update_state <= i2q2_valid && !acquisition_complete ?
+              update_state <= prev_acq_active &&
+                              i2q2_valid &&
+                              !acquisition_complete ?
                               `ACQ_STATE_EARLY_PROMPT :
                               `ACQ_STATE_IDLE;
               update_complete <= 1'b0;

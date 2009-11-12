@@ -32,7 +32,7 @@ module mem_bank (
    
    wire mode_change;
    
-   wire m4k_wren;
+   `KEEP wire m4k_wren;
    mem_bank_ram #(.WORD_LENGTH(`WORD_LENGTH),
                   .NUM_WORDS(`NUM_WORDS),
                   .ADDR_WIDTH(`ADDRESS_LENGTH))
@@ -57,12 +57,12 @@ module mem_bank (
    reg [`MEM_BANK_WAIT_RANGE] wait_count;
    always @ (posedge clk) begin
       
-      if (reset) begin
+      if (reset || (mode_change && mode==`MODE_WRITING)) begin
          
          offset <= `OFFSET_LENGTH'd0;
          buffer <= `WORD_LENGTH'h0;
-         addr <= addr;
-         start_addr <= start_addr;
+         addr <= `ADDRESS_LENGTH'd0;
+         start_addr <= `ADDRESS_LENGTH'd0;
          sample_counter <= `SAMPLE_COUNT_WIDTH'd0;
          wait_count <= `MEM_BANK_WAIT_WIDTH'd0;
          
@@ -81,25 +81,26 @@ module mem_bank (
       
       else begin
 
-         if (wait_count!=`MEM_BANK_WAIT_WIDTH'd0) begin
-            wait_count <= wait_count==`MEM_BANK_WAIT_MAX ?
-                          `MEM_BANK_WAIT_WIDTH'd0 :
-                          wait_count+`MEM_BANK_WAIT_WIDTH'd1;
-         end
-         else if (mode == `MODE_PLAYBACK) begin
-            
-            buffer <= (offset == `BUFFER_MAX_OFFSET || sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M1) ? m4k_out : 
-                      {buffer[`DATA_IN_RANGE],`OFFSET_LENGTH'h0};//FIXME This is 25b and gets truncated to 24b.
-            offset <= offset + `OFFSET_LENGTH'd1;
-            addr <= (sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M4) ? start_addr :
-                    (offset != `OFFSET_LENGTH'd1) ? addr :
-                    (addr == `ADDRESS_LENGTH'd`NUM_WORDS_M1) ? `ADDRESS_LENGTH'd0 :
-                    addr + `ADDRESS_LENGTH'd1 ;
+         if (mode == `MODE_PLAYBACK) begin
+            if(wait_count!=`MEM_BANK_WAIT_WIDTH'd0) begin
+               wait_count <= wait_count==`MEM_BANK_WAIT_MAX ?
+                             `MEM_BANK_WAIT_WIDTH'd0 :
+                             wait_count+`MEM_BANK_WAIT_WIDTH'd1;
+            end
+            else begin
+               buffer <= (offset == `BUFFER_MAX_OFFSET || sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M1) ? m4k_out : 
+                         {buffer[`DATA_IN_RANGE],`OFFSET_LENGTH'h0};//FIXME This is 25b and gets truncated to 24b.
+               offset <= offset + `OFFSET_LENGTH'd1;
+               addr <= (sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M4) ? start_addr :
+                       (offset != `OFFSET_LENGTH'd1) ? addr :
+                       (addr == `ADDRESS_LENGTH'd`NUM_WORDS_M1) ? `ADDRESS_LENGTH'd0 :
+                       addr + `ADDRESS_LENGTH'd1 ;
 
-            wait_count <= sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M1 ? `MEM_BANK_WAIT_WIDTH'd1 : wait_count;
-            
-            start_addr <= start_addr;
-            sample_counter <= (sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M1) ? `SAMPLE_COUNT_WIDTH'h0 : sample_counter + `SAMPLE_COUNT_WIDTH'h1;
+               wait_count <= sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M1 ? `MEM_BANK_WAIT_WIDTH'd1 : wait_count;
+               
+               start_addr <= start_addr;
+               sample_counter <= (sample_counter == `SAMPLE_COUNT_WIDTH'd`SAMPLES_PER_ACQ_M1) ? `SAMPLE_COUNT_WIDTH'h0 : sample_counter + `SAMPLE_COUNT_WIDTH'h1;
+            end
          end
          
          else begin // mode == `MODE_WRITING

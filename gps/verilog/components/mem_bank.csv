@@ -4,10 +4,10 @@ MODE_PLAYBACK,1'b0,Memory bank playback mode.
 MODE_WRITING,1'b1,Memory bank writing mode.
 
 WORD_LENGTH,24,Memory bank RAM word length.
-NUM_WORDS,8192,Number of words in one m4k RAM module.
+NUM_WORDS,ceil(INPUT_WIDTH*SAMPLES_PER_ACQ/WORD_LENGTH),Number of words in one m4k RAM module.
 NUM_WORDS_M1,NUM_WORDS-1,Number of words in one m4k RAM module - 1.
-WORD_RANGE,23:0,Memory bank RAM word range.
-SAMPLES_PER_WORD,8,Number of samples in one RAM word.
+WORD_RANGE,range(WORD_LENGTH),Memory bank RAM word range.
+SAMPLES_PER_WORD,floor(WORD_LENGTH/INPUT_WIDTH),Number of samples in one RAM word.
 OFFSET_LENGTH,max_width(SAMPLES_PER_WORD-1),Number of bits needed for possible word offsets.
 OFFSET_RANGE,OFFSET_LENGTH-1:0,Bit range for possible word offsets.
 ADDRESS_LENGTH,max_width(NUM_WORDS-1),Number of bits needed for possible addresses.

@@ -137,9 +137,7 @@ module rt_data_feed(
          //are already 2 extra bits available, and by
          //5 otherwise.
          sample_count <= sample_count>3'd1 ? sample_count-3'd1 :
-                         packet_empty ? (sample_count==3'd1 :
-                                         3'd0 :
-                                         sample_count) :
+                         packet_empty ? 3'd0 :
                          sample_extra==2'd2 ? 3'd6 :
                          3'd5;
       

@@ -133,7 +133,7 @@ module channel(
    reg [`CS_RANGE] track_seek_target;
    wire seeking;
    ca_upsampler upsampler(.clk(clk),
-                          .reset(global_reset),
+                          .reset(global_reset || mode_switch),
                           .enable(mode==`MODE_ACQ ? mem_data_available : data_available),
                           //Control interface.
                           .prn(prn),

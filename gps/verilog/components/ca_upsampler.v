@@ -65,7 +65,7 @@ module ca_upsampler(
    //Advance the clock when the system is
    //enabled (data available) or when seeking.
    `KEEP wire ca_clk_en;
-   assign ca_clk_en = ((~seek_en_int) & enable) | (seeking && !target_upcoming);
+   assign ca_clk_en = ((~seek_en_int) & enable) | (seeking && !target_reached);
 
    //Pipe clock enable signal for 1 cycle
    //to meet timing requirements.

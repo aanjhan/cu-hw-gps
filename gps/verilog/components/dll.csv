@@ -10,7 +10,7 @@ DLL_IQ_SHIFT,8,Amount to which IQ values are shifted before operation.
 DLL_SHIFT,6,DLL fixed-point multiplication shift.
 DLL_A_SHIFT,1,Tau-prime coefficient fixed-point shift.
 DLL_B_SHIFT,2,Phase increment coefficient fixed-point shift.
-DOPP_AID_SHIFT,16,Doppler aiding coefficient fixed-point shift.
+DOPP_AID_SHIFT,25,Doppler aiding coefficient fixed-point shift.
 
 //Clock divider counter.
 DLL_CLK_COUNT,8,Division clock divider (must be even).
@@ -47,7 +47,7 @@ DLL_A_FIX,DLL_MULT_CONST_WIDTH'dDLL_A_FIX_VAL,Tau-prime coefficient (fixed-point
 DLL_B,DLL_A*2^CA_ACC_WIDTH*DLL_HNUM,Phase increment coefficient.
 DLL_B_FIX_VAL,fix(DLL_B;DLL_B_SHIFT),Phase increment coefficient value (fixed-point).
 DLL_B_FIX,DLL_MULT_CONST_WIDTH'dDLL_B_FIX_VAL,Phase increment coefficient (fixed-point).
-DOPP_AID_COEFF_VAL,fix(2^CARRIER_ACC_WIDTH/F_S*F_CA/2/PI/F_L1;DOPP_AID_SHIFT),Doppler aiding coefficient value.
+DOPP_AID_COEFF_VAL,fix((2^CA_ACC_WIDTH/F_S)/(2^CARRIER_ACC_WIDTH/F_S)*F_CA/F_L1;DOPP_AID_SHIFT),Doppler aiding coefficient value.
 DOPP_AID_COEFF,DLL_MULT_CONST_WIDTH'dDOPP_AID_COEFF_VAL,Doppler aiding coefficient.
 DLL_MULT_CONST_WIDTH,max_width(max(DLL_A_FIX_VAL;DLL_B_FIX_VAL;DOPP_AID_COEFF_VAL)),Multiplication constant width.
 DLL_MULT_CONST_RANGE,range(DLL_MULT_CONST_WIDTH),Multiplication constant bit range.

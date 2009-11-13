@@ -51,7 +51,7 @@ module ca_upsampler(
    //Target is coming up if it is the next shift
    //value and the shift is enabled.
    wire target_upcoming;
-   assign target_upcoming = next_code_shift==seek_target_int && seek_en_int;
+   assign target_upcoming = next_code_shift==seek_target_int && pl_update_en && seek_en_int;
 
    //The seek target has been reached when
    //the current code shift is equal to
@@ -60,7 +60,7 @@ module ca_upsampler(
 
    //We are seeking when seeking has been
    //enabled and the target has not been reached.
-   assign seeking = seek_en_int && !target_reached;
+   assign seeking = seek_en_int && !target_upcoming;
 
    //Advance the clock when the system is
    //enabled (data available) or when seeking.
@@ -108,7 +108,9 @@ module ca_upsampler(
      ca_clock_gen(.clk(clk),
                   .reset(reset),
                   .enable(ca_clk_en),
-                  .inc(`CA_RATE_INC+phase_inc_offset),
+                  .inc(resetting ?
+                       `CA_RATE_INC :
+                       `CA_RATE_INC+phase_inc_offset),
                   .out(ca_clk_n));
 
    //Strobe C/A clock for 1 cycle.

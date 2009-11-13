@@ -48,8 +48,6 @@ module top(
     output wire [3:0]                track_count,
     output reg                       data_available,
     output wire                      track_feed_complete,
-    output wire [2:0]                 carrier_i,
-    output wire [2:0]                 carrier_q,
     output wire                      ca_bit,
     output wire                      ca_clk,
     output wire [9:0]                ca_code_shift);

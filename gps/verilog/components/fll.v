@@ -529,10 +529,13 @@ module fll(
               res_state <= `FLL_RES_STATE_IDLE;
               
               result_ready <= 1'b1;
-              if(w_df_kp1[`W_DF_WIDTH-1])
+
+              doppler_inc_kp1 <= w_df_kp1>>`ANGLE_SHIFT;
+              /*if(w_df_kp1[`W_DF_WIDTH-1])
                 doppler_inc_kp1 <= -res_mult_result[`FLL_RES_INC_RANGE];
               else
                 doppler_inc_kp1 <= res_mult_result[`FLL_RES_INC_RANGE];
+               */
            end
            default: begin
               res_state <= div_results_ready ?

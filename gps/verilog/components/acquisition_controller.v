@@ -10,7 +10,7 @@
  //`undef MAX_CODE_SHIFT
  //`define MAX_CODE_SHIFT `CS_WIDTH'h0
 
- `undef DOPP_MAX_INC
+ /*`undef DOPP_MAX_INC
  `define DOPP_MAX_INC `DOPPLER_INC_WIDTH'd6392
 
  `undef DOPP_EARLY_START
@@ -20,7 +20,7 @@
  `define DOPP_PROMPT_START `DOPPLER_INC_WIDTH'd0
 
  `undef DOPP_LATE_START
- `define DOPP_LATE_START -`DOPPLER_INC_WIDTH'd1598
+ `define DOPP_LATE_START -`DOPPLER_INC_WIDTH'd1598*/
 `endif
 
 module acquisition_controller(
@@ -29,9 +29,9 @@ module acquisition_controller(
     //Acquisiton control.
     input                           start_acquisition,
     input                           frame_start,
-    output reg [`DOPPLER_INC_RANGE] doppler_early,
-    output reg [`DOPPLER_INC_RANGE] doppler_prompt,
-    output reg [`DOPPLER_INC_RANGE] doppler_late,
+    output reg signed [`DOPPLER_INC_RANGE] doppler_early,
+    output reg signed [`DOPPLER_INC_RANGE] doppler_prompt,
+    output reg signed [`DOPPLER_INC_RANGE] doppler_late,
     output reg                      seek_en,
     output reg [`CS_RANGE]          code_shift,
     input                           target_reached,
@@ -57,6 +57,7 @@ module acquisition_controller(
    always @(posedge clk) begin
       //Determine when the feed is idle for seek enable usage.
       feed_idle <= global_reset ? 1'b1 :
+                   start_acquisition ? 1'b0 :
                    frame_start ? 1'b0 :
                    accumulation_complete ? 1'b1 :
                    feed_idle;
@@ -152,7 +153,7 @@ module acquisition_controller(
          prev_doppler_late <= doppler_late;
          prev_code_shift <= code_shift;
          prev_ignore_update <= ignore_next_update;
-         prev_acq_active <= acq_active;
+         prev_acq_active <= ignore_next_update ? prev_acq_active : acq_active;
       end
    end
    

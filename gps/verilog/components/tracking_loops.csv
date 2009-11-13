@@ -17,10 +17,10 @@ IQ_RANGE,IQ_WIDTH-1:0,IQ range when tracking.
 
 //Carrier parameters.
 ANGLE_SHIFT,9,Fixed-point angle shift.
-W_DF_WIDTH,max_width((F_DOPP_MAX*2*PI)*2^ANGLE_SHIFT)+1,Doppler shift width [rad/s] (two's complement).
+W_DF_WIDTH,DOPPLER_INC_WIDTH+ANGLE_SHIFT,Doppler shift width [rad/s] (two's complement).
 W_DF_RANGE,range(W_DF_WIDTH),Doppler shift range.
-W_DF_DOT_MAX,4000*(2*PI),Maximum expected Doppler shift rate [rad/s^2] - empirical (200Hz/50ms).
-W_DF_DOT_MAX_VAL,fix(W_DF_DOT_MAX;ANGLE_SHIFT),Approximate expected maximum w_df_dot value [rad/s^2].
+W_DF_DOT_MAX,fix(4000*(2^CARRIER_ACC_WIDTH/F_S);ANGLE_SHIFT),Maximum expected Doppler shift rate [dphi/s] - empirical (200Hz/50ms).
+W_DF_DOT_MAX_VAL,W_DF_DOT_MAX,Approximate expected maximum w_df_dot value [dphi/s].
 W_DF_DOT_WIDTH,max_width(W_DF_DOT_MAX_VAL)+1,Expected maximum w_df_dot width [rad/s^2] (two's complement).
 W_DF_DOT_RANGE,range(W_DF_DOT_WIDTH),Expected maximum w_df_dot range.
 DOPPLER_INC_WIDTH,@

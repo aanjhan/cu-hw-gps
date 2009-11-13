@@ -87,7 +87,6 @@ module channel(
    always @(posedge clk) begin
       sample_count <= start_tracking ? `SAMPLE_COUNT_TRACK_WIDTH'd0 :
                       !data_available ? sample_count :
-                      track_seek_en ? sample_count :
                       track_feed_complete ? `SAMPLE_COUNT_TRACK_WIDTH'd0 :
                       sample_count+`SAMPLE_COUNT_TRACK_WIDTH'd1;
       
@@ -385,10 +384,10 @@ module channel(
       //FIXME Don't start accepting tracking loop updates
       //FIXME until after the seek has completed.
       track_seek_en <= start_tracking ? 1'b1 :
-                       target_reached ? 1'b0 :
+                       target_reached && accumulation_complete ? 1'b0 :
                        track_seek_en;
       track_seek_target <= start_tracking ?
-                           acq_peak_code_shift ://`CS_WIDTH'd0 :
+                           acq_peak_code_shift :
                            track_seek_target;
       
       track_count <= start_tracking ? 4'd0 :
@@ -417,9 +416,7 @@ module channel(
                         ignore_doppler;
 
       //Carrier generator.
-      //FIXME Remove w_df completely and use carrier_dphi,
-      //FIXME so that the results from acquisition work.
-      w_df_k <= start_tracking ? `W_DF_WIDTH'd0 : //FIXME Get value from acquisition.
+      w_df_k <= start_tracking ? {acq_peak_doppler,{`ANGLE_SHIFT{1'b0}}} :
                 !track_carrier_en ? w_df_k :
                 tracking_ready && !ignore_doppler ? w_df_kp1 :
                 w_df_k;
@@ -428,9 +425,7 @@ module channel(
                     tracking_ready && !ignore_doppler ? w_df_dot_kp1 :
                     w_df_dot_k;
       carrier_dphi_k <= start_tracking ? acq_peak_doppler :
-                        //start_tracking ? `DOPPLER_INC_WIDTH'd0 : //FIXME Remove this in favor of acquisiton result below.
                         !track_carrier_en ? carrier_dphi_k :
-                        acquisition_complete && mode==`MODE_ACQ ? acq_peak_doppler :
                         tracking_ready && !ignore_doppler ? doppler_inc_kp1 :
                         carrier_dphi_k;
 

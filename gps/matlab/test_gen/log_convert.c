@@ -32,46 +32,36 @@ int ReadHWFormat(FILE *file, int8_t *samples)
     numBytes=fread(buffer,1,HW_BUFFER_SIZE,file);
 
     //FIXME This code doesn't work yet!
-    /*bitPos=0;
-    outPos=0;
-    outMag=0;
-    outSign=0;
-    while(numBytes>0)
+    bitPos=0;
+    byteIndex=0;
+    numSamples=0;
+    while(byteIndex<numBytes)
     {
-        byteIndex=0;
-        while(byteIndex<numRead)
+        //Read packed sample from log.
+        mag=(buffer[byteIndex]>>bitPos)&0x03;
+        negative=(buffer[byteIndex]>>bitPos)&0x04;
+
+        //Add bits from next byte as necessary.
+        if(bitPos>=5)byteIndex++;
+        if(byteIndex==numBytes)break;
+        
+        if(bitPos==6)
         {
-            //Read packed sample from log.
-            mag=(bytes[byteIndex]>>bitPos)&0x03;
-            sign=(bytes[byteIndex]>>bitPos)&0x04;
-
-            //Add bits from next byte as necessary.
-            if(bitPos>=5)byteIndex++;
-            if(bitPos==6)
-            {
-                sign=bytes[byteIndex]&0x01;
-            }
-            else if(bitPos==7)
-            {
-                mag=mag&0x01 | (bytes[byteIndex]&0x01)<<1;
-                sign=(bytes[byteIndex]&0x02)>>1;
-            }
-            if(sign)sign=1;
-
-            //Update bit position.
-            bitPos=(bitPos+3)&0x7;
-
-            //Convert sample to output format.
-            //  --Input format: [-3,+3] {sign (1b), magnitude (2b)}
-            //    --Sign: 0=positive, 1=negative
-            //  --Output foramt: {-3,-1,1,3} {sign (1b), magnitude (1b)}
-            //    --Sign: 0=negative, 1=positive
-            sign=!sign;
-            mag>>=1;
+            negative=buffer[byteIndex]&0x01;
         }
-        }*/
+        else if(bitPos==7)
+        {
+            mag=mag&0x01 | (buffer[byteIndex]&0x01)<<1;
+            negative=(buffer[byteIndex]&0x02)>>1;
+        }
 
-    return 0;
+        //Update bit position.
+        bitPos=(bitPos+3)&0x7;
+
+        samples[numSamples++]=negative ? -((int8_t)mag) : ((int8_t)mag);
+    }
+
+    return numSamples;
 }
 
 int ReadSWFormat(FILE *file, int8_t *samples)

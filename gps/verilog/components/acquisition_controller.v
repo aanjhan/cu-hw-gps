@@ -29,9 +29,9 @@ module acquisition_controller(
     //Acquisiton control.
     input                           start_acquisition,
     input                           frame_start,
-    output reg signed [`DOPPLER_INC_RANGE] doppler_early,
-    output reg signed [`DOPPLER_INC_RANGE] doppler_prompt,
-    output reg signed [`DOPPLER_INC_RANGE] doppler_late,
+    output reg [`DOPPLER_INC_RANGE] doppler_early,
+    output reg [`DOPPLER_INC_RANGE] doppler_prompt,
+    output reg [`DOPPLER_INC_RANGE] doppler_late,
     output reg                      seek_en,
     output reg [`CS_RANGE]          code_shift,
     input                           target_reached,
@@ -121,7 +121,7 @@ module acquisition_controller(
 
    //Flag when the last bin is waiting for I2Q2 results.
    assign last_bin_pending = code_shift==`MAX_CODE_SHIFT &&
-                             doppler_early>=`DOPP_MAX_INC;
+                             (!doppler_early[`DOPPLER_INC_WIDTH-1] && doppler_early>=`DOPP_MAX_INC);
 
    //Reset code shift after hitting maximum value.
    wire cs_reset;

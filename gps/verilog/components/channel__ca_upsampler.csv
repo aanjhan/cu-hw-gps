@@ -1,3 +1,6 @@
 #include !"ca_upsampler.csv"
+#include !"channel.csv"
 
 CA_PHASE_INC_RANGE,@
+MODE_RANGE,@
+MODE_ACQ,@

@@ -13,6 +13,7 @@ module channel(
     input                            clk,
     input                            global_reset,
     input [`MODE_RANGE]              mode,
+    input                            mode_reset,
     //Real-time sample interface.
     input                            data_available,
     input [`INPUT_RANGE]             data,
@@ -72,7 +73,7 @@ module channel(
    strobe #(.STROBE_AFTER_RESET(1),
             .FLAG_CHANGE(1))
      mode_switch_strobe(.clk(clk),
-                        .reset(global_reset),
+                        .reset(global_reset || mode_reset),
                         .in(mode),
                         .out(mode_switch));
    
@@ -133,6 +134,7 @@ module channel(
    wire seeking;
    ca_upsampler upsampler(.clk(clk),
                           .reset(global_reset || mode_switch),
+                          .mode(mode),
                           .enable(mode==`MODE_ACQ ? mem_data_available : data_available),
                           //Control interface.
                           .prn(prn),

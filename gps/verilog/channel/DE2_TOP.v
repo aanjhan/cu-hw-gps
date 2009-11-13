@@ -309,6 +309,7 @@ module DE2_TOP (
    top sub(.clk(clk_200),
            .global_reset(global_reset),
            .mode(mode),
+           .mode_reset(~KEY[1]),
            .mem_mode(mem_mode),
            //Sample data.
            .clk_sample(clk_sample),

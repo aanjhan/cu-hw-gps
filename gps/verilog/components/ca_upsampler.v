@@ -8,6 +8,7 @@
 module ca_upsampler(
     input                       clk,
     input                       reset,
+    input [`MODE_RANGE]         mode,
     input                       enable,
     //Control interface.
     input [4:0]                 prn,
@@ -96,17 +97,17 @@ module ca_upsampler(
 
    //Reset the C/A DDS unit at code shift
    //wrap-around to maintain code alignment.
-   wire ca_clk_reset;
-   assign ca_clk_reset = code_shift==`CS_RESET_VALUE;
+   `KEEP wire ca_clk_reset;
+   assign ca_clk_reset = code_shift==(`CS_RESET_VALUE-`CS_WIDTH'd1) && mode==`MODE_ACQ;
    
    //Generate C/A code clock from reference
    //clock signal.
-   wire ca_clk_n;
+   `KEEP wire ca_clk_n;
    dds #(.ACC_WIDTH(`CA_ACC_WIDTH),
          .PHASE_INC_WIDTH(`CA_PHASE_INC_WIDTH),
          .OUTPUT_WIDTH(1))
      ca_clock_gen(.clk(clk),
-                  .reset(reset),
+                  .reset(reset || ca_clk_reset),
                   .enable(ca_clk_en),
                   .inc(resetting ?
                        `CA_RATE_INC :
@@ -114,14 +115,15 @@ module ca_upsampler(
                   .out(ca_clk_n));
 
    //Strobe C/A clock for 1 cycle.
-   strobe ca_strobe(.clk(clk),
-                    .reset(reset),
-                    .in(~ca_clk_n),
-                    .out(ca_clk));
+   strobe #(.RESET_ONE(1))
+     ca_strobe(.clk(clk),
+               .reset(reset || ca_clk_reset),
+               .in(~ca_clk_n),
+               .out(ca_clk));
 
    //Generate C/A code bit for given PRN.
    ca_generator ca_gen(.clk(clk),
-                       .reset(reset),
+                       .reset(reset || ca_clk_reset),
                        .enable(ca_clk),
                        .prn(prn),
                        .code_shift(ca_code_shift),

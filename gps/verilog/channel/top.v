@@ -11,6 +11,7 @@ module top(
     input                            clk,
     input                            global_reset,
     input [`MODE_RANGE]              mode,
+    input                            mode_reset,
     input                            mem_mode,
     //Sample data.
     input                            clk_sample,
@@ -137,6 +138,7 @@ module top(
    channel channel_0(.clk(clk),
                      .global_reset(global_reset),
                      .mode(mode),
+                     .mode_reset(mode_reset),
                      //Real-time sample interface.
                      .data_available(data_available),
                      .data(data_sync),

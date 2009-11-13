@@ -32,7 +32,7 @@ if(display)
     w_df=zeros(hist_size,1);
     dopp_dphi=zeros(hist_size,1);
     hold on;
-    h_w_df=plot(t,w_df/2/pi/2^ANGLE_SHIFT);
+    h_w_df=plot(t,w_df*F_S/2^(CARRIER_ACC_WIDTH+ANGLE_SHIFT));
     h_dopp_dphi=plot(t,dopp_dphi*F_S/2^CARRIER_ACC_WIDTH,'g');
     hold off;
     title('Doppler Shift Plot');
@@ -41,7 +41,7 @@ if(display)
     
     subplot(2,2,4);
     w_df_dot=zeros(hist_size,1);
-    h_w_df_dot=plot(w_df_dot/2/pi/2^ANGLE_SHIFT,'r');
+    h_w_df_dot=plot(w_df_dot*F_S/2^(CARRIER_ACC_WIDTH+ANGLE_SHIFT),'r');
     title('Doppler Rate Plot');
     xlabel('Time (ms)');
     ylabel('Doppler Rate (Hz/s)');
@@ -120,11 +120,11 @@ while(running==1)
                 
                 w_df=[w_df(2:end);data(3)];
                 set(h_w_df,'XData',t);
-                set(h_w_df,'YData',w_df/2/pi/2^ANGLE_SHIFT);
+                set(h_w_df,'YData',w_df*F_S/2^(CARRIER_ACC_WIDTH+ANGLE_SHIFT));
                 
                 w_df_dot=[w_df_dot(2:end);data(4)];
                 set(h_w_df_dot,'XData',t);
-                set(h_w_df_dot,'YData',w_df_dot/2/pi/2^ANGLE_SHIFT);
+                set(h_w_df_dot,'YData',w_df_dot*F_S/2^(CARRIER_ACC_WIDTH+ANGLE_SHIFT));
                 
                 dopp_dphi=[dopp_dphi(2:end);data(5)];
                 set(h_dopp_dphi,'XData',t);

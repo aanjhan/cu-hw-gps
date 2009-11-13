@@ -9,6 +9,7 @@
 %    doppler - Doppler shift [Hz].
 %      --For scalar values Doppler is held constant.
 %      --For vector values Doppler is ramped between the first and second.
+%    code_start - Code start [upsampled chips].
 %    save - Save log to a file: 0=no, 1=yes.
 %
 %  Outputs:
@@ -22,11 +23,15 @@
 % - Run twos_to_ones(<data>,3)
 % - Run write_vwf(<data>,<Verilog subdirectory>,<filename>)
 
-function [signal,t,carrier,code]=log_gen(PRN,sig_length,doppler,save)
+function [signal,t,carrier,code]=log_gen(PRN,sig_length,doppler,code_start,save)
     constant_h;
     constant_rcx;
     
     if(nargin<4)
+        code_start=0;
+    end
+    
+    if(nargin<5)
         save=0;
     end
     
@@ -35,7 +40,9 @@ function [signal,t,carrier,code]=log_gen(PRN,sig_length,doppler,save)
     
     %Generate PRN code.
     caCode=cacodegn(PRN);
-    code=digitize_ca_prompt(caCode,sig_length);
+    code_start=floor(code_start);
+    code=digitize_ca_prompt(caCode,sig_length+code_start/ONE_MSEC_SAM);
+    code=code(code_start+1:end);
     code=code*2-1;
     
     %Generate carrier.
@@ -60,7 +67,8 @@ function [signal,t,carrier,code]=log_gen(PRN,sig_length,doppler,save)
         else
             strDoppler=sprintf('%sHz',string_format(doppler,1));
         end
-        filename=sprintf('prn%d_%s_%s.dat',PRN,strTime,strDoppler);
+        strCode=sprintf('chip_%d',code_start);
+        filename=sprintf('prn%d_%s_%s_%s.dat',PRN,strTime,strDoppler,strCode);
         
         log_write(signal,filename);
         fprintf('Log saved to ''%s''.\n',filename);

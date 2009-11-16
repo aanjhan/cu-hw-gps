@@ -6,6 +6,9 @@ F_CA,1.023e6,C/A code chipping rate.
 N_CHIPS,1023,Number of C/A chips.
 T_CA_CODE,N_CHIPS/F_CA,C/A code repetition rate.
 
+CA_CS_WIDTH,max_width(N_CHIPS-1),C/A code shift width.
+CA_CS_RANGE,range(CA_CS_WIDTH),C/A code shift range.
+
 //Front-end parameters.
 F_S,16.8e6,Front-end sampling rate.
 F_IF,3.78e6,Front-end intermediate frequency.
@@ -28,6 +31,11 @@ MAX_CODE_SHIFT,CS_WIDTH'dMAX_CS_VALUE,Maximum upsampled code shift value.
 //Acquisition parameters.
 F_DOPP_MAX,6000,Maximum expected Doppler shift.
 DOPP_BIN_SIZE,200,Doppler bin width in Hz.
+
+//PRN identifier.
+PRN_MAX,31,Maximum supported satellite PRN.
+PRN_WIDTH,max_width(PRN_MAX),PRN identifier width.
+PRN_RANGE,range(PRN_WIDTH),PRN identifier range.
 
 //Channel configuration.
 NUM_CHANNELS,10,Number of tracking channels implemented in receiver.

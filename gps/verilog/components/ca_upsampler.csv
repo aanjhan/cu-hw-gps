@@ -14,3 +14,6 @@ CA_RATE_INC,CA_PHASE_INC_WIDTH'dround((2^CA_ACC_WIDTH)*F_CA/F_S),C/A code clock 
 CHIPS_EML_UP,CHIPS_EML/F_CA*F_S,Upsampled chips between early and late subchannels (float).
 CHIPS_LEAD_LAG,floor(CHIPS_EML_UP/2),Upsampled chip lead/lag for early and late subchannels
 CS_RESET_VALUE,CS_WIDTH'd(MAX_CS_VALUE-CHIPS_LEAD_LAG+1),Code shift reset value (resets to early at 0).
+
+CA_CHIP_HIST_WIDTH,CHIPS_LEAD_LAG,C/A chip history width.
+CA_CHIP_HIST_RANGE,range(CA_CHIP_HIST_WIDTH),C/A chip history range.

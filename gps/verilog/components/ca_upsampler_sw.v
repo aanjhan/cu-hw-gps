@@ -118,27 +118,23 @@ module ca_upsampler_sw(
    //early code by CHIPS_LEAD_LAG. Outputs are
    //delayed one cycle to align with output from
    //C/A generator.
-   //FIXME Won't this just end up using a garbage out_early value?
-   //FIXME Instead, delay *_hist_in by 1 cycle, then shift, concatenate and output.
+   
+   wire [`CA_CHIP_HIST_RANGE] prompt_chip_hist_km1;
    delay #(.WIDTH(`CA_CHIP_HIST_WIDTH))
      prompt_hist_delay(.clk(clk),
                        .reset(reset),
-                       .in(reset ? `CA_CHIP_HIST_WIDTH'b0 :
-                           {prompt_chip_hist_in[(`CA_CHIP_HIST_WIDTH-2):0],out_early}),
-                       .out(prompt_chip_hist_out));
-   delay out_prompt_delay(.clk(clk),
-                          .reset(reset),
-                          .in(prompt_chip_hist_in[`CA_CHIP_HIST_WIDTH-1]),
-                          .out(out_prompt));
+                       .in(prompt_chip_hist_in),
+                       .out(prompt_chip_hist_km1));
+   assign prompt_chip_hist_out = {prompt_chip_hist_km1[(`CA_CHIP_HIST_WIDTH-2):0],out_early};
+   assign out_prompt = prompt_chip_hist_km1[`CA_CHIP_HIST_WIDTH-1];
    
+   wire [`CA_CHIP_HIST_RANGE] late_chip_hist_km1;
    delay #(.WIDTH(`CA_CHIP_HIST_WIDTH))
      late_hist_delay(.clk(clk),
                      .reset(reset),
-                     .in(reset ? `CA_CHIP_HIST_WIDTH'b0 :
-                         {late_chip_hist_in[(`CA_CHIP_HIST_WIDTH-2):0],out_prompt}),
-                     .out(late_chip_hist_out));
-   delay out_late_delay(.clk(clk),
-                        .reset(reset),
-                        .in(late_chip_hist_in[`CA_CHIP_HIST_WIDTH-1]),
-                        .out(out_late));
+                     .in(late_chip_hist_in),
+                     .out(late_chip_hist_km1));
+   assign late_chip_hist_out = {late_chip_hist_km1[(`CA_CHIP_HIST_WIDTH-2):0],out_prompt};
+   assign out_late = late_chip_hist_km1[`CA_CHIP_HIST_WIDTH-1];
+   
 endmodule

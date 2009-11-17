@@ -28,7 +28,13 @@ module channel_sw(
     output wire [`ACC_RANGE] i_prompt,
     output wire [`ACC_RANGE] q_prompt,
     output wire [`ACC_RANGE] i_late,
-    output wire [`ACC_RANGE] q_late);
+    output wire [`ACC_RANGE] q_late,
+    //Tracking result memory interface.
+    //FIXME Bit ranges.
+    output wire [1:0]        track_mem_addr,
+    output wire              track_mem_wr_en,
+    input [37:0]             track_mem_data_in,
+    output wire [37:0]       track_mem_data_out);
    
    //Cycle through PRN slots in channel.
    //The slot number indicates which slot
@@ -158,12 +164,22 @@ module channel_sw(
 	     .rdaddress(acc_mem_rd_addr),
 	     .q(acc_mem_out));
 
-   //////////////////////////////
+   ///////////////////////////////////
    // Pipeline Stage 0:
-   //   --Wait for slot state fetch.
-   //////////////////////////////
+   //   --Fetch slot state.
+   //   --Fetch slot tracking results.
+   ///////////////////////////////////
 
+   //Fetch current slot's state.
    assign slot_mem_rd_addr = slot;
+
+   //Fetch current slot's tracking results.
+   //FIXME Need to write initial Doppler/code rate into
+   //FIXME memory on init, but slot_init_pending might not
+   //FIXME be set until stage 1. How to deal with this?
+   assign track_mem_addr = slot;
+   assign track_mem_wr_en = 1'b0;
+   assign track_mem_data_out = 38'd0;
    
    `KEEP wire [1:0] slot_km1;
    delay #(.WIDTH(2))
@@ -185,10 +201,11 @@ module channel_sw(
                   .in(data),
                   .out(data_km1));
 
-   //////////////////////////////
+   ///////////////////////////////////
    // Pipeline Stage 1:
-   //   --Wait for slot state fetch.
-   //////////////////////////////
+   //   --Wait for slot state.
+   //   --Wait for tracking results.
+   ///////////////////////////////////
    
    `KEEP wire [1:0] slot_km2;
    delay #(.WIDTH(2))
@@ -232,7 +249,7 @@ module channel_sw(
    assign g2_in = slot_init_pending[slot_km2] ? 10'h3FF : slot_mem_out[95:86];
    assign ca_code_shift_in = slot_init_pending[slot_km2] ? `CA_CS_WIDTH'd0 : slot_mem_out[85:76];
    assign carrier_acc_in = slot_init_pending[slot_km2] ? `CARRIER_ACC_WIDTH'd0 : slot_mem_out[75:49];
-   assign code_shift_in = slot_init_pending[slot_km2] ? `CS_WIDTH'd0: slot_mem_out[48:34];
+   assign code_shift_in = slot_init_pending[slot_km2] ? `CS_RESET_VALUE : slot_mem_out[48:34];
    assign ca_clk_acc_in = slot_init_pending[slot_km2] ? `CA_ACC_WIDTH'd0 : slot_mem_out[33:9];
    assign ca_clk_hist_in = slot_init_pending[slot_km2] ? 1'b1 : slot_mem_out[8];
    assign prompt_chip_hist_in = slot_init_pending[slot_km2] ? `CA_CHIP_HIST_WIDTH'b0 : slot_mem_out[7:4];
@@ -246,21 +263,24 @@ module channel_sw(
    //Clear init flags.
    generate
       for(i=0;i<NUM_SLOTS;i=i+1) begin : slot_init_clear_gen
-         assign clear_init[i] = active_km4 && slot_km4==i && slot_init_pending[i];
+         assign clear_init[i] = active_km2 && slot_km2==i && slot_init_pending[i];
       end
    endgenerate
    
-   //FIXME Get Doppler value from M4K.
-   wire [`DOPPLER_INC_RANGE] doppler;
-   assign doppler=`DOPPLER_INC_WIDTH'd0;
+   //Fetch tracking results from memory.
+   //FIXME Ranges.
+   wire [`DOPPLER_INC_RANGE] doppler_dphi;
+   wire [`CA_PHASE_INC_RANGE] ca_dphi;
+   assign ca_dphi = track_mem_data_in[37:18];
+   assign doppler_dphi = track_mem_data_in[17:0];
 
    //Carrier value is front-end intermediate frequency plus
    //sign-extended version of two's complement Doppler shift.
    
    wire [`CARRIER_PHASE_INC_RANGE] f_carrier;
    assign f_carrier = `MIXING_SIGN ?
-                      `F_IF_INC-{{`DOPPLER_PAD_SIZE{doppler[`DOPPLER_INC_WIDTH-1]}},doppler} :
-                      `F_IF_INC+{{`DOPPLER_PAD_SIZE{doppler[`DOPPLER_INC_WIDTH-1]}},doppler};
+                      `F_IF_INC-{{`DOPPLER_PAD_SIZE{doppler_dphi[`DOPPLER_INC_WIDTH-1]}},doppler_dphi} :
+                      `F_IF_INC+{{`DOPPLER_PAD_SIZE{doppler_dphi[`DOPPLER_INC_WIDTH-1]}},doppler_dphi};
 
    //Generate the carrier frequency.
    //Note: This DDS module is internally pipelined
@@ -282,7 +302,6 @@ module channel_sw(
    //Generate the upsampled C/A code.
    //Note: The C/A upsampler is internally pipelined.
    //      The C/A bits are ready in stage 3.
-   //FIXME Connect all state I/O and phase increment.
    `KEEP wire ca_bit_early_km3, ca_bit_prompt_km3, ca_bit_late_km3;
    `KEEP wire [`CS_RANGE]           code_shift_out;
    `KEEP wire [`CA_ACC_RANGE]       ca_clk_acc_out;
@@ -296,7 +315,7 @@ module channel_sw(
                              .reset(reset),
                              //Control interface.
                              .prn(slot_prn[slot_km2]),
-                             .ca_dphi(10'd0),//FIXME
+                             .ca_dphi(ca_dphi),
                              //C/A code output interface.
                              .out_early(ca_bit_early_km3),
                              .out_prompt(ca_bit_prompt_km3),

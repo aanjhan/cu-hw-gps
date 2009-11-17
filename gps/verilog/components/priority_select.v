@@ -1,5 +1,6 @@
 module priority_select(
     input [(NUM_ENTRIES-1):0]       eligible,
+    output reg [1:0]                select,
     output wire [(NUM_ENTRIES-1):0] select_oh);
 
    parameter NUM_ENTRIES = 1;
@@ -19,5 +20,14 @@ module priority_select(
          end
       end
    endgenerate
+
+   //FIXME Parameterize this with preprocessor.
+   always @(eligible) begin
+      casez(eligible)
+        2'bz1: select <= 2'd0;
+        2'b10: select <= 2'd1;
+        default: select <= 2'd0;
+      endcase
+   end
    
 endmodule

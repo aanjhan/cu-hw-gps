@@ -19,7 +19,7 @@ module channel_sw(
     //Slot control.
     input                    init,
     input [`PRN_RANGE]       prn,
-    output                   slot_available,
+    output                   slot_initializing,
     //Accumulation results.
     output wire              acc_valid,
     output wire [`PRN_RANGE] acc_tag,
@@ -33,8 +33,8 @@ module channel_sw(
     //FIXME Bit ranges.
     output wire [1:0]        track_mem_addr,
     output wire              track_mem_wr_en,
-    input [37:0]             track_mem_data_in,
-    output wire [37:0]       track_mem_data_out);
+    input [52:0]             track_mem_data_in,
+    output wire [52:0]       track_mem_data_out);
    
    //Cycle through PRN slots in channel.
    //The slot number indicates which slot
@@ -58,66 +58,45 @@ module channel_sw(
 
    //Select next available slot.
    reg [(NUM_SLOTS-1):0] slot_active;
-   wire [(NUM_SLOTS-1):0] next_slot;
+   wire [1:0] next_slot;
+   wire [(NUM_SLOTS-1):0] next_slot_oh;
    priority_select #(.NUM_ENTRIES(NUM_SLOTS))
      slot_select(.eligible(~slot_active),
-                 .select_oh(next_slot));
+                 .select(next_slot),
+                 .select_oh(next_slot_oh));
 
    //Start next-available slot when initialization
    //requested from top level.
    reg [`PRN_RANGE] slot_prn[(NUM_SLOTS-1):0];
    reg [(NUM_SLOTS-1):0] slot_init_pending;
+   reg [(NUM_SLOTS-1):0] slot_track_initialized;
    `KEEP wire [(NUM_SLOTS-1):0] clear_init;
+   `KEEP wire [(NUM_SLOTS-1):0] initalizing_track;
    genvar i;
    generate
       for(i=0;i<NUM_SLOTS;i=i+1) begin : slot_status_gen
          always @(posedge clk) begin
             slot_active[i] <= reset ? 1'b0 :
-                              init && next_slot[i] ? 1'b1 :
+                              init && next_slot_oh[i] ? 1'b1 :
                               slot_active[i];
 
             slot_prn[i] <= reset ? `PRN_WIDTH'd0 :
-                           init && next_slot[i] ? prn :
+                           init && next_slot_oh[i] ? prn :
                            slot_prn[i];
 
             slot_init_pending[i] <= reset ? 1'b0 :
                                     clear_init[i] ? 1'b0 :
-                                    init && next_slot[i] ? 1'b1 :
+                                    init && next_slot_oh[i] ? 1'b1 :
                                     slot_init_pending[i];
+
+            slot_track_initialized[i] <= reset ? 1'b0 :
+                                         init && next_slot_oh[i] && !active ? 1'b1 :
+                                         init && next_slot_oh[i] ? initalizing_track[i] :
+                                         !slot_track_initialized[i] ? initalizing_track[i] :
+                                         slot_track_initialized[i];
          end
       end
    endgenerate
-
-   //Assert slot available flag to top level to clear
-   //initializaiton request.
-   assign slot_available = |(~slot_active);
-
-   //Flag accumulation completion when enough
-   //samples have been accumulated.
-   //FIXME Does the sample count have to be loaded
-   //      from the slot state memory as well? Each
-   //      slot can initialize and complete accumulations
-   //      at a different time.
-   wire [`SAMPLE_COUNT_TRACK_RANGE] tau_prime_k;
-   reg [`SAMPLE_COUNT_TRACK_RANGE] sample_count;
-   reg                             acc_complete_km1;
-   always @(posedge clk) begin
-      sample_count <= reset ? `SAMPLE_COUNT_TRACK_WIDTH'd0 :
-                      !data_available ? sample_count :
-                      acc_complete_km1 ? `SAMPLE_COUNT_TRACK_WIDTH'd0 :
-                      sample_count+`SAMPLE_COUNT_TRACK_WIDTH'd1;
-
-      acc_complete_km1 <= reset ? 1'b0 :
-                          sample_count==tau_prime_k-`SAMPLE_COUNT_TRACK_WIDTH'd1 ? 1'b1 :
-                          1'b0;
-   end // always @ (posedge clk)
-
-   //FIXME Get tau_prime value from tracking loops.
-   assign tau_prime_k = `SAMPLE_COUNT_TRACK_MAX;
-
-   //Clear the accumulators on the first sample.
-   wire clear;
-   assign clear = sample_count==`SAMPLE_COUNT_TRACK_WIDTH'd0;
 
    //////////////////////////////
    // Channel Slot State Memory
@@ -132,12 +111,12 @@ module channel_sw(
    //FIXME Add define for this.
    `KEEP wire         slot_mem_wr_en;
    `KEEP wire [1:0]   slot_mem_wr_addr;
-   `KEEP wire [105:0] slot_mem_in;
+   `KEEP wire [120:0] slot_mem_in;
    `KEEP wire [1:0]   slot_mem_rd_addr;
-   `KEEP wire [105:0] slot_mem_out;
+   `KEEP wire [120:0] slot_mem_out;
    channel_slot_mem #(.DEPTH(2),
                       .ADDR_WIDTH(2),
-                      .DATA_WIDTH(106))
+                      .DATA_WIDTH(121))
      slot_mem(.clock(clk),
               .aclr(reset),
 	      .wren(slot_mem_wr_en),
@@ -177,9 +156,25 @@ module channel_sw(
    //FIXME Need to write initial Doppler/code rate into
    //FIXME memory on init, but slot_init_pending might not
    //FIXME be set until stage 1. How to deal with this?
-   assign track_mem_addr = slot;
-   assign track_mem_wr_en = 1'b0;
-   assign track_mem_data_out = 38'd0;
+   assign track_mem_addr = !active ? next_slot : slot;
+   assign track_mem_wr_en = !active ?
+                            init && |next_slot_oh :
+                            !slot_track_initialized[slot];
+
+   //FIXME Get Doppler from acquisition.
+   //FIXME Ranges.
+   assign track_mem_data_out[52:38] = `SAMPLE_COUNT_TRACK_MAX;
+   assign track_mem_data_out[37:17] = 21'd0;
+   assign track_mem_data_out[16:0] = doppler_dphi;
+
+   //Assert flag to top level to clear initializaiton request.
+   assign slot_initializing = track_mem_wr_en;
+   
+   generate
+      for(i=0;i<NUM_SLOTS;i=i+1) begin : slot_track_init_gen
+         assign initalizing_track[i] = track_mem_wr_en && track_mem_addr==i && !slot_track_initialized[i];
+      end
+   endgenerate
    
    `KEEP wire [1:0] slot_km1;
    delay #(.WIDTH(2))
@@ -245,6 +240,8 @@ module channel_sw(
    `KEEP wire [10:1]                g1_in;
    `KEEP wire [10:1]                g2_in;
    `KEEP wire [`CA_CS_RANGE]        ca_code_shift_in;
+   `KEEP wire [`SAMPLE_COUNT_TRACK_RANGE] sample_count_in;
+   assign sample_count_in = slot_init_pending[slot_km2] ? 15'd0 : slot_mem_out[120:106];
    assign g1_in = slot_init_pending[slot_km2] ? 10'h3FF : slot_mem_out[105:96];
    assign g2_in = slot_init_pending[slot_km2] ? 10'h3FF : slot_mem_out[95:86];
    assign ca_code_shift_in = slot_init_pending[slot_km2] ? `CA_CS_WIDTH'd0 : slot_mem_out[85:76];
@@ -269,14 +266,30 @@ module channel_sw(
    
    //Fetch tracking results from memory.
    //FIXME Ranges.
-   wire [`DOPPLER_INC_RANGE] doppler_dphi;
-   wire [`CA_PHASE_INC_RANGE] ca_dphi;
-   assign ca_dphi = track_mem_data_in[37:18];
-   assign doppler_dphi = track_mem_data_in[17:0];
+   //FIXME Will these get the correct values when initializing
+   //FIXME if the memory was just written 2 cycles earlier?
+   `KEEP wire [`SAMPLE_COUNT_TRACK_RANGE] tau_prime;
+   `KEEP wire [`DOPPLER_INC_RANGE] doppler_dphi;
+   `KEEP wire [`CA_PHASE_INC_RANGE] ca_dphi;
+   assign tau_prime = track_mem_data_in[52:38];
+   assign ca_dphi = track_mem_data_in[37:17];
+   assign doppler_dphi = track_mem_data_in[16:0];
+
+   //Flag accumulation completion when enough
+   //samples have been accumulated.
+   `KEEP wire accumulation_complete;
+   assign accumulation_complete = sample_count_in==(tau_prime-`SAMPLE_COUNT_TRACK_WIDTH'd1);
+   
+   `KEEP wire [`SAMPLE_COUNT_TRACK_RANGE] sample_count_out;
+   assign sample_count_out = accumulation_complete ? `SAMPLE_COUNT_TRACK_WIDTH'd0 :
+                             sample_count_in+`SAMPLE_COUNT_TRACK_WIDTH'd1;
+
+   //Clear the accumulators on the first sample.
+   wire clear;
+   assign clear = sample_count_in==`SAMPLE_COUNT_TRACK_WIDTH'd0;
 
    //Carrier value is front-end intermediate frequency plus
    //sign-extended version of two's complement Doppler shift.
-   
    wire [`CARRIER_PHASE_INC_RANGE] f_carrier;
    assign f_carrier = `MIXING_SIGN ?
                       `F_IF_INC-{{`DOPPLER_PAD_SIZE{doppler_dphi[`DOPPLER_INC_WIDTH-1]}},doppler_dphi} :
@@ -372,6 +385,13 @@ module channel_sw(
                            .reset(reset),
                            .in(ca_clk_hist_out),
                            .out(ca_clk_hist_out_km3));
+   
+   wire [`SAMPLE_COUNT_TRACK_RANGE] sample_count_out_km3;
+   delay #(.WIDTH(`SAMPLE_COUNT_TRACK_WIDTH))
+     sample_count_delay(.clk(clk),
+                        .reset(reset),
+                        .in(sample_count_out),
+                        .out(sample_count_out_km3));
 
    //Delay data until next stage.
    `KEEP wire [`INPUT_RANGE] data_km3;
@@ -387,6 +407,12 @@ module channel_sw(
                       .in(slot_init_pending[slot_km2]),
                       .out(init_pending_km3));
 
+   `KEEP wire acc_complete_km3;
+   delay acc_complete_delay_2(.clk(clk),
+                              .reset(reset),
+                              .in(accumulation_complete),
+                              .out(acc_complete_km3));
+
    ///////////////////////////////////
    // Pipeline Stage 3:
    //   --Update slot state.
@@ -395,6 +421,7 @@ module channel_sw(
    ///////////////////////////////////
 
    //Write slot state to memory.
+   assign slot_mem_in[120:106] = sample_count_out_km3;
    assign slot_mem_in[105:96] = g1_out_km3;
    assign slot_mem_in[95:86] = g2_out_km3;
    assign slot_mem_in[85:76] = ca_code_shift_out_km3;
@@ -480,6 +507,12 @@ module channel_sw(
                       .reset(reset),
                       .in(init_pending_km3),
                       .out(init_pending_km4));
+
+   `KEEP wire acc_complete_km4;
+   delay acc_complete_delay_3(.clk(clk),
+                              .reset(reset),
+                              .in(acc_complete_km3),
+                              .out(acc_complete_km4));
 
    /////////////////////////////////////////////
    // Pipeline Stage 4:
@@ -568,6 +601,12 @@ module channel_sw(
                         .in(active_km4),
                         .out(active_km5));
 
+   `KEEP wire acc_complete_km5;
+   delay acc_complete_delay_4(.clk(clk),
+                              .reset(reset),
+                              .in(acc_complete_km4),
+                              .out(acc_complete_km5));
+
    /////////////////////////////////////////////
    // Pipeline Stage 5:
    //   --Write back to accumulator memory.
@@ -595,13 +634,9 @@ module channel_sw(
    
    //Assert accumulation valid to tracking loops
    //at the end of an accumulation period.
-   delay #(.DELAY(4))
-     acc_valid_delay(.clk(clk),
-                     .reset(reset),
-                     .in(acc_complete_km1),
-                     .out(acc_valid));
+   assign acc_valid = acc_complete_km5 && active_km5;
 
    //FIXME Pipe PRN to acc_tag.
-   assign acc_tag = `PRN_WIDTH'd0;
+   assign acc_tag = slot_prn[slot_km5];
    
 endmodule

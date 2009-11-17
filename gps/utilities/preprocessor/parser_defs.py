@@ -177,7 +177,7 @@ DESCRIPTION
         -l [list of source files]  Print out a list of header files used by the
                                    given source files
 
-        -o                         Print output to output file instead of 
+        -o [output file]           Print output to output file instead of 
                                    stdout
 
         Normal usage: Input a single .s file to process the file contents into

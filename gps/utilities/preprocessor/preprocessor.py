@@ -5,6 +5,7 @@ import os
 import string
 import math
 import traceback
+from optparse import OptionParser
 
 #src imports
 from parser_defs import *
@@ -25,12 +26,7 @@ def main():
     global printbuffer
     
     # Parse input args
-    (args,list_mode,help_mode,ofile) = parseArgs()
-
-    # If in help_mode, print help string and exit
-    if help_mode:
-        print HELP_STRING
-        sys.exit(1)
+    (args,list_mode,ofile,useparams) = parseArgs()
 
     # If in list mode:
     if list_mode:
@@ -42,7 +38,7 @@ def main():
         include_paths = []
 
         # Process all of the listed files
-        for path in args:
+        for path in args:            
 
             # Check to make sure the file ends in .s
             if not path.endswith(".s"):
@@ -119,6 +115,15 @@ def main():
 
             # Parse the header file
             parseHeader(hfile, hpath, var_dict)
+
+        # If any useparams have been specified, add them to the var_dict
+        if not (useparams is None):
+            var_dict.update(useparams);
+
+#        print(var_dict);
+
+        # Parse out module instantiations
+        parseModuleCalls(sfile, var_dict)
 
         # Parse the source file
         parseSource(sfile, var_dict)
@@ -203,41 +208,70 @@ def getIncludes(sfile):
 
 ###############################################################################
 
+# Parse out any module calls and recursively run preprocessor
+def parseModuleCalls(sfile, var_dict):
+    pass
+
+###############################################################################
+
 # Parse out the script input arguments using optparse
 def parseArgs():   
 
     list_mode = False
-    help_mode = False
     ofile = None
+    useparams = None
+    usearg = None
 
-    #Pop off the script name arg
-    sys.argv.pop(0)
+    #Store the args list in args
+    args = sys.argv
 
-    #Search for a -h flag.  If a -h flag is found, return with help_mode flagged
-    try:
-        sys.argv.remove("-h")
-        help_mode = True
-    except:
-        pass
+    #Build an OptionParser object and add the input options.
+    parser = OptionParser()
+    
+    #list option
+    parser.add_option("-l", "--list", action="store_true", dest="list_mode", default=False, 
+                      help="List mode: Print out a list of header files used by the given source files.");
 
-    #Search for -l or -o flags.  If -o is flagged, grab the output filepath
-    try:
-        sys.argv.remove("-l")
-        list_mode = True
-    except:
-        pass
+    #output file
+    parser.add_option("-o", "--outfile", dest="ofile", help="Write output to specified file", metavar="FILE");
 
-    try:
-        i = sys.argv.index("-o")
-        ofile = sys.argv[index + 1]
-        sys.argv.pop(i)             #Pop the -o flag
-        sys.argv.pop(i)             #Pop the output filepath
-    except:
-        pass
+    #use 
+    parser.add_option("-u", "--useparams", dest="usearg",
+                       help="Input USE directives in the following format: @(.useparam1(x1), .useparam2(x2), ...)", 
+                       metavar = "USE_PARAMS");
 
-    #Return all remaining arguments in a list structure (only 1 argument unless in list mode)
-    return (sys.argv,list_mode,help_mode,ofile)
+    (options, args) = parser.parse_args()
 
+    # Extract usearg from the options list
+    if  not (options.usearg is None):
+        usearg = options.usearg; #Grab the usearg string out of the options list
+        useparams = {};          #Declare "useparams" as an empty dictionary
+
+        # Parse useparams out of usearg
+        # usearg syntax check
+        usearg_syntax_regex = re.compile('^\s*@\(((\s*)(\.)([A-Za-z0-9_])+\([A-Za-z0-9_]+\)(,)?)+\)');
+       
+        if not usearg_syntax_regex.match(usearg):
+            print("Error: invalid syntax in USE useparam list. Exiting...");
+            sys.exit(1);
+
+        # grab useparams
+        usearg = usearg.strip("[ @]");      #Strip off @ symbol and leading/trailing spaces
+        usearg = usearg[1:len(usearg)-1];   #Take off tuple parentheses
+        for s in usearg.split(','):
+            keyval = s.split('(');
+            key = keyval[0];
+            key = key[1:len(key)];  #Strip off the leading period
+            val = keyval[1];        
+            val = val[0:len(val)-1]; #Strip off trailing paren
+            useparams.setdefault(key,[]).append(val);
+
+        print(useparams);
+
+    # Extract ofile from the options list
+    ofile = options.ofile;
+
+    return (args,list_mode,ofile,useparams)
 
 ###############################################################################
 

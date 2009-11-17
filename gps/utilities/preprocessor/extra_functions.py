@@ -17,10 +17,10 @@ def d2b(n, width=0):
 # a, b must be integers or macros
 # name must be a valid Verilog wire name
 
-def wire(a,b,name,suf='f'):
+def wire(a,b,name,suf='f',signed=''):
     print("wire [%s:%s] %s%s;" % (`a`,`b`,name,suf));
     
-def reg(a,b,name,suf=';'):
+def reg(a,b,name,suf=';',signed=''):
     print("reg [%s:%s] %s%s;" % ('a','b',name,suf));
 
 def input(a,b,name,suf=';'):

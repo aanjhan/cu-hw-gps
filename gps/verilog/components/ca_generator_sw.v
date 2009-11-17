@@ -4,7 +4,6 @@
 `define TAP_2 3:0
 
 module ca_generator_sw(
-    input                     clk,
     input                     enable,
     //Code interface.
     input [`PRN_RANGE]        prn,

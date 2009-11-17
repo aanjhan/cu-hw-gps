@@ -66,20 +66,50 @@ module ca_upsampler_sw(
                .hist_out(ca_clk_hist_out));
 
    //Delay C/A generator clock 1 cycle to meet timing.
-   wire ca_clk_km1;
+   `KEEP wire ca_clk_km1;
    delay ca_clk_delay(.clk(clk),
                       .reset(reset),
                       .in(ca_clk),
                       .out(ca_clk_km1));
 
+   //FIXME Can all of these delays be eliminated,
+   //FIXME or at least the PRN delay, and pushed
+   //FIXME to a mux at the top level?
+   `KEEP wire [`PRN_RANGE] prn_km1;
+   delay #(.WIDTH(`PRN_WIDTH))
+     prn_delay(.clk(clk),
+              .reset(reset),
+              .in(prn),
+              .out(prn_km1));
+   
+   `KEEP wire [10:1] g1_km1;
+   delay #(.WIDTH(10))
+     g1_delay(.clk(clk),
+              .reset(reset),
+              .in(g1_in),
+              .out(g1_km1));
+   
+   `KEEP wire [10:1]  g2_km1;
+   delay #(.WIDTH(10))
+     g2_delay(.clk(clk),
+              .reset(reset),
+              .in(g2_in),
+              .out(g2_km1));
+   
+   `KEEP wire [`CA_CS_RANGE] ca_cs_km1;
+   delay #(.WIDTH(`CA_CS_WIDTH))
+     ca_cs_delay(.clk(clk),
+                 .reset(reset),
+                 .in(ca_code_shift_in),
+              .out(ca_cs_km1));
+
    //Generate C/A code bit for given PRN.
-   ca_generator_sw ca_gen(.clk(clk),
-                          .enable(ca_clk),
-                          .prn(prn),
+   ca_generator_sw ca_gen(.enable(ca_clk_km1),
+                          .prn(prn_km1),
                           .out(out_early),
-                          .g1_in(g1_in),
-                          .g2_in(g2_in),
-                          .code_shift_in(ca_code_shift_in),
+                          .g1_in(g1_km1),
+                          .g2_in(g2_km1),
+                          .code_shift_in(ca_cs_km1),
                           .g1_out(g1_out),
                           .g2_out(g2_out),
                           .code_shift_out(ca_code_shift_out));
@@ -88,6 +118,8 @@ module ca_upsampler_sw(
    //early code by CHIPS_LEAD_LAG. Outputs are
    //delayed one cycle to align with output from
    //C/A generator.
+   //FIXME Won't this just end up using a garbage out_early value?
+   //FIXME Instead, delay *_hist_in by 1 cycle, then shift, concatenate and output.
    delay #(.WIDTH(`CA_CHIP_HIST_WIDTH))
      prompt_hist_delay(.clk(clk),
                        .reset(reset),
@@ -96,7 +128,7 @@ module ca_upsampler_sw(
                        .out(prompt_chip_hist_out));
    delay out_prompt_delay(.clk(clk),
                           .reset(reset),
-                          .in(prompt_chip_hist_in[0]),
+                          .in(prompt_chip_hist_in[`CA_CHIP_HIST_WIDTH-1]),
                           .out(out_prompt));
    
    delay #(.WIDTH(`CA_CHIP_HIST_WIDTH))
@@ -107,6 +139,6 @@ module ca_upsampler_sw(
                      .out(late_chip_hist_out));
    delay out_late_delay(.clk(clk),
                         .reset(reset),
-                        .in(late_chip_hist_in[0]),
+                        .in(late_chip_hist_in[`CA_CHIP_HIST_WIDTH-1]),
                         .out(out_late));
 endmodule

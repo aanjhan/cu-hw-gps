@@ -17,7 +17,9 @@ module channel_sw(
     input                    data_available,
     input [`INPUT_RANGE]     data,
     //Slot control.
+    input                    init,
     input [`PRN_RANGE]       prn,
+    output                   slot_available,
     //Accumulation results.
     output wire              acc_valid,
     output wire [`PRN_RANGE] acc_tag,
@@ -32,7 +34,8 @@ module channel_sw(
    //The slot number indicates which slot
    //is in pipeline stage 0.
    //FIXME Add defines for this somewhere.
-   localparam [1:0] MAX_SLOT = 2'd0;
+   localparam NUM_SLOTS = 2;
+   localparam [1:0] MAX_SLOT = NUM_SLOTS-1;
    reg [1:0] slot;
    reg       active;
    always @(posedge clk) begin
@@ -41,11 +44,47 @@ module channel_sw(
               slot==MAX_SLOT ? 2'd0 :
               slot+2'd1;
 
-      active <= reset ? 1'b1 :
+      active <= reset ? 1'b0 :
                 data_available ? 1'b1 :
                 slot==MAX_SLOT ? 1'b0 :
                 active;
-   end
+   end // always @ (posedge clk)
+
+   //Select next available slot.
+   reg [(NUM_SLOTS-1):0] slot_active;
+   wire [(NUM_SLOTS-1):0] next_slot;
+   priority_select #(.NUM_ENTRIES(NUM_SLOTS))
+     slot_select(.eligible(~slot_active),
+                 .select_oh(next_slot));
+
+   //Start next-available slot when initialization
+   //requested from top level.
+   reg [`PRN_RANGE] slot_prn[(NUM_SLOTS-1):0];
+   reg [(NUM_SLOTS-1):0] slot_init_pending;
+   `KEEP wire [(NUM_SLOTS-1):0] clear_init;
+   genvar i;
+   generate
+      for(i=0;i<NUM_SLOTS;i=i+1) begin : slot_status_gen
+         always @(posedge clk) begin
+            slot_active[i] <= reset ? 1'b0 :
+                              init && next_slot[i] ? 1'b1 :
+                              slot_active[i];
+
+            slot_prn[i] <= reset ? `PRN_WIDTH'd0 :
+                           init && next_slot[i] ? prn :
+                           slot_prn[i];
+
+            slot_init_pending[i] <= reset ? 1'b0 :
+                                    clear_init[i] ? 1'b0 :
+                                    init && next_slot[i] ? 1'b1 :
+                                    slot_init_pending[i];
+         end
+      end
+   endgenerate
+
+   //Assert slot available flag to top level to clear
+   //initializaiton request.
+   assign slot_available = |(~slot_active);
 
    //Flag accumulation completion when enough
    //samples have been accumulated.
@@ -85,14 +124,14 @@ module channel_sw(
    
    //Slot state memory.
    //FIXME Add define for this.
-   wire         slot_mem_wr_en;
-   wire [1:0]   slot_mem_wr_addr;
-   wire [104:0] slot_mem_in;
-   wire [1:0]   slot_mem_rd_addr;
-   wire [104:0] slot_mem_out;
+   `KEEP wire         slot_mem_wr_en;
+   `KEEP wire [1:0]   slot_mem_wr_addr;
+   `KEEP wire [105:0] slot_mem_in;
+   `KEEP wire [1:0]   slot_mem_rd_addr;
+   `KEEP wire [105:0] slot_mem_out;
    channel_slot_mem #(.DEPTH(2),
                       .ADDR_WIDTH(2),
-                      .DATA_WIDTH(105))
+                      .DATA_WIDTH(106))
      slot_mem(.clock(clk),
               .aclr(reset),
 	      .wren(slot_mem_wr_en),
@@ -103,11 +142,11 @@ module channel_sw(
    
    //Accumulator state memory.
    //FIXME Add define for this.
-   wire         acc_mem_wr_en;
-   wire [1:0]   acc_mem_wr_addr;
-   wire [119:0] acc_mem_in;
-   wire [1:0]   acc_mem_rd_addr;
-   wire [119:0] acc_mem_out;
+   `KEEP wire         acc_mem_wr_en;
+   `KEEP wire [1:0]   acc_mem_wr_addr;
+   `KEEP wire [119:0] acc_mem_in;
+   `KEEP wire [1:0]   acc_mem_rd_addr;
+   `KEEP wire [119:0] acc_mem_out;
    channel_slot_mem #(.DEPTH(2),
                       .ADDR_WIDTH(2),
                       .DATA_WIDTH(6*`ACC_WIDTH))//FIXME
@@ -126,21 +165,21 @@ module channel_sw(
 
    assign slot_mem_rd_addr = slot;
    
-   wire [1:0] slot_km1;
-   delay #(.DELAY(2))
+   `KEEP wire [1:0] slot_km1;
+   delay #(.WIDTH(2))
      slot_delay_0(.clk(clk),
                   .reset(reset),
                   .in(slot),
                   .out(slot_km1));
 
-   wire active_km1;
+   `KEEP wire active_km1;
    delay active_delay_0(.clk(clk),
                         .reset(reset),
-                        .in(active),
+                        .in(active && slot_active[slot]),
                         .out(active_km1));
 
-   wire data_km1;
-   delay #(.DELAY(`INPUT_WIDTH))
+   `KEEP wire [`INPUT_RANGE] data_km1;
+   delay #(.WIDTH(`INPUT_WIDTH))
      data_delay_0(.clk(clk),
                   .reset(reset),
                   .in(data),
@@ -151,21 +190,21 @@ module channel_sw(
    //   --Wait for slot state fetch.
    //////////////////////////////
    
-   wire [1:0] slot_km2;
-   delay #(.DELAY(2))
+   `KEEP wire [1:0] slot_km2;
+   delay #(.WIDTH(2))
      slot_delay_1(.clk(clk),
                   .reset(reset),
                   .in(slot_km1),
                   .out(slot_km2));
 
-   wire active_km2;
+   `KEEP wire active_km2;
    delay active_delay_1(.clk(clk),
                         .reset(reset),
                         .in(active_km1),
                         .out(active_km2));
 
-   wire data_km2;
-   delay #(.DELAY(`INPUT_WIDTH))
+   `KEEP wire [`INPUT_RANGE] data_km2;
+   delay #(.WIDTH(`INPUT_WIDTH))
      data_delay_1(.clk(clk),
                   .reset(reset),
                   .in(data_km1),
@@ -179,24 +218,37 @@ module channel_sw(
 
    //Decode state memory output.
    //FIXME Make defines for these.
-   wire [`CARRIER_ACC_RANGE]  carrier_acc_in;
-   wire [`CS_RANGE]           code_shift_in;
-   wire [`CA_ACC_RANGE]       ca_clk_acc_in;
-   wire                       ca_clk_hist_in;
-   wire [`CA_CHIP_HIST_RANGE] prompt_chip_hist_in;
-   wire [`CA_CHIP_HIST_RANGE] late_chip_hist_in;
-   wire [10:1]                g1_in;
-   wire [10:1]                g2_in;
-   wire [`CA_CS_RANGE]        ca_code_shift_in;
-   assign g1_in = slot_mem_out[104:96];
-   assign g2_in = slot_mem_out[95:86];
-   assign ca_code_shift_in = slot_mem_out[85:76];
-   assign carrier_acc_in = slot_mem_out[75:49];
-   assign code_shift_in = slot_mem_out[48:34];
-   assign ca_clk_acc_in = slot_mem_out[33:9];
-   assign ca_clk_hist_in = slot_mem_out[8];
-   assign prompt_chip_hist_in = slot_mem_out[7:4];
-   assign late_chip_hist_in = slot_mem_out[3:0];
+   //FIXME Get init values from startup C/A upsampler.
+   `KEEP wire [`CARRIER_ACC_RANGE]  carrier_acc_in;
+   `KEEP wire [`CS_RANGE]           code_shift_in;
+   `KEEP wire [`CA_ACC_RANGE]       ca_clk_acc_in;
+   `KEEP wire                       ca_clk_hist_in;
+   `KEEP wire [`CA_CHIP_HIST_RANGE] prompt_chip_hist_in;
+   `KEEP wire [`CA_CHIP_HIST_RANGE] late_chip_hist_in;
+   `KEEP wire [10:1]                g1_in;
+   `KEEP wire [10:1]                g2_in;
+   `KEEP wire [`CA_CS_RANGE]        ca_code_shift_in;
+   assign g1_in = slot_init_pending[slot_km2] ? 10'h3FF : slot_mem_out[105:96];
+   assign g2_in = slot_init_pending[slot_km2] ? 10'h3FF : slot_mem_out[95:86];
+   assign ca_code_shift_in = slot_init_pending[slot_km2] ? `CA_CS_WIDTH'd0 : slot_mem_out[85:76];
+   assign carrier_acc_in = slot_init_pending[slot_km2] ? `CARRIER_ACC_WIDTH'd0 : slot_mem_out[75:49];
+   assign code_shift_in = slot_init_pending[slot_km2] ? `CS_WIDTH'd0: slot_mem_out[48:34];
+   assign ca_clk_acc_in = slot_init_pending[slot_km2] ? `CA_ACC_WIDTH'd0 : slot_mem_out[33:9];
+   assign ca_clk_hist_in = slot_init_pending[slot_km2] ? 1'b1 : slot_mem_out[8];
+   assign prompt_chip_hist_in = slot_init_pending[slot_km2] ? `CA_CHIP_HIST_WIDTH'b0 : slot_mem_out[7:4];
+   assign late_chip_hist_in = slot_init_pending[slot_km2] ? `CA_CHIP_HIST_WIDTH'b0 : slot_mem_out[3:0];
+
+   //FIXME On init write initial Doppler and code shift (needed?)
+   //FIXME values INTO tracking loop M4K. This is the only instance
+   //FIXME where the channel writes to that memory. This means that
+   //FIXME the channel-side port must be read/write.
+
+   //Clear init flags.
+   generate
+      for(i=0;i<NUM_SLOTS;i=i+1) begin : slot_init_clear_gen
+         assign clear_init[i] = active_km4 && slot_km4==i && slot_init_pending[i];
+      end
+   endgenerate
    
    //FIXME Get Doppler value from M4K.
    wire [`DOPPLER_INC_RANGE] doppler;
@@ -231,19 +283,19 @@ module channel_sw(
    //Note: The C/A upsampler is internally pipelined.
    //      The C/A bits are ready in stage 3.
    //FIXME Connect all state I/O and phase increment.
-   wire ca_bit_early_km3, ca_bit_prompt_km3, ca_bit_late_km3;
-   wire [`CS_RANGE]           code_shift_out;
-   wire [`CA_ACC_RANGE]       ca_clk_acc_out;
-   wire                       ca_clk_hist_out;
-   wire [`CA_CHIP_HIST_RANGE] prompt_chip_hist_out_km3;
-   wire [`CA_CHIP_HIST_RANGE] late_chip_hist_out_km3;
-   wire [10:1]                g1_out_km3;
-   wire [10:1]                g2_out_km3;
-   wire [`CA_CS_RANGE]        ca_code_shift_out_km3;
+   `KEEP wire ca_bit_early_km3, ca_bit_prompt_km3, ca_bit_late_km3;
+   `KEEP wire [`CS_RANGE]           code_shift_out;
+   `KEEP wire [`CA_ACC_RANGE]       ca_clk_acc_out;
+   `KEEP wire                       ca_clk_hist_out;
+   `KEEP wire [`CA_CHIP_HIST_RANGE] prompt_chip_hist_out_km3;
+   `KEEP wire [`CA_CHIP_HIST_RANGE] late_chip_hist_out_km3;
+   `KEEP wire [10:1]                g1_out_km3;
+   `KEEP wire [10:1]                g2_out_km3;
+   `KEEP wire [`CA_CS_RANGE]        ca_code_shift_out_km3;
    ca_upsampler_sw upsampler(.clk(clk),
                              .reset(reset),
                              //Control interface.
-                             .prn(prn),
+                             .prn(slot_prn[slot_km2]),
                              .ca_dphi(10'd0),//FIXME
                              //C/A code output interface.
                              .out_early(ca_bit_early_km3),
@@ -269,14 +321,14 @@ module channel_sw(
                              .ca_code_shift_out(ca_code_shift_out_km3));
 
    //Pipe C/A upsampler state to next stage.
-   wire [1:0] slot_km3;
-   delay #(.DELAY(2))
+   `KEEP wire [1:0] slot_km3;
+   delay #(.WIDTH(2))
      slot_delay_2(.clk(clk),
                   .reset(reset),
                   .in(slot_km2),
                   .out(slot_km3));
    
-   wire active_km3;
+   `KEEP wire active_km3;
    delay active_delay_2(.clk(clk),
                         .reset(reset),
                         .in(active_km2),
@@ -310,6 +362,12 @@ module channel_sw(
                 .in(data_km2),
                 .out(data_km3));
 
+   `KEEP wire init_pending_km3;
+   delay init_delay_2(.clk(clk),
+                      .reset(reset),
+                      .in(slot_init_pending[slot_km2]),
+                      .out(init_pending_km3));
+
    ///////////////////////////////////
    // Pipeline Stage 3:
    //   --Update slot state.
@@ -318,7 +376,7 @@ module channel_sw(
    ///////////////////////////////////
 
    //Write slot state to memory.
-   assign slot_mem_in[104:96] = g1_out_km3;
+   assign slot_mem_in[105:96] = g1_out_km3;
    assign slot_mem_in[95:86] = g2_out_km3;
    assign slot_mem_in[85:76] = ca_code_shift_out_km3;
    assign slot_mem_in[75:49] = carrier_acc_out_km3;
@@ -333,11 +391,11 @@ module channel_sw(
 
    //Generate in-phase (cos) and quadrature (sin)
    //carrier signals.
-   wire [`CARRIER_LUT_RANGE] carrier_i;
+   `KEEP wire [`CARRIER_LUT_RANGE] carrier_i;
    cos carrier_cos_lut(.in(carrier_index_km3),
                        .out(carrier_i));
    
-   wire [`CARRIER_LUT_RANGE] carrier_q;
+   `KEEP wire [`CARRIER_LUT_RANGE] carrier_q;
    sin carrier_sin_lut(.in(carrier_index_km3),
                        .out(carrier_q));
 
@@ -353,7 +411,7 @@ module channel_sw(
                       .signal(data_km3),
                       .out(sig_no_carrier_q));
 
-   //Pipe post-carrier wipe signals to stage 2.
+   //Pipe post-carrier wipe signals to stage 4.
    `KEEP wire [`SIG_NO_CARRIER_RANGE] sig_no_carrier_i_km4;
    delay #(.WIDTH(`SIG_NO_CARRIER_WIDTH))
      post_carrier_i_delay(.clk(clk),
@@ -377,14 +435,14 @@ module channel_sw(
                              .out({ca_bit_early_km4,ca_bit_prompt_km4,ca_bit_late_km4}));
 
    //Pipe slot control to next stage.
-   wire [1:0] slot_km4;
-   delay #(.DELAY(2))
+   `KEEP wire [1:0] slot_km4;
+   delay #(.WIDTH(2))
      slot_delay_3(.clk(clk),
                   .reset(reset),
                   .in(slot_km3),
                   .out(slot_km4));
    
-   wire active_km4;
+   `KEEP wire active_km4;
    delay active_delay_3(.clk(clk),
                         .reset(reset),
                         .in(active_km3),
@@ -398,6 +456,12 @@ module channel_sw(
                  .in(clear),
                  .out(clear_km4));
 
+   `KEEP wire init_pending_km4;
+   delay init_delay_3(.clk(clk),
+                      .reset(reset),
+                      .in(init_pending_km3),
+                      .out(init_pending_km4));
+
    /////////////////////////////////////////////
    // Pipeline Stage 4:
    //   --Wipe-off code.
@@ -407,12 +471,12 @@ module channel_sw(
 
    //Decode accumulator memory output.
    //FIXME Make defines for these.
-   wire [`ACC_RANGE] acc_i_early_in;
-   wire [`ACC_RANGE] acc_q_early_in;
-   wire [`ACC_RANGE] acc_i_prompt_in;
-   wire [`ACC_RANGE] acc_q_prompt_in;
-   wire [`ACC_RANGE] acc_i_late_in;
-   wire [`ACC_RANGE] acc_q_late_in;
+   `KEEP wire [`ACC_RANGE] acc_i_early_in;
+   `KEEP wire [`ACC_RANGE] acc_q_early_in;
+   `KEEP wire [`ACC_RANGE] acc_i_prompt_in;
+   `KEEP wire [`ACC_RANGE] acc_q_prompt_in;
+   `KEEP wire [`ACC_RANGE] acc_i_late_in;
+   `KEEP wire [`ACC_RANGE] acc_q_late_in;
    assign acc_i_early_in = acc_mem_out[119:100];
    assign acc_q_early_in = acc_mem_out[99:80];
    assign acc_i_prompt_in = acc_mem_out[79:60];
@@ -424,13 +488,13 @@ module channel_sw(
    //      The results are ready in stage 5.
 
    //Early subchannel.
-   wire [`ACC_RANGE] acc_i_early_out_km5;
-   wire [`ACC_RANGE] acc_q_early_out_km5;
+   `KEEP wire [`ACC_RANGE] acc_i_early_out_km5;
+   `KEEP wire [`ACC_RANGE] acc_q_early_out_km5;
    subchannel_sw #(.INPUT_WIDTH(`SIG_NO_CARRIER_WIDTH),
                    .OUTPUT_WIDTH(`ACC_WIDTH))
      subchannel_early(.clk(clk),
                       .reset(reset),
-                      .clear(clear_km4),
+                      .clear(clear_km4 || init_pending_km4),
                       .ca_bit(ca_bit_early_km4),
                       .data_i(sig_no_carrier_i_km4),
                       .data_q(sig_no_carrier_q_km4),
@@ -440,13 +504,13 @@ module channel_sw(
                       .accumulator_q_out(acc_q_early_out_km5));
 
    //Prompt subchannel.
-   wire [`ACC_RANGE] acc_i_prompt_out_km5;
-   wire [`ACC_RANGE] acc_q_prompt_out_km5;
+   `KEEP wire [`ACC_RANGE] acc_i_prompt_out_km5;
+   `KEEP wire [`ACC_RANGE] acc_q_prompt_out_km5;
    subchannel_sw #(.INPUT_WIDTH(`SIG_NO_CARRIER_WIDTH),
                    .OUTPUT_WIDTH(`ACC_WIDTH))
      subchannel_prompt(.clk(clk),
                        .reset(reset),
-                       .clear(clear_km4),
+                       .clear(clear_km4 || init_pending_km4),
                        .ca_bit(ca_bit_prompt_km4),
                        .data_i(sig_no_carrier_i_km4),
                        .data_q(sig_no_carrier_q_km4),
@@ -456,13 +520,13 @@ module channel_sw(
                        .accumulator_q_out(acc_q_prompt_out_km5));
 
    //Late subchannel.
-   wire [`ACC_RANGE] acc_i_late_out_km5;
-   wire [`ACC_RANGE] acc_q_late_out_km5;
+   `KEEP wire [`ACC_RANGE] acc_i_late_out_km5;
+   `KEEP wire [`ACC_RANGE] acc_q_late_out_km5;
    subchannel_sw #(.INPUT_WIDTH(`SIG_NO_CARRIER_WIDTH),
                    .OUTPUT_WIDTH(`ACC_WIDTH))
      subchannel_late(.clk(clk),
                      .reset(reset),
-                     .clear(clear_km4),
+                     .clear(clear_km4 || init_pending_km4),
                      .ca_bit(ca_bit_late_km4),
                      .data_i(sig_no_carrier_i_km4),
                      .data_q(sig_no_carrier_q_km4),
@@ -472,14 +536,14 @@ module channel_sw(
                      .accumulator_q_out(acc_q_late_out_km5));
 
    //Pipe slot control to next stage.
-   wire [1:0] slot_km5;
-   delay #(.DELAY(2))
+   `KEEP wire [1:0] slot_km5;
+   delay #(.WIDTH(2))
      slot_delay_4(.clk(clk),
                   .reset(reset),
                   .in(slot_km4),
                   .out(slot_km5));
    
-   wire active_km5;
+   `KEEP wire active_km5;
    delay active_delay_4(.clk(clk),
                         .reset(reset),
                         .in(active_km4),

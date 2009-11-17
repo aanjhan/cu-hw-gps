@@ -471,6 +471,10 @@ set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_instance_assignment -name CLOCK_SETTINGS CLOCK_50 -to CLOCK_50
 set_instance_assignment -name CLOCK_SETTINGS CLOCK_27 -to CLOCK_27
+set_global_assignment -name SIMULATION_MODE FUNCTIONAL
+set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE test.vwf
+set_global_assignment -name ADD_DEFAULT_PINS_TO_SIMULATION_OUTPUT_WAVEFORMS OFF
+set_global_assignment -name VERILOG_FILE ../components/priority_select.v
 set_global_assignment -name VERILOG_FILE ../components/sin.v
 set_global_assignment -name VERILOG_FILE ../components/ones_extend.v
 set_global_assignment -name VERILOG_FILE ../components/cos.v
@@ -486,3 +490,4 @@ set_global_assignment -name VERILOG_FILE ../components/delay.v
 set_global_assignment -name VERILOG_FILE ../components/delay_1.v
 set_global_assignment -name VERILOG_FILE ../components/strobe_sw.v
 set_global_assignment -name VERILOG_FILE ../components/subchannel_sw.v
+set_global_assignment -name VECTOR_WAVEFORM_FILE test.vwf

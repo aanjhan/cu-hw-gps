@@ -21,13 +21,18 @@ module priority_select(
       end
    endgenerate
 
-   //FIXME Parameterize this with preprocessor.
-   always @(eligible) begin
-      casez(eligible)
-        2'bz1: select <= 2'd0;
-        2'b10: select <= 2'd1;
-        default: select <= 2'd0;
-      endcase
-   end
+   //FIXME Finish use directive and make NUM_ENTRIES a parameter,
+   //FIXME and calculate select bit-range from that.
+   //FIXME Fix spacing for the code generated below.
+<? NUM_ENTRIES=2;
+print("always @(eligible) begin");
+print("casez(eligible)");
+for i in range(0,NUM_ENTRIES):
+  case_value=(NUM_ENTRIES-i-1)*"z" + "1" + i*"0";
+  print("%d'b%s: select <= %d'd%d;" % (NUM_ENTRIES,case_value,2,i));
+print("default: select <= %d'd0;" % (2));
+print("endcase");
+print("end");
+?>
    
 endmodule

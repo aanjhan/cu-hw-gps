@@ -20,4 +20,6 @@ SOURCES+=$(COMPONENTS_DIR)/ca_upsampler.csv \
 	../rt_data_feed/rtdf_packet_processor.csv \
 #	top__channel.csv
 
+VERILOG_SOURCES+=$(COMPONENTS_DIR)/priority_select.s
+
 include ../components/common.mk

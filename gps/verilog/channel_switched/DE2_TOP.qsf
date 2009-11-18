@@ -491,3 +491,4 @@ set_global_assignment -name VERILOG_FILE ../components/delay_1.v
 set_global_assignment -name VERILOG_FILE ../components/strobe_sw.v
 set_global_assignment -name VERILOG_FILE ../components/subchannel_sw.v
 set_global_assignment -name VECTOR_WAVEFORM_FILE test.vwf
+set_global_assignment -name QIP_FILE ../components/tracking_loop_ram.qip

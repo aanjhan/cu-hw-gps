@@ -1,8 +1,8 @@
-HEADERS=$(patsubst %.csv,%.vh,$(SOURCES))
-UNDEF_FILE=$(COMPONENTS_DIR)/global_undef.vh
+HEADER_FILES=$(patsubst %.csv,%.vh,$(SOURCES))
+SOURCE_FILES=$(patsubst %.s,%.v,$(VERILOG_SOURCES))
 
 .phony: all
-all: conflict_check headers undefines_file
+all: conflict_check headers sources undefines_file
 
 .phony: conflict_check
 conflict_check: $(SOURCES)
@@ -10,10 +10,16 @@ conflict_check: $(SOURCES)
 	@perl -e '$$err=`$(DEFPARSER) $(SOURCES) 2>&1 1>/dev/null`; print $$err; exit(1) if $$err ne "";'
 
 .phony: headers
-headers: $(HEADERS)
+headers: $(HEADER_FILES)
 %.vh: %.csv
 	@echo Parsing $^...
 	@$(DEFPARSER) -o $@ $^
+
+.phony: sources
+sources: $(SOURCE_FILES)
+%.v: %.s
+	@echo Parsing $^...
+	@$(PREPROCESSOR) -o $@ $^
 
 .phony: undef undefines_file
 undef: undefines_file
@@ -24,7 +30,13 @@ $(UNDEF_FILE): $(SOURCES)
 
 .phony: clean
 clean:
-	@for h in $(HEADERS) $(UNDEF_FILE); do \
+	@echo Removing header files...
+	@rm -f $(HEADER_FILES)
+	@echo Removing source files...
+	@rm -f $(SOURCE_FILES)
+	@echo Removing undefines file...
+	@rm -f $(UNDEF_FILE)
+	#@for h in $(HEADER_FILES) $(SOURCE_FILES) $(UNDEF_FILE); do \
 	echo Removing $$h...; \
 	rm -f $$h; \
 	done

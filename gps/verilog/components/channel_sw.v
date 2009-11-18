@@ -22,7 +22,7 @@ module channel_sw(
     output                   slot_initializing,
     //Accumulation results.
     output wire              acc_valid,
-    output wire [`PRN_RANGE] acc_tag,
+    output wire [1:0]        acc_tag,
     output wire [`ACC_RANGE] i_early,
     output wire [`ACC_RANGE] q_early,
     output wire [`ACC_RANGE] i_prompt,
@@ -637,6 +637,6 @@ module channel_sw(
    assign acc_valid = acc_complete_km5 && active_km5;
 
    //FIXME Pipe PRN to acc_tag.
-   assign acc_tag = slot_prn[slot_km5];
+   assign acc_tag = slot_km5;
    
 endmodule

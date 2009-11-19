@@ -25,10 +25,10 @@
 
 set_global_assignment -name FAMILY "Cyclone II"
 set_global_assignment -name DEVICE EP2C35F672C6
-set_global_assignment -name TOP_LEVEL_ENTITY channel_sw
+set_global_assignment -name TOP_LEVEL_ENTITY tracking_loops_sw
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 8.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "11:32:43  FEBRUARY 28, 2009"
-set_global_assignment -name LAST_QUARTUS_VERSION 8.0
+set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP1"
 set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
@@ -464,6 +464,8 @@ set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name FMAX_REQUIREMENT "50 MHz" -section_id CLOCK_50
 set_global_assignment -name FMAX_REQUIREMENT "27 MHz" -section_id CLOCK_27
 set_global_assignment -name FMAX_REQUIREMENT "200 MHz"
+set_global_assignment -name SIMULATION_MODE FUNCTIONAL
+set_global_assignment -name ADD_DEFAULT_PINS_TO_SIMULATION_OUTPUT_WAVEFORMS OFF
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
@@ -471,9 +473,24 @@ set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_instance_assignment -name CLOCK_SETTINGS CLOCK_50 -to CLOCK_50
 set_instance_assignment -name CLOCK_SETTINGS CLOCK_27 -to CLOCK_27
-set_global_assignment -name SIMULATION_MODE FUNCTIONAL
-set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE test.vwf
-set_global_assignment -name ADD_DEFAULT_PINS_TO_SIMULATION_OUTPUT_WAVEFORMS OFF
+set_global_assignment -name VERILOG_FILE ../components/strobe.v
+set_global_assignment -name VERILOG_FILE ../components/sqrt_fixed.v
+set_global_assignment -name VERILOG_FILE ../components/abs.v
+set_global_assignment -name VERILOG_FILE ../components/iq_square.v
+set_global_assignment -name VERILOG_FILE ../components/tracking_iq_fifo.v
+set_global_assignment -name VERILOG_FILE ../components/tracking_loop_ram.v
+set_global_assignment -name VERILOG_FILE ../components/tracking_loops_sw.v
+set_global_assignment -name VERILOG_FILE ../components/dll.v
+set_global_assignment -name VERILOG_FILE ../components/dll_divider.v
+set_global_assignment -name VERILOG_FILE ../components/dll_multiplier.v
+set_global_assignment -name VERILOG_FILE ../components/dll_priority_enc.v
+set_global_assignment -name VERILOG_FILE ../components/dll_truncate.v
+set_global_assignment -name VERILOG_FILE ../components/fll.v
+set_global_assignment -name VERILOG_FILE ../components/fll_divider.v
+set_global_assignment -name VERILOG_FILE ../components/fll_multiplier.v
+set_global_assignment -name VERILOG_FILE ../components/fll_priority_enc.v
+set_global_assignment -name VERILOG_FILE ../components/fll_truncate.v
+set_global_assignment -name VERILOG_FILE ../components/tracking_hist_ram.v
 set_global_assignment -name VERILOG_FILE ../components/priority_select.v
 set_global_assignment -name VERILOG_FILE ../components/sin.v
 set_global_assignment -name VERILOG_FILE ../components/ones_extend.v
@@ -491,4 +508,5 @@ set_global_assignment -name VERILOG_FILE ../components/delay_1.v
 set_global_assignment -name VERILOG_FILE ../components/strobe_sw.v
 set_global_assignment -name VERILOG_FILE ../components/subchannel_sw.v
 set_global_assignment -name VECTOR_WAVEFORM_FILE test.vwf
-set_global_assignment -name QIP_FILE ../components/tracking_loop_ram.qip
+set_global_assignment -name VECTOR_WAVEFORM_FILE tracking_test.vwf
+set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE tracking_test.vwf

@@ -21,6 +21,7 @@ module channel_sw(
     input [`PRN_RANGE]       prn,
     output                   slot_initializing,
     //Accumulation results.
+    //FIXME Switch accumulators to ACC_RANGE_TRACK
     output wire              acc_valid,
     output wire [1:0]        acc_tag,
     output wire [`ACC_RANGE] i_early,
@@ -40,7 +41,7 @@ module channel_sw(
    //The slot number indicates which slot
    //is in pipeline stage 0.
    //FIXME Add defines for this somewhere.
-   localparam NUM_SLOTS = 2;
+   localparam NUM_SLOTS = 1;
    localparam [1:0] MAX_SLOT = NUM_SLOTS-1;
    reg [1:0] slot;
    reg       active;
@@ -165,7 +166,7 @@ module channel_sw(
    //FIXME Ranges.
    assign track_mem_data_out[52:38] = `SAMPLE_COUNT_TRACK_MAX;
    assign track_mem_data_out[37:17] = 21'd0;
-   assign track_mem_data_out[16:0] = doppler_dphi;
+   assign track_mem_data_out[16:0] = `DOPPLER_INC_WIDTH'd0;
 
    //Assert flag to top level to clear initializaiton request.
    assign slot_initializing = track_mem_wr_en;

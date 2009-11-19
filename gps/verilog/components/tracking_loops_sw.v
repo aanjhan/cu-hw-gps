@@ -3,6 +3,8 @@
 `include "channel__dll.vh"
 `include "channel__tracking_loops.vh"
 
+`include "channel.vh"
+
 `define DEBUG
 `include "debug.vh"
 
@@ -12,25 +14,37 @@ module tracking_loops_sw(
     //Channel 0 accumulation results.
     input              acc_valid_0,
     input [1:0]        acc_tag_0,
-    input [`ACC_RANGE] i_early_0,
-    input [`ACC_RANGE] q_early_0,
-    input [`ACC_RANGE] i_prompt_0,
-    input [`ACC_RANGE] q_prompt_0,
-    input [`ACC_RANGE] i_late_0,
-    input [`ACC_RANGE] q_late_0,
+    input [`ACC_RANGE_TRACK] i_early_0,
+    input [`ACC_RANGE_TRACK] q_early_0,
+    input [`ACC_RANGE_TRACK] i_prompt_0,
+    input [`ACC_RANGE_TRACK] q_prompt_0,
+    input [`ACC_RANGE_TRACK] i_late_0,
+    input [`ACC_RANGE_TRACK] q_late_0,
     //Channel 0 tracking result memory.
     input [1:0]        track_mem_addr_0,
     input              track_mem_wr_en_0,
     input [52:0]       track_mem_data_in_0,
-    output wire [52:0] track_mem_data_out_0);
+    output wire [52:0] track_mem_data_out_0,
+    //Channel 0 tracking result memory.
+    output wire        ready_dbg,
+    output reg [`ACC_RANGE_TRACK]   i_prompt_dbg,
+    output reg [`ACC_RANGE_TRACK]   q_prompt_dbg,
+    output reg [`DOPPLER_INC_RANGE] doppler_inc_dbg,
+    output reg [`W_DF_RANGE]        w_df_dbg,
+    output reg [`W_DF_DOT_RANGE]    w_df_dot_dbg,
+    output reg [`CA_DPHI_RANGE]     ca_dphi_dbg,
+    output reg [`DLL_TAU_RANGE]     tau_prime_dbg,
+    output reg [`I2Q2_RANGE]        i2q2_early_dbg,
+    output reg [`I2Q2_RANGE]        i2q2_prompt_dbg,
+    output reg [`I2Q2_RANGE]        i2q2_late_dbg);
 
    //Store channel 0 I/Q results as they become
    //available, along with result tag.
    //FIXME Ranges.
-   wire iq_fifo_empty_0;
+   `KEEP wire iq_fifo_empty_0;
    wire iq_read_0;
-   wire [109:0] results_0;
-   tracking_iq_fifo #(.WIDTH(6*`ACC_WIDTH+2),
+   wire [115:0] results_0;
+   tracking_iq_fifo #(.WIDTH(6*`ACC_WIDTH_TRACK+2),
                       .DEPTH(4))
      iq_fifo_0(.clock(clk),
 	       .sclr(reset),
@@ -45,34 +59,34 @@ module tracking_loops_sw(
 
    //Extract next I/Q results from FIFO.
    //FIXME Ranges.
-   wire [1:0]        tag_0;
-   wire [`ACC_RANGE] i_e_0;
-   wire [`ACC_RANGE] q_e_0;
-   wire [`ACC_RANGE] i_p_0;
-   wire [`ACC_RANGE] q_p_0;
-   wire [`ACC_RANGE] i_l_0;
-   wire [`ACC_RANGE] q_l_0;
-   assign tag_0 = results_0[109:108];
-   assign i_e_0 = results_0[107:90];
-   assign q_e_0 = results_0[89:72];
-   assign i_p_0 = results_0[71:54];
-   assign q_p_0 = results_0[53:36];
-   assign i_l_0 = results_0[35:18];
-   assign q_l_0 = results_0[17:0];
+   wire [1:0]              tag_0;
+   wire [`ACC_RANGE_TRACK] i_e_0;
+   wire [`ACC_RANGE_TRACK] q_e_0;
+   wire [`ACC_RANGE_TRACK] i_p_0;
+   wire [`ACC_RANGE_TRACK] q_p_0;
+   wire [`ACC_RANGE_TRACK] i_l_0;
+   wire [`ACC_RANGE_TRACK] q_l_0;
+   assign tag_0 = results_0[115:114];
+   assign i_e_0 = results_0[113:95];
+   assign q_e_0 = results_0[94:76];
+   assign i_p_0 = results_0[75:57];
+   assign q_p_0 = results_0[56:38];
+   assign i_l_0 = results_0[37:19];
+   assign q_l_0 = results_0[18:0];
 
    /////////////////////////
    // Begin Tracking Update
    /////////////////////////
 
    //FIXME Select channel via round-robin.
-   wire [1:0]        tag;
-   wire [`ACC_RANGE] i_e;
-   wire [`ACC_RANGE] q_e;
-   wire [`ACC_RANGE] i_p;
-   wire [`ACC_RANGE] q_p;
-   wire [`ACC_RANGE] i_l;
-   wire [`ACC_RANGE] q_l;
-   wire              iq_read;
+   `KEEP wire [1:0]             tag;
+   `KEEP wire [`ACC_RANGE_TRACK] i_e;
+   `KEEP wire [`ACC_RANGE_TRACK] q_e;
+   `KEEP wire [`ACC_RANGE_TRACK] i_p;
+   `KEEP wire [`ACC_RANGE_TRACK] q_p;
+   `KEEP wire [`ACC_RANGE_TRACK] i_l;
+   `KEEP wire [`ACC_RANGE_TRACK] q_l;
+   `KEEP wire                    iq_read;
    assign tag = tag_0;
    assign i_e = i_e_0;
    assign q_e = q_e_0;
@@ -87,14 +101,14 @@ module tracking_loops_sw(
    //      These values should be pipelined, or
    //      placed in a FIFO if the tracking loops
    //      are parallelized.
-   reg [`ACC_RANGE] i_prompt_k;
-   reg [`ACC_RANGE] q_prompt_k;
+   reg [`ACC_RANGE_TRACK] i_prompt_k;
+   reg [`ACC_RANGE_TRACK] q_prompt_k;
    always @(posedge clk) begin
-      i_prompt_k <= reset ? `ACC_WIDTH'd0 :
+      i_prompt_k <= reset ? `ACC_WIDTH_TRACK'd0 :
                     iq_read ? i_p :
                     i_prompt_k;
       
-      q_prompt_k <= reset ? `ACC_WIDTH'd0 :
+      q_prompt_k <= reset ? `ACC_WIDTH_TRACK'd0 :
                     iq_read ? q_p :
                     q_prompt_k;
    end
@@ -103,8 +117,8 @@ module tracking_loops_sw(
    //not already in progress, and I/Q results
    //are available from a channel/slot.
    reg tracking_active;
-   wire start_tracking_update;
-   assign start_tracking_update = !tracking_active && iq_fifo_empty_0;
+   `KEEP wire start_tracking_update;
+   assign start_tracking_update = !tracking_active && !iq_fifo_empty_0;
 
    //Flag when a tracking update begins.
    //Currently tracking updates are serialized
@@ -122,7 +136,7 @@ module tracking_loops_sw(
    ////////////////////
 
    //Square I and Q for each subchannel.
-   wire start_square;
+   `KEEP wire start_square;
    reg [1:0] sub_select;
    assign start_square = sub_select!=2'h3;
 
@@ -131,7 +145,7 @@ module tracking_loops_sw(
    assign iq_read = start_square && sub_select==2'h2;
    
    always @(posedge clk) begin
-      sub_select <= reset ? 2'h0 :
+      sub_select <= reset ? 2'h3 :
                     start_tracking_update ? 2'h0 :
                     sub_select!=2'h3 ? sub_select+2'h1 :
                     sub_select;
@@ -140,28 +154,28 @@ module tracking_loops_sw(
    //Take the absolute value of I/Q to
    //reduce multiplier complexity.
    wire [`ACC_MAG_RANGE] i_mag;
-   abs #(.WIDTH(`ACC_WIDTH))
+   abs #(.WIDTH(`ACC_WIDTH_TRACK))
      abs_i(.in(sub_select==2'h0 ? i_e :
                sub_select==2'h1 ? i_p :
                i_l),
            .out(i_mag));
 
    wire [`ACC_MAG_RANGE] q_mag;
-   abs #(.WIDTH(`ACC_WIDTH))
+   abs #(.WIDTH(`ACC_WIDTH_TRACK))
      abs_q(.in(sub_select==2'h0 ? q_e :
                sub_select==2'h1 ? q_p :
                q_l),
            .out(q_mag));
 
    //Square I and Q values.
-   wire [`I2Q2_RANGE] i2;
+   `KEEP wire [`I2Q2_RANGE] i2;
    iq_square #(.INPUT_WIDTH(`ACC_MAG_WIDTH),
                .OUTPUT_WIDTH(`I2Q2_WIDTH))
      i2_square(.clock(clk),
                .dataa(i_mag),
                .result(i2));
    
-   wire [`I2Q2_RANGE] q2;
+   `KEEP wire [`I2Q2_RANGE] q2;
    iq_square #(.INPUT_WIDTH(`ACC_MAG_WIDTH),
                .OUTPUT_WIDTH(`I2Q2_WIDTH))
      q2_square(.clock(clk),
@@ -190,21 +204,21 @@ module tracking_loops_sw(
    //Flag i2q2_ready when multiply and sum have
    //completed, noting iq_square multiplier
    //pipeline depth.
-   wire i2q2_ready;
-   delay #(.DELAY(5+1))
-     square_delay(.clk(clk),
-                  .reset(reset),
-                  .in(start_square),
-                  .out(i2q2_ready));
+   `KEEP wire i2q2_ready;
+   delay #(.DELAY(4+1))
+     square_ready_delay(.clk(clk),
+                        .reset(reset),
+                        .in(start_square),
+                        .out(i2q2_ready));
 
    //Pipe slot+channel tag along with i2q2 computation.
    //FIXME Can this be reduced with multi-cycle flop stages?
    wire [1:0] tag_post_i2q2;
-   delay #(.DELAY(5+1))
-     square_delay(.clk(clk),
-                  .reset(reset),
-                  .in(tag),
-                  .out(tag_post_i2q2));
+   delay #(.DELAY(4+1))
+     square_tag_delay(.clk(clk),
+                      .reset(reset),
+                      .in(tag),
+                      .out(tag_post_i2q2));
 
    reg [1:0]         i2q2_select;
    reg [1:0]         i2q2_tag;
@@ -292,7 +306,7 @@ module tracking_loops_sw(
    reg [`IQ_RANGE] iq_prompt_k;
    reg [`IQ_RANGE] iq_late_k;
    always @(posedge clk) begin
-      iq_tag <= reset ? 2'd0
+      iq_tag <= reset ? 2'd0 :
                 iq_values_ready ? i2q2_tag :
                 iq_tag;
       
@@ -317,13 +331,13 @@ module tracking_loops_sw(
    //the control signals (Doppler, chipping rate,
    //and tau_prime) for a given channel.
    //FIXME Defines/ranges.
-   wire [1:0]  control_addr_0;
-   wire        control_wr_en_0;
-   wire [52:0] control_in_0;
-   wire [52:0] control_out_0;
-   tracking_loop_ram (.DEPTH(2),
-                      .ADDR_WIDTH(2),
-                      .DATA_WIDTH(53))
+   `KEEP wire [1:0]  control_addr_0;
+   `KEEP wire        control_wr_en_0;
+   `KEEP wire [52:0] control_in_0;
+   `KEEP wire [52:0] control_out_0;
+   tracking_loop_ram #(.DEPTH(2),
+                       .ADDR_WIDTH(2),
+                       .DATA_WIDTH(53))
      control_ram_0(.clock(clk),
                    .address_a(track_mem_addr_0),
                    .wren_a(track_mem_wr_en_0),
@@ -338,16 +352,16 @@ module tracking_loops_sw(
    //for ALL channels and slots. It is addressed
    //by tracking tag ({channel,slot}).
    //FIXME Defines/ranges.
-   wire [1:0]  hist_rd_addr;
-   wire [1:0]  hist_wr_addr;
-   wire        hist_wr_en;
-   wire [52:0] hist_in;
-   wire [52:0] hist_out;
-   tracking_hist_ram (.ADDR_WIDTH(2),
-                      .DATA_WIDTH(53))
+   `KEEP wire [1:0]  hist_rd_addr;
+   `KEEP wire [1:0]  hist_wr_addr;
+   `KEEP wire        hist_wr_en;
+   `KEEP wire [104:0] hist_in;
+   `KEEP wire [104:0] hist_out;
+   tracking_hist_ram #(.ADDR_WIDTH(2),
+                       .DATA_WIDTH(105))
      history_ram(.clock(clk),
                  .rdaddress(hist_rd_addr),
-                 .data(hist_out),
+                 .data(hist_in),
                  .wraddress(hist_wr_addr),
                  .wren(hist_wr_en),
                  .q(hist_out));
@@ -361,18 +375,21 @@ module tracking_loops_sw(
    //Note: i_prompt_k and q_prompt_k are stored
    //      above, and are only valid if the tracking
    //      updates are serialized.
-   wire [`IQ_RANGE]        iq_prompt_km1;
-   wire [`ACC_RANGE_TRACK] i_prompt_km1;
-   wire [`ACC_RANGE_TRACK] q_prompt_km1;
-   wire [`W_DF_RANGE]      w_df_k;
-   wire [`W_DF_DOT_RANGE]  w_df_dot_k;
-   
-   //FIXME Read tracking history from M4K.
+   `KEEP wire [`IQ_RANGE]        iq_prompt_km1;
+   `KEEP wire [`ACC_RANGE_TRACK] i_prompt_km1;
+   `KEEP wire [`ACC_RANGE_TRACK] q_prompt_km1;
+   `KEEP wire [`W_DF_RANGE]      w_df_k;
+   `KEEP wire [`W_DF_DOT_RANGE]  w_df_dot_k;
+   assign iq_prompt_km1 = hist_out[104:87];
+   assign i_prompt_km1 = hist_out[86:69];
+   assign q_prompt_km1 = hist_out[68:51];
+   assign w_df_k = hist_out[50:25];
+   assign w_df_dot_k = hist_out[24:0];
 
    //Delay start of tracking loops by two cycles
    //to allow history memory read to complete.
-   wire start_loops;
-   delay #(.DELAY(2))
+   `KEEP wire start_loops;
+   delay #(.DELAY(3))
      loop_start_delay(.clk(clk),
                       .reset(reset),
                       .in(iq_values_ready),
@@ -391,6 +408,7 @@ module tracking_loops_sw(
    end
 
    //Frequency-locked loop.
+   //FIXME Connect iq_tag to tag port.
    `KEEP wire                      fll_result_ready;
    `KEEP wire [`CHANNEL_ID_RANGE]  fll_result_tag;
    `KEEP wire [`DOPPLER_INC_RANGE] doppler_inc_kp1;
@@ -402,13 +420,13 @@ module tracking_loops_sw(
             .tag(`CHANNEL_ID_WIDTH'd0),
             .starting(fll_starting),
             .iq_prompt_k(iq_prompt_k),
-            .iq_prompt_km1(iq_prompt_km1_0),
+            .iq_prompt_km1(iq_prompt_km1),
             .i_prompt_k(i_prompt_k),
             .q_prompt_k(q_prompt_k),
-            .i_prompt_km1(i_prompt_km1_0),
-            .q_prompt_km1(q_prompt_km1_0),
-            .w_df_k(w_df_k_0),
-            .w_df_dot_k(w_df_dot_k_0),
+            .i_prompt_km1(i_prompt_km1),
+            .q_prompt_km1(q_prompt_km1),
+            .w_df_k(w_df_k),
+            .w_df_dot_k(w_df_dot_k),
             .result_ready(fll_result_ready),
             .result_tag(fll_result_tag),
             .doppler_inc_kp1(doppler_inc_kp1),
@@ -416,11 +434,12 @@ module tracking_loops_sw(
             .w_df_dot_kp1(w_df_dot_kp1));
 
    //Delay-locked loop.
+   //FIXME Connect iq_tag to tag port.
    `KEEP wire                     dll_result_ready;
    `KEEP wire [`CHANNEL_ID_RANGE] dll_result_tag;
    `KEEP wire [`DLL_DPHI_RANGE]   dll_dphi_kp1;
-   wire [`DLL_TAU_RANGE]          tau_prime_kp1;
-   wire                           w_df_ready;
+   `KEEP wire [`DLL_TAU_RANGE]    tau_prime_kp1;
+   `KEEP wire                     w_df_ready;
    wire [`W_DF_RANGE]             w_df_kp1_to_dll;
    dll dll0(.clk(clk),
             .reset(reset),
@@ -438,50 +457,74 @@ module tracking_loops_sw(
 
    //Sign-extend DLL phase increment to CA increment width.
    //FIXME Remove this and resize ca_dphi in DLL.
-   wire [`CA_PHASE_INC_RANGE] ca_dphi_kp1;
+   `KEEP wire [`CA_PHASE_INC_RANGE] ca_dphi_kp1;
    assign ca_dphi_kp1 = {{(`CA_PHASE_INC_WIDTH-`DLL_DPHI_WIDTH){dll_dphi_kp1[`DLL_DPHI_WIDTH-1]}},dll_dphi_kp1};
 
    ////////////////////
    // Report Results
    ////////////////////
 
-   //FIXME Store results in M4K.
+   //Inform DLL of Doppler calculation completion.
+   `KEEP reg fll_finished;
+   assign w_df_ready = fll_result_ready || fll_finished;
 
-   //FIXME Assert tracking_update_complete to the top.
+   `KEEP reg [`W_DF_RANGE] w_df_kp1_hold;
+   assign w_df_kp1_to_dll = fll_result_ready ? w_df_kp1 : w_df_kp1_hold;
 
-   //Store channel 0 results.
-   //FIXME Update everything for multi-channel.
-   `PRESERVE reg [1:0] channel_0_loop_status;
+   //Store Doppler control until DLL has completed
+   //in order to write control parameters to memory.
+   `KEEP reg [`DOPPLER_INC_RANGE] doppler_inc_kp1_hold;
    always @(posedge clk) begin
-      //Flag each loop's completion for one cycle.
-      channel_0_loop_status <= reset ? 2'h0 :
-                               tracking_ready_0 ? 2'h0 :
-                               fll_result_ready ? channel_0_loop_status | 2'b10 :
-                               dll_result_ready ? channel_0_loop_status | 2'b01 :
-                               channel_0_loop_status;
-      
-      //Store prompt IQ value to return to channel history.
-      iq_prompt_k_0 <= iq_values_ready ? iq_prompt_k_value : iq_prompt_k_0;
-      
-      //Flag tracking complete for one cycle
-      //as soon as all tracking loops finish.
-      tracking_ready_0 <= channel_0_loop_status==2'b11 && !tracking_ready_0;
-
-      //FLL results.
-      if(fll_result_ready) begin
-         doppler_inc_kp1_0 <= doppler_inc_kp1;
-         w_df_kp1_0 <= w_df_kp1;
-         w_df_dot_kp1_0 <= w_df_dot_kp1;
-      end
-
-      //FLL results.
-      if(dll_result_ready) begin
-         ca_dphi_kp1_0 <= ca_dphi_kp1;
-         tau_prime_kp1_0 <= tau_prime_kp1;
-      end
+      w_df_kp1_hold <= fll_result_ready ? w_df_kp1 : w_df_kp1_hold;
+      doppler_inc_kp1_hold <= fll_result_ready ? doppler_inc_kp1 : doppler_inc_kp1_hold;
    end // always @ (posedge clk)
 
-   assign w_df_ready = channel_0_loop_status[1];
-   assign w_df_kp1_to_dll = w_df_kp1_0;
+   //Store history results in M4K.
+   //FIXME Ranges.
+   //FIXME Initialize slot values when idle (get w_df value from acq).
+   assign hist_wr_en = fll_result_ready;
+   assign hist_wr_addr = fll_result_tag;
+   assign hist_in[104:87] = iq_prompt_k;
+   assign hist_in[86:69] = i_prompt_k;
+   assign hist_in[68:51] = q_prompt_k;
+   assign hist_in[50:25] = w_df_kp1;
+   assign hist_in[24:0] = w_df_dot_kp1;
+   
+   //Update slot control parameters.
+   //FIXME Ranges.
+   assign control_addr_0 = dll_result_tag[1:0];//FIXME Select only the slot ID for this channel.
+   assign control_wr_en_0 = dll_result_ready;
+   assign control_in_0[52:38] = tau_prime_kp1;
+   assign control_in_0[37:17] = ca_dphi_kp1;
+   assign control_in_0[16:0] = doppler_inc_kp1_hold;
+
+   //Assert tracking_update_complete to the top.
+   assign tracking_update_complete = dll_result_ready;
+
+   //Debug outputs.
+   wire dbg_update;
+   assign dbg_update = tracking_update_complete && iq_tag==0;
+   
+   delay dbg_delay(.clk(clk),
+                   .reset(reset),
+                   .in(dbg_update),
+                   .out(ready_dbg));
+   
+   always @(posedge clk) begin
+      if(hist_wr_en && iq_tag==0) begin
+         i_prompt_dbg <= i_prompt_k;
+         q_prompt_dbg <= q_prompt_k;
+         doppler_inc_dbg <= doppler_inc_kp1;
+         w_df_dbg <= w_df_kp1;
+         w_df_dot_dbg <= w_df_dot_kp1;
+         i2q2_early_dbg <= i2q2_early;
+         i2q2_prompt_dbg <= i2q2_prompt;
+         i2q2_late_dbg <= i2q2_late;
+      end
+      if(control_wr_en_0 && iq_tag==0) begin
+         ca_dphi_dbg <= ca_dphi_kp1;
+         tau_prime_dbg <= tau_prime_kp1;
+      end
+   end
    
 endmodule

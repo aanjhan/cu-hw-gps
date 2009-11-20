@@ -2,6 +2,9 @@
 //`include "top__channel.vh"
 `include "../components/channel__tracking_loops.vh"
 
+`include "../components/channel.vh"
+`include "../components/tracking_loops.vh"
+
 `define DEBUG
 `include "../components/debug.vh"
 
@@ -62,6 +65,7 @@ module top(
                      .out(new_sample));
 
    `PRESERVE reg [`INPUT_RANGE] data_sync;
+   `PRESERVE reg data_available;
    always @(posedge clk) begin
       if(new_sample) begin
          data_sync <= data;
@@ -70,12 +74,6 @@ module top(
       else begin
          data_available <= 1'b0;
       end
-   end
-
-   always @(posedge clk) begin
-      sample_count <= global_reset ? 32'd0 :
-                      data_available ? sample_count+32'd1 :
-                      sample_count;
    end
 
    ///////////////
@@ -142,7 +140,7 @@ module top(
                              .track_mem_addr_0(track_mem_addr),
                              .track_mem_wr_en_0(track_mem_wr_en),
                              .track_mem_data_in_0(track_mem_data_in),
-                             .track_mem_data_out_0(track_mem_data_out)
+                             .track_mem_data_out_0(track_mem_data_out),
                              //Debug.
                              .ready_dbg(tracking_ready),
                              .i2q2_early_dbg(i2q2_early),
@@ -154,6 +152,8 @@ module top(
                              .w_df_dot_dbg(w_df_dot_k),
                              .doppler_inc_dbg(carrier_dphi_k),
                              .ca_dphi_dbg(ca_dphi_k),
-                             .tau_prime_dbg(tau_prime_k));
+                             .tau_prime_dbg(tau_prime_k),
+                             .track_carrier_en(track_carrier_en),
+                             .track_code_en(track_code_en));
    
 endmodule

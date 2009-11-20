@@ -25,18 +25,20 @@ module tracking_loops_sw(
     input              track_mem_wr_en_0,
     input [52:0]       track_mem_data_in_0,
     output wire [52:0] track_mem_data_out_0,
-    //Channel 0 tracking result memory.
+    //Debug signals.
     output wire        ready_dbg,
     output reg [`ACC_RANGE_TRACK]   i_prompt_dbg,
     output reg [`ACC_RANGE_TRACK]   q_prompt_dbg,
     output reg [`DOPPLER_INC_RANGE] doppler_inc_dbg,
     output reg [`W_DF_RANGE]        w_df_dbg,
     output reg [`W_DF_DOT_RANGE]    w_df_dot_dbg,
-    output reg [`CA_DPHI_RANGE]     ca_dphi_dbg,
+    output reg [`CA_PHASE_INC_RANGE]     ca_dphi_dbg,
     output reg [`DLL_TAU_RANGE]     tau_prime_dbg,
     output reg [`I2Q2_RANGE]        i2q2_early_dbg,
     output reg [`I2Q2_RANGE]        i2q2_prompt_dbg,
-    output reg [`I2Q2_RANGE]        i2q2_late_dbg);
+    output reg [`I2Q2_RANGE]        i2q2_late_dbg,
+    input                           track_carrier_en,
+    input                           track_code_en);
 
    //Store channel 0 I/Q results as they become
    //available, along with result tag.
@@ -411,7 +413,7 @@ module tracking_loops_sw(
    //FIXME Connect iq_tag to tag port.
    `KEEP wire                      fll_result_ready;
    `KEEP wire [`CHANNEL_ID_RANGE]  fll_result_tag;
-   `KEEP wire [`DOPPLER_INC_RANGE] doppler_inc_kp1;
+   `KEEP wire [`DOPPLER_INC_RANGE] doppler_inc_out;
    `KEEP wire [`W_DF_RANGE]        w_df_kp1;
    `KEEP wire [`W_DF_DOT_RANGE]    w_df_dot_kp1;
    fll fll0(.clk(clk),
@@ -429,16 +431,19 @@ module tracking_loops_sw(
             .w_df_dot_k(w_df_dot_k),
             .result_ready(fll_result_ready),
             .result_tag(fll_result_tag),
-            .doppler_inc_kp1(doppler_inc_kp1),
+            .doppler_inc_kp1(doppler_inc_out),
             .w_df_kp1(w_df_kp1),
             .w_df_dot_kp1(w_df_dot_kp1));
+   
+   `KEEP wire [`DOPPLER_INC_RANGE] doppler_inc_kp1;
+   assign doppler_inc_kp1 = track_carrier_en ? doppler_inc_out : `DOPPLER_INC_WIDTH'd0;
 
    //Delay-locked loop.
    //FIXME Connect iq_tag to tag port.
    `KEEP wire                     dll_result_ready;
    `KEEP wire [`CHANNEL_ID_RANGE] dll_result_tag;
-   `KEEP wire [`DLL_DPHI_RANGE]   dll_dphi_kp1;
-   `KEEP wire [`DLL_TAU_RANGE]    tau_prime_kp1;
+   `KEEP wire [`DLL_DPHI_RANGE]   dll_dphi_out;
+   `KEEP wire [`DLL_TAU_RANGE]    tau_prime_out;
    `KEEP wire                     w_df_ready;
    wire [`W_DF_RANGE]             w_df_kp1_to_dll;
    dll dll0(.clk(clk),
@@ -452,8 +457,13 @@ module tracking_loops_sw(
             .w_df_kp1(w_df_kp1_to_dll),
             .result_ready(dll_result_ready),
             .result_tag(dll_result_tag),
-            .ca_dphi(dll_dphi_kp1),
-            .tau_prime(tau_prime_kp1));
+            .ca_dphi(dll_dphi_out),
+            .tau_prime(tau_prime_out));
+   
+   `KEEP wire [`DLL_DPHI_RANGE] dll_dphi_kp1;
+   `KEEP wire [`DLL_TAU_RANGE]  tau_prime_kp1;
+   assign dll_dphi_kp1 = track_code_en ? dll_dphi_out : `DLL_DPHI_WIDTH'd0;
+   assign tau_prime_kp1 = track_code_en ? tau_prime_out : `DLL_TAU_WIDTH'd0;
 
    //Sign-extend DLL phase increment to CA increment width.
    //FIXME Remove this and resize ca_dphi in DLL.

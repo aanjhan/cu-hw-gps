@@ -20,6 +20,10 @@ module channel_sw(
     input                    init,
     input [`PRN_RANGE]       prn,
     output                   slot_initializing,
+    //Tracking loop initialization.
+    output wire              init_track,
+    output wire [1:0]        init_track_tag,
+    output wire [`DOPPLER_INC_RANGE] init_track_carrier_dphi,
     //Accumulation results.
     //FIXME Switch accumulators to ACC_RANGE_TRACK
     output wire              acc_valid,
@@ -32,10 +36,9 @@ module channel_sw(
     output wire [`ACC_RANGE] q_late,
     //Tracking result memory interface.
     //FIXME Bit ranges.
-    output wire [1:0]        track_mem_addr,
-    output wire              track_mem_wr_en,
-    input [52:0]             track_mem_data_in,
-    output wire [52:0]       track_mem_data_out);
+    input [1:0]              track_mem_addr,
+    input                    track_mem_wr_en,
+    input [52:0]             track_mem_data);
    
    //Cycle through PRN slots in channel.
    //The slot number indicates which slot
@@ -144,6 +147,28 @@ module channel_sw(
 	     .rdaddress(acc_mem_rd_addr),
 	     .q(acc_mem_out));
 
+   //The tracking loop control memories hold
+   //the control signals (Doppler, chipping rate,
+   //and tau_prime) for a given channel.
+   //FIXME Defines/ranges.
+   `KEEP wire [1:0]  control_addr;
+   `KEEP wire        control_wr_en;
+   `KEEP wire [52:0] control_data_in;
+   `KEEP wire [52:0] control_data_out;
+   wire [52:0] control_track_data_out;
+   tracking_loop_ram #(.DEPTH(2),
+                       .ADDR_WIDTH(2),
+                       .DATA_WIDTH(53))
+     control_ram(.clock(clk),
+                 .address_a(track_mem_addr),
+                 .wren_a(track_mem_wr_en),
+                 .data_a(track_mem_data_in),
+                 .q_a(control_track_data_out),
+                 .address_b(control_addr),
+                 .wren_b(control_wr_en),
+                 .data_b(control_data_in),
+                 .q_b(control_data_out));
+
    ///////////////////////////////////
    // Pipeline Stage 0:
    //   --Fetch slot state.
@@ -153,27 +178,31 @@ module channel_sw(
    //Fetch current slot's state.
    assign slot_mem_rd_addr = slot;
 
-   //Fetch current slot's tracking results.
+   //Initialize tracking control memory.
    //FIXME Need to write initial Doppler/code rate into
    //FIXME memory on init, but slot_init_pending might not
    //FIXME be set until stage 1. How to deal with this?
-   assign track_mem_addr = !active ? next_slot : slot;
-   assign track_mem_wr_en = !active ?
+   assign control_addr = !active ? next_slot : slot;
+   assign control_wr_en = !active ?
                             init && |next_slot_oh :
                             !slot_track_initialized[slot];
 
    //FIXME Get Doppler from acquisition.
    //FIXME Ranges.
-   assign track_mem_data_out[52:38] = `SAMPLE_COUNT_TRACK_MAX;
-   assign track_mem_data_out[37:17] = 21'd0;
-   assign track_mem_data_out[16:0] = `DOPPLER_INC_WIDTH'd0;
+   assign control_data_in[52:38] = `SAMPLE_COUNT_TRACK_WIDTH'd0;
+   assign control_data_in[37:17] = 21'd0;
+   assign control_data_in[16:0] = `DOPPLER_INC_WIDTH'd0;
+
+   assign init_track = control_wr_en;
+   assign init_track_tag = control_addr;
+   assign init_track_carrier_dphi = `DOPPLER_INC_WIDTH'd0;
 
    //Assert flag to top level to clear initializaiton request.
-   assign slot_initializing = track_mem_wr_en;
+   assign slot_initializing = control_wr_en;
    
    generate
       for(i=0;i<NUM_SLOTS;i=i+1) begin : slot_track_init_gen
-         assign initalizing_track[i] = track_mem_wr_en && track_mem_addr==i && !slot_track_initialized[i];
+         assign initalizing_track[i] = control_wr_en && control_addr==i && !slot_track_initialized[i];
       end
    endgenerate
    
@@ -265,21 +294,21 @@ module channel_sw(
       end
    endgenerate
    
-   //Fetch tracking results from memory.
+   //Fetch tracking control results from memory.
    //FIXME Ranges.
    //FIXME Will these get the correct values when initializing
    //FIXME if the memory was just written 2 cycles earlier?
    `KEEP wire [`SAMPLE_COUNT_TRACK_RANGE] tau_prime;
    `KEEP wire [`DOPPLER_INC_RANGE] doppler_dphi;
    `KEEP wire [`CA_PHASE_INC_RANGE] ca_dphi;
-   assign tau_prime = track_mem_data_in[52:38];
-   assign ca_dphi = track_mem_data_in[37:17];
-   assign doppler_dphi = track_mem_data_in[16:0];
+   assign tau_prime = control_data_out[52:38];
+   assign ca_dphi = control_data_out[37:17];
+   assign doppler_dphi = control_data_out[16:0];
 
    //Flag accumulation completion when enough
    //samples have been accumulated.
    `KEEP wire accumulation_complete;
-   assign accumulation_complete = sample_count_in==(tau_prime-`SAMPLE_COUNT_TRACK_WIDTH'd1);
+   assign accumulation_complete = sample_count_in==(`SAMPLE_COUNT_TRACK_MAX-`SAMPLE_COUNT_TRACK_WIDTH'd1+tau_prime);
    
    `KEEP wire [`SAMPLE_COUNT_TRACK_RANGE] sample_count_out;
    assign sample_count_out = accumulation_complete ? `SAMPLE_COUNT_TRACK_WIDTH'd0 :

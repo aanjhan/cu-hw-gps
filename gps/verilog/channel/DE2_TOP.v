@@ -362,7 +362,7 @@ module DE2_TOP (
                               tracking_ready_count==4'd0 ? 4'd0 :
                               tracking_ready_count-4'd1;
    end
-   receiver_back_end be(.clk_0(clk_50),
+   /*receiver_back_end be(.clk_0(clk_50),
                         .reset_n(1'b1),
                         .out_port_from_the_heartbeat_led(LEDG[0]),
                         .in_port_to_the_tracking_ready(tracking_ready_flag),
@@ -387,7 +387,7 @@ module DE2_TOP (
                         .zs_dqm_from_the_sdram({DRAM_UDQM, DRAM_LDQM}),
                         .zs_ras_n_from_the_sdram(DRAM_RAS_N),
                         .zs_we_n_from_the_sdram(DRAM_WE_N));
-   assign DRAM_CLK = clk_50_m3ns;
+   assign DRAM_CLK = clk_50_m3ns;*/
 
    wire disp_acc, disp_i_q,
         disp_pkt, disp_pkt_good;

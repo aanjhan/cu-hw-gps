@@ -26,12 +26,10 @@ typedef struct
 int heartbeat_led;
 static alt_alarm heartbeat_alarm;
 
-volatile alt_u8 bad_value;
 volatile alt_u8 updates_ready;
 volatile Tracking tracking_params[4];
 volatile int param_head;
-volatile int prev=0;
-int param_tail; 
+int param_tail;
 
 alt_u32 Heartbeat(void *context)
 {
@@ -45,21 +43,17 @@ inline void SignFix32(volatile alt_32 *value, alt_u8 width)
 {
     if((*value)&(1<<(width-1)))
     {
-        (*value)|=~((1<<width)-1);
+        (*value)|=~((1<<(alt_u32)width)-1);
     }
 }
 
 void TrackingUpdate(void *context, alt_u32 id)
 {
     volatile Tracking *params;
-    volatile Tracking *prev_params;
-    alt_u32 diff;
     
     IOWR_ALTERA_AVALON_PIO_IRQ_MASK(TRACKING_READY_BASE,0x00);
         
     params=&tracking_params[param_head];
-    prev_params=&tracking_params[prev];
-    prev=param_head;
     if(++param_head>3)param_head=0;
     
     //Read tracking parameters.
@@ -81,13 +75,6 @@ void TrackingUpdate(void *context, alt_u32 id)
     SignFix32(&params->w_df_dot,W_DF_DOT_DATA_WIDTH);
     SignFix32(&params->doppler_dphi,DOPPLER_DPHI_DATA_WIDTH);
     SignFix32(&params->ca_dphi,CA_DPHI_DATA_WIDTH);
-    
-    diff=prev_params->w_df-params->w_df;
-    if(diff<0)diff=-diff;
-    if(diff>(prev_params->w_df>>4))
-    {
-       bad_value=1;
-    }
     
     if(updates_ready<4)++updates_ready;
 
@@ -128,8 +115,6 @@ int main(void)
     {
         if(updates_ready)
         {
-            updates_ready--;
-
             /*sprintf(data,"Update: i=%d, q=%d, w=%d, w_dot=%d, dopp_dphi=%d.",
                    (int)tracking_params.i_prompt,
                    (int)tracking_params.q_prompt,
@@ -140,15 +125,15 @@ int main(void)
             //Send tracking parameters.
             memcpy(data+4,(const void*)&tracking_params[param_tail],sizeof(Tracking));
             write(uart_fd,(const void*)data,sizeof(Tracking)+4);
+            
+            /*if(tracking_params[param_tail].doppler_dphi>100000)
+            {
+                printf("Bad: %d\n",tracking_params[param_tail].doppler_dphi);
+            }*/
             if(++param_tail>3)param_tail=0;
+            updates_ready--;
             //write(uart_fd,(const void*)data,strlen(data));
             //puts((const void*)data);
-            
-            if(bad_value)
-            {
-                bad_value=0;
-                printf("%d bad values received!\n",++bad_count);
-            }
         }
     }
     

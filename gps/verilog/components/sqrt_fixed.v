@@ -103,43 +103,53 @@ module sqrt_fixed(
 
         //Update rem1.  rem1 resets to zero.  rem1 gets the output of rem_mux.
         rem1 <= reset ? `SQRT_REM_WIDTH'b0 :     //Reset to zero
+                (input_ready && !in_use) ? `SQRT_REM_WIDTH'b0 :    //If flag_new_input, reset to 0
                 rem_mux_out;                     //Take the output of rem_mux otherwise
 
         //Update root1.  root1 resets to zero.  root1 gets the output of
         //root_mux.
         root1 <= reset ? `SQRT_ROOT_WIDTH'b0 :   //Reset to zero
+                (input_ready && !in_use) ? `SQRT_ROOT_WIDTH'b0 :    //If flag_new_input, reset to 0
                  root_mux_out;                   //Take the output of rem_mux otherwise
 
         //Update x2.  x2 resets to zero.  x2 gets the output of (x << 2)
         //& (2^width - 1).
         x2 <= reset ? `SQRT_INPUT_PADDED_WIDTH'b0 :     //Reset to zero
+              (input_ready && !in_use) ? `SQRT_INPUT_PADDED_WIDTH'b0 :    //If flag_new_input, reset to 0
               x1_lshift_2;       //Take (x1 << 2) & 2^WIDTH - 1 otherwise
 
         //Update rem2.  rem2 resets to zero.  rem2 gets the output of rem1 <<
         //(WIDTH - SHIFT) | x1 >> SHIFT
         rem2 <= reset ? `SQRT_REM_WIDTH'b0 :     //Reset to zero
+                (input_ready && !in_use) ? `SQRT_REM_WIDTH'b0 :    //If flag_new_input, reset to 0
                 rem1_lshift_WIDTH_m_SHIFT | x1_rshift_SHIFT; //Take the logic output otherwise
 
         //Update rem_m_div.  rem_m_div resets to zero.  rem_m_div gets the
         //output of rem1 << (WIDTH - SHIFT) | x1 >> SHIFT - DIVISOR
         rem_m_div <= reset ? `SQRT_REM_WIDTH'b0 : //Reset to zero
+                (input_ready && !in_use) ? `SQRT_REM_WIDTH'b0 :    //If flag_new_input, reset to 0
                 (rem1_lshift_WIDTH_m_SHIFT | x1_rshift_SHIFT) - divisor; //Take the logic output otherwise     
 
         //Update comp_out_pl.   
-        comp_out_pl <= reset ? 1'b0 : (divisor <= (rem1_lshift_WIDTH_m_SHIFT | x1_rshift_SHIFT));
+        comp_out_pl <= reset ? 1'b0 : 
+                      (input_ready && !in_use) ? 1'b0 :    //If flag_new_input, reset to 0
+                      (divisor <= (rem1_lshift_WIDTH_m_SHIFT | x1_rshift_SHIFT));
 
         //Update root2.  root2 resets to zero.  root2 gets root1 << 1
         root2 <= reset ? `SQRT_ROOT_WIDTH'b0 :   //Reset to zero
+                 (input_ready && !in_use) ? `SQRT_ROOT_WIDTH'b0 :    //If flag_new_input, reset to 0
                  root1_lshift_1;                 //Take the output of root1 << 1 otherwise
 
         //Update root2_p1.  root2_p1 resets to zero.  
         //root2_p1 gets (root1 << 1) + 1
         root2_p1 <= reset ? `SQRT_ROOT_WIDTH'b0 : //reset to zero
+                    (input_ready && !in_use) ? `SQRT_ROOT_WIDTH'b0 :    //If flag_new_input, reset to 0
                     root1_lshift_1  + `SQRT_ROOT_WIDTH'b1; //Take the output of (root1 << 1) + 1 otherwise
 
         //Update the output out. out resets to zero.  Out gets 
         //root >> (SHIFT/2).
         out <= reset ? `SQRT_OUTPUT_WIDTH'b0 :   //Reset to zero
+               (input_ready && !in_use) ? `SQRT_OUTPUT_WIDTH'b0 :    //If flag_new_input, reset to 0
                root2_rshift_SHIFT_DIV_2[`SQRT_OUTPUT_RANGE];         //Take the output of root >> (SHIFT/2) otherwise
 
         //Update output_ready.  output_ready resets to zero.  output_ready is

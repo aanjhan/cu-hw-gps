@@ -32,6 +32,15 @@ module top(
     output wire [`DOPPLER_INC_RANGE] carrier_dphi_k,
     output wire [`CA_PHASE_INC_RANGE] ca_dphi_k,
     output wire [`SAMPLE_COUNT_TRACK_RANGE] tau_prime_k,
+    //Accumulation debug.
+   output wire              acc_valid,
+   output wire [1:0]        acc_tag,
+   output wire [`ACC_RANGE] i_early,
+   output wire [`ACC_RANGE] q_early,
+   output wire [`ACC_RANGE] i_prompt,
+   output wire [`ACC_RANGE] q_prompt,
+   output wire [`ACC_RANGE] i_late,
+   output wire [`ACC_RANGE] q_late,
     //Debug signals.
     input                            track_carrier_en,
     input                            track_code_en);
@@ -81,19 +90,21 @@ module top(
    ///////////////
 
    //Accumulation results.
-   wire              acc_valid;
+   /*wire              acc_valid;
    wire [1:0]        acc_tag;
    wire [`ACC_RANGE] i_early;
    wire [`ACC_RANGE] q_early;
    wire [`ACC_RANGE] i_prompt;
    wire [`ACC_RANGE] q_prompt;
    wire [`ACC_RANGE] i_late;
-   wire [`ACC_RANGE] q_late;
+   wire [`ACC_RANGE] q_late;*/
+   wire init_track_0;
+   wire [1:0] init_track_tag_0;
+   wire [`DOPPLER_INC_RANGE] init_track_carrier_dphi_0;
    //Tracking memory.
-   wire [1:0]          track_mem_addr;
-   wire                track_mem_wr_en;
-   wire [52:0]         track_mem_data_in;
-   wire [52:0]         track_mem_data_out;
+   wire [1:0]          track_mem_addr_0;
+   wire                track_mem_wr_en_0;
+   wire [52:0]         track_mem_data_0;
    //Misc.
    wire accumulator_updating;
    wire slot_initializing;
@@ -106,6 +117,10 @@ module top(
                         .init(init),
                         .prn(prn),
                         .slot_initializing(slot_initializing),
+                        //Tracking loop initialization.
+                        .init_track(init_track_0),
+                        .init_track_tag(init_track_tag_0),
+                        .init_track_carrier_dphi(init_track_carrier_dphi_0),
                         //Accumulation results.
                         .acc_valid(acc_valid),
                         .acc_tag(acc_tag),
@@ -116,10 +131,9 @@ module top(
                         .i_late(i_late),
                         .q_late(q_late),
                         //Tracking results memory interface.
-                        .track_mem_addr(track_mem_addr),
-                        .track_mem_wr_en(track_mem_wr_en),
-                        .track_mem_data_in(track_mem_data_in),
-                        .track_mem_data_out(track_mem_data_out));
+                        .track_mem_addr(track_mem_addr_0),
+                        .track_mem_wr_en(track_mem_wr_en_0),
+                        .track_mem_data(track_mem_data_0));
 
    ////////////////////
    // Tracking Loops
@@ -127,6 +141,10 @@ module top(
 
    tracking_loops_sw loops_0(.clk(clk),
                              .reset(global_reset),
+                             //Channel 0 initialization.
+                             .init_0(init_track_0),
+                             .init_tag_0(init_track_tag_0),
+                             .init_carrier_dphi_0(init_track_carrier_dphi_0),
                              //Accumulation results.
                              .acc_valid_0(acc_valid),
                              .acc_tag_0(acc_tag),
@@ -137,10 +155,9 @@ module top(
                              .i_late_0(i_late[`ACC_RANGE_TRACK]),
                              .q_late_0(q_late[`ACC_RANGE_TRACK]),
                              //Tracking results memory interface.
-                             .track_mem_addr_0(track_mem_addr),
-                             .track_mem_wr_en_0(track_mem_wr_en),
-                             .track_mem_data_in_0(track_mem_data_in),
-                             .track_mem_data_out_0(track_mem_data_out),
+                             .track_mem_addr_0(track_mem_addr_0),
+                             .track_mem_wr_en_0(track_mem_wr_en_0),
+                             .track_mem_data_0(track_mem_data_0),
                              //Debug.
                              .ready_dbg(tracking_ready),
                              .i2q2_early_dbg(i2q2_early),

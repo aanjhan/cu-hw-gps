@@ -9,11 +9,15 @@
 `include "debug.vh"
 
 module tracking_loops_sw(
-    input              clk,
-    input              reset,
+    input                    clk,
+    input                    reset,
+    //Channel 0 initizliation.
+    input                    init_0,
+    input [1:0]              init_tag_0,
+    input [`DOPPLER_INC_RANGE] init_carrier_dphi_0,
     //Channel 0 accumulation results.
-    input              acc_valid_0,
-    input [1:0]        acc_tag_0,
+    input                    acc_valid_0,
+    input [1:0]              acc_tag_0,
     input [`ACC_RANGE_TRACK] i_early_0,
     input [`ACC_RANGE_TRACK] q_early_0,
     input [`ACC_RANGE_TRACK] i_prompt_0,
@@ -21,10 +25,9 @@ module tracking_loops_sw(
     input [`ACC_RANGE_TRACK] i_late_0,
     input [`ACC_RANGE_TRACK] q_late_0,
     //Channel 0 tracking result memory.
-    input [1:0]        track_mem_addr_0,
-    input              track_mem_wr_en_0,
-    input [52:0]       track_mem_data_in_0,
-    output wire [52:0] track_mem_data_out_0,
+    output wire [1:0]        track_mem_addr_0,
+    output wire              track_mem_wr_en_0,
+    output wire [52:0]       track_mem_data_0,
     //Debug signals.
     output wire        ready_dbg,
     output reg [`ACC_RANGE_TRACK]   i_prompt_dbg,
@@ -59,9 +62,30 @@ module tracking_loops_sw(
 	       .empty(iq_fifo_empty_0),
 	       .q(results_0));
 
+   //Store channel 0 I/Q results as they become
+   //available, along with result tag.
+   //FIXME Ranges.
+   `KEEP wire init_fifo_empty;
+   wire init_read;
+   wire [(`DOPPLER_INC_WIDTH+1):0] init_out;
+   tracking_iq_fifo #(.WIDTH(2+`DOPPLER_INC_WIDTH),
+                      .DEPTH(4))
+     init_fifo(.clock(clk),
+	       .sclr(reset),
+	       .wrreq(init_0),
+	       .data({init_tag_0,init_carrier_dphi_0}),
+	       .rdreq(init_read),
+	       .empty(init_fifo_empty),
+	       .q(dphi_init));
+
+   wire [1:0] init_tag;
+   wire [`DOPPLER_INC_RANGE] init_carrier_dphi;
+   assign init_tag = init_out[(`DOPPLER_INC_WIDTH+1):`DOPPLER_INC_WIDTH];
+   assign init_carrier_dphi = init_out[`DOPPLER_INC_RANGE];
+
    //Extract next I/Q results from FIFO.
    //FIXME Ranges.
-   wire [1:0]              tag_0;
+   wire [1:0] tag_0;
    wire [`ACC_RANGE_TRACK] i_e_0;
    wire [`ACC_RANGE_TRACK] q_e_0;
    wire [`ACC_RANGE_TRACK] i_p_0;
@@ -329,27 +353,6 @@ module tracking_loops_sw(
    // Tracking Loops
    ////////////////////
 
-   //The tracking loop control memories hold
-   //the control signals (Doppler, chipping rate,
-   //and tau_prime) for a given channel.
-   //FIXME Defines/ranges.
-   `KEEP wire [1:0]  control_addr_0;
-   `KEEP wire        control_wr_en_0;
-   `KEEP wire [52:0] control_in_0;
-   `KEEP wire [52:0] control_out_0;
-   tracking_loop_ram #(.DEPTH(2),
-                       .ADDR_WIDTH(2),
-                       .DATA_WIDTH(53))
-     control_ram_0(.clock(clk),
-                   .address_a(track_mem_addr_0),
-                   .wren_a(track_mem_wr_en_0),
-                   .data_a(track_mem_data_in_0),
-                   .q_a(track_mem_data_out_0),
-                   .address_b(control_addr_0),
-                   .wren_b(control_wr_en_0),
-                   .data_b(control_in_0),
-                   .q_b(control_out_0));
-
    //The history memory holds the history values
    //for ALL channels and slots. It is addressed
    //by tracking tag ({channel,slot}).
@@ -492,21 +495,22 @@ module tracking_loops_sw(
    //Store history results in M4K.
    //FIXME Ranges.
    //FIXME Initialize slot values when idle (get w_df value from acq).
-   assign hist_wr_en = fll_result_ready;
-   assign hist_wr_addr = fll_result_tag;
-   assign hist_in[104:87] = iq_prompt_k;
-   assign hist_in[86:69] = i_prompt_k;
-   assign hist_in[68:51] = q_prompt_k;
-   assign hist_in[50:25] = w_df_kp1;
-   assign hist_in[24:0] = w_df_dot_kp1;
+   assign hist_wr_en = fll_result_ready || !init_fifo_empty;
+   assign hist_wr_addr = fll_result_ready ? fll_result_tag : init_tag;
+   assign hist_in[104:87] = fll_result_ready ? iq_prompt_k : `IQ_WIDTH'd1;
+   assign hist_in[86:69] = fll_result_ready ? i_prompt_k : `ACC_WIDTH_TRACK'd1;
+   assign hist_in[68:51] = fll_result_ready ? q_prompt_k : `ACC_WIDTH_TRACK'd1;
+   assign hist_in[50:25] = fll_result_ready ? w_df_kp1 : (init_carrier_dphi<<`ANGLE_SHIFT);
+   assign hist_in[24:0] = fll_result_ready ? w_df_dot_kp1 : `W_DF_DOT_WIDTH'd0;
+   assign init_read = hist_wr_en && !fll_result_ready;
    
    //Update slot control parameters.
    //FIXME Ranges.
-   assign control_addr_0 = dll_result_tag[1:0];//FIXME Select only the slot ID for this channel.
-   assign control_wr_en_0 = dll_result_ready;
-   assign control_in_0[52:38] = tau_prime_kp1;
-   assign control_in_0[37:17] = ca_dphi_kp1;
-   assign control_in_0[16:0] = doppler_inc_kp1_hold;
+   assign track_mem_addr_0 = dll_result_tag[1:0];//FIXME Select only the slot ID for this channel.
+   assign track_mem_wr_en_0 = dll_result_ready;
+   assign track_mem_data_0[52:38] = tau_prime_kp1;
+   assign track_mem_data_0[37:17] = ca_dphi_kp1;
+   assign track_mem_data_0[16:0] = doppler_inc_kp1_hold;
 
    //Assert tracking_update_complete to the top.
    assign tracking_update_complete = dll_result_ready;
@@ -531,7 +535,7 @@ module tracking_loops_sw(
          i2q2_prompt_dbg <= i2q2_prompt;
          i2q2_late_dbg <= i2q2_late;
       end
-      if(control_wr_en_0 && iq_tag==0) begin
+      if(track_mem_wr_en_0 && iq_tag==0) begin
          ca_dphi_dbg <= ca_dphi_kp1;
          tau_prime_dbg <= tau_prime_kp1;
       end

@@ -138,6 +138,7 @@ module dm9000a_controller(
    //Enable address cycling, and link change and RX interrupts.
    localparam INTERRUPT_FLAGS = (`DM9000A_BIT_IMR_PAR |
                                  `DM9000A_BIT_IMR_LNKCHGI |
+                                 `DM9000A_BIT_IMR_PTI |
                                  `DM9000A_BIT_IMR_PRI);
 
    //A packet is bad if any of the following flags are set.

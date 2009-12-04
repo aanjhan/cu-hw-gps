@@ -39,6 +39,11 @@ module dm9000a_controller(
     input              rx_fifo_rd_req,
     output wire [15:0] rx_fifo_rd_data,
     output wire        rx_fifo_empty,
+    //TX data FIFO interface.
+    input              tx_fifo_wr_clk,
+    input              tx_fifo_wr_req,
+    output wire [15:0] tx_fifo_wr_data,
+    output wire        tx_fifo_full,
     //Control and status.
     input              halt,
     output reg         link_status);
@@ -73,6 +78,21 @@ module dm9000a_controller(
              .q(rx_fifo_rd_data),
              .rdempty(rx_fifo_empty));
 
+   //Ethernet data TX FIFO.
+   wire        tx_fifo_empty;
+   reg         tx_fifo_rd_req;
+   reg [15:0]  tx_fifo_rd_data;
+   rx_data_fifo #(.DEPTH(`DM9000A_TX_FIFO_DEPTH))
+     tx_fifo(.sclr(reset),
+             .wrclk(tx_fifo_wr_clk),
+             .data(tx_fifo_wr_data),
+             .wrreq(tx_fifo_wr_req),
+             .wrfull(tx_fifo_full),
+             .rdclk(clk_enet),
+             .rdreq(tx_fifo_rd_req),
+             .q(tx_fifo_rd_data),
+             .rdempty(tx_fifo_empty));
+
    //A FIFO halt occurs when the FIFO is full
    //and cannot accept new data, or when halted
    //by the upper level.
@@ -90,6 +110,23 @@ module dm9000a_controller(
    reg [15:0] rx_length;
    reg        rx_bad_packet;
    reg        rx_odd_length;
+
+   //Transmitted packet information.
+   //Note: The maximum packet length should be the
+   //      Ethernet MTU size (1500 B).
+   reg [10:0] tx_length;
+   wire       tx_start;
+   wire       tx_finish;
+   reg        tx_in_progress;
+
+   always @(posedge clk_enet) begin
+      tx_in_progress <= reset ? 1'b0 :
+                        tx_start ? 1'b1 :
+                        tx_finish ? 1'b0 :
+                        tx_in_progress;
+   end
+
+   assign tx_start = state==`DM9000A_STATE_TX_START;
 
    //Packet RX ix halted whenever a FIFO halt is
    //asserted and the packet is valid. If the packet
@@ -139,6 +176,8 @@ module dm9000a_controller(
          rx_fifo_wr_req <= 1'b0;
          rx_bad_packet <= 1'b0;
 
+         tx_length <= 11'd0;
+
          enet_cmd <= `DM9000A_TYPE_DATA;
          enet_wr_n <= 1'b1;
          enet_rd_n <= 1'b1;
@@ -146,8 +185,9 @@ module dm9000a_controller(
       else begin
          case(state)
            `DM9000A_STATE_IDLE: begin
-              state <= !issue_ready ? `DM9000A_STATE_IDLE :
-                       `DM9000A_STATE_SETUP;
+              state <= issue_ready ? `DM9000A_STATE_SETUP :
+                       !tx_fifo_empty && !tx_in_progress ? `DM9000A_STATE_TX_LENL_SETUP :
+                       `DM9000A_STATE_IDLE;
               
               rx_fifo_wr_req <= 1'b0;
 
@@ -231,6 +271,306 @@ module dm9000a_controller(
               enet_cmd <= `DM9000A_TYPE_DATA;
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b0;
+           end
+
+           /////////////////////////
+           // Packet TX Sequence
+           /////////////////////////
+
+           //Transmit packet data.
+           //Complete TX sequence:
+           //  --Setup TX length low register (1 cycle).
+           //  --Spin (1 cycle).
+           //  --Write TX length low byte (1 cycle).
+           //  --Spin (1 cycle).
+           //  --Setup TX length high register (1 cycle).
+           //  --Spin (1 cycle).
+           //  --Write TX length high byte (1 cycle).
+           //  --Spin (1 cycle).
+           //  --Setup TX register (1 cycle).
+           //  --Spin (1 cycle).
+           //  --Send destination address (3 cycles + 3 spin cycles).
+           //  --Send source address (3 cycles + 3 spin cycles).
+           //  --Send EtherType (1 cycle + 1 spin cycle).
+           //  --Send frame data (length/2 cycles + length/2 spin cycles).
+           //  --Setup TX control register (1 cycle).
+           //  --Spin (1 cycle).
+           //  --Assert TX request bit to start transmission (1 cycle).
+           //Total time: 27+length cycles.
+           
+           //Setup TX low register.
+           //Read TX length from FIFO.
+           `DM9000A_STATE_TX_LENL_SETUP: begin
+              data_out <= `DM9000A_REG_TX_LEN_L;
+              state <= `DM9000A_STATE_TX_LENL_SETUP_SPIN;
+
+              tx_length <= tx_fifo_rd_data;
+              tx_fifo_rd_req <= 1'b1;
+
+              enet_cmd <= `DM9000A_TYPE_INDEX;
+              enet_wr_n <= 1'b0;
+              enet_rd_n <= 1'b1;
+           end
+           //Spin after TX low setup.
+           `DM9000A_STATE_TX_LENL_SETUP_SPIN: begin
+              state <= `DM9000A_STATE_TX_LENL;
+              
+              tx_fifo_rd_req <= 1'b0;
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           //Send TX low byte.
+           `DM9000A_STATE_TX_LENL: begin
+              data_out <= {8'h0,tx_length[7:0]};
+              state <= `DM9000A_STATE_TX_LENL_SPIN;
+
+              enet_cmd <= `DM9000A_TYPE_DATA;
+              enet_wr_n <= 1'b0;
+              enet_rd_n <= 1'b1;
+           end
+           //Spin after TX low byte.
+           `DM9000A_STATE_TX_LENL_SPIN: begin
+              state <= `DM9000A_STATE_TX_LENH_SETUP;
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           //Setup TX high register.
+           `DM9000A_STATE_TX_LENH_SETUP: begin
+              data_out <= `DM9000A_REG_TX_LEN_H;
+              state <= `DM9000A_STATE_TX_LENH_SETUP_SPIN;
+
+              enet_cmd <= `DM9000A_TYPE_INDEX;
+              enet_wr_n <= 1'b0;
+              enet_rd_n <= 1'b1;
+           end
+           //Spin after TX high setup.
+           `DM9000A_STATE_TX_LENH_SETUP_SPIN: begin
+              state <= `DM9000A_STATE_TX_LENH;
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           //Send TX high byte.
+           `DM9000A_STATE_TX_LENH: begin
+              data_out <= {13'h0,tx_length[10:8]};
+              state <= `DM9000A_STATE_TX_LENH_SPIN;
+
+              enet_cmd <= `DM9000A_TYPE_DATA;
+              enet_wr_n <= 1'b0;
+              enet_rd_n <= 1'b1;
+           end
+           //Spin after TX high byte.
+           `DM9000A_STATE_TX_LENH_SPIN: begin
+              state <= `DM9000A_STATE_TX_DATA_SETUP;
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           //Setup data transmission.
+           `DM9000A_STATE_TX_DATA_SETUP: begin
+              data_out <= `DM9000A_REG_TX_MEM_WR_INC;
+              state <= `DM9000A_STATE_TX_DATA_SETUP_SPIN;
+
+              enet_cmd <= `DM9000A_TYPE_INDEX;
+              enet_wr_n <= 1'b0;
+              enet_rd_n <= 1'b1;
+           end
+           //Spin after TX setup.
+           `DM9000A_STATE_TX_DATA_SETUP_SPIN: begin
+              state <= `DM9000A_STATE_TX_DEST_0;
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           //Transmit destination address (cycle 1).
+           `DM9000A_STATE_TX_DEST_0: begin
+              data_out <= tx_fifo_rd_data;
+              state <= !tx_fifo_empty ?
+                       `DM9000A_STATE_TX_DEST_SPIN_0 :
+                       `DM9000A_STATE_TX_DEST_0;
+
+              tx_fifo_rd_req <= !tx_fifo_empty;
+
+              enet_cmd <= `DM9000A_TYPE_DATA;
+              enet_wr_n <= !tx_fifo_empty;
+              enet_rd_n <= 1'b1;
+           end
+           //Spin after destination address (cycle 1).
+           `DM9000A_STATE_TX_DEST_SPIN_0: begin
+              state <= `DM9000A_STATE_TX_DEST_1;
+              
+              tx_fifo_rd_req <= 1'b0;
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           //Transmit destination address (cycle 2).
+           `DM9000A_STATE_TX_DEST_1: begin
+              data_out <= tx_fifo_rd_data;
+              state <= !tx_fifo_empty ?
+                       `DM9000A_STATE_TX_DEST_SPIN_1 :
+                       `DM9000A_STATE_TX_DEST_1;
+
+              tx_fifo_rd_req <= !tx_fifo_empty;
+
+              enet_cmd <= `DM9000A_TYPE_DATA;
+              enet_wr_n <= !tx_fifo_empty;
+              enet_rd_n <= 1'b1;
+           end
+           //Spin after destination address (cycle 2).
+           `DM9000A_STATE_TX_DEST_SPIN_1: begin
+              state <= `DM9000A_STATE_TX_DEST_2;
+              
+              tx_fifo_rd_req <= 1'b0;
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           //Transmit destination address (cycle 3).
+           `DM9000A_STATE_TX_DEST_2: begin
+              data_out <= tx_fifo_rd_data;
+              state <= !tx_fifo_empty ?
+                       `DM9000A_STATE_TX_DEST_SPIN_2 :
+                       `DM9000A_STATE_TX_DEST_2;
+
+              tx_fifo_rd_req <= !tx_fifo_empty;
+
+              enet_cmd <= `DM9000A_TYPE_DATA;
+              enet_wr_n <= !tx_fifo_empty;
+              enet_rd_n <= 1'b1;
+           end
+           //Spin after destination address (cycle 3).
+           `DM9000A_STATE_TX_DEST_SPIN_2: begin
+              state <= `DM9000A_STATE_TX_SRC_0;
+              
+              tx_fifo_rd_req <= 1'b0;
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           //Transmit source address (cycle 1).
+           `DM9000A_STATE_TX_SRC_0: begin
+              data_out <= {MAC_ADDRESS[39:32],MAC_ADDRESS[47:40]};
+              state <= `DM9000A_STATE_TX_SRC_SPIN_0;
+
+              enet_cmd <= `DM9000A_TYPE_DATA;
+              enet_wr_n <= 1'b0;
+              enet_rd_n <= 1'b1;
+           end
+           //Spin after source address (cycle 1).
+           `DM9000A_STATE_TX_SRC_SPIN_0: begin
+              state <= `DM9000A_STATE_TX_SRC_1;
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           //Transmit source address (cycle 2).
+           `DM9000A_STATE_TX_SRC_1: begin
+              data_out <= {MAC_ADDRESS[23:16],MAC_ADDRESS[31:24]};
+              state <= `DM9000A_STATE_TX_SRC_SPIN_1;
+
+              enet_cmd <= `DM9000A_TYPE_DATA;
+              enet_wr_n <= 1'b0;
+              enet_rd_n <= 1'b1;
+           end
+           //Spin after source address (cycle 2).
+           `DM9000A_STATE_TX_SRC_SPIN_1: begin
+              state <= `DM9000A_STATE_TX_SRC_2;
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           //Transmit source address (cycle 3).
+           `DM9000A_STATE_TX_SRC_2: begin
+              data_out <= {MAC_ADDRESS[7:0],MAC_ADDRESS[15:8]};
+              state <= `DM9000A_STATE_TX_SRC_SPIN_2;
+
+              enet_cmd <= `DM9000A_TYPE_DATA;
+              enet_wr_n <= 1'b0;
+              enet_rd_n <= 1'b1;
+           end
+           //Spin after source address (cycle 3).
+           `DM9000A_STATE_TX_SRC_SPIN_2: begin
+              state <= `DM9000A_STATE_TX_ETHERTYPE;
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           //Transmit EtherType.
+           `DM9000A_STATE_TX_ETHERTYPE: begin
+              data_out <= tx_fifo_rd_data;
+              state <= !tx_fifo_empty ?
+                       `DM9000A_STATE_TX_ETHERTYPE_SPIN :
+                       `DM9000A_STATE_TX_ETHERTYPE;
+
+              tx_fifo_rd_req <= !tx_fifo_empty;
+
+              enet_cmd <= `DM9000A_TYPE_DATA;
+              enet_wr_n <= !tx_fifo_empty;
+              enet_rd_n <= 1'b1;
+           end
+           //Spin after EtherType.
+           `DM9000A_STATE_TX_ETHERTYPE_SPIN: begin
+              state <= `DM9000A_STATE_TX_DATA;
+              
+              tx_fifo_rd_req <= 1'b0;
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           //Transmit next data word (16b).
+           `DM9000A_STATE_TX_DATA: begin
+              data_out <= tx_fifo_rd_data;
+              state <= !tx_fifo_empty ?
+                       `DM9000A_STATE_TX_DATA_SPIN :
+                       `DM9000A_STATE_TX_DATA;
+
+              tx_length <= tx_fifo_empty ? tx_length :
+                            tx_length==11'd1 ? 11'd0 :
+                            tx_length-11'd2;
+              tx_fifo_rd_req <= !tx_fifo_empty;
+
+              enet_cmd <= `DM9000A_TYPE_DATA;
+              enet_wr_n <= !tx_fifo_empty;
+              enet_rd_n <= 1'b1;
+           end
+           //Spin after data transmission.
+           `DM9000A_STATE_TX_DATA_SETUP_SPIN: begin
+              state <= tx_length==11'd0 ?
+                        `DM9000A_STATE_IDLE :
+                        `DM9000A_STATE_TX_DATA;
+              
+              tx_fifo_rd_req <= 1'b0;
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           //Setup TX control register.
+           `DM9000A_STATE_TXC_SETUP: begin
+              data_out <= `DM9000A_REG_TXCR1;
+              state <= `DM9000A_STATE_TXC_SETUP_SPIN;
+
+              enet_cmd <= `DM9000A_TYPE_INDEX;
+              enet_wr_n <= 1'b0;
+              enet_rd_n <= 1'b1;
+           end
+           //Spin after TX control setup.
+           `DM9000A_STATE_TXC_SETUP_SPIN: begin
+              state <= `DM9000A_STATE_TX_LENH;
+
+              enet_wr_n <= 1'b1;
+              enet_rd_n <= 1'b1;
+           end
+           //Start transmission.
+           `DM9000A_STATE_TX_START: begin
+              data_out <= `DM9000A_BIT_TXCR1_TXREQ;
+              state <= `DM9000A_STATE_IDLE;
+
+              enet_cmd <= `DM9000A_TYPE_DATA;
+              enet_wr_n <= 1'b0;
+              enet_rd_n <= 1'b1;
            end
 
            /////////////////////////
@@ -388,6 +728,10 @@ module dm9000a_controller(
    //Command state variable.
    `PRESERVE reg [`DM9000A_CMD_STATE_RANGE] cmd_state;
 
+   //An in-progress transmission has finished when
+   //a completion interrupt is dispatched.
+   assign tx_finished = cmd_state==`DM9000A_CMD_STATE_TX_COMPLETE;
+
    //The command state machine is paused whenever
    //spinning for a command, or when an issue is
    //already in progress.
@@ -489,12 +833,12 @@ module dm9000a_controller(
            end
            //Check remaining interrupt flags and dispatch
            //interrupt handlers as necessary.
-           //FIXME Transmit handler.
            `DM9000A_CMD_STATE_DISPATCH: begin
-              cmd_state <= interrupt_flags[`DM9000A_ISR_POS_PR] ? `DM9000A_CMD_STATE_RX_PACKET_0 :
+              cmd_state <= interrupt_flags[`DM9000A_ISR_POS_PT] ? `DM9000A_CMD_STATE_TX_COMPLETE :
+                           interrupt_flags[`DM9000A_ISR_POS_PR] ? `DM9000A_CMD_STATE_RX_PACKET_0 :
                            interrupt_flags[`DM9000A_ISR_POS_LNKCHG] ? `DM9000A_CMD_STATE_LINK_CHANGE :
                            `DM9000A_CMD_STATE_IRQ_FINISH;
-              spin_next <= 1'b0;
+              spin_next <= !interrupt_flags[`DM9000A_ISR_POS_PT];
            end
            //Interrupts handled. Re-enable all interrupts.
            `DM9000A_CMD_STATE_IRQ_FINISH: begin
@@ -516,6 +860,13 @@ module dm9000a_controller(
               link_status <= (data_out & `DM9000A_BIT_NSR_LINK)==`DM9000A_BIT_NSR_LINK;
               
               interrupt_flags <= interrupt_flags & ~(`DM9000A_BIT8_ISR_LNKCHG);
+           end
+           //Transmission has completed.
+           `DM9000A_CMD_STATE_TX_COMPLETE: begin
+              cmd_state <= `DM9000A_CMD_STATE_DISPATCH;
+              spin_next <= 1'b1;
+              
+              interrupt_flags <= interrupt_flags & ~(`DM9000A_BIT8_ISR_PT);
            end
            //Prefetch packet status word and check if a packet
            //is available to receive. If so, start reception,

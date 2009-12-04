@@ -386,7 +386,7 @@ module dm9000a_controller(
            end
            //Transmit destination address (cycle 1).
            `DM9000A_STATE_TX_DEST_0: begin
-              data_out <= tx_fifo_rd_data;
+              data_out <= {tx_fifo_rd_data[39:32],tx_fifo_rd_data[47:40]};
               state <= !tx_fifo_empty ?
                        `DM9000A_STATE_TX_DEST_SPIN_0 :
                        `DM9000A_STATE_TX_DEST_0;
@@ -408,7 +408,7 @@ module dm9000a_controller(
            end
            //Transmit destination address (cycle 2).
            `DM9000A_STATE_TX_DEST_1: begin
-              data_out <= tx_fifo_rd_data;
+              data_out <= {tx_fifo_rd_data[23:16],tx_fifo_rd_data[31:24]};
               state <= !tx_fifo_empty ?
                        `DM9000A_STATE_TX_DEST_SPIN_1 :
                        `DM9000A_STATE_TX_DEST_1;
@@ -430,7 +430,7 @@ module dm9000a_controller(
            end
            //Transmit destination address (cycle 3).
            `DM9000A_STATE_TX_DEST_2: begin
-              data_out <= tx_fifo_rd_data;
+              data_out <= {tx_fifo_rd_data[7:0],tx_fifo_rd_data[15:8]};
               state <= !tx_fifo_empty ?
                        `DM9000A_STATE_TX_DEST_SPIN_2 :
                        `DM9000A_STATE_TX_DEST_2;

@@ -26,7 +26,7 @@ DM9000A_RX_FIFO_DEPTH,16,RX FIFO depth.
 /////////////////////////
 
 //Issue/control state variable.
-DM9000A_STATE_MAX_STATE,43,DM9000A control state variable maximum value.
+DM9000A_STATE_MAX_STATE,46,DM9000A control state variable maximum value.
 DM9000A_STATE_WIDTH,max_width(DM9000A_STATE_MAX_STATE),DM9000A control state variable width.
 DM9000A_STATE_RANGE,DM9000A_STATE_WIDTH-1:0,DM9000A control state variable bit range.
 
@@ -69,19 +69,19 @@ DM9000A_STATE_TX_DEST_1,DM9000A_STATE_WIDTH'd30,Transmit destination address cyc
 DM9000A_STATE_TX_DEST_SPIN_1,DM9000A_STATE_WIDTH'd31,Spin after destination address cycle 2.
 DM9000A_STATE_TX_DEST_2,DM9000A_STATE_WIDTH'd32,Transmit destination address cycle 3.
 DM9000A_STATE_TX_DEST_SPIN_2,DM9000A_STATE_WIDTH'd33,Spin after destination address cycle 3.
-DM9000A_STATE_TX_SRC_0,DM9000A_STATE_WIDTH'd31,Transmit source address cycle 1.
-DM9000A_STATE_TX_SRC_SPIN_0,DM9000A_STATE_WIDTH'd32,Spin after source address cycle 1.
-DM9000A_STATE_TX_SRC_1,DM9000A_STATE_WIDTH'd33,Transmit source address cycle 2.
-DM9000A_STATE_TX_SRC_SPIN_1,DM9000A_STATE_WIDTH'd34,Spin after source address cycle 2.
-DM9000A_STATE_TX_SRC_2,DM9000A_STATE_WIDTH'd35,Transmit source address cycle 3.
-DM9000A_STATE_TX_SRC_SPIN_2,DM9000A_STATE_WIDTH'd36,Spin after source address cycle 3.
-DM9000A_STATE_TX_ETHERTYPE,DM9000A_STATE_WIDTH'd37,Transmit EtherType.
-DM9000A_STATE_TX_ETHERTYPE_SPIN,DM9000A_STATE_WIDTH'd38,Spin after transmiting EtherType.
-DM9000A_STATE_TX_DATA,DM9000A_STATE_WIDTH'd39,Transmit next 16b of frame.
-DM9000A_STATE_TX_DATA_SPIN,DM9000A_STATE_WIDTH'd40,Spin after data transmission.
-DM9000A_STATE_TXC_SETUP,DM9000A_STATE_WIDTH'd41,Setup TX control register.
-DM9000A_STATE_TXC_SETUP_SPIN,DM9000A_STATE_WIDTH'd42,Spin after TX control setup.
-DM9000A_STATE_TX_START,DM9000A_STATE_WIDTH'd43,Start transmission.
+DM9000A_STATE_TX_SRC_0,DM9000A_STATE_WIDTH'd34,Transmit source address cycle 1.
+DM9000A_STATE_TX_SRC_SPIN_0,DM9000A_STATE_WIDTH'd35,Spin after source address cycle 1.
+DM9000A_STATE_TX_SRC_1,DM9000A_STATE_WIDTH'd36,Transmit source address cycle 2.
+DM9000A_STATE_TX_SRC_SPIN_1,DM9000A_STATE_WIDTH'd37,Spin after source address cycle 2.
+DM9000A_STATE_TX_SRC_2,DM9000A_STATE_WIDTH'd38,Transmit source address cycle 3.
+DM9000A_STATE_TX_SRC_SPIN_2,DM9000A_STATE_WIDTH'd39,Spin after source address cycle 3.
+DM9000A_STATE_TX_ETHERTYPE,DM9000A_STATE_WIDTH'd40,Transmit EtherType.
+DM9000A_STATE_TX_ETHERTYPE_SPIN,DM9000A_STATE_WIDTH'd41,Spin after transmiting EtherType.
+DM9000A_STATE_TX_DATA,DM9000A_STATE_WIDTH'd42,Transmit next 16b of frame.
+DM9000A_STATE_TX_DATA_SPIN,DM9000A_STATE_WIDTH'd43,Spin after data transmission.
+DM9000A_STATE_TXC_SETUP,DM9000A_STATE_WIDTH'd44,Setup TX control register.
+DM9000A_STATE_TXC_SETUP_SPIN,DM9000A_STATE_WIDTH'd45,Spin after TX control setup.
+DM9000A_STATE_TX_START,DM9000A_STATE_WIDTH'd46,Start transmission.
 
 ////////////////////
 // Command Control
@@ -115,6 +115,7 @@ DM9000A_CMD_STATE_IRQ_FINISH,DM9000A_CMD_STATE_WIDTH'd14,Interrupts handled - en
 DM9000A_CMD_STATE_LINK_CHANGE,DM9000A_CMD_STATE_WIDTH'd15,Link status changed.
 DM9000A_CMD_STATE_RX_PACKET_0,DM9000A_CMD_STATE_WIDTH'd16,Prefetch packet.
 DM9000A_CMD_STATE_RX_PACKET_1,DM9000A_CMD_STATE_WIDTH'd17,Receive packet.
+DM9000A_CMD_STATE_TX_COMPLETE,DM9000A_CMD_STATE_WIDTH'd18,TX Complete.
 
 //Command signal values.
 DM9000A_TYPE_INDEX,1'b0,Register index value.

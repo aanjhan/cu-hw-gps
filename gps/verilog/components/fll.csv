@@ -22,8 +22,8 @@ FLL_CLK_WIDTH,max_width(FLL_CLK_MAX),Division clock counter width.
 FLL_CLK_RANGE,range(FLL_CLK_WIDTH),Division clock counter bit range.
 
 //FLL tuning.
-FLL_A_VAL,fix(((1.89*FLL_BW)^2)*2^CARRIER_ACC_WIDTH/F_S;FLL_CONST_SHIFT),FLL_A contant value.
-FLL_B_VAL,fix(sqrt(2)*1.89*FLL_BW*2^CARRIER_ACC_WIDTH/F_S;FLL_CONST_SHIFT),FLL_B contant value.
+FLL_A_VAL,fix(((1.89*FLL_BW)^2)*2^CARRIER_ACC_WIDTH/F_S/2/PI;FLL_CONST_SHIFT),FLL_A contant value.
+FLL_B_VAL,fix(sqrt(2)*1.89*FLL_BW*2^CARRIER_ACC_WIDTH/F_S/2/PI;FLL_CONST_SHIFT),FLL_B contant value.
 FLL_CONST_WIDTH,max_width(max(FLL_A_VAL;FLL_B_VAL;FLL_T;W_DF_TO_INC_VAL)),FLL constant width.
 FLL_CONST_RANGE,range(FLL_CONST_WIDTH),FLL constant range.
 FLL_A,FLL_CONST_WIDTH'dFLL_A_VAL,A_FLL constant.

@@ -20,6 +20,7 @@ module top(
     //Init control.
     input                            init,
     input [`PRN_RANGE]               prn,
+    input [`DOPPLER_INC_RANGE]       init_carrier_dphi,
     //Tracking results.
     output wire                      tracking_ready,
     output wire [`I2Q2_RANGE]        i2q2_early,
@@ -116,6 +117,7 @@ module top(
                         //Slot control.
                         .init(init),
                         .prn(prn),
+                        .init_carrier_dphi(init_carrier_dphi),
                         .slot_initializing(slot_initializing),
                         //Tracking loop initialization.
                         .init_track(init_track_0),

@@ -19,7 +19,8 @@ module channel_sw(
     //Slot control.
     input                    init,
     input [`PRN_RANGE]       prn,
-    output                   slot_initializing,
+    input [`DOPPLER_INC_RANGE] init_carrier_dphi,
+    output wire                slot_initializing,
     //Tracking loop initialization.
     output wire              init_track,
     output wire [1:0]        init_track_tag,
@@ -62,8 +63,8 @@ module channel_sw(
 
    //Select next available slot.
    reg [(NUM_SLOTS-1):0] slot_active;
-   wire [1:0] next_slot;
-   wire [(NUM_SLOTS-1):0] next_slot_oh;
+   `KEEP wire [1:0] next_slot;
+   `KEEP wire [(NUM_SLOTS-1):0] next_slot_oh;
    priority_select #(.NUM_ENTRIES(NUM_SLOTS))
      slot_select(.eligible(~slot_active),
                  .select(next_slot),
@@ -162,7 +163,7 @@ module channel_sw(
      control_ram(.clock(clk),
                  .address_a(track_mem_addr),
                  .wren_a(track_mem_wr_en),
-                 .data_a(track_mem_data_in),
+                 .data_a(track_mem_data),
                  .q_a(control_track_data_out),
                  .address_b(control_addr),
                  .wren_b(control_wr_en),
@@ -191,11 +192,11 @@ module channel_sw(
    //FIXME Ranges.
    assign control_data_in[52:38] = `SAMPLE_COUNT_TRACK_WIDTH'd0;
    assign control_data_in[37:17] = 21'd0;
-   assign control_data_in[16:0] = `DOPPLER_INC_WIDTH'd0;
+   assign control_data_in[16:0] = init_carrier_dphi;
 
    assign init_track = control_wr_en;
    assign init_track_tag = control_addr;
-   assign init_track_carrier_dphi = `DOPPLER_INC_WIDTH'd0;
+   assign init_track_carrier_dphi = init_carrier_dphi;
 
    //Assert flag to top level to clear initializaiton request.
    assign slot_initializing = control_wr_en;
@@ -308,7 +309,7 @@ module channel_sw(
    //Flag accumulation completion when enough
    //samples have been accumulated.
    `KEEP wire accumulation_complete;
-   assign accumulation_complete = sample_count_in==(`SAMPLE_COUNT_TRACK_MAX-`SAMPLE_COUNT_TRACK_WIDTH'd1+tau_prime);
+   assign accumulation_complete = sample_count_in==(`SAMPLE_COUNT_TRACK_MAX-`SAMPLE_COUNT_TRACK_WIDTH'd1);
    
    `KEEP wire [`SAMPLE_COUNT_TRACK_RANGE] sample_count_out;
    assign sample_count_out = accumulation_complete ? `SAMPLE_COUNT_TRACK_WIDTH'd0 :

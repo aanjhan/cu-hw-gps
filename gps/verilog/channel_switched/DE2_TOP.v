@@ -308,6 +308,7 @@ module DE2_TOP (
            //Code control.
            .init(~KEY[1]),
            .prn(5'd0),
+           .init_carrier_dphi(`DOPPLER_INC_WIDTH'd0),
            //Tracking results.
            .tracking_ready(tracking_ready),
            .i2q2_early(i2q2_early),

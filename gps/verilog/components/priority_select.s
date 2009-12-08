@@ -24,7 +24,7 @@ module priority_select(
    //FIXME Finish use directive and make NUM_ENTRIES a parameter,
    //FIXME and calculate select bit-range from that.
    //FIXME Fix spacing for the code generated below.
-<? NUM_ENTRIES=1;
+<? NUM_ENTRIES=2;
 print("always @(eligible) begin");
 print("casez(eligible)");
 for i in range(0,NUM_ENTRIES):

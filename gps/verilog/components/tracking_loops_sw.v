@@ -76,7 +76,7 @@ module tracking_loops_sw(
 	       .data({init_tag_0,init_carrier_dphi_0}),
 	       .rdreq(init_read),
 	       .empty(init_fifo_empty),
-	       .q(dphi_init));
+	       .q(init_out));
 
    wire [1:0] init_tag;
    wire [`DOPPLER_INC_RANGE] init_carrier_dphi;
@@ -360,16 +360,38 @@ module tracking_loops_sw(
    `KEEP wire [1:0]  hist_rd_addr;
    `KEEP wire [1:0]  hist_wr_addr;
    `KEEP wire        hist_wr_en;
-   `KEEP wire [104:0] hist_in;
-   `KEEP wire [104:0] hist_out;
+   `KEEP wire [106:0] hist_in;
+   `KEEP wire [106:0] hist_out;
    tracking_hist_ram #(.ADDR_WIDTH(2),
-                       .DATA_WIDTH(105))
+                       .DATA_WIDTH(107))
      history_ram(.clock(clk),
                  .rdaddress(hist_rd_addr),
                  .data(hist_in),
                  .wraddress(hist_wr_addr),
                  .wren(hist_wr_en),
                  .q(hist_out));
+
+   //Initialize the next slot as soon as the tracking
+   //loops become idle.
+   wire init_next_slot;
+   assign init_next_slot = fll_result_ready || !init_fifo_empty;
+   
+   //Ignore the first tracking update for a given
+   //slot, in order to collect the two accumulations
+   //needed for carrier tracking.
+   //FIXME Ranges.
+   reg [1:0] ignore_first_update;
+   generate
+      genvar i;
+      for(i=0;i<1;i=i+1) begin : ignore_gen
+         always @(posedge clk) begin
+            ignore_first_update[i] <= reset ? 1'b0 :
+                                      init_next_slot && init_tag==i ? 1'b1 :
+                                      tracking_update_complete && dll_result_tag==i ? 1'b0 :
+                                      ignore_first_update[i];
+         end
+      end
+   endgenerate
 
    //Issue a read for the history values for the
    //tag that has completed sqrt.
@@ -385,12 +407,12 @@ module tracking_loops_sw(
    `KEEP wire [`ACC_RANGE_TRACK] q_prompt_km1;
    `KEEP wire [`W_DF_RANGE]      w_df_k;
    `KEEP wire [`W_DF_DOT_RANGE]  w_df_dot_k;
-   assign iq_prompt_km1 = hist_out[104:87];
-   assign i_prompt_km1 = hist_out[86:69];
-   assign q_prompt_km1 = hist_out[68:51];
+   assign iq_prompt_km1 = hist_out[106:89];
+   assign i_prompt_km1 = hist_out[88:70];
+   assign q_prompt_km1 = hist_out[69:51];
    assign w_df_k = hist_out[50:25];
    assign w_df_dot_k = hist_out[24:0];
-
+   
    //Delay start of tracking loops by two cycles
    //to allow history memory read to complete.
    `KEEP wire start_loops;
@@ -488,18 +510,23 @@ module tracking_loops_sw(
    //in order to write control parameters to memory.
    `KEEP reg [`DOPPLER_INC_RANGE] doppler_inc_kp1_hold;
    always @(posedge clk) begin
+      fll_finished <= start_loops ? 1'b0 :
+                      fll_result_ready ? 1'b1 :
+                      fll_finished;
       w_df_kp1_hold <= fll_result_ready ? w_df_kp1 : w_df_kp1_hold;
       doppler_inc_kp1_hold <= fll_result_ready ? doppler_inc_kp1 : doppler_inc_kp1_hold;
    end // always @ (posedge clk)
 
    //Store history results in M4K.
+   //Initialize new slots when idle and initialization is necessary.
    //FIXME Ranges.
    //FIXME Initialize slot values when idle (get w_df value from acq).
-   assign hist_wr_en = fll_result_ready || !init_fifo_empty;
+   assign hist_wr_en = (fll_result_ready && !ignore_first_update[fll_result_tag]) ||
+                       !init_fifo_empty;
    assign hist_wr_addr = fll_result_ready ? fll_result_tag : init_tag;
-   assign hist_in[104:87] = fll_result_ready ? iq_prompt_k : `IQ_WIDTH'd1;
-   assign hist_in[86:69] = fll_result_ready ? i_prompt_k : `ACC_WIDTH_TRACK'd1;
-   assign hist_in[68:51] = fll_result_ready ? q_prompt_k : `ACC_WIDTH_TRACK'd1;
+   assign hist_in[106:89] = fll_result_ready ? iq_prompt_k : `IQ_WIDTH'd1;
+   assign hist_in[88:70] = fll_result_ready ? i_prompt_k : `ACC_WIDTH_TRACK'd1;
+   assign hist_in[69:51] = fll_result_ready ? q_prompt_k : `ACC_WIDTH_TRACK'd1;
    assign hist_in[50:25] = fll_result_ready ? w_df_kp1 : (init_carrier_dphi<<`ANGLE_SHIFT);
    assign hist_in[24:0] = fll_result_ready ? w_df_dot_kp1 : `W_DF_DOT_WIDTH'd0;
    assign init_read = hist_wr_en && !fll_result_ready;
@@ -507,7 +534,7 @@ module tracking_loops_sw(
    //Update slot control parameters.
    //FIXME Ranges.
    assign track_mem_addr_0 = dll_result_tag[1:0];//FIXME Select only the slot ID for this channel.
-   assign track_mem_wr_en_0 = dll_result_ready;
+   assign track_mem_wr_en_0 = (dll_result_ready && !ignore_first_update[dll_result_tag]);
    assign track_mem_data_0[52:38] = tau_prime_kp1;
    assign track_mem_data_0[37:17] = ca_dphi_kp1;
    assign track_mem_data_0[16:0] = doppler_inc_kp1_hold;

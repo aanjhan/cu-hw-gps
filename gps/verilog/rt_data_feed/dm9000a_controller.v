@@ -19,8 +19,8 @@
 `include "dm9000a_controller.vh"
 
 `undef DEBUG
-//`define DEBUG
-`include "../components/debug.vh"
+`define DEBUG
+`include "debug.vh"
 
 module dm9000a_controller(
     input              clk,
@@ -39,10 +39,11 @@ module dm9000a_controller(
     input              rx_fifo_rd_req,
     output wire [15:0] rx_fifo_rd_data,
     output wire        rx_fifo_empty,
+    output wire        rx_fifo_full,
     //TX data FIFO interface.
     input              tx_fifo_wr_clk,
     input              tx_fifo_wr_req,
-    output wire [15:0] tx_fifo_wr_data,
+    input wire [15:0]  tx_fifo_wr_data,
     output wire        tx_fifo_full,
     //Control and status.
     input              halt,
@@ -64,7 +65,7 @@ module dm9000a_controller(
    assign enet_cs_n = 1'b0;
 
    //Ethernet data RX FIFO.
-   wire        rx_fifo_full;
+  // wire        rx_fifo_full;
    reg         rx_fifo_wr_req;
    reg [15:0]  rx_fifo_wr_data;
    rx_data_fifo #(.DEPTH(`DM9000A_RX_FIFO_DEPTH))
@@ -79,9 +80,10 @@ module dm9000a_controller(
              .rdempty(rx_fifo_empty));
 
    //Ethernet data TX FIFO.
-   wire        tx_fifo_empty;
+   `KEEP wire        tx_fifo_empty;
    reg         tx_fifo_rd_req;
-   reg [15:0]  tx_fifo_rd_data;
+   
+   `KEEP wire [15:0]  tx_fifo_rd_data;
    rx_data_fifo #(.DEPTH(`DM9000A_TX_FIFO_DEPTH))
      tx_fifo(.sclr(reset),
              .wrclk(tx_fifo_wr_clk),
@@ -126,7 +128,7 @@ module dm9000a_controller(
                         tx_in_progress;
    end
 
-   assign tx_start = state==`DM9000A_STATE_TX_START;
+   assign tx_start = (state==`DM9000A_STATE_TX_START);
 
    //Packet RX ix halted whenever a FIFO halt is
    //asserted and the packet is valid. If the packet
@@ -163,12 +165,15 @@ module dm9000a_controller(
       enet_int_km1 <= enet_int;
    end
    
+   wire [10:0] tx_frame_length;
+   assign tx_frame_length = tx_length + 11'd14;
+   
    //DM9000A control state machine - used to issue
    //a single command and send/receive subsequent data.
    //Also used to transmit/receive packet data.
-   `PRESERVE reg [`DM9000A_STATE_RANGE] state;
+  `PRESERVE reg [`DM9000A_STATE_RANGE] state;
    reg                          initializing;
-   reg [15:0]                   data_out;
+   reg [15:0]	data_out;
    always @(posedge clk_enet) begin
       if(reset) begin
          data_out <= data_out;
@@ -212,6 +217,7 @@ module dm9000a_controller(
            //Setup register index and command type.
            `DM9000A_STATE_SETUP: begin
               data_out <= issue_register;
+             //state <= `DM9000A_STATE_SETUP_SPIN;
               state <= issue_register==`DM9000A_REG_MEM_RD_INC ?
                        `DM9000A_STATE_RX_SETUP_SPIN :
                        `DM9000A_STATE_SETUP_SPIN;
@@ -305,7 +311,7 @@ module dm9000a_controller(
               data_out <= `DM9000A_REG_TX_LEN_L;
               state <= `DM9000A_STATE_TX_LENL_SETUP_SPIN;
 
-              tx_length <= tx_fifo_rd_data;
+              tx_length <= tx_fifo_rd_data[10:0];
               tx_fifo_rd_req <= 1'b1;
 
               enet_cmd <= `DM9000A_TYPE_INDEX;
@@ -321,23 +327,23 @@ module dm9000a_controller(
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Send TX low byte.
+           //Send TX low byte. 20
            `DM9000A_STATE_TX_LENL: begin
-              data_out <= {8'h0,tx_length[7:0]};
+              data_out <= {8'h0,tx_frame_length[7:0]};
               state <= `DM9000A_STATE_TX_LENL_SPIN;
 
               enet_cmd <= `DM9000A_TYPE_DATA;
               enet_wr_n <= 1'b0;
               enet_rd_n <= 1'b1;
            end
-           //Spin after TX low byte.
+           //Spin after TX low byte. 21
            `DM9000A_STATE_TX_LENL_SPIN: begin
               state <= `DM9000A_STATE_TX_LENH_SETUP;
 
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Setup TX high register.
+           //Setup TX high register. 22
            `DM9000A_STATE_TX_LENH_SETUP: begin
               data_out <= `DM9000A_REG_TX_LEN_H;
               state <= `DM9000A_STATE_TX_LENH_SETUP_SPIN;
@@ -346,48 +352,48 @@ module dm9000a_controller(
               enet_wr_n <= 1'b0;
               enet_rd_n <= 1'b1;
            end
-           //Spin after TX high setup.
+           //Spin after TX high setup. 23
            `DM9000A_STATE_TX_LENH_SETUP_SPIN: begin
               state <= `DM9000A_STATE_TX_LENH;
 
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Send TX high byte.
+           //Send TX high byte. 24
            `DM9000A_STATE_TX_LENH: begin
-              data_out <= {13'h0,tx_length[10:8]};
+              data_out <= {13'h0,tx_frame_length[10:8]};
               state <= `DM9000A_STATE_TX_LENH_SPIN;
 
               enet_cmd <= `DM9000A_TYPE_DATA;
               enet_wr_n <= 1'b0;
               enet_rd_n <= 1'b1;
            end
-           //Spin after TX high byte.
+           //Spin after TX high byte. 25
            `DM9000A_STATE_TX_LENH_SPIN: begin
               state <= `DM9000A_STATE_TX_DATA_SETUP;
 
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Setup data transmission.
+           //Setup data transmission. 26
            `DM9000A_STATE_TX_DATA_SETUP: begin
-              data_out <= `DM9000A_REG_TX_MEM_WR_INC;
+              data_out <= `DM9000A_REG_MEM_WR_INC;
               state <= `DM9000A_STATE_TX_DATA_SETUP_SPIN;
 
               enet_cmd <= `DM9000A_TYPE_INDEX;
               enet_wr_n <= 1'b0;
               enet_rd_n <= 1'b1;
            end
-           //Spin after TX setup.
+           //Spin after TX setup. 27
            `DM9000A_STATE_TX_DATA_SETUP_SPIN: begin
               state <= `DM9000A_STATE_TX_DEST_0;
 
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Transmit destination address (cycle 1).
+           //Transmit destination address (cycle 1). 28
            `DM9000A_STATE_TX_DEST_0: begin
-              data_out <= {tx_fifo_rd_data[39:32],tx_fifo_rd_data[47:40]};
+              data_out <= {tx_fifo_rd_data[7:0],tx_fifo_rd_data[15:8]};
               state <= !tx_fifo_empty ?
                        `DM9000A_STATE_TX_DEST_SPIN_0 :
                        `DM9000A_STATE_TX_DEST_0;
@@ -395,10 +401,10 @@ module dm9000a_controller(
               tx_fifo_rd_req <= !tx_fifo_empty;
 
               enet_cmd <= `DM9000A_TYPE_DATA;
-              enet_wr_n <= !tx_fifo_empty;
+              enet_wr_n <= tx_fifo_empty;
               enet_rd_n <= 1'b1;
            end
-           //Spin after destination address (cycle 1).
+           //Spin after destination address (cycle 1). 29
            `DM9000A_STATE_TX_DEST_SPIN_0: begin
               state <= `DM9000A_STATE_TX_DEST_1;
               
@@ -407,9 +413,9 @@ module dm9000a_controller(
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Transmit destination address (cycle 2).
+           //Transmit destination address (cycle 2). 30
            `DM9000A_STATE_TX_DEST_1: begin
-              data_out <= {tx_fifo_rd_data[23:16],tx_fifo_rd_data[31:24]};
+              data_out <= {tx_fifo_rd_data[7:0],tx_fifo_rd_data[15:8]};
               state <= !tx_fifo_empty ?
                        `DM9000A_STATE_TX_DEST_SPIN_1 :
                        `DM9000A_STATE_TX_DEST_1;
@@ -417,10 +423,10 @@ module dm9000a_controller(
               tx_fifo_rd_req <= !tx_fifo_empty;
 
               enet_cmd <= `DM9000A_TYPE_DATA;
-              enet_wr_n <= !tx_fifo_empty;
+              enet_wr_n <= tx_fifo_empty;
               enet_rd_n <= 1'b1;
            end
-           //Spin after destination address (cycle 2).
+           //Spin after destination address (cycle 2). 31
            `DM9000A_STATE_TX_DEST_SPIN_1: begin
               state <= `DM9000A_STATE_TX_DEST_2;
               
@@ -429,7 +435,7 @@ module dm9000a_controller(
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Transmit destination address (cycle 3).
+           //Transmit destination address (cycle 3). 32
            `DM9000A_STATE_TX_DEST_2: begin
               data_out <= {tx_fifo_rd_data[7:0],tx_fifo_rd_data[15:8]};
               state <= !tx_fifo_empty ?
@@ -439,10 +445,10 @@ module dm9000a_controller(
               tx_fifo_rd_req <= !tx_fifo_empty;
 
               enet_cmd <= `DM9000A_TYPE_DATA;
-              enet_wr_n <= !tx_fifo_empty;
+              enet_wr_n <= tx_fifo_empty;
               enet_rd_n <= 1'b1;
            end
-           //Spin after destination address (cycle 3).
+           //Spin after destination address (cycle 3). 33
            `DM9000A_STATE_TX_DEST_SPIN_2: begin
               state <= `DM9000A_STATE_TX_SRC_0;
               
@@ -451,7 +457,7 @@ module dm9000a_controller(
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Transmit source address (cycle 1).
+           //Transmit source address (cycle 1). 34
            `DM9000A_STATE_TX_SRC_0: begin
               data_out <= {MAC_ADDRESS[39:32],MAC_ADDRESS[47:40]};
               state <= `DM9000A_STATE_TX_SRC_SPIN_0;
@@ -460,14 +466,14 @@ module dm9000a_controller(
               enet_wr_n <= 1'b0;
               enet_rd_n <= 1'b1;
            end
-           //Spin after source address (cycle 1).
+           //Spin after source address (cycle 1). 35
            `DM9000A_STATE_TX_SRC_SPIN_0: begin
               state <= `DM9000A_STATE_TX_SRC_1;
 
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Transmit source address (cycle 2).
+           //Transmit source address (cycle 2). 36
            `DM9000A_STATE_TX_SRC_1: begin
               data_out <= {MAC_ADDRESS[23:16],MAC_ADDRESS[31:24]};
               state <= `DM9000A_STATE_TX_SRC_SPIN_1;
@@ -476,14 +482,14 @@ module dm9000a_controller(
               enet_wr_n <= 1'b0;
               enet_rd_n <= 1'b1;
            end
-           //Spin after source address (cycle 2).
+           //Spin after source address (cycle 2). 37
            `DM9000A_STATE_TX_SRC_SPIN_1: begin
               state <= `DM9000A_STATE_TX_SRC_2;
 
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Transmit source address (cycle 3).
+           //Transmit source address (cycle 3). 38
            `DM9000A_STATE_TX_SRC_2: begin
               data_out <= {MAC_ADDRESS[7:0],MAC_ADDRESS[15:8]};
               state <= `DM9000A_STATE_TX_SRC_SPIN_2;
@@ -492,16 +498,16 @@ module dm9000a_controller(
               enet_wr_n <= 1'b0;
               enet_rd_n <= 1'b1;
            end
-           //Spin after source address (cycle 3).
+           //Spin after source address (cycle 3). 39
            `DM9000A_STATE_TX_SRC_SPIN_2: begin
               state <= `DM9000A_STATE_TX_ETHERTYPE;
 
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Transmit EtherType.
+           //Transmit EtherType. 40
            `DM9000A_STATE_TX_ETHERTYPE: begin
-              data_out <= tx_fifo_rd_data;
+              data_out <= {tx_fifo_rd_data[7:0],tx_fifo_rd_data[15:8]};
               state <= !tx_fifo_empty ?
                        `DM9000A_STATE_TX_ETHERTYPE_SPIN :
                        `DM9000A_STATE_TX_ETHERTYPE;
@@ -509,10 +515,10 @@ module dm9000a_controller(
               tx_fifo_rd_req <= !tx_fifo_empty;
 
               enet_cmd <= `DM9000A_TYPE_DATA;
-              enet_wr_n <= !tx_fifo_empty;
+              enet_wr_n <= tx_fifo_empty;
               enet_rd_n <= 1'b1;
            end
-           //Spin after EtherType.
+           //Spin after EtherType. 41
            `DM9000A_STATE_TX_ETHERTYPE_SPIN: begin
               state <= `DM9000A_STATE_TX_DATA;
               
@@ -521,7 +527,7 @@ module dm9000a_controller(
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Transmit next data word (16b).
+           //Transmit next data word (16b). 42
            `DM9000A_STATE_TX_DATA: begin
               data_out <= tx_fifo_rd_data;
               state <= !tx_fifo_empty ?
@@ -534,13 +540,13 @@ module dm9000a_controller(
               tx_fifo_rd_req <= !tx_fifo_empty;
 
               enet_cmd <= `DM9000A_TYPE_DATA;
-              enet_wr_n <= !tx_fifo_empty;
+              enet_wr_n <= tx_fifo_empty;
               enet_rd_n <= 1'b1;
            end
-           //Spin after data transmission.
-           `DM9000A_STATE_TX_DATA_SETUP_SPIN: begin
+           //Spin after data transmission. 43
+           `DM9000A_STATE_TX_DATA_SPIN: begin
               state <= tx_length==11'd0 ?
-                        `DM9000A_STATE_IDLE :
+                        `DM9000A_STATE_TXC_SETUP :
                         `DM9000A_STATE_TX_DATA;
               
               tx_fifo_rd_req <= 1'b0;
@@ -548,7 +554,7 @@ module dm9000a_controller(
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Setup TX control register.
+           //Setup TX control register. 44
            `DM9000A_STATE_TXC_SETUP: begin
               data_out <= `DM9000A_REG_TXCR1;
               state <= `DM9000A_STATE_TXC_SETUP_SPIN;
@@ -557,14 +563,14 @@ module dm9000a_controller(
               enet_wr_n <= 1'b0;
               enet_rd_n <= 1'b1;
            end
-           //Spin after TX control setup.
+           //Spin after TX control setup. 45
            `DM9000A_STATE_TXC_SETUP_SPIN: begin
-              state <= `DM9000A_STATE_TX_LENH;
+              state <= `DM9000A_STATE_TX_START;
 
               enet_wr_n <= 1'b1;
               enet_rd_n <= 1'b1;
            end
-           //Start transmission.
+           //Start transmission. 46
            `DM9000A_STATE_TX_START: begin
               data_out <= `DM9000A_BIT_TXCR1_TXREQ;
               state <= `DM9000A_STATE_IDLE;
@@ -731,7 +737,8 @@ module dm9000a_controller(
 
    //An in-progress transmission has finished when
    //a completion interrupt is dispatched.
-   assign tx_finished = cmd_state==`DM9000A_CMD_STATE_TX_COMPLETE;
+   
+   `KEEP assign tx_finish = (cmd_state==`DM9000A_CMD_STATE_TX_COMPLETE);
 
    //The command state machine is paused whenever
    //spinning for a command, or when an issue is
@@ -839,7 +846,7 @@ module dm9000a_controller(
                            interrupt_flags[`DM9000A_ISR_POS_PR] ? `DM9000A_CMD_STATE_RX_PACKET_0 :
                            interrupt_flags[`DM9000A_ISR_POS_LNKCHG] ? `DM9000A_CMD_STATE_LINK_CHANGE :
                            `DM9000A_CMD_STATE_IRQ_FINISH;
-              spin_next <= !interrupt_flags[`DM9000A_ISR_POS_PT];
+              spin_next <= interrupt_flags[`DM9000A_ISR_POS_PT];
            end
            //Interrupts handled. Re-enable all interrupts.
            `DM9000A_CMD_STATE_IRQ_FINISH: begin

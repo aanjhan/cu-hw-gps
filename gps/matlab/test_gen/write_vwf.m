@@ -11,7 +11,7 @@ function write_vwf(signal,directory,filename)
     end
     
     f_system=200e6;
-    f_s=100e6;
+    f_s=50e6;
     t_s=1/f_s;
     t_step=t_s*1e9;
     t_sys_step=1/f_system*1e9;

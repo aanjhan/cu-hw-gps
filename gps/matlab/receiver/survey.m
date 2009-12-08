@@ -90,10 +90,10 @@ for fd=-FD_SIZE:FREQ_STEP:FD_SIZE
 end
 
 %now print out some results
-surf(I2Q2);
+%surf(I2Q2);
 CNR = 10*log10((max_val(2)-SNR_FLOOR)/SNR_FLOOR/(codeLength*1e-3));
 code_start_time = max_val(3);
 doppler_frequency = max_val(1);
-fprintf('PRN %02d had a peak value of %f at a Doppler of %f\n',PRN,CNR,max_val(1));
+fprintf('PRN %02d had a peak value of %f at a Doppler of %f, code start of %d\n',PRN,CNR,max_val(1),max_val(3));
 
 return;

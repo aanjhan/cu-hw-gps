@@ -116,7 +116,9 @@ while(running==1)
                 set(h_iq,'XData',iq(:,1));
                 set(h_iq,'YData',iq(:,2));
                 axis_limit=max(max(max(abs(iq))),axis_limit);
-                axis(h_ax_iq,[-axis_limit axis_limit -axis_limit axis_limit]);
+                if(axis_limit~=0)
+                    axis(h_ax_iq,[-axis_limit axis_limit -axis_limit axis_limit]);
+                end
                 
                 w_df=[w_df(2:end);data(3)];
                 set(h_w_df,'XData',t);

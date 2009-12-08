@@ -24,7 +24,7 @@ set(ylabel('Doppler Shift (Hz)'),'FontSize',14);
 legend('w_df','dphi','w_df_avg');
 
 subplot(2,1,2);
-plot(w_df_dot/2/pi/2^ANGLE_SHIFT,'r');
+plot(w_df_dot*F_S/2^(CARRIER_ACC_WIDTH+ANGLE_SHIFT),'r');
 set(title('Doppler Rate'),'FontSize',14);
 set(xlabel('Time (ms)'),'FontSize',14);
 set(ylabel('Doppler Rate (Hz/s)'),'FontSize',14);

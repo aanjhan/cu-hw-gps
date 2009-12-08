@@ -10,10 +10,8 @@ function fll(i_prompt_k,q_prompt_k,...
     PER_SHIFT=12;
     ANGLE_SHIFT=9;
     FLL_CONST_SHIFT=2;
-    W_DF_TO_INC_SHIFT=12;
     
     op_width=ACC_WIDTH_TRACK-IQ_SHIFT;
-    W_DF_TO_INC=(2^(CARRIER_ACC_WIDTH-ANGLE_SHIFT)/(2*pi*F_S));
     
     T=1e-3;
     T_fix=round(T*2^PER_SHIFT);
@@ -41,26 +39,24 @@ function fll(i_prompt_k,q_prompt_k,...
     fprintf('                iq_prompt_k=%d, iq_prompt_km1=%d\n',iq_prompt_k,iq_prompt_km1);
     
     %Floating point truth value.
-    w_df_k=w_df_k/2^ANGLE_SHIFT;
-    w_df_dot_k=w_df_dot_k/2^ANGLE_SHIFT;
+    w_df_k=w_df_k*F_S/2^(ANGLE_SHIFT+CARRIER_ACC_WIDTH);
+    w_df_dot_k=w_df_dot_k*F_S/2^(ANGLE_SHIFT+CARRIER_ACC_WIDTH);
     
     num=q_prompt_k*i_prompt_km1-i_prompt_k*q_prompt_km1;
     den=iq_prompt_k*iq_prompt_km1;
     dtheta=MIXING_SIGN*num/den;
     w_df_dot_kp1=w_df_dot_k+FLL_A*dtheta;
     w_df_kp1=w_df_k+w_df_dot_k*T+FLL_B*dtheta;
-    dopp_inc_kp1=w_df_kp1*W_DF_TO_INC;
+    dopp_inc_kp1=w_df_kp1*2^CARRIER_ACC_WIDTH/F_S;
     fprintf('Truth: dtheta=%f, dopp_inc_kp1=%f\n',dtheta,dopp_inc_kp1);
     fprintf('       w_df_dot_kp1=%f (%d), w_df_kp1=%f (%d)\n',...
-        w_df_dot_kp1,round(w_df_dot_kp1*2^ANGLE_SHIFT),w_df_kp1,round(w_df_kp1*2^ANGLE_SHIFT));
-    
-    w_df_k=w_df_k*2^ANGLE_SHIFT;
-    w_df_dot_k=w_df_dot_k*2^ANGLE_SHIFT;
+        w_df_dot_kp1,round(w_df_dot_kp1/F_S*2^(ANGLE_SHIFT+CARRIER_ACC_WIDTH)),w_df_kp1,round(w_df_kp1/F_S*2^(ANGLE_SHIFT+CARRIER_ACC_WIDTH)));
     
     %Setup fixed-point parameters.
-    FLL_A=round(FLL_A*2^FLL_CONST_SHIFT);
-    FLL_B=round(FLL_B*2^FLL_CONST_SHIFT);
-    W_DF_TO_INC=round(W_DF_TO_INC*2^W_DF_TO_INC_SHIFT);
+    w_df_k=w_df_k/F_S*2^(ANGLE_SHIFT+CARRIER_ACC_WIDTH);
+    w_df_dot_k=w_df_dot_k/F_S*2^(ANGLE_SHIFT+CARRIER_ACC_WIDTH);
+    FLL_A=round(FLL_A*2^FLL_CONST_SHIFT*2^CARRIER_ACC_WIDTH/F_S);
+    FLL_B=round(FLL_B*2^FLL_CONST_SHIFT*2^CARRIER_ACC_WIDTH/F_S);
     
     %Fixed-point without truncating IQ values
     %for speed increase and circuit complexity reduction.
@@ -69,14 +65,14 @@ function fll(i_prompt_k,q_prompt_k,...
     s=MIXING_SIGN*sign(num);
     num=abs(num);
     div_result=floor(num/den);
-    dtheta=div_result/2^ANGLE_SHIFT;
+    dtheta=s*div_result/2^ANGLE_SHIFT;
     w_df_dot_kp1=w_df_dot_k+s*floor(FLL_A*div_result/2^FLL_CONST_SHIFT);
     w_df_kp1=w_df_k+...
             sign(w_df_dot_k)*floor(abs(w_df_dot_k)*T_fix/2^PER_SHIFT)+...
             s*floor(FLL_B*div_result/2^FLL_CONST_SHIFT);
-    dopp_inc_kp1=floor(abs(w_df_kp1)*W_DF_TO_INC/2^W_DF_TO_INC_SHIFT);
+    dopp_inc_kp1=floor(w_df_kp1/2^ANGLE_SHIFT);
     fprintf('No truncate: dtheta=%f, dopp_inc_kp1=%d\n',dtheta,dopp_inc_kp1);
-    fprintf('       w_df_dot_kp1=%f (%d), w_df_kp1=%f (%d)\n',w_df_dot_kp1/2^ANGLE_SHIFT,w_df_dot_kp1,w_df_kp1/2^ANGLE_SHIFT,w_df_kp1);
+    fprintf('       w_df_dot_kp1=%f (%d), w_df_kp1=%f (%d)\n',w_df_dot_kp1*F_S/2^(ANGLE_SHIFT+CARRIER_ACC_WIDTH),w_df_dot_kp1,w_df_kp1*F_S/2^(ANGLE_SHIFT+CARRIER_ACC_WIDTH),w_df_kp1);
     fprintf('       [num=%d, den=%d, div_result=%d]\n',num,den,div_result);
     
     %Fixed-point with IQ sum/diff truncation.
@@ -97,14 +93,14 @@ function fll(i_prompt_k,q_prompt_k,...
     s=MIXING_SIGN*sign(num);
     num=abs(num);
     div_result=floor(num/den);
-    dtheta=div_result/2^ANGLE_SHIFT;
+    dtheta=s*div_result/2^ANGLE_SHIFT;
     w_df_dot_kp1=w_df_dot_k+s*floor(FLL_A*div_result/2^FLL_CONST_SHIFT);
     w_df_kp1=w_df_k+...
             sign(w_df_dot_k)*floor(abs(w_df_dot_k)*T_fix/2^PER_SHIFT)+...
             s*floor(FLL_B*div_result/2^FLL_CONST_SHIFT);
-    dopp_inc_kp1=floor(abs(w_df_kp1)*W_DF_TO_INC/2^W_DF_TO_INC_SHIFT);
+    dopp_inc_kp1=floor(w_df_kp1/2^ANGLE_SHIFT);
     fprintf('Truncate (%db): dtheta=%f, dopp_inc_kp1=%d\n',op_width,dtheta,dopp_inc_kp1);
-    fprintf('       w_df_dot_kp1=%f (%d), w_df_kp1=%f (%d)\n',w_df_dot_kp1/2^ANGLE_SHIFT,w_df_dot_kp1,w_df_kp1/2^ANGLE_SHIFT,w_df_kp1);
+    fprintf('       w_df_dot_kp1=%f (%d), w_df_kp1=%f (%d)\n',w_df_dot_kp1*F_S/2^(ANGLE_SHIFT+CARRIER_ACC_WIDTH),w_df_dot_kp1,w_df_kp1*F_S/2^(ANGLE_SHIFT+CARRIER_ACC_WIDTH),w_df_kp1);
     fprintf('       [num=%d, den=%d, div_result=%d]\n',num,den,div_result),
     fprintf('       [index=%d, shift=%d, iq_k_trunc=%d, iq_km1_trunc=%d]\n',...
         index,shift,iq_prompt_k,iq_prompt_km1);

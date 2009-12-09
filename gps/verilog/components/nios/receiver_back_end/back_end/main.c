@@ -51,7 +51,10 @@ void TrackingUpdate(void *context, alt_u32 id)
 {
     volatile Tracking *params;
     
-    IOWR_ALTERA_AVALON_PIO_IRQ_MASK(TRACKING_READY_BASE,0x00);
+    //IOWR_ALTERA_AVALON_PIO_IRQ_MASK(TRACKING_READY_BASE,0x00);
+
+    //Reset interrupt flag.
+    IOWR_ALTERA_AVALON_PIO_EDGE_CAP(TRACKING_READY_BASE,0x01);
         
     params=&tracking_params[param_head];
     if(++param_head>3)param_head=0;
@@ -77,10 +80,8 @@ void TrackingUpdate(void *context, alt_u32 id)
     SignFix32(&params->ca_dphi,CA_DPHI_DATA_WIDTH);
     
     if(updates_ready<4)++updates_ready;
-
-    //Reset interrupt flag.
-    IOWR_ALTERA_AVALON_PIO_EDGE_CAP(TRACKING_READY_BASE,0x01);
-    IOWR_ALTERA_AVALON_PIO_IRQ_MASK(TRACKING_READY_BASE,0x01);
+    
+    //IOWR_ALTERA_AVALON_PIO_IRQ_MASK(TRACKING_READY_BASE,0x01);
 }
 
 int main(void)
@@ -88,6 +89,8 @@ int main(void)
     int uart_fd;
     char data[100];
     int bad_count=0;
+    
+    int prev_ready=0;
     
     updates_ready=0;
     data[0]=0xDE;
@@ -104,15 +107,31 @@ int main(void)
     uart_fd=open("/dev/uart_0",O_RDWR,0);
 
     //Enable tracking update interrupt.
-    IOWR_ALTERA_AVALON_PIO_IRQ_MASK(TRACKING_READY_BASE,0x01);
+    //IOWR_ALTERA_AVALON_PIO_IRQ_MASK(TRACKING_READY_BASE,0x01);
     IOWR_ALTERA_AVALON_PIO_EDGE_CAP(TRACKING_READY_BASE,0x01);
-    alt_irq_register(TRACKING_READY_IRQ,NULL,TrackingUpdate);
+    //alt_irq_register(TRACKING_READY_IRQ,NULL,TrackingUpdate);
 
     //Enable heartbeat timer.
     alt_alarm_start(&heartbeat_alarm,alt_ticks_per_second(),Heartbeat,0);
 
     while(1)
     {
+        /*if(IORD_ALTERA_AVALON_PIO_DATA(TRACKING_READY_BASE))
+        {
+            if(!prev_ready)
+            {
+                prev_ready=1;
+                TrackingUpdate(0,0);
+                printf("Edge\n");
+            }
+        }
+        else prev_ready=0;*/
+        if(IORD_ALTERA_AVALON_PIO_EDGE_CAP(TRACKING_READY_BASE))
+        {
+            TrackingUpdate(0,0);
+            //printf("Edge\n");
+        }
+        
         if(updates_ready)
         {
             /*sprintf(data,"Update: i=%d, q=%d, w=%d, w_dot=%d, dopp_dphi=%d.",

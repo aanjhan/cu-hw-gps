@@ -322,7 +322,7 @@ module channel_sw(
    //Carrier value is front-end intermediate frequency plus
    //sign-extended version of two's complement Doppler shift.
    wire [`CARRIER_PHASE_INC_RANGE] f_carrier;
-   assign f_carrier = ~`MIXING_SIGN ?
+   assign f_carrier = `MIXING_SIGN ?
                       `F_IF_INC-{{`DOPPLER_PAD_SIZE{doppler_dphi[`DOPPLER_INC_WIDTH-1]}},doppler_dphi} :
                       `F_IF_INC+{{`DOPPLER_PAD_SIZE{doppler_dphi[`DOPPLER_INC_WIDTH-1]}},doppler_dphi};
 
@@ -484,7 +484,7 @@ module channel_sw(
                       .out(sig_no_carrier_i));
    
    `KEEP wire [`SIG_NO_CARRIER_RANGE] sig_no_carrier_q;
-   mult carrier_mux_q(.carrier(carrier_q),
+   mult carrier_mux_q(.carrier({`MIXING_SIGN^carrier_q[`CARRIER_LUT_WIDTH-1],carrier_q[(`CARRIER_LUT_WIDTH-2):0]}),
                       .signal(data_km3),
                       .out(sig_no_carrier_q));
 

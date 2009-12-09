@@ -1,46 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><system name="receiver_back_end">
     <parameter name="bonusData">bonusData 
 {
-   element i_prompt
-   {
-      datum _sortIndex
-      {
-         value = "3";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element receiver_back_end
-   {
-   }
-   element q_prompt.s1
-   {
-      datum baseAddress
-      {
-         value = "16781392";
-         type = "long";
-      }
-   }
-   element i2q2_late.s1
-   {
-      datum baseAddress
-      {
-         value = "96";
-         type = "long";
-      }
-   }
-   element w_df_dot.s1
-   {
-      datum baseAddress
-      {
-         value = "0";
-         type = "long";
-      }
-   }
    element q_prompt
    {
       datum _sortIndex
@@ -54,43 +14,19 @@
          type = "String";
       }
    }
-   element i2q2_prompt.s1
+   element i2q2_late.s1
    {
       datum baseAddress
       {
-         value = "80";
+         value = "16781552";
          type = "long";
       }
    }
-   element tau_prime.s1
-   {
-      datum baseAddress
-      {
-         value = "48";
-         type = "long";
-      }
-   }
-   element doppler_dphi.s1
-   {
-      datum baseAddress
-      {
-         value = "16";
-         type = "long";
-      }
-   }
-   element jtag_uart_0.avalon_jtag_slave
-   {
-      datum baseAddress
-      {
-         value = "16781456";
-         type = "long";
-      }
-   }
-   element heartbeat_led
+   element i2q2_early
    {
       datum _sortIndex
       {
-         value = "12";
+         value = "15";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -99,12 +35,96 @@
          type = "String";
       }
    }
-   element tracking_ready.s1
+   element sdram
+   {
+      datum _sortIndex
+      {
+         value = "1";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element i2q2_early.s1
    {
       datum baseAddress
       {
-         value = "16781424";
+         value = "16781520";
          type = "long";
+      }
+   }
+   element q_prompt.s1
+   {
+      datum baseAddress
+      {
+         value = "16781392";
+         type = "long";
+      }
+   }
+   element ca_dphi.s1
+   {
+      datum baseAddress
+      {
+         value = "16781488";
+         type = "long";
+      }
+   }
+   element ca_dphi
+   {
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element tau_prime.s1
+   {
+      datum baseAddress
+      {
+         value = "16781504";
+         type = "long";
+      }
+   }
+   element heartbeat_led.s1
+   {
+      datum baseAddress
+      {
+         value = "16781440";
+         type = "long";
+      }
+   }
+   element i_prompt
+   {
+      datum _sortIndex
+      {
+         value = "3";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element jtag_uart_0
+   {
+      datum _sortIndex
+      {
+         value = "13";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
       }
    }
    element doppler_dphi
@@ -120,19 +140,106 @@
          type = "String";
       }
    }
-   element sdram.s1
+   element receiver_back_end
    {
-      datum baseAddress
-      {
-         value = "8388608";
-         type = "long";
-      }
    }
-   element ca_dphi
+   element tracking_ready
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "2";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element w_df.s1
+   {
+      datum baseAddress
+      {
+         value = "16781408";
+         type = "long";
+      }
+   }
+   element uart_0.s1
+   {
+      datum baseAddress
+      {
+         value = "16781344";
+         type = "long";
+      }
+   }
+   element timer_0.s1
+   {
+      datum baseAddress
+      {
+         value = "16781312";
+         type = "long";
+      }
+   }
+   element cpu_0.jtag_debug_module
+   {
+      datum baseAddress
+      {
+         value = "16779264";
+         type = "long";
+      }
+   }
+   element w_df_dot.s1
+   {
+      datum baseAddress
+      {
+         value = "16781456";
+         type = "long";
+      }
+   }
+   element cpu_0
+   {
+      datum _sortIndex
+      {
+         value = "0";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element w_df
+   {
+      datum _sortIndex
+      {
+         value = "5";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element heartbeat_led
+   {
+      datum _sortIndex
+      {
+         value = "12";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+   }
+   element w_df_dot
+   {
+      datum _sortIndex
+      {
+         value = "6";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -154,11 +261,11 @@
          type = "String";
       }
    }
-   element cpu_0
+   element timer_0
    {
       datum _sortIndex
       {
-         value = "0";
+         value = "10";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -167,104 +274,12 @@
          type = "String";
       }
    }
-   element uart_0
-   {
-      datum _sortIndex
-      {
-         value = "14";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element clk_0
-   {
-      datum _sortIndex
-      {
-         value = "11";
-         type = "int";
-      }
-   }
-   element tracking_ready
-   {
-      datum _sortIndex
-      {
-         value = "2";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element ca_dphi.s1
+   element jtag_uart_0.avalon_jtag_slave
    {
       datum baseAddress
       {
-         value = "32";
+         value = "16781568";
          type = "long";
-      }
-   }
-   element i2q2_early.s1
-   {
-      datum baseAddress
-      {
-         value = "64";
-         type = "long";
-      }
-   }
-   element cpu_0.jtag_debug_module
-   {
-      datum baseAddress
-      {
-         value = "16779264";
-         type = "long";
-      }
-   }
-   element heartbeat_led.s1
-   {
-      datum baseAddress
-      {
-         value = "16781440";
-         type = "long";
-      }
-   }
-   element w_df
-   {
-      datum _sortIndex
-      {
-         value = "5";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element i_prompt.s1
-   {
-      datum baseAddress
-      {
-         value = "16781376";
-         type = "long";
-      }
-   }
-   element jtag_uart_0
-   {
-      datum _sortIndex
-      {
-         value = "13";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
       }
    }
    element i2q2_late
@@ -272,53 +287,6 @@
       datum _sortIndex
       {
          value = "17";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element uart_0.s1
-   {
-      datum baseAddress
-      {
-         value = "16781344";
-         type = "long";
-      }
-   }
-   element sdram
-   {
-      datum _sortIndex
-      {
-         value = "1";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element i2q2_early
-   {
-      datum _sortIndex
-      {
-         value = "15";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-   }
-   element timer_0
-   {
-      datum _sortIndex
-      {
-         value = "10";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -340,19 +308,27 @@
          type = "String";
       }
    }
-   element timer_0.s1
+   element i2q2_prompt.s1
    {
       datum baseAddress
       {
-         value = "16781312";
+         value = "16781536";
          type = "long";
       }
    }
-   element w_df_dot
+   element clk_0
    {
       datum _sortIndex
       {
-         value = "6";
+         value = "11";
+         type = "int";
+      }
+   }
+   element uart_0
+   {
+      datum _sortIndex
+      {
+         value = "14";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -361,11 +337,35 @@
          type = "String";
       }
    }
-   element w_df.s1
+   element i_prompt.s1
    {
       datum baseAddress
       {
-         value = "16781408";
+         value = "16781376";
+         type = "long";
+      }
+   }
+   element sdram.s1
+   {
+      datum baseAddress
+      {
+         value = "8388608";
+         type = "long";
+      }
+   }
+   element tracking_ready.s1
+   {
+      datum baseAddress
+      {
+         value = "16781424";
+         type = "long";
+      }
+   }
+   element doppler_dphi.s1
+   {
+      datum baseAddress
+      {
+         value = "16781472";
          type = "long";
       }
    }
@@ -376,8 +376,8 @@
     <parameter name="hardcopyCompatible" value="false" />
     <parameter name="hdlLanguage" value="VERILOG" />
     <parameter name="projectName" value="" />
-    <parameter name="systemHash" value="27862871218" />
-    <parameter name="timeStamp" value="1257528538868" />
+    <parameter name="systemHash" value="29029582709" />
+    <parameter name="timeStamp" value="1260306540277" />
     <module name="clk_0" kind="clock_source" version="8.0" enabled="1">
         <parameter name="clockFrequency" value="50000000" />
         <parameter name="clockFrequencyKnown" value="true" />
@@ -453,7 +453,7 @@
         <parameter name="mmu_autoAssignTlbPtrSz" value="true" />
         <parameter name="mmu_TLBMissExcSlave" value="" />
         <parameter name="mmu_TLBMissExcOffset" value="0" />
-        <parameter name="impl" value="Tiny" />
+        <parameter name="impl" value="Small" />
         <parameter name="icache_size" value="_4096" />
         <parameter name="icache_ramBlockType" value="Automatic" />
         <parameter name="icache_numTCIM" value="_0" />
@@ -712,7 +712,7 @@
     <connection kind="clock" version="8.0" start="clk_0.clk" end="jtag_uart_0.clk" />
     <connection kind="avalon" version="6.1" start="cpu_0.data_master" end="jtag_uart_0.avalon_jtag_slave">
         <parameter name="arbitrationPriority" value="1" />
-        <parameter name="baseAddress" value="0x01001090" />
+        <parameter name="baseAddress" value="0x01001100" />
     </connection>
     <connection kind="interrupt" version="8.0" start="cpu_0.d_irq" end="jtag_uart_0.irq">
         <parameter name="irqNumber" value="2" />
@@ -728,36 +728,36 @@
     <connection kind="clock" version="8.0" start="clk_0.clk" end="w_df_dot.clk" />
     <connection kind="avalon" version="6.1" start="cpu_0.data_master" end="w_df_dot.s1">
         <parameter name="arbitrationPriority" value="1" />
-        <parameter name="baseAddress" value="0x0000" />
+        <parameter name="baseAddress" value="0x01001090" />
     </connection>
     <connection kind="clock" version="8.0" start="clk_0.clk" end="doppler_dphi.clk" />
     <connection kind="avalon" version="6.1" start="cpu_0.data_master" end="doppler_dphi.s1">
         <parameter name="arbitrationPriority" value="1" />
-        <parameter name="baseAddress" value="0x0010" />
+        <parameter name="baseAddress" value="0x010010a0" />
     </connection>
     <connection kind="clock" version="8.0" start="clk_0.clk" end="ca_dphi.clk" />
     <connection kind="avalon" version="6.1" start="cpu_0.data_master" end="ca_dphi.s1">
         <parameter name="arbitrationPriority" value="1" />
-        <parameter name="baseAddress" value="0x0020" />
+        <parameter name="baseAddress" value="0x010010b0" />
     </connection>
     <connection kind="clock" version="8.0" start="clk_0.clk" end="tau_prime.clk" />
     <connection kind="avalon" version="6.1" start="cpu_0.data_master" end="tau_prime.s1">
         <parameter name="arbitrationPriority" value="1" />
-        <parameter name="baseAddress" value="0x0030" />
+        <parameter name="baseAddress" value="0x010010c0" />
     </connection>
     <connection kind="clock" version="8.0" start="clk_0.clk" end="i2q2_early.clk" />
     <connection kind="avalon" version="6.1" start="cpu_0.data_master" end="i2q2_early.s1">
         <parameter name="arbitrationPriority" value="1" />
-        <parameter name="baseAddress" value="0x0040" />
+        <parameter name="baseAddress" value="0x010010d0" />
     </connection>
     <connection kind="clock" version="8.0" start="clk_0.clk" end="i2q2_prompt.clk" />
     <connection kind="avalon" version="6.1" start="cpu_0.data_master" end="i2q2_prompt.s1">
         <parameter name="arbitrationPriority" value="1" />
-        <parameter name="baseAddress" value="0x0050" />
+        <parameter name="baseAddress" value="0x010010e0" />
     </connection>
     <connection kind="clock" version="8.0" start="clk_0.clk" end="i2q2_late.clk" />
     <connection kind="avalon" version="6.1" start="cpu_0.data_master" end="i2q2_late.s1">
         <parameter name="arbitrationPriority" value="1" />
-        <parameter name="baseAddress" value="0x0060" />
+        <parameter name="baseAddress" value="0x010010f0" />
     </connection>
 </system>

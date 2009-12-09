@@ -104,7 +104,8 @@ module ca_upsampler_sw(
               .out(ca_cs_km1));
 
    //Generate C/A code bit for given PRN.
-   ca_generator_sw ca_gen(.enable(ca_clk_km1),
+   ca_generator_sw ca_gen(.reset(reset),
+                          .enable(ca_clk_km1),
                           .prn(prn_km1),
                           .out(out_early),
                           .g1_in(g1_km1),

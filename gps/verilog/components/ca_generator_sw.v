@@ -4,6 +4,7 @@
 `define TAP_2 3:0
 
 module ca_generator_sw(
+    input                     reset,
     input                     enable,
     //Code interface.
     input [`PRN_RANGE]        prn,
@@ -22,12 +23,15 @@ module ca_generator_sw(
 
    //Update shift registers and code shift.
    always @(*) begin
-      code_shift_out<=!enable ? code_shift_in :
+      code_shift_out<=reset ? 10'd0 :
+                      !enable ? code_shift_in :
                       code_shift_in==10'd1022 ? 10'd0 :
                       code_shift_in+10'd1;
-      g1_out<=!enable ? g1_in :
+      g1_out<=reset ? 10'h3FF :
+              !enable ? g1_in :
               g1_in<<1 | (g1_in[3]^g1_in[10]);
-      g2_out<=!enable ? g2_in :
+      g2_out<=reset ? 10'h3FF :
+              !enable ? g2_in :
               g2_in<<1 | (g2_in[2]^g2_in[3]^g2_in[6]^g2_in[8]^g2_in[9]^g2_in[10]);
    end
 

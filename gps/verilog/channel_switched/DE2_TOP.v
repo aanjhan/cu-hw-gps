@@ -332,11 +332,37 @@ module DE2_TOP (
            //Debug signals.
            .track_carrier_en(SW[8]),
            .track_code_en(SW[7]));
+
+   reg [23:0] sc;
+   reg [10:0] updates;
+   reg [3:0]  edge_count;
+   always @(posedge clk_200) begin
+      sc <= global_reset ? 24'd0 :
+            tracking_ready ? sample_count[23:0] :
+            sc;
+      updates <= global_reset ? 11'd0 :
+                 tracking_ready ? updates+11'd1 :
+                 updates;
+   end
+
+   reg tracking_ready_flag;
+   reg [3:0] tracking_ready_count;
+   always @(posedge clk_200) begin
+      tracking_ready_flag <= global_reset ? 1'b0 :
+                             tracking_ready ? 1'b1 :
+                             tracking_ready_count==4'd0 ? 1'b0 :
+                             tracking_ready_flag;
+
+      tracking_ready_count <= global_reset ? 4'd0 :
+                              tracking_ready ? 4'd15 :
+                              tracking_ready_count==4'd0 ? 4'd0 :
+                              tracking_ready_count-4'd1;
+   end
    
    receiver_back_end be(.clk_0(clk_50),
                         .reset_n(1'b1),
                         .out_port_from_the_heartbeat_led(LEDG[0]),
-                        .in_port_to_the_tracking_ready(tracking_ready),
+                        .in_port_to_the_tracking_ready(tracking_ready_flag),
                         .in_port_to_the_i_prompt(i_prompt_k),
                         .in_port_to_the_q_prompt(q_prompt_k),
                         .in_port_to_the_w_df(w_df_k),
@@ -397,13 +423,16 @@ module DE2_TOP (
    wire disp_q_i, disp_el_p, disp_e_l,
         disp_pkt, disp_pkt_good;
    wire disp_acq, disp_count,
+        disp_update, disp_update_count_sc,
         disp_acq_i2q2, disp_acq_dopp, disp_acq_cs;
    assign disp_q_i = SW[17];
    assign disp_el_p = SW[16];
    assign disp_e_l = SW[15];
    assign disp_pkt = SW[11];
    assign disp_pkt_good = SW[10];
-   
+
+   assign disp_update = SW[6];
+   assign disp_update_count_sc = SW[5];
    assign disp_count = SW[4];
    assign disp_acq = SW[14];
    assign disp_acq_i2q2 = disp_acq && !disp_acq_dopp && !disp_acq_cs;
@@ -423,39 +452,45 @@ module DE2_TOP (
    //assign LEDG[2] = acquisition_complete;
    assign LEDG[1] = sample_valid;
 
-   hex_driver hex7(disp_count ? sample_count[31:28] :
+   wire [31:0] disp_count_value;
+   assign disp_count_value = disp_update ? (disp_update_count_sc ?
+                                            {8'h0,sc} :
+                                            {21'h0,updates}) :
+                             sample_count;
+
+   hex_driver hex7(disp_count || disp_update ? disp_count_value[31:28] :
                    acq_peak_i2q2[37:34],
                    disp_count || disp_acq_i2q2,HEX7);
-   hex_driver hex6(disp_count ? sample_count[27:24] :
+   hex_driver hex6(disp_count || disp_update ? disp_count_value[27:24] :
                    acq_peak_i2q2[33:30],
                    disp_count || disp_acq_i2q2,HEX6);
-   hex_driver hex5(disp_count ? sample_count[23:20] :
+   hex_driver hex5(disp_count || disp_update ? disp_count_value[23:20] :
                    acq_peak_i2q2[29:26],
                    disp_count || disp_acq_i2q2,HEX5);
-   hex_driver hex4(disp_count ? sample_count[19:16] :
+   hex_driver hex4(disp_count || disp_update ? disp_count_value[19:16] :
                    disp_acq_i2q2 ? acq_peak_i2q2[25:22] :
                    disp_acq_dopp ? {3'b0,acq_peak_doppler[16]} :
                    {1'b0,sel_i_q_value[18:16]},
                    disp_count || !disp_acq_cs,HEX4);
-   hex_driver hex3(disp_count ? sample_count[15:12] :
+   hex_driver hex3(disp_count || disp_update ? disp_count_value[15:12] :
                    disp_acq_i2q2 ? acq_peak_i2q2[21:18] :
                    disp_acq_dopp ? acq_peak_doppler[15:12] :
                    disp_acq_cs ? {1'b0,acq_peak_code_shift[14:12]} :
                    sel_i_q_value[15:12],
                    1'b1,HEX3);
-   hex_driver hex2(disp_count ? sample_count[11:8] :
+   hex_driver hex2(disp_count || disp_update ? disp_count_value[11:8] :
                    disp_acq_i2q2 ? acq_peak_i2q2[17:14] :
                    disp_acq_dopp ? acq_peak_doppler[11:8] :
                    disp_acq_cs ? {1'b0,acq_peak_code_shift[11:8]} :
                    sel_i_q_value[11:8],
                    1'b1,HEX2);
-   hex_driver hex1(disp_count ? sample_count[7:4] :
+   hex_driver hex1(disp_count || disp_update ? disp_count_value[7:4] :
                    disp_acq_i2q2 ? acq_peak_i2q2[13:10] :
                    disp_acq_dopp ? acq_peak_doppler[7:4] :
                    disp_acq_cs ? {1'b0,acq_peak_code_shift[7:4]} :
                    sel_i_q_value[7:4],
                    1'b1,HEX1);
-   hex_driver hex0(disp_count ? sample_count[3:0] :
+   hex_driver hex0(disp_count || disp_update ? disp_count_value[3:0] :
                    disp_acq_i2q2 ? acq_peak_i2q2[9:6] :
                    disp_acq_dopp ? acq_peak_doppler[3:0] :
                    disp_acq_cs ? {1'b0,acq_peak_code_shift[3:0]} :

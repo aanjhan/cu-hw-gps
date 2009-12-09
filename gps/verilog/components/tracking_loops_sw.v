@@ -374,7 +374,7 @@ module tracking_loops_sw(
    //Initialize the next slot as soon as the tracking
    //loops become idle.
    wire init_next_slot;
-   assign init_next_slot = fll_result_ready || !init_fifo_empty;
+   assign init_next_slot = dll_result_ready && !init_fifo_empty;
    
    //Ignore the first tracking update for a given
    //slot, in order to collect the two accumulations

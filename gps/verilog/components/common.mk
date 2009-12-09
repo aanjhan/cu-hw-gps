@@ -36,7 +36,7 @@ clean:
 	@rm -f $(SOURCE_FILES)
 	@echo Removing undefines file...
 	@rm -f $(UNDEF_FILE)
-	#@for h in $(HEADER_FILES) $(SOURCE_FILES) $(UNDEF_FILE); do \
+#	@for h in $(HEADER_FILES) $(SOURCE_FILES) $(UNDEF_FILE); do \
 	echo Removing $$h...; \
 	rm -f $$h; \
 	done

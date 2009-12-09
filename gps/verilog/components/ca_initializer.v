@@ -13,7 +13,6 @@ module ca_initializer(
     input [`CS_RANGE]                seek_target,
     output wire                      seek_complete,
     //C/A upsampler state.
-    output reg [`CS_RANGE]           code_shift,
     output reg [`CA_ACC_RANGE]       ca_clk_acc,
     output reg                       ca_clk_hist,
     output reg [`CA_CHIP_HIST_RANGE] prompt_chip_hist,
@@ -23,6 +22,7 @@ module ca_initializer(
     output reg [10:1]                g2);
 
    `KEEP wire [`CS_RANGE] next_code_shift;
+   `PRESERVE reg [`CS_RANGE] code_shift;
    assign next_code_shift = (code_shift==`MAX_CODE_SHIFT ?
                              `CS_WIDTH'd0 :
                              code_shift+`CS_WIDTH'd1);

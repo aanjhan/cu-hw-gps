@@ -4,6 +4,7 @@
 
 `include "../components/channel.vh"
 `include "../components/tracking_loops.vh"
+`include "../components/ca_upsampler.vh"
 
 `define DEBUG
 `include "../components/debug.vh"
@@ -18,9 +19,10 @@ module top(
     input                            sample_valid,
     input [`INPUT_RANGE]             data,
     //Init control.
-    input                            init,
-    input [`PRN_RANGE]               prn,
-    input [`DOPPLER_INC_RANGE]       init_carrier_dphi,
+    input                            acq_complete,
+    input [`PRN_RANGE]               acq_prn,
+    input [`DOPPLER_INC_RANGE]       acq_carrier_dphi,
+    input [`CS_RANGE]                acq_code_shift,
     //Tracking results.
     output wire                      tracking_ready,
     output wire [`I2Q2_RANGE]        i2q2_early,
@@ -86,6 +88,73 @@ module top(
       end
    end
 
+   ////////////////////
+   // Initialization
+   ////////////////////
+
+   wire init_fifo_empty;
+   wire init_fifo_full;
+   wire init_fifo_read;
+   wire [(`PRN_WIDTH+`DOPPLER_INC_WIDTH+`CS_WIDTH-1):0] init_fifo_out;
+   sync_fifo #(.WIDTH(`PRN_WIDTH+`DOPPLER_INC_WIDTH+`CS_WIDTH),
+               .DEPTH(4))
+     pending_init_fifo(.clk(clk),
+                       .reset(global_reset),
+                       .empty(init_fifo_empty),
+                       .full(init_fifo_full),
+                       .wr_req(acq_complete),
+                       .wr_data({acq_prn,acq_carrier_dphi,acq_code_shift}),
+                       .rd_req(init_fifo_read),
+                       .rd_data(init_fifo_out));
+
+   //Extract next available PRN for initialization.
+   wire [`PRN_RANGE]         init_prn;
+   wire [`DOPPLER_INC_RANGE] init_carrier_dphi;
+   wire [`CS_RANGE]          init_code_shift;
+   assign init_prn = init_fifo_out[(`PRN_WIDTH+`DOPPLER_INC_WIDTH+`CS_WIDTH-1):(`DOPPLER_INC_WIDTH+`CS_WIDTH)];
+   assign init_carrier_dphi = init_fifo_out[(`DOPPLER_INC_WIDTH+`CS_WIDTH-1):`CS_WIDTH];
+   assign init_code_shift = init_fifo_out[(`CS_WIDTH-1):0];
+
+   //Start a new initialization whenever there is a
+   //new SV pending and there isn't an init pending.
+   wire ca_init_start;
+   reg init_in_progress;
+   assign ca_init_start = !init_fifo_empty && !init_in_progress;
+
+   //Run C/A generator until target code shift has
+   //been reached, then initialize next slot.
+   wire                       init_target_reached;
+   wire [`CA_ACC_RANGE]       init_ca_clk_acc;
+   wire                       init_ca_clk_hist;
+   wire [`CA_CHIP_HIST_RANGE] init_prompt_chip_hist;
+   wire [`CA_CHIP_HIST_RANGE] init_late_chip_hist;
+   wire [10:1]                init_g1;
+   wire [10:1]                init_g2;
+   ca_initializer ca_init(.clk(clk),
+                          .reset(global_reset || ca_init_start),
+                          .prn(init_prn),
+                          .seek_target(init_code_shift),
+                          .seek_complete(init_target_reached),
+                          .ca_clk_acc(init_ca_clk_acc),
+                          .ca_clk_hist(init_ca_clk_hist),
+                          .prompt_chip_hist(init_prompt_chip_hist),
+                          .late_chip_hist(init_late_chip_hist),
+                          .g1(init_g1),
+                          .g2(init_g2));
+
+   wire slot_initializing_0;
+   always @(posedge clk) begin
+      init_in_progress <= global_reset ? 1'b0 :
+                          ca_init_start ? 1'b1 :
+                          slot_initializing_0 ? 1'b0 :
+                          init_in_progress;
+   end
+
+   wire init_ready;
+   assign init_ready = init_in_progress && init_target_reached;
+
+   assign init_fifo_read = slot_initializing_0;
+
    ///////////////
    // Channel 0
    ///////////////
@@ -108,17 +177,23 @@ module top(
    wire [52:0]         track_mem_data_0;
    //Misc.
    wire accumulator_updating;
-   wire slot_initializing;
    channel_sw channel_0(.clk(clk),
                         .reset(global_reset),
                         //Real-time sample interface.
                         .data_available(data_available),
                         .data(data_sync),
-                        //Slot control.
-                        .init(init),
-                        .prn(prn),
+                        //Slot initialization.
+                        .init_ready(init_ready),
+                        .init_prn(init_prn),
                         .init_carrier_dphi(init_carrier_dphi),
-                        .slot_initializing(slot_initializing),
+                        .init_code_shift(init_code_shift),
+                        .init_ca_clk_acc(init_ca_clk_acc),
+                        .init_ca_clk_hist(init_ca_clk_hist),
+                        .init_prompt_chip_hist(init_prompt_chip_hist),
+                        .init_late_chip_hist(init_late_chip_hist),
+                        .init_g1(init_g1),
+                        .init_g2(init_g2),
+                        .slot_initializing(slot_initializing_0),
                         //Tracking loop initialization.
                         .init_track(init_track_0),
                         .init_track_tag(init_track_tag_0),

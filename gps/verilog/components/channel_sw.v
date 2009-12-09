@@ -16,11 +16,18 @@ module channel_sw(
     //Real-time sample interface.
     input                    data_available,
     input [`INPUT_RANGE]     data,
-    //Slot control.
-    input                    init,
-    input [`PRN_RANGE]       prn,
-    input [`DOPPLER_INC_RANGE] init_carrier_dphi,
-    output wire                slot_initializing,
+    //Slot initialization.
+    input                       init_ready,
+    input [`PRN_RANGE]          init_prn,
+    input [`DOPPLER_INC_RANGE]  init_carrier_dphi,
+    input [`CS_RANGE]           init_code_shift,
+    input [`CA_ACC_RANGE]       init_ca_clk_acc,
+    input                       init_ca_clk_hist,
+    input [`CA_CHIP_HIST_RANGE] init_prompt_chip_hist,
+    input [`CA_CHIP_HIST_RANGE] init_late_chip_hist,
+    input [10:1]                init_g1,
+    input [10:1]                init_g2,
+    output wire                 slot_initializing,
     //Tracking loop initialization.
     output wire              init_track,
     output wire [1:0]        init_track_tag,
@@ -73,32 +80,17 @@ module channel_sw(
    //Start next-available slot when initialization
    //requested from top level.
    reg [`PRN_RANGE] slot_prn[(NUM_SLOTS-1):0];
-   reg [(NUM_SLOTS-1):0] slot_init_pending;
-   reg [(NUM_SLOTS-1):0] slot_track_initialized;
-   `KEEP wire [(NUM_SLOTS-1):0] clear_init;
-   `KEEP wire [(NUM_SLOTS-1):0] initalizing_track;
    genvar i;
    generate
       for(i=0;i<NUM_SLOTS;i=i+1) begin : slot_status_gen
          always @(posedge clk) begin
             slot_active[i] <= reset ? 1'b0 :
-                              init && next_slot_oh[i] ? 1'b1 :
+                              slot_initializing && next_slot_oh[i] ? 1'b1 :
                               slot_active[i];
 
             slot_prn[i] <= reset ? `PRN_WIDTH'd0 :
-                           init && next_slot_oh[i] ? prn :
+                           slot_initializing && next_slot_oh[i] ? init_prn :
                            slot_prn[i];
-
-            slot_init_pending[i] <= reset ? 1'b0 :
-                                    clear_init[i] ? 1'b0 :
-                                    init && next_slot_oh[i] ? 1'b1 :
-                                    slot_init_pending[i];
-
-            slot_track_initialized[i] <= reset ? 1'b0 :
-                                         init && next_slot_oh[i] && !active ? 1'b1 :
-                                         init && next_slot_oh[i] ? initalizing_track[i] :
-                                         !slot_track_initialized[i] ? initalizing_track[i] :
-                                         slot_track_initialized[i];
          end
       end
    endgenerate
@@ -116,12 +108,12 @@ module channel_sw(
    //FIXME Add define for this.
    `KEEP wire         slot_mem_wr_en;
    `KEEP wire [1:0]   slot_mem_wr_addr;
-   `KEEP wire [120:0] slot_mem_in;
+   `KEEP wire [110:0] slot_mem_in;
    `KEEP wire [1:0]   slot_mem_rd_addr;
-   `KEEP wire [120:0] slot_mem_out;
+   `KEEP wire [110:0] slot_mem_out;
    channel_slot_mem #(.DEPTH(2),
                       .ADDR_WIDTH(2),
-                      .DATA_WIDTH(121))
+                      .DATA_WIDTH(111))
      slot_mem(.clock(clk),
               .aclr(reset),
 	      .wren(slot_mem_wr_en),
@@ -178,34 +170,6 @@ module channel_sw(
 
    //Fetch current slot's state.
    assign slot_mem_rd_addr = slot;
-
-   //Initialize tracking control memory.
-   //FIXME Need to write initial Doppler/code rate into
-   //FIXME memory on init, but slot_init_pending might not
-   //FIXME be set until stage 1. How to deal with this?
-   assign control_addr = !active ? next_slot : slot;
-   assign control_wr_en = !active ?
-                            init && |next_slot_oh :
-                            !slot_track_initialized[slot];
-
-   //FIXME Get Doppler from acquisition.
-   //FIXME Ranges.
-   assign control_data_in[52:38] = `SAMPLE_COUNT_TRACK_WIDTH'd0;
-   assign control_data_in[37:17] = 21'd0;
-   assign control_data_in[16:0] = init_carrier_dphi;
-
-   assign init_track = control_wr_en;
-   assign init_track_tag = control_addr;
-   assign init_track_carrier_dphi = init_carrier_dphi;
-
-   //Assert flag to top level to clear initializaiton request.
-   assign slot_initializing = control_wr_en;
-   
-   generate
-      for(i=0;i<NUM_SLOTS;i=i+1) begin : slot_track_init_gen
-         assign initalizing_track[i] = control_wr_en && control_addr==i && !slot_track_initialized[i];
-      end
-   endgenerate
    
    `KEEP wire [1:0] slot_km1;
    delay #(.WIDTH(2))
@@ -270,35 +234,19 @@ module channel_sw(
    `KEEP wire [`CA_CHIP_HIST_RANGE] late_chip_hist_in;
    `KEEP wire [10:1]                g1_in;
    `KEEP wire [10:1]                g2_in;
-   `KEEP wire [`CA_CS_RANGE]        ca_code_shift_in;
    `KEEP wire [`SAMPLE_COUNT_TRACK_RANGE] sample_count_in;
-   assign sample_count_in = slot_init_pending[slot_km2] ? 15'd0 : slot_mem_out[120:106];
-   assign g1_in = slot_init_pending[slot_km2] ? 10'h3FF : slot_mem_out[105:96];
-   assign g2_in = slot_init_pending[slot_km2] ? 10'h3FF : slot_mem_out[95:86];
-   assign ca_code_shift_in = slot_init_pending[slot_km2] ? `CA_CS_WIDTH'd0 : slot_mem_out[85:76];
-   assign carrier_acc_in = slot_init_pending[slot_km2] ? `CARRIER_ACC_WIDTH'd0 : slot_mem_out[75:49];
-   assign code_shift_in = slot_init_pending[slot_km2] ? `CS_RESET_VALUE : slot_mem_out[48:34];
-   assign ca_clk_acc_in = slot_init_pending[slot_km2] ? `CA_ACC_WIDTH'd0 : slot_mem_out[33:9];
-   assign ca_clk_hist_in = slot_init_pending[slot_km2] ? 1'b1 : slot_mem_out[8];
-   assign prompt_chip_hist_in = slot_init_pending[slot_km2] ? `CA_CHIP_HIST_WIDTH'b0 : slot_mem_out[7:4];
-   assign late_chip_hist_in = slot_init_pending[slot_km2] ? `CA_CHIP_HIST_WIDTH'b0 : slot_mem_out[3:0];
-
-   //FIXME On init write initial Doppler and code shift (needed?)
-   //FIXME values INTO tracking loop M4K. This is the only instance
-   //FIXME where the channel writes to that memory. This means that
-   //FIXME the channel-side port must be read/write.
-
-   //Clear init flags.
-   generate
-      for(i=0;i<NUM_SLOTS;i=i+1) begin : slot_init_clear_gen
-         assign clear_init[i] = active_km2 && slot_km2==i && slot_init_pending[i];
-      end
-   endgenerate
+   assign sample_count_in = slot_mem_out[110:96];
+   assign g1_in = slot_mem_out[95:86];
+   assign g2_in = slot_mem_out[85:76];
+   assign carrier_acc_in = slot_mem_out[75:49];
+   assign code_shift_in = slot_mem_out[48:34];
+   assign ca_clk_acc_in = slot_mem_out[33:9];
+   assign ca_clk_hist_in = slot_mem_out[8];
+   assign prompt_chip_hist_in = slot_mem_out[7:4];
+   assign late_chip_hist_in = slot_mem_out[3:0];
    
    //Fetch tracking control results from memory.
    //FIXME Ranges.
-   //FIXME Will these get the correct values when initializing
-   //FIXME if the memory was just written 2 cycles earlier?
    `KEEP wire [`SAMPLE_COUNT_TRACK_RANGE] tau_prime;
    `KEEP wire [`DOPPLER_INC_RANGE] doppler_dphi;
    `KEEP wire [`CA_PHASE_INC_RANGE] ca_dphi;
@@ -354,7 +302,6 @@ module channel_sw(
    `KEEP wire [`CA_CHIP_HIST_RANGE] late_chip_hist_out_km3;
    `KEEP wire [10:1]                g1_out_km3;
    `KEEP wire [10:1]                g2_out_km3;
-   `KEEP wire [`CA_CS_RANGE]        ca_code_shift_out_km3;
    ca_upsampler_sw upsampler(.clk(clk),
                              .reset(reset),
                              //Control interface.
@@ -378,10 +325,8 @@ module channel_sw(
                              //C/A generator state.
                              .g1_in(g1_in),
                              .g2_in(g2_in),
-                             .ca_code_shift_in(ca_code_shift_in),
                              .g1_out(g1_out_km3),
-                             .g2_out(g2_out_km3),
-                             .ca_code_shift_out(ca_code_shift_out_km3));
+                             .g2_out(g2_out_km3));
 
    //Pipe C/A upsampler state to next stage.
    `KEEP wire [1:0] slot_km3;
@@ -432,12 +377,6 @@ module channel_sw(
                 .in(data_km2),
                 .out(data_km3));
 
-   `KEEP wire init_pending_km3;
-   delay init_delay_2(.clk(clk),
-                      .reset(reset),
-                      .in(slot_init_pending[slot_km2]),
-                      .out(init_pending_km3));
-
    `KEEP wire acc_complete_km3;
    delay acc_complete_delay_2(.clk(clk),
                               .reset(reset),
@@ -451,20 +390,37 @@ module channel_sw(
    //   --Wipe-off carrier.
    ///////////////////////////////////
 
-   //Write slot state to memory.
-   assign slot_mem_in[120:106] = sample_count_out_km3;
-   assign slot_mem_in[105:96] = g1_out_km3;
-   assign slot_mem_in[95:86] = g2_out_km3;
-   assign slot_mem_in[85:76] = ca_code_shift_out_km3;
-   assign slot_mem_in[75:49] = carrier_acc_out_km3;
-   assign slot_mem_in[48:34] = code_shift_out_km3;
-   assign slot_mem_in[33:9] = ca_clk_acc_out_km3;
-   assign slot_mem_in[8] = ca_clk_hist_out_km3;
-   assign slot_mem_in[7:4] = prompt_chip_hist_out_km3;
-   assign slot_mem_in[3:0] = late_chip_hist_out_km3;
+   //Initialize tracking control memory whenever an
+   //initialization is pending and the channel is idle.
+   assign control_addr = next_slot;
+   assign control_wr_en = !active_km3 && init_ready && |next_slot_oh;
 
-   assign slot_mem_wr_en = active_km3;
-   assign slot_mem_wr_addr = slot_km3;
+   //FIXME Get rid of tau_prime (unneeded).
+   //FIXME Ranges.
+   assign control_data_in[52:38] = `SAMPLE_COUNT_TRACK_WIDTH'd0;
+   assign control_data_in[37:17] = 21'd0;
+   assign control_data_in[16:0] = init_carrier_dphi;
+
+   assign init_track = control_wr_en;
+   assign init_track_tag = control_addr;
+   assign init_track_carrier_dphi = init_carrier_dphi;
+
+   //Assert flag to top level to clear initializaiton request.
+   assign slot_initializing = control_wr_en;
+
+   //Write slot state to memory.
+   assign slot_mem_in[110:96] = slot_initializing ? 15'd0 : sample_count_out_km3;
+   assign slot_mem_in[95:86] = slot_initializing ? init_g1 : g1_out_km3;
+   assign slot_mem_in[85:76] = slot_initializing ? init_g2 : g2_out_km3;
+   assign slot_mem_in[75:49] = slot_initializing ? `CARRIER_ACC_WIDTH'd0 : carrier_acc_out_km3;
+   assign slot_mem_in[48:34] = slot_initializing ? init_code_shift : code_shift_out_km3;
+   assign slot_mem_in[33:9] = slot_initializing ? init_ca_clk_acc : ca_clk_acc_out_km3;
+   assign slot_mem_in[8] = slot_initializing ? init_ca_clk_hist : ca_clk_hist_out_km3;
+   assign slot_mem_in[7:4] = slot_initializing ? init_prompt_chip_hist : prompt_chip_hist_out_km3;
+   assign slot_mem_in[3:0] = slot_initializing ? init_late_chip_hist : late_chip_hist_out_km3;
+
+   assign slot_mem_wr_en = slot_initializing || active_km3;
+   assign slot_mem_wr_addr = slot_initializing ? next_slot : slot_km3;
 
    //Generate in-phase (cos) and quadrature (sin)
    //carrier signals.
@@ -530,14 +486,8 @@ module channel_sw(
    delay #(.DELAY(4))
      clear_delay(.clk(clk),
                  .reset(reset),
-                 .in(clear),
+                 .in(clear || slot_initializing),
                  .out(clear_km4));
-
-   `KEEP wire init_pending_km4;
-   delay init_delay_3(.clk(clk),
-                      .reset(reset),
-                      .in(init_pending_km3),
-                      .out(init_pending_km4));
 
    `KEEP wire acc_complete_km4;
    delay acc_complete_delay_3(.clk(clk),
@@ -577,7 +527,7 @@ module channel_sw(
                    .OUTPUT_WIDTH(`ACC_WIDTH))
      subchannel_early(.clk(clk),
                       .reset(reset),
-                      .clear(clear_km4 || init_pending_km4),
+                      .clear(clear_km4),
                       .ca_bit(ca_bit_early_km4),
                       .data_i(sig_no_carrier_i_km4),
                       .data_q(sig_no_carrier_q_km4),
@@ -593,7 +543,7 @@ module channel_sw(
                    .OUTPUT_WIDTH(`ACC_WIDTH))
      subchannel_prompt(.clk(clk),
                        .reset(reset),
-                       .clear(clear_km4 || init_pending_km4),
+                       .clear(clear_km4),
                        .ca_bit(ca_bit_prompt_km4),
                        .data_i(sig_no_carrier_i_km4),
                        .data_q(sig_no_carrier_q_km4),
@@ -609,7 +559,7 @@ module channel_sw(
                    .OUTPUT_WIDTH(`ACC_WIDTH))
      subchannel_late(.clk(clk),
                      .reset(reset),
-                     .clear(clear_km4 || init_pending_km4),
+                     .clear(clear_km4),
                      .ca_bit(ca_bit_late_km4),
                      .data_i(sig_no_carrier_i_km4),
                      .data_q(sig_no_carrier_q_km4),

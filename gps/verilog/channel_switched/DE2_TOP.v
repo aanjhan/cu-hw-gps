@@ -280,6 +280,12 @@ module DE2_TOP (
    wire [`MODE_RANGE] mem_mode;
    assign mem_mode = SW[1];
 
+   wire acq_complete;
+   strobe acq_complete_strobe(.clk(clk_200),
+                              .reset(global_reset),
+                              .in(~KEY[1]),
+                              .out(acq_complete));
+
    wire        tracking_ready;
    `KEEP wire [`I2Q2_RANGE] i2q2_early;
    `KEEP wire [`I2Q2_RANGE] i2q2_prompt;
@@ -306,9 +312,10 @@ module DE2_TOP (
            .sample_valid(sample_valid),
            .data(sample_data),
            //Code control.
-           .init(~KEY[1]),
-           .prn(5'd0),
-           .init_carrier_dphi(`DOPPLER_INC_WIDTH'd0),
+           .acq_complete(acq_complete),
+           .acq_prn(5'd0),
+           .acq_carrier_dphi(`DOPPLER_INC_WIDTH'd0),
+           .acq_code_shift(`CS_WIDTH'd0),
            //Tracking results.
            .tracking_ready(tracking_ready),
            .i2q2_early(i2q2_early),

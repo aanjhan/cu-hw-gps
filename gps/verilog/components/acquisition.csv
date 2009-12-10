@@ -1,0 +1,4 @@
+ACQ_NUM_ACCUMULATORS,3,Number of acquisition accumulators per unit.
+ACQ_ACC_SEL_WIDTH,max_width(ACQ_NUM_ACCUMULATORS),Accumulator select bit width.
+ACQ_ACC_SEL_RANGE,range(ACQ_ACC_SEL_WIDTH),Accumulator select bit range.
+ACQ_ACC_SEL_MAX,ACQ_ACC_SEL_WIDTH'dACQ_NUM_ACCUMULATORS,Accumulator select max value.

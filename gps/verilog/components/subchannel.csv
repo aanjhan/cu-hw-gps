@@ -13,8 +13,6 @@ DOPPLER_INC_RANGE,DOPPLER_INC_WIDTH-1:0,Doppler shift phase increment range.
 DOPPLER_PAD_SIZE,CARRIER_PHASE_INC_WIDTH-DOPPLER_INC_WIDTH,Doppler shift pad size.
 
 F_IF_INC,CARRIER_PHASE_INC_WIDTH'dround((2^CARRIER_ACC_WIDTH)*F_IF/F_S),Carrier intermediate frequency phase increment.
-DOPP_BIN_INC_VAL,round((2^CARRIER_ACC_WIDTH)*DOPP_BIN_SIZE/F_S),Doppler bin phase increment value.
-DOPP_BIN_INC,DOPPLER_INC_WIDTH'dDOPP_BIN_INC_VAL,Doppler bin phase increment.
 
 //FIXME Take value from SIN_/COS_OUTPUT_WIDTH.
 //FIXME If values do not match throw an error.

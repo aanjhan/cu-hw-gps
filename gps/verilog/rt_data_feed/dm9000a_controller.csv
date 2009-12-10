@@ -20,6 +20,7 @@
 // Configuration
 /////////////////////////
 DM9000A_RX_FIFO_DEPTH,16,RX FIFO depth.
+DM9000A_TX_FIFO_DEPTH,16,TX FIFO depth.
 
 /////////////////////////
 // Instruction Issue

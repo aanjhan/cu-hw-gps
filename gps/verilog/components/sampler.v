@@ -1,5 +1,6 @@
-`define DEBUG
-`include "../components/debug.vh"
+`undef DEBUG
+//`define DEBUG
+`include "debug.vh"
 
 module sampler(
     input            clk_sample,

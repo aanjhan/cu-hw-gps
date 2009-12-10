@@ -18,9 +18,9 @@
 
 `include "rtdf_packet_processor.vh"
 
-//`undef DEBUG
-`define DEBUG
-`include "../components/debug.vh"
+`undef DEBUG
+//`define DEBUG
+`include "debug.vh"
 
 module rtdf_packet_processor(
     input              reset,

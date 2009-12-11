@@ -1,0 +1,205 @@
+\documentclass[14pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+\renewcommand{\abstractname}{}
+
+\setlength{\parskip}{7.2pt}
+\setlength{\parindent}{0mm}
+
+
+\title{\textbf{{\LARGE{FPGA-based Real-time GPS Receiver}}}
+\\*
+\vspace{4.5 cm}
+Proposal for a design project for the 
+\\*
+School of Electrical and Computer Engineering
+\\*
+\vspace{4.5 cm}
+by
+\\*
+\vspace{4.5 cm}
+}
+
+\author{
+Tom Chatt (tjc42@cornell.edu)
+\vspace{0.2 cm}
+\\
+Signature:\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_  Date:\_\_\_\_\_\_\_\_\_
+\vspace{0.5 cm}
+\\
+Adam Shapiro (ams348@cornell.edu) 
+\vspace{0.2 cm}
+\\
+Signature:\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_  Date:\_\_\_\_\_\_\_\_\_
+\vspace{0.5 cm}
+\\
+Advisor: Dr. Bruce Land (brl4@cornell.edu)
+}
+
+\date{}
+
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+A survey of the available open-source resources in the field of GPS and other satellite navigation 
+systems reveals that there is a shortage of robust, easily reconfigurable code.  Most existing 
+designs are either intended only for a specific use and therefore too difficult to modify for general-purpose 
+release, commercially sold and not openly available, or simply poorly designed and implemented.  
+With this situation in mind, we are currently working with in collaboration with the Cornell GNSS 
+Research Group to develop and build 
+a mobile GPS receiver.  Our intent is to create a general purpose receiver which is easily modifiable, 
+highly modular, and completely open-source.  The design consists of two major components, 
+implemented on separate Altera Cyclone II FPGAs.  The primary component is a hardware GPS receiver, 
+capable of receiving, tracking, and processing multiple satellite transmissions of the L1 civilian GPS
+signal in real time.  The receiver outputs packaged satellite data streams and navigation parameters
+(observables) in a standardized format.  This packaged data is used by the second component, a
+combined navigation controller and graphics processing unit designed to calculate a Kalman filter
+navigation solution in real time and display navigation information on a human-readable graphical
+interface.  Once completed, this freely available general purpose receiver should prove useful to 
+the Cornell GNSS Research Group as well as the satellite navigation research community as a whole.
+\end{abstract}
+
+\section*{Introduction}
+
+The expansion of the open-source software community has prompted many researchers to look for publicly
+available solutions before turning to more costly alternatives, often with remarkable success.  However,
+the satellite navigation community seems to suffer from a dearth of quality open-source code.  This is
+in part due to the fact that most satellite navigation research is carried out by government or
+commercial organizations, which are often reluctant to release design data under public license.  In an
+attempt to make a valuable contribution to the open-source resources available to the GPS community, we
+have been working with the Cornell GNSS Research group to develop and build a mobile GPS receiver.    
+We present here more detail on the motivation for our project work, followed by the enumeration of
+several specific issues which require significant thought and the strategies we have developed to
+address and overcome those issues.  We conclude with a description of our future goals and timeline.  
+Our intent is to create a general purpose receiver which is easily modifiable, 
+highly modular, and completely open-source.  The design consists of two major components, 
+implemented on separate Altera Cyclone II FPGAs.  The primary component is a hardware GPS receiver, 
+capable of receiving, tracking, and processing multiple satellite transmissions of the L1 civilian GPS
+signal in real time.  The receiver outputs packaged satellite data streams and navigation parameters
+(observables) in a standardized format.  This packaged data is used by the second component, a
+combined navigation controller and graphics processing unit designed to calculate a Kalman filter
+navigation solution in real time and display navigation information on a human-readable graphical
+interface.  Once completed, this freely available general purpose receiver should prove useful to 
+the Cornell GNSS Research Group as well as the satellite navigation research community as a whole.
+
+\section*{Background}
+Historically, the majority of work in the field of satellite navigation has been closed to public
+access and contribution.  Because the primary applications of GPS and other navigation systems tend to
+be either military or commercial in nature, researchers are often unable to obtain many of the necessary
+tools for GPS research and development without specific permission from government or commercial
+sources.  This permission often comes at a considerable monetary cost, if at all; military and other
+government organizations are understandably reluctant to release valuable research tools, and a
+commerical organization is unlikely to freely release a product which they spent considerable time and
+resources developing.  Recently, with the increasing prevalence in open-source and publicly available
+software and design information, GPS researchers are searching for free alternatives to costly
+research tools.  Unfortunately, the available open-source resources tend to be few in number and often
+are of unacceptably poor quality.  Currently, the majority of open-source GPS material is designed for a
+single specific purpose, such as an academic project or hobbyist's endeavor, and is therefore unusable
+for most other applications.  To make matters worse, this material is often poorly designed and often
+unsuitable for modification.  This is an unfortunate state of things for a field with an enormous
+multitude of different research and engineering problems.  It is our opinion that an open-source, 
+general purpose receiver designed with modification and reconfiguration in mind would be a very valuable
+contribution to the GPS community.  The ability to quickly configure and customize a
+real-time mobile receiver for a specific experiment at extremely low cost is not easily available at
+present, and it is our hope that our proposed design will change that situation.
+
+\section*{Specific Issues To Be Addressed}
+The design of a GPS receiver in hardware poses several challenging problems.  Combining the considerable 
+signal processing aspects of the GPS receiver problem with the task of implementing a complex digital
+system presents several difficult issues.  Building the entire system with a goal of modularity and
+reconfigurability adds another level of difficulty.  Several specific issues have already been
+identified, along with proposed solutions:
+
+\subsection*{The Signal Processing Problem}
+The civilian L1 code used by the GPS system uses both frequency and code modulation to transport a data
+stream containing information about the current state of the satellite constellation, including orbital
+parameters, clock correction information, and estimations of the ionospheric interference.  To extract
+this data stream, which is necessary for navigation, the receiver must execute a series of standard
+signal processing algorithms to demodulate and negate the effects of channel interference, clock offset,
+and Doppler shift.  These algorithms are nontrivial, and developing a scheme for accurately and
+efficiently performing the necessary signal processing is a difficult task.  We instead use a receiver
+structure implemented in software by the Cornell GNSS team as a template, in order to avoid the need to
+develop a structure of our own.
+
+\subsection*{Implementing Signal Processing Arithmetic in Hardware}
+Our signal processing structure is based on a software receiver which is implemented in MATLAB, and thus
+uses floating point arithmetic to perform signal processing arithmetic.  In a pure hardware environment,
+floating point arithmetic is not feasible, and so fixed point arithmetic is substituted.  Special care
+must be taken when making this substitution to ensure that signal bitwidths are sufficient to prevent
+overflow and that the error caused by quantization and truncation does not significantly degrade the
+performance of the signal processing algorithms.  Additionally, the computation of functions such as
+square root or inverse tangent is trivial in MATLAB, but requires nontrivial hardware when performed on
+the FPGA.  Modifying the existing signal processing algorithms to avoid such functions, as well as
+multiplication or division, is a major concern.  Converting a complicated operation to a bit shift or
+add saves considerable hardware, pipeline delay, and design time, and therefore such optimizations are a
+prime concern.
+
+\subsection*{Designing for High-speed, Resource-limited Digital Hardware}
+In order to maximize the processing that can be performed by the hardware receiver, the FPGA is clocked
+at 200 MHz, four times the typical operating speed.  The design of hardware at this speed takes
+particular care, since significant pipelining is required throughout all stages of the signal
+processing.  Furthermore, all receiver components must be designed with hardware efficiency in mind as
+well; with a limited number of logic elements on the FPGA and a large amount of signal processing to
+carry out, designing components which require a minimum amount of FPGA resources becomes crucial.
+
+\subsection*{Designing a Complex System}
+A digital design at the level of complexity of a GPS receiver contains a large number of interacting
+components, all of which must be able to function cooperatively.  In order to ensure that each
+individual component can be designed to fit seamlessly into the overall design, we attempt to standardize the
+components as much as possible.  We maintain documentation explaining the design and functionality of
+each component, subsystem, and layer of abstraction, with information from the mathematics of the signal
+processing to the details of the digital design.  Design processes, code format, and test methodologies
+are all standardized and documented to the greatest extent possible in order to streamline the
+integration of new components into the system.
+
+\subsection*{Designing for Modularity and Reconfigurability}
+As stated previously, a primary goal is to implement a receiver which is not only functional, but easily
+configurable and modifiable.  With this in mind, we endeavor to place all configurable parameters in a
+series of consolidated header files, not scattered about a large number of HDL files.  Changes in a few
+parameters in a single file should propagate throughout the entire design without the need for manually
+changing hardcoded values.  To aid with this task, we have built several software tools to facilitate
+the easy writing of highly parameterized code.  These tools have already proved useful in various other
+applications, and allow us to write HDL code with an uncommon level of parameterization and ease of
+modification.
+
+\section*{Approach}
+Our team consists of Tom Chatt and Adam Shapiro, both Master of Engineering students at Cornell
+University working under the advisement of Dr. Bruce Land.  As stated previously, the project has been 
+ongoing since summer 2009, and will be completed in May 2010.  To date, we have made significant progress 
+toward completion of the hardware receiver, and intend to complete that component by the end of December 2009.
+The navigation controller and graphical interface, along with several other enhancements to the hardware
+receiver, will be completed by May 2010.  Major tasks for the spring semester include translation of a
+MATLAB-based Kalman filter solution into C/C++ code, creation of a graphical user interface and
+real-time display of navigation information, and integration of these components with the hardware
+receiver to complete a full mobile receiver system.  The option to support almanac-aided signal
+acquisition and Wide Area Augmentation System (WAAS) corrections to the navigation solution will also be
+included.
+
+Since beginning this project, we have developed design
+methodologies specifically intended to address the issues listed previously, and will continue to employ
+and improve that paradigm throughout the remainder of our work.  We emphasize consistency, continuous
+documentation, incremental testing, and maximal parameterization.  To do so, we leverage a wide variety
+of tools, including Altera hardware design software, wiki-based documentation tools, code repository
+utilities, and our own HDL-generation software.  The effectiveness of our modular design process will be
+put to the test during our later work, when various small modifications (for example, supporting WAAS 
+correction) are added.  We expect that such modifications to the hardware receiver should be relatively
+simple, both for us and for any other user.
+
+\section*{Summary}
+Noting the relative scarcity of high quality open-source resources for GPS research, we have been
+working in collaboration with the Cornell GNSS Research Group and under the advisement of Dr. Bruce Land 
+to design and implement an FPGA-based mobile receiver, to be released for unrestricted public use.
+In contrast with the majority of publicly available GPS resources, our goal is to release a receiver
+implementation which is highly configurable and modifiable, to allow a user to custom-configure a
+receiver for a particular experiment or application with a minimum of cost and effort.  Since beginning
+this project in summer 2009, we have identified and encountered a number of significant obstacles to
+overcome, and have developed design practices and tools to address them. Our progress to date has been
+promising, and we are confident that we will achieve our stated goals by May 2010.
+
+\end{document}
+

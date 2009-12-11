@@ -1,0 +1,162 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+\setlength{\parskip}{7.2pt}
+\setlength{\parindent}{0mm}
+
+\title{FPGA-based Real-time GPS Receiver}
+\author{Adam Shapiro (ams348@cornell.edu) \\
+              Tom Chatt (tjc42@cornell.edu) \\
+              \\
+              Advisor: Bruce R. Land (brl4@cornell.edu)}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+A survey of the available open-source resources in the field of satellite navigation 
+systems reveals that there is a shortage of robust, easily reconfigurable code. Most existing 
+designs are either intended only for a specific use and therefore too difficult to modify for general-purpose release, or commercially sold and not openly available. With this situation in mind, we are currently working with in collaboration with the Cornell GNSS Research Group to develop and build a mobile GPS receiver. Our intent is to create a general purpose receiver which is easily modifiable, highly modular, and completely open-source.
+
+The design consists of two major components, implemented on separate Altera Cyclone II FPGAs in Verilog. The primary component is a hardware GPS receiver, capable of receiving, tracking, and processing multiple satellite transmissions of the L1 civilian GPS signal in real time. The secondary component is a combined navigation controller and graphics processing unit designed to calculate a navigation solution in real-time and provide a human-readable graphical interface. Once completed, this freely available general purpose receiver should prove useful to the Cornell GNSS Research Group as well as the satellite navigation research community as a whole.
+\end{abstract}
+
+\section*{Executive Summary}
+
+\section{Introduction}
+The expansion of the open-source software community has prompted many researchers to look for publicly available solutions before turning to more costly alternatives, often with remarkable success. However, the satellite navigation community seems to suffer from a dearth of quality open-source code. This is in part due to the fact that most satellite navigation research is carried out by government or commercial organizations, which are often reluctant to release design data under public license. In an attempt to make a valuable contribution to the open-source resources available to the Global Positioning System (\emph{GPS}) community, we have been working with the Cornell Global Navigation Satellite Systems (GNSS) research group to develop and build a mobile GPS receiver.
+
+Commercial and academic GPS receivers are often designed in software for ease of modification and production. Writing software affords a number of benefits, including ease of debugging, modularity, and expandability. It is often considerably easier to prototype a system in software, either on a CPU or a DSP, than it is to develop an equivalent system in hardware. That being said, satellite tracking is a largely parallelizable process, and the serial nature of software makes it difficult to easily take advantage of this fact. One of the primary goals of this project is to design a modular, parallel architecture for GPS signal tracking in hardware, while still maintaining much of the modularity and expandability attributed to software. At the same time, we aimed to develop a system and set of tools to ease the development of such large-scale hardware systems in the future.
+
+Presented here is a discussion of the design and implementation of the hardware GPS receiver developed for this project, an enumeration of several issues and challenges involved in such a design which require significant thought and the strategies we have developed to address those issues, preliminary receiver results, and future goals for the project, as well as a description of the tools and procedures developed to aid in the production of such a complex system on an FPGA in Verilog.
+
+\section{The Global Positioning System}
+
+\subsection{GPS Signal Description}
+\label{sec:signal description}
+Satellite navigation systems work by triangulating a user's location from known-location reference transmitters. In the case of GPS, a constellation of 32 satellites orbits the Earth in a Medium Earth Orbit (MEO), with a height range of approximately 20,000 km to 26,000 km. Each satellite transmits a data message, providing a receiver with orbital parameters that can then be used to determine the satellite location. Once the locations are known for each of the available satellites in view, the receiver can then determine its location by calculating distances to each satellite from the time-of-flight of the data bits for that satellite's message.
+
+The currently-available civilian GPS signal, called the Coarse Acquisition (\emph{C/A}) code, is broadcast by each satellite in the constellation on the GPS \emph{L1} frequency (1575.42 MHz). This signal contains a data message with the broadcasting satellite's orbital parameters (\emph{ephimerides}), an atmospheric correction model, and a set of coarse satellite positioning parameters for all satellites, known as the \emph{almanac}. The broadcast signals are encoded with a Code-Division Multiple Access (\emph{CDMA}) scheme such that all satellites can broadcast simultaneously on the same frequency. The signal is then mixed with the L1 carrier frequency and broadcast.
+
+The CDMA encoding scheme uses pseudorandom binary sequences known as Gold codes. Gold codes are maximum-length sequences with very good cross-correlation characteristics, which allow for easy signal separation of individual signals by a receiver. A data stream encoded with a given code (referred to as a \emph{PRN}) can be transmitted at the same time as another, and later recovered by correlating it with that same code. The codes used for the L1 C/A code are 1023 chips long and chip at a rate of 1.023 MHz.
+
+\subsection{Satellite Acquisition}
+\label{sec:acquisition}
+Acquisition is the process by which the receiver determines which satellites are in view such that it can track them and begin to navigate. To track a satellite's transmitted signal, a receiver must remove both the carrier frequency and the PRN code from the signal, such that the remaining signal is only contains the transmitted data bits (plus noise). There are therefore two pieces of information that a receiver needs to know in order to track a given satellite: the carrier frequency and the code position.
+
+As discussed in Section \ref{sec:signal description}, all satellites transmit the C/A code on the GPS L1 frequency. The observer, however, does not always see the signal exactly modulated with the L1 frequency, but slightly shifted by the satellite's \emph{Doppler shift}. Doppler shift is the change in carrier frequency that arises from the radial velocity of the satellite relative to the receiver. A satellite moving towards the receiver will appear to have a carrier frequency slightly greater than the true carrier frequency (L1), whereas a satellite moving away will appear to have a carrier frequency slightly less than the true carrier. This means that, in order to demodulate the signal to removing the carrier frequency (baseband wipe-off), the receiver must determine the Doppler shift of the satellite.
+
+In addition to generating the carrier, the receiver must be able to generate the CDMA code for the selected satellite in order to remove that from the data signal (code wipe-off). The autocorrelation properties of the Gold codes are such that if the generated replica code is offset by one or more chips, the autocorrelation value will always be less than 100 (with a maximum of 1023). Effectively, if the replica code is misaligned with the transmitted code by a full chip or more the received signal will look like noise and will not be recoverable. The acquisition process must therefore search for and determine the current position of the sequence.
+
+When a receiver is first powered on it has no a priori knowledge of the state of the GPS constellation. It doesn't even know where it is or what the current time is. This type of startup is called a \emph{cold start}. During a cold start the receiver must search all possible PRNs, checking all possible Doppler and code shifts, until satellites are found.
+
+A \emph{warm start} involves using prior knowledge to reduce the search space, speeding up the acquisition process. Each satellite transmits a set of parameters, called the almanac, which coarsely describe the long-term orbits of all satellites in the constellation. Combining this information with knowledge of the approximate receiver location and time, the receiver can determine which satellites should be in the sky and what their approximate Doppler shifts are. It can then search only on these parameters. Almanac-aided acquisition can speed up the acquisition process significantly (more than 90\% in some cases).
+
+\subsection{Signal Tracking}
+\label{sec:tracking}
+Once acquired, a satellite must be tracked over time to maintain synchronization of the locally-generated carrier and code replicas. This is done in two steps. First, the local code replica is upsampled to the incoming sampling rate. The code is tracked by delaying or advancing the local replica by a fraction of a chip in order to maximize the received signal strength. Second, the carrier is tracked by adjusting the local carrier frequency (Doppler shift) to eliminate frequency or phase offset between the received signal and the local replica.
+
+To track the code three local code replicas are generated for each PRN. Slightly advanced (\emph{early}) and delayed (\emph{late}) replicas are generated, in addition to the matched version (\emph{prompt}). After correlating the incoming signal with each of the three replicas, the receiver can determine if the code must be adjusted, by how much, and in which direction by comparing the three received signal strengths using a Delay-Locked Loop (\emph{DLL}). It should be noted that the early and late codes must not be offset by more than one half of a chip from the prompt code. If they are offset by more than half of a chip, they might correlate to a different starting PRN chip for a large tracking error, resulting in an inability to recover the code.
+
+To track the carrier the receiver generates an in-phase carrier replica and a quadrature replica, which is phase shifted from the in-phase carrier by 90 degrees. The receiver then uses a Frequency-Locked Loop (\emph{FLL}) or Phase-Locked Loop (\emph{PLL}) to adjust the Doppler shift as needed to obtain the desired result. An FLL attempts to lock in-phase and quadrature accumulations of the signal in place, such that the angle between two subsequent accumulations when plotted in the imaginary plane does not change quickly. When the frequency of the replica and the incoming signal match the angle will not change from one accumulation to the next. A PLL attempts to reduce the quadrature component to zero, locking the in-phase component to the incoming signal, which subsequently matches both the frequency and phase of the signal.
+
+\subsection{Data}
+\label{sec:data}
+Once the carrier and code have been wiped off of the incoming signal, the remaining information, disregarding any noise, is the encoded data message broadcast by the satellite. Data bits are transmitted at a rate of 50 bits/second. The satellites' data broadcasts are divided into frames, which are each further divided into five subframes. Each subframe contains ten 30-bit words. An entire frame takes 30 seconds to transmit.
+
+Data bits are encoded as $\pm 1$, and bit transitions can thus be recovered by looking for 180 degree phase shifts (negations) of the incoming carrier signal. Each satellite uses an atomic clock to synchronize its bit transitions with all of the other satellites. Each subframe begins with a 30-bit telemetry word, which contains a fixed 22-bit preamble, followed by a telemetry message and accompanying parity bits. A receiver can use the preamble to locate the start of a subframe prior to decoding the data message.
+
+The subframes from a given satellite provide ephemeris data required to locate the satellite's orbital position, satellite constellation health information, atmospheric modeling parameters used to correct for positioning errors introduced by ionospheric and tropospheric delays, and an almanac of long-term, coarse satellite orbital parameters for the entire constellation.
+
+\subsection{Observables}
+\label{sec:observables}
+Navigation using GPS involves triangulating the receiver location in three dimensions relative to the positions of the satellites. To do this, the receiver needs to know how far it is from each satellite used for navigation. Additionally, it must be able to determine to high precision where the satellites are in their orbits, which requires precise knowledge of the current time. Once a signal is tracked, there are three observable parameters that the receiver can extract that provide it with this information.
+
+The first observable, \emph{pseudorange}, is perhaps the most intuitive of the three. The range to a given satellite is given by the time from transmission of a given bit to reception of that bit, multiplied by the speed of light. Pseudorange is the distance to a satellite measured in this fashion, plus or minus some additional error sources. Since the transmission time is not known by the receiver, this value cannot be directly measured. Because the bit transitions for all satellites occur at the same time (see Section \ref{sec:data}), however, the distance of one satellite to the receiver can be measured relative to another satellite. By selecting one satellite as a reference point, the relative distances to all other satellites can be measured. The difference between the relative ranges and the true ranges is simply the range to the reference satellite. This unknown distance is the first difference between pseudorange and true range, and is usually thought of as a receiver clock bias.
+
+Next, though the satellites have highly-precise clocks, each has a slight drift which adds additional error to the range calculation. This drift is tracked closely by the GPS control segment, modeled as a quadratic error, and broadcast in as part of the ephemeris data to the receiever.
+
+If the transmitted signals travelled through vacuum to the receiver the measured transmission times would exactly the distances to the satellites given the speed of light. The signals don't travel through vacuum though, and are delayed by any medium they pass trough including the ionosphere and troposphere, as well as any ground-based objects they may meet on the way to the receiver.
+
+Adding all of these error sources together results in the receiver-perceived distance, pseudorange, as follows
+
+\begin{equation}
+\label{eqn:pseudorange}
+P^S=\rho^S+c(\delta^S-\delta_R)+\epsilon^S
+\end{equation}
+
+where $P^S$ is the pseudorange for satellite $S$, $\rho^S$ is the true range to satellite $S$, $\delta^S$ is satellite $S$'s clock offset, $\delta_R$ is the receiver clock error (including the unknown reference satellite range), and $\epsilon^S$ is additional error introduced by atmospheric propagation, multipath interference, and other sources. Note that $\delta_R$ is common to all satellites, while $\epsilon^S$ is satellite-depedent. Because pseudorange is defined by the signal data bit transitions, it is only as accurate as the upsampled code chipping rate (sampling rate) multiplied by the speed of light.
+
+The next observable, \emph{Doppler shift}, is the most easily-found observable. It is tracked and directly reported by the the carrier tracking loops. Doppler shift represents the velocity of the radial receiver with respect to the satellite. The measured Doppler shift includes this value and error terms due to the clock drift rates of both the satellite and the receiver. The Doppler shift, measured in Hz, is given by
+
+\begin{equation}
+\label{eqn:doppler}
+f_D=\frac{f_{L1}}{1+\dot{\delta}^S}\left[\frac{-\hat{\rho}^T(\vec{v}^S-\vec{v})+c\dot{\delta}_R}{c+\hat{\rho}^T(\vec{v}^S-\vec{v})} - \dot{\delta}^S\right]
+\end{equation}
+
+where $f_D$ and $f_{L1}$ are the Doppler shift and the L1 frequency of 1575.42MHz respectively, $\hat{\rho}$ is the unit vector to satellite S from the receiver location in Earth-Centered, Earth-Fixed (\emph{ECEF}) coordinates, $\vec{v}^S$ is the satellite velocity vector in ECEF, $\vec{v}$ receiver velocity in ECEF, and $c$ is the speed of light in meters per second. $\dot{\delta}^S$ and $\dot{\delta}_R$ are the derivatives of the satellite and receiver clock offsets respectively.
+
+The final observable, \emph{carrier phase range}, is the range to the satellite defined by the number of carrier cycles between it and the receiver. Using a PLL, the receiver can keep track of the number of carrier cycles that elapse during a given accumulation period. The range to the satellite can then be determined with an accuracy on the order of the L1 wavelength (approximately 0.19 m). Because phase range is a relative measurement (the receiver measures changes in phase, not total phase), the true range to the satellite is unknown initially. Resolving the initial number of cycles between the receiver and the satellite is an issue known as the integer ambiguity problem, and is an active topic of research.
+
+Methods for determining the receiver location and velocity, as well as the current time, are not discussed in this paper.
+
+\section{Implementation}
+This section discusses the implementation details of the Cornell University Hardware Receiver. The receiver has been developed in conjunction with Cornell Electrical and Computer Engineering department's GPS courses (ECE 4150 and ECE 5840), microcontroller and embedded design courses (ECE 4760 and ECE 5760), and the Cornell GNSS Research Group.
+
+\subsection{Receiver Overview}
+
+\subsection{Acquisition Units}
+
+\subsection{Channels}
+
+\subsection{Tracking Loops}
+
+\subsubsection{Square Root}
+
+\subsubsection{Delay-Locked Loop (DLL)}
+
+\subsubsection{Frequency-Locked Loop (FLL)}
+
+\subsubsection{Phase-Locked Loop (PLL)}
+A phase-locked loop is not currently implemented in the hardware receiver. Plans exist to implement one in the near future.
+
+\subsection{Observables Extraction}
+
+\subsection{Locks and Data Extraction}
+
+\section{Tools}
+
+\subsection{Verilog Defines Parser}
+
+\subsection{Verilog Preprocessor}
+
+\subsection{High-Speed Ethernet Data Feed}
+
+\section{Testing}
+
+\subsection{Data Generation}
+
+\subsection{MATLAB Software Testbench}
+
+\subsubsection{Fixed-Point Implementation}
+
+\section{Results}
+
+\subsection{Acquisition Results}
+
+\subsection{Tracking Results}
+
+\section{Future Goals}
+
+\section{Acknowledgments}
+We would like to thank Professor Bruce Land for his endless support and advice. His help in the development of the receiver has been invaluable, and his unending knowledge and stories have kept us well educated, focused, and very entertained.
+
+We would also like to thank Professor Paul Kintner, Brady O'Hanlon, and the Cornell GNSS Research Group for their help and support.
+
+Finally, we would like to thank the Cornell Department of Electrical and Computer Engineering for a terrific education and all of the opportunities to learn and grow it provided.
+
+\end{document}

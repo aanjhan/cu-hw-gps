@@ -28,7 +28,7 @@ set_global_assignment -name DEVICE EP2C35F672C6
 set_global_assignment -name TOP_LEVEL_ENTITY DE2_TOP
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 8.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "11:32:43  FEBRUARY 28, 2009"
-set_global_assignment -name LAST_QUARTUS_VERSION 8.0
+set_global_assignment -name LAST_QUARTUS_VERSION 9.1
 set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
 set_location_assignment PIN_N25 -to SW[0]
 set_location_assignment PIN_N26 -to SW[1]
@@ -490,17 +490,34 @@ set_global_assignment -name BASED_ON_CLOCK_SETTINGS CLOCK_50 -section_id clk_dll
 set_global_assignment -name MULTIPLY_BASE_CLOCK_PERIOD_BY 10 -section_id clk_dll
 set_global_assignment -name DIVIDE_BASE_CLOCK_PERIOD_BY 4 -section_id clk_dll
 set_global_assignment -name SIMULATOR_GENERATE_POWERPLAY_VCD_FILE OFF
+set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE tracking_short.vwf
+set_global_assignment -name PARTITION_NETLIST_TYPE POST_FIT -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT -section_id Top
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name VERILOG_FILE ../components/track.v
+set_global_assignment -name VERILOG_FILE ../components/subchannel.v
+set_global_assignment -name VERILOG_FILE ../components/delay_en_1.v
+set_global_assignment -name VERILOG_FILE ../components/delay_en.v
+set_global_assignment -name VERILOG_FILE ../components/ca_generator.v
+set_global_assignment -name VERILOG_FILE ../components/mem_bank_ram.v
+set_global_assignment -name VERILOG_FILE ../components/mem_bank.v
+set_global_assignment -name VERILOG_FILE ../components/dm9000a_controller.v
+set_global_assignment -name VERILOG_FILE ../components/dm9000a_clk_gen.v
+set_global_assignment -name VERILOG_FILE ../components/rt_data_feed.v
+set_global_assignment -name VERILOG_FILE ../components/rtdf_packet_processor.v
+set_global_assignment -name VERILOG_FILE ../components/rtdf_stream_fifo.v
+set_global_assignment -name VERILOG_FILE ../components/rx_data_fifo.v
+set_global_assignment -name VERILOG_FILE ../components/sampler.v
+set_global_assignment -name VERILOG_FILE ../components/ca_upsampler.v
+set_global_assignment -name VERILOG_FILE ../components/acquisition_unit.v
+set_global_assignment -name VERILOG_FILE ../components/acquisition_controller.v
 set_global_assignment -name VERILOG_FILE ../components/sync_fifo.v
 set_global_assignment -name VERILOG_FILE ../components/ca_initializer.v
 set_global_assignment -name VERILOG_FILE system_pll.v
 set_global_assignment -name VERILOG_FILE ../components/sdram_pll.v
-set_global_assignment -name VERILOG_FILE ../rt_data_feed/sampler.v
-set_global_assignment -name VERILOG_FILE ../rt_data_feed/rx_data_fifo.v
-set_global_assignment -name VERILOG_FILE ../rt_data_feed/dm9000a_clk_gen.v
-set_global_assignment -name VERILOG_FILE ../rt_data_feed/dm9000a_controller.v
-set_global_assignment -name VERILOG_FILE ../rt_data_feed/rt_data_feed.v
-set_global_assignment -name VERILOG_FILE ../rt_data_feed/rtdf_packet_processor.v
-set_global_assignment -name VERILOG_FILE ../rt_data_feed/rtdf_stream_fifo.v
 set_global_assignment -name VERILOG_FILE ../components/power_on_reset.v
 set_global_assignment -name VERILOG_FILE ../components/synchronizer.v
 set_global_assignment -name VERILOG_FILE ../components/hex_driver.v
@@ -544,10 +561,3 @@ set_global_assignment -name VECTOR_WAVEFORM_FILE tracking.vwf
 set_global_assignment -name SOURCE_FILE tracking_2.01ms
 set_global_assignment -name SIGNALTAP_FILE data_feed.stp
 set_global_assignment -name VECTOR_WAVEFORM_FILE ca_initializer.vwf
-set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE tracking_short.vwf
-set_global_assignment -name PARTITION_NETLIST_TYPE POST_FIT -section_id Top
-set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
-set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
-set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT -section_id Top
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

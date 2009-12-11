@@ -7,6 +7,7 @@ SOURCES+=$(COMPONENTS_DIR)/ca_upsampler.csv \
 	$(COMPONENTS_DIR)/channel__subchannel.csv \
 	$(COMPONENTS_DIR)/channel__ca_upsampler.csv \
 	$(COMPONENTS_DIR)/channel.csv \
+	$(COMPONENTS_DIR)/acquisition.csv \
 	$(COMPONENTS_DIR)/acquisition_controller.csv \
 	$(COMPONENTS_DIR)/channel__acquisition_controller.csv \
 	$(COMPONENTS_DIR)/tracking_loops.csv \
@@ -16,8 +17,8 @@ SOURCES+=$(COMPONENTS_DIR)/ca_upsampler.csv \
 	$(COMPONENTS_DIR)/channel__dll.csv \
 	$(COMPONENTS_DIR)/channel__tracking_loops.csv \
 	$(COMPONENTS_DIR)/mem_bank.csv \
-	../rt_data_feed/dm9000a_controller.csv \
-	../rt_data_feed/rtdf_packet_processor.csv \
+	$(COMPONENTS_DIR)/dm9000a_controller.csv \
+	$(COMPONENTS_DIR)/rtdf_packet_processor.csv \
 #	top__channel.csv
 
 VERILOG_SOURCES+=$(COMPONENTS_DIR)/priority_select.s

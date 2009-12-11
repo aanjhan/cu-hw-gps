@@ -18,11 +18,15 @@ module top(
     input                            clk_sample,
     input                            sample_valid,
     input [`INPUT_RANGE]             data,
-    //Init control.
-    input                            acq_complete,
-    input [`PRN_RANGE]               acq_prn,
-    input [`DOPPLER_INC_RANGE]       acq_carrier_dphi,
-    input [`CS_RANGE]                acq_code_shift,
+    input                            mem_mode,
+    //Acquisition control.
+    input                            acq_start,
+    input [`PRN_RANGE]               acq_start_prn,
+
+    output wire                      acq_in_progress,
+    output wire [`DOPPLER_INC_RANGE] acq_carrier_dphi,
+    output wire [`CS_RANGE]          acq_code_shift,
+    output wire [`I2Q2_RANGE]        acq_i2q2,
     //Tracking results.
     output wire                      tracking_ready,
     output wire [`I2Q2_RANGE]        i2q2_early,
@@ -88,6 +92,53 @@ module top(
       end
    end
 
+   ///////////////
+   // Memory Bank
+   ///////////////
+
+   //Memory bank.
+   `KEEP wire mem_bank_ready;
+   `KEEP wire mem_bank_frame_start;
+   `KEEP wire mem_bank_frame_end;
+   `KEEP wire mem_bank_sample_valid;
+   `KEEP wire [`INPUT_RANGE] mem_bank_data;
+   mem_bank bank_0(.clk(clk),
+                   .reset(global_reset),
+                   .mode(mem_mode),
+                   .data_available(data_available),
+                   .data_in(data_sync),
+                   .ready(mem_bank_ready),
+                   .frame_start(mem_bank_frame_start),
+                   .frame_end(mem_bank_frame_end),
+                   .sample_valid(mem_bank_sample_valid),
+                   .data_out(mem_bank_data));
+
+   /////////////////////////
+   // Satellite Acquisition
+   /////////////////////////
+
+   //wire acq_in_progress;
+   `KEEP wire acq_complete;
+   wire satellite_acquired;
+   `KEEP wire [`PRN_RANGE] acq_prn;
+   //wire [`DOPPLER_INC_RANGE] acq_carrier_dphi;
+   //wire [`CS_RANGE]          acq_code_shift;
+   acquisition_unit acq_0(.clk(clk),
+                          .reset(global_reset),
+                          .mem_data_available(mem_bank_sample_valid),
+                          .mem_data(mem_bank_data),
+                          .frame_start(mem_bank_frame_start),
+                          .frame_end(mem_bank_frame_end),
+                          .start(acq_start),
+                          .prn(acq_start_prn),
+                          .in_progress(acq_in_progress),
+                          .acquisition_complete(acq_complete),
+                          .satellite_acquired(satellite_acquired),
+                          .acq_prn(acq_prn),
+                          .acq_peak_doppler(acq_carrier_dphi),
+                          .acq_peak_code_shift(acq_code_shift),
+                          .acq_peak_i2q2(acq_i2q2));
+
    ////////////////////
    // Initialization
    ////////////////////
@@ -102,22 +153,22 @@ module top(
                        .reset(global_reset),
                        .empty(init_fifo_empty),
                        .full(init_fifo_full),
-                       .wr_req(acq_complete),
+                       .wr_req(satellite_acquired),
                        .wr_data({acq_prn,acq_carrier_dphi,acq_code_shift}),
                        .rd_req(init_fifo_read),
                        .rd_data(init_fifo_out));
 
    //Extract next available PRN for initialization.
-   wire [`PRN_RANGE]         init_prn;
-   wire [`DOPPLER_INC_RANGE] init_carrier_dphi;
-   wire [`CS_RANGE]          init_code_shift;
+   `KEEP wire [`PRN_RANGE]         init_prn;
+   `KEEP wire [`DOPPLER_INC_RANGE] init_carrier_dphi;
+   `KEEP wire [`CS_RANGE]          init_code_shift;
    assign init_prn = init_fifo_out[(`PRN_WIDTH+`DOPPLER_INC_WIDTH+`CS_WIDTH-1):(`DOPPLER_INC_WIDTH+`CS_WIDTH)];
    assign init_carrier_dphi = init_fifo_out[(`DOPPLER_INC_WIDTH+`CS_WIDTH-1):`CS_WIDTH];
    assign init_code_shift = init_fifo_out[(`CS_WIDTH-1):0];
 
    //Start a new initialization whenever there is a
    //new SV pending and there isn't an init pending.
-   wire ca_init_start;
+   `KEEP wire ca_init_start;
    reg init_in_progress;
    assign ca_init_start = !init_fifo_empty && !init_in_progress;
 
@@ -150,7 +201,7 @@ module top(
                           init_in_progress;
    end
 
-   wire init_ready;
+   `KEEP wire init_ready;
    assign init_ready = init_in_progress && init_target_reached;
 
    assign init_fifo_read = slot_initializing_0;

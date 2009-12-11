@@ -7,9 +7,9 @@ module sync_fifo (
     output wire               empty,
     output wire               full,
     input                     wr_req,
-    output wire [(WIDTH-1):0] wr_data,
+    input [(WIDTH-1):0]       wr_data,
     input                     rd_req,
-    input [(WIDTH-1):0]       rd_data);
+    output wire [(WIDTH-1):0] rd_data);
 
    parameter WIDTH = 1;
    parameter DEPTH = 1;

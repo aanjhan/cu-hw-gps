@@ -5,14 +5,14 @@
 
 `define DEBUG
 `include "debug.vh"
-//`define DEBUG
 
+`undef DEBUG
 `ifdef DEBUG
 
- `undef MAX_CODE_SHIFT
- `define MAX_CODE_SHIFT `CS_WIDTH'h1
+ //`undef MAX_CODE_SHIFT
+ //`define MAX_CODE_SHIFT `CS_WIDTH'h1
 
- `undef DOPP_MAX_INC
+ /*`undef DOPP_MAX_INC
  `define DOPP_MAX_INC `DOPPLER_INC_WIDTH'd6392
 
  `undef DOPP_EARLY_START
@@ -22,10 +22,21 @@
  `define DOPP_PROMPT_START `DOPPLER_INC_WIDTH'd0
 
  `undef DOPP_LATE_START
-  `define DOPP_LATE_START -`DOPPLER_INC_WIDTH'd1598
+  `define DOPP_LATE_START -`DOPPLER_INC_WIDTH'd1598*/
+ `undef DOPP_MAX_INC
+ `define DOPP_MAX_INC `DOPPLER_INC_WIDTH'd7990
 
-  `define DOPP_START `DOPP_LATE_START
-`endif
+ `undef DOPP_EARLY_START
+ `define DOPP_EARLY_START -`DOPPLER_INC_WIDTH'd4794
+
+ `undef DOPP_PROMPT_START
+ `define DOPP_PROMPT_START -`DOPPLER_INC_WIDTH'd6392
+
+ `undef DOPP_LATE_START
+ `define DOPP_LATE_START -`DOPPLER_INC_WIDTH'd7990
+`endif //  `ifdef DEBUG
+
+`define DOPP_START `DOPP_LATE_START
 
 module acquisition_controller(
     input                            clk,
@@ -48,13 +59,17 @@ module acquisition_controller(
     input [`I2Q2_RANGE]              i2q2_value,
     //Acquisition results.
     output wire                      acquisition_complete,
+    output wire                      satellite_acquired,
     output reg [`DOPPLER_INC_RANGE]  peak_doppler,
-    output reg [`CS_RANGE]           peak_code_shift);
+    output reg [`CS_RANGE]           peak_code_shift,
+    //Debug.
+    output reg [`I2Q2_RANGE]         peak_i2q2);
 
    `PRESERVE reg acq_active;
    wire start_acq;
    assign start_acq = start_acquisition && !acq_active;
 
+   wire finished_early;
    `PRESERVE reg ignore_next_update;
    `PRESERVE reg feed_idle;
    `KEEP wire advance_code;
@@ -75,6 +90,7 @@ module acquisition_controller(
       //FIXME Is the update ignore necessary anymore?
       acq_active <= reset ? 1'b0 :
                     start_acq ? 1'b1 :
+                    finished_early ? 1'b0 :
                     prev_last_bin_pending && last_i2q2_received ? 1'b0 :
                     acq_active;
       
@@ -91,19 +107,30 @@ module acquisition_controller(
       //to seek and ignore the next accumulation result.
       ignore_next_update <= reset ? 1'b0 :
                             start_acq ? 1'b1 :
-                            frame_start && !target_reached ? 1'b1 :
-                            accumulation_complete ? 1'b0 :
+                            frame_start ? !target_reached :
                             ignore_next_update;
    end // always @ (posedge clk)
 
    //Seek the code to the next offset at the end of each
    //accumulation. Assert seek until feed starts.
-   assign seek_en = feed_idle;
+   assign seek_en = feed_idle || ignore_next_update;
 
    strobe acq_complete_strobe(.clk(clk),
                               .reset(reset),
                               .in(!acq_active),
                               .out(acquisition_complete));
+
+   //Report acquisition early if the peak value is beyond
+   //the early completion threshold and the new value is
+   //smaller than the peak value.
+   assign finished_early = i2q2_ready &&
+                           peak_i2q2>i2q2_value &&
+                           peak_i2q2>=`ACQ_I2Q2_EARLY_THRESHOLD;
+
+   //A satellite has been acquired as long as its peak I2Q2 value
+   //is higher than the defined acquisition threshold.
+   assign satellite_acquired = (acquisition_complete && peak_i2q2>=`ACQ_I2Q2_THRESHOLD) ||
+                               finished_early;
 
    //Advance each accumulator's Doppler bin by (# acc)*bin width
    //after the accumulation has completed for the last code shift
@@ -165,12 +192,15 @@ module acquisition_controller(
          prev_last_bin_pending <= last_bin_pending;
          prev_acq_active <= acq_active;
       end
+      else if(finished_early) begin
+         prev_acq_active <= 1'b0;
+      end
    end
 
    //Store peak value and search parameters at the
    //end of each code shift search. Update values
    //only if new peak I2Q2 value > old peak.
-   `PRESERVE reg [`I2Q2_RANGE] peak_i2q2;
+   //`PRESERVE reg [`I2Q2_RANGE] peak_i2q2;
    always @(posedge clk) begin
       if(reset || start_acq) begin
          peak_i2q2 <= `I2Q2_WIDTH'd0;

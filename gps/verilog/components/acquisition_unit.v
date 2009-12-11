@@ -1,6 +1,13 @@
+`include "global.vh"
+
+`include "ca_upsampler.vh"
+`include "subchannel.vh"
+`include "channel.vh"
+`include "acquisition.vh"
+
 module acquisition_unit(
     input                            clk,
-    input                            global_reset,
+    input                            reset,
     //Memory bank sample interface.
     input                            mem_data_available,
     input [`INPUT_RANGE]             mem_data,
@@ -12,20 +19,23 @@ module acquisition_unit(
     output reg                       in_progress,
     //Acquisition results.
     output wire                      acquisition_complete,
+    output wire                      satellite_acquired,
+    output reg [`PRN_RANGE]          acq_prn,
     output wire [`DOPPLER_INC_RANGE] acq_peak_doppler,
-    output wire [`CS_RANGE]          acq_peak_code_shift);
+    output wire [`CS_RANGE]          acq_peak_code_shift,
+    //Debug.
+    output wire [`I2Q2_RANGE]        acq_peak_i2q2);
 
    //Start the next acquisition as soon as possible.
    wire start_acq;
    assign start_acq = start && !in_progress;
 
-   reg [`PRN_RANGE] acq_prn;
    always @(posedge clk) begin
-      acq_prn <= global_reset ? `PRN_WIDTH'd0 :
+      acq_prn <= reset ? `PRN_WIDTH'd0 :
                  start_acq ? prn :
                  acq_prn;
 
-      in_progress <= global_reset ? 1'b0 :
+      in_progress <= reset ? 1'b0 :
                      start ? 1'b1 :
                      acquisition_complete ? 1'b0 :
                      in_progress;
@@ -37,12 +47,13 @@ module acquisition_unit(
    `KEEP wire [`DOPPLER_INC_RANGE] acq_dopp[0:(`ACQ_NUM_ACCUMULATORS-1)];
    `KEEP wire                      acq_seek_en;
    `KEEP wire [`CS_RANGE]          acq_seek_target;
+   wire accumulation_complete;
    `KEEP wire                      target_reached;
-   reg [`I2Q2_RANGE] i2q2_out;
-   reg [`ACQ_ACC_SEL_RANGE] i2q2_tag;
-   wire i2q2_ready;
+   `KEEP wire i2q2_ready;
+   `PRESERVE reg [`ACQ_ACC_SEL_RANGE] i2q2_tag;
+   `PRESERVE reg [`I2Q2_RANGE] i2q2_out;
    acquisition_controller acq_controller(.clk(clk),
-                                         .global_reset(global_reset),
+                                         .reset(reset),
                                          .start_acquisition(start_acq),
                                          .frame_start(frame_start),
                                          .doppler_0(acq_dopp[0]),
@@ -52,20 +63,20 @@ module acquisition_unit(
                                          .code_shift(acq_seek_target),
                                          .target_reached(target_reached),
                                          .accumulation_complete(accumulation_complete),
-                                         .i2q2_valid(i2q2_valid),
-                                         .i2q2_early(i2q2_early),
-                                         .i2q2_prompt(i2q2_prompt),
-                                         .i2q2_late(i2q2_late),
+                                         .satellite_acquired(satellite_acquired),
+                                         .i2q2_ready(i2q2_ready),
+                                         .i2q2_tag(i2q2_tag),
+                                         .i2q2_value(i2q2_out),
                                          .acquisition_complete(acquisition_complete),
                                          .peak_doppler(acq_peak_doppler),
-                                         .peak_code_shift(acq_peak_code_shift));
+                                         .peak_code_shift(acq_peak_code_shift),
+                                         .peak_i2q2(acq_peak_i2q2));
 
    //Upsample the C/A code to the incoming sampling rate.
    //Note: All accumulators run on the same code shift.
    wire ca_bit;
-   wire seeking;
    ca_upsampler upsampler(.clk(clk),
-                          .reset(global_reset || start_acq),
+                          .reset(reset || start_acq),
                           .mode(`MODE_ACQ),
                           .enable(mem_data_available),
                           //Control interface.
@@ -76,19 +87,18 @@ module acquisition_unit(
                           //Seek control.
                           .seek_en(acq_seek_en),
                           .seek_target(acq_seek_target),
-                          .seeking(seeking),
                           .target_reached(target_reached));
 
    //Generate accumulators.
    `KEEP wire acc_complete[0:(`ACQ_NUM_ACCUMULATORS-1)];
    `KEEP wire [`ACC_RANGE] acc_i_out[0:(`ACQ_NUM_ACCUMULATORS-1)], acc_q_out[0:(`ACQ_NUM_ACCUMULATORS-1)];
    `KEEP reg [`ACC_RANGE] acc_i[0:(`ACQ_NUM_ACCUMULATORS-1)], acc_q[0:(`ACQ_NUM_ACCUMULATORS-1)];
+   genvar i;
    generate
-      genvar i;
       for(i=0;i<`ACQ_NUM_ACCUMULATORS;i=i+1) begin : acc_gen
          subchannel acc(.clk(clk),
-                        .global_reset(global_reset),
-                        .clear(acc_complete[0]),
+                        .global_reset(reset),
+                        .clear(accumulation_complete),
                         .data_available(mem_data_available),
                         .feed_complete(frame_end),
                         .data(mem_data),
@@ -101,11 +111,12 @@ module acquisition_unit(
          //Store accumulation results until I2Q2 calculation
          //has started for each accumulator.
          always @(posedge clk) begin
-            acc_i[i] <= acc_complete[i] ? acc_i_out[i] : acc_i[i];
-            acc_q[i] <= acc_complete[i] ? acc_q_out[i] : acc_q[i];
+            acc_i[i] <= accumulation_complete ? acc_i_out[i] : acc_i[i];
+            acc_q[i] <= accumulation_complete ? acc_q_out[i] : acc_q[i];
          end
       end // block: acc_gen
    endgenerate
+   assign accumulation_complete = acc_complete[0];
 
    ////////////////////
    // Compute I^2+Q^2
@@ -116,27 +127,23 @@ module acquisition_unit(
    reg [`ACQ_ACC_SEL_RANGE] acc_select;
    reg                      acc_i_q_sel;
    assign start_square = !(acc_select==`ACQ_ACC_SEL_MAX && acc_i_q_sel==1'b1);
-
-   //Issue a read to the channel FIFO to discard
-   //I/Q values when the last calculation has started.
-   assign iq_read = start_square && sub_select==2'h2;
    
    always @(posedge clk) begin
       acc_select <= reset ? `ACQ_ACC_SEL_MAX :
-                    acc_complete[0] ? `ACQ_ACC_SEL_WIDTH'd0 :
+                    accumulation_complete ? `ACQ_ACC_SEL_WIDTH'd0 :
                     acc_select!=`ACQ_ACC_SEL_MAX && acc_i_q_sel==1'b1 ? acc_select+`ACQ_ACC_SEL_WIDTH'd1 :
                     acc_select;
       
       acc_i_q_sel <= reset ? 1'b0 :
-                    acc_complete[0] ? 1'b0 :
+                    accumulation_complete ? 1'b0 :
                     ~acc_i_q_sel;
    end
 
    //Select next I/Q value.
-   wire [`ACC_RANGE_TRACK] i_q_value;
-   always @(*) begin
-      generate
-         genvar i;
+   //FIXME Preprocessor.
+   reg [`ACC_RANGE] i_q_value;
+   /*generate
+      always @(*) begin
          for(i=0;i<`ACQ_NUM_ACCUMULATORS;i=i+1) begin : i_q_sel
             if(i==0) begin
                if(acc_select==i) begin
@@ -150,16 +157,19 @@ module acquisition_unit(
             end
          end // block: i_q_sel
          else begin
-            i_q_value <= `ACC_WIDTH_TRACK'd0;
+            i_q_value <= `ACC_WIDTH'd0;
          end
-      endgenerate
+      end
+   endgenerate*/
+   always @(*) begin
+      i_q_value <= acc_i_q_sel ? acc_q[acc_select] : acc_i[acc_select];
    end
    
 
    //Take the absolute value of I/Q to
    //reduce multiplier complexity.
    wire [`ACC_MAG_RANGE] mag;
-   abs #(.WIDTH(`ACC_WIDTH_TRACK))
+   abs #(.WIDTH(`ACC_WIDTH))
      abs_value(.in(i_q_value),
                .out(mag));
 
@@ -187,7 +197,8 @@ module acquisition_unit(
                       .reset(reset),
                       .in(acc_i_q_sel==1'b0),
                       .out(i2_pending));
-   
+
+   wire square_ready;
    delay #(.DELAY(4+1))
      square_ready_delay(.clk(clk),
                         .reset(reset),
@@ -201,8 +212,8 @@ module acquisition_unit(
                   i2q2_out+square_km1;
       
       i2q2_tag <= reset ? `ACQ_ACC_SEL_MAX :
-                  acc_complete[0] ? `ACQ_ACC_SEL_WIDTH'd0 :
-                  square_ready && !i2_pending ? i2q2_tag+`ACQ_ACC_SEL_WIDTH'd1 :
+                  accumulation_complete ? `ACQ_ACC_SEL_WIDTH'd0 :
+                  i2q2_ready ? i2q2_tag+`ACQ_ACC_SEL_WIDTH'd1 :
                   i2q2_tag;
    end
 

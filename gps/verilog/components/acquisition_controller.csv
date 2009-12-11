@@ -22,3 +22,7 @@ ACQ_STATE_EARLY_PROMPT,ACQ_STATE_WIDTH'd1,Compare early and prompt I2Q2 values.
 ACQ_STATE_EP_LATE,ACQ_STATE_WIDTH'd2,Compare previous result with late I2Q2 value.
 ACQ_STATE_PEAK,ACQ_STATE_WIDTH'd3,Check result to current peak value.
 ACQ_STATE_UPDATE,ACQ_STATE_WIDTH'd4,Update peak values if necessary.
+
+//Satellite acquisition threshold.
+ACQ_I2Q2_THRESHOLD,I2Q2_WIDTH'dround(10^(CNO_MIN/10)*SNR_FLOOR*ACQ_ACC_LENGTH*1e-3),Satellite acquisition threshold.
+ACQ_I2Q2_EARLY_THRESHOLD,I2Q2_WIDTH'dround(10^(CNO_EARLY/10)*SNR_FLOOR*ACQ_ACC_LENGTH*1e-3),Satellite early acquisition threshold.

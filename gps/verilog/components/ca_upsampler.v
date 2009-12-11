@@ -52,7 +52,7 @@ module ca_upsampler(
    //Target is coming up if it is the next shift
    //value and the shift is enabled.
    wire target_upcoming;
-   assign target_upcoming = next_code_shift==seek_target_int && pl_update_en && seek_en_int;
+   assign target_upcoming = next_code_shift==seek_target_int && pl_update_en;
 
    //The seek target has been reached when
    //the current code shift is equal to

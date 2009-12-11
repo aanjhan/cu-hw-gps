@@ -23,6 +23,7 @@ INPUT_MAG,INPUT_WIDTH-2:0,Input magniude value.
 ACQ_ACC_LENGTH,3,Acquisition accumulation length in C/A code lengths.
 TRACK_ACC_LENGTH,1,Tracking accumulation length in C/A code lengths.
 
+//Code shift.
 CS_WIDTH,max_width(F_S*T_CA_CODE),Upsampled C/A code shift width.
 CS_RANGE,CS_WIDTH-1:0,Upsampled C/A code shift range.
 MAX_CS_VALUE,T_CA_CODE*F_S-1,Maximum upsampled code shift value.
@@ -31,6 +32,9 @@ MAX_CODE_SHIFT,CS_WIDTH'dMAX_CS_VALUE,Maximum upsampled code shift value.
 //Acquisition parameters.
 F_DOPP_MAX,6000,Maximum expected Doppler shift.
 DOPP_BIN_SIZE,200,Doppler bin width in Hz.
+SNR_FLOOR,3e8,Average signal-to-noise floor (empirically measured for 3ms accumulations).
+CNO_MIN,37,Minimum carrier-to-noise ratio required for acquisition.
+CNO_EARLY,50,Early-acquisition carrier-to-noise threshold.
 
 //PRN identifier.
 PRN_MAX,31,Maximum supported satellite PRN.

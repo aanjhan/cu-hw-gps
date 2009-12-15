@@ -3,6 +3,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{graphicx}
 \usepackage{amsmath}
+\usepackage{url}
 
 \setlength{\parskip}{7.2pt}
 \setlength{\parindent}{0mm}
@@ -38,7 +39,7 @@ Presented here is a discussion of the design and implementation of the hardware 
 
 \subsection{GPS Signal Description}
 \label{sec:signal description}
-Satellite navigation systems work by triangulating a user's location from known-location reference transmitters. In the case of GPS, a constellation of 32 satellites orbits the Earth in a Medium Earth Orbit (MEO), with a height range of approximately 20,000 km to 26,000 km. Each satellite transmits a data message, providing a receiver with orbital parameters that can then be used to determine the satellite location. Once the locations are known for each of the available satellites in view, the receiver can then determine its location by calculating distances to each satellite from the time-of-flight of the data bits for that satellite's message.
+Satellite navigation systems work by triangulating a user's location from known-location reference transmitters. In the case of GPS, a constellation of 32 satellites orbits the Earth in a Medium Earth Orbit (MEO), with a height range of approximately 20,000 km to 26,000 km \cite{navstar}. Each satellite transmits a data message, providing a receiver with orbital parameters that can then be used to determine the satellite location. Once the locations are known for each of the available satellites in view, the receiver can then determine its location by calculating distances to each satellite from the time-of-flight of the data bits for that satellite's message.
 
 The currently-available civilian GPS signal, called the Coarse Acquisition (\emph{C/A}) code, is broadcast by each satellite in the constellation on the GPS \emph{L1} frequency (1575.42 MHz). This signal contains a data message with the broadcasting satellite's orbital parameters (\emph{ephimerides}), an atmospheric correction model, and a set of coarse satellite positioning parameters for all satellites, known as the \emph{almanac}. The broadcast signals are encoded with a Code-Division Multiple Access (\emph{CDMA}) scheme such that all satellites can broadcast simultaneously on the same frequency. The signal is then mixed with the L1 carrier frequency and broadcast.
 
@@ -68,7 +69,7 @@ To track the carrier the receiver generates an in-phase carrier replica and a qu
 \label{sec:data}
 Once the carrier and code have been wiped off of the incoming signal, the remaining information, disregarding any noise, is the encoded data message broadcast by the satellite. Data bits are transmitted at a rate of 50 bits/second. The satellites' data broadcasts are divided into frames, which are each further divided into five subframes. Each subframe contains ten 30-bit words. An entire frame takes 30 seconds to transmit.
 
-Data bits are encoded as $\pm 1$, and bit transitions can thus be recovered by looking for 180 degree phase shifts (negations) of the incoming carrier signal. Each satellite uses an atomic clock to synchronize its bit transitions with all of the other satellites. Each subframe begins with a 30-bit telemetry word, which contains a fixed 22-bit preamble, followed by a telemetry message and accompanying parity bits. A receiver can use the preamble to locate the start of a subframe prior to decoding the data message.
+Data bits are encoded as $\pm 1$, and bit transitions can thus be recovered by looking for 180 degree phase shifts (negations) of the incoming carrier signal. Each satellite uses an atomic clock to synchronize its bit transitions with all of the other satellites. Each subframe begins with a 30-bit telemetry word, which contains a fixed 22-bit preamble, followed by a telemetry message and accompanying parity bits \cite{navstar}. A receiver can use the preamble to locate the start of a subframe prior to decoding the data message.
 
 The subframes from a given satellite provide ephemeris data required to locate the satellite's orbital position, satellite constellation health information, atmospheric modeling parameters used to correct for positioning errors introduced by ionospheric and tropospheric delays, and an almanac of long-term, coarse satellite orbital parameters for the entire constellation.
 
@@ -108,7 +109,7 @@ Methods for determining the receiver location and velocity, as well as the curre
 This section discusses the implementation details of the Cornell University Hardware Receiver. The receiver has been developed in conjunction with Cornell Electrical and Computer Engineering department's GPS courses (ECE 4150 and ECE 5840), microcontroller and embedded design courses (ECE 4760 and ECE 5760), and the Cornell GNSS Research Group.
 
 \subsection{Receiver Overview}
-This project involved developing a modular GPS receiver in Verilog for an Altera Cyclone II FPGA. The receiver was designed to contain all necessary functionality in hardware to acquire and track satellites, and package observables and extracted satellite data in an easily consumable form for navigation.
+This project involved developing a modular GPS receiver in Verilog for an Altera Cyclone II FPGA. The receiver was designed to contain all necessary functionality in hardware to acquire and track satellites, and package observables and extracted satellite data in an easily consumable form for navigation. The hardware is additionally outfitted with a Maxim MAX2741 GPS L1 front-end module with a built-in 3-bit analog-to-digital converter.
 
 \begin{figure}
 \centering
@@ -127,8 +128,7 @@ In a GPS receiver, each channel is responsible for tracking an assigned satellit
 The accumulators and carrier/code generation units take a significant amount of hardware. In order to increase the number of satellites that can be tracked at a time, each channel is pipelined and slotted such that it is capable of performing accumulations for as many satellites as there are cycles between samples. Operating at 200 MHz with a 16.8 MHz sample clock, this means that a given channel can track up to 11 satellites at a time.
 
 %FIXME Insert slotted channel schematic.
-
-Figure \ref{FIXME} shows the hardware implementation of a slotted channel unit, excluding pipelining required for calculation timing and memory data retrieval. A slotted channel contains three memory banks used to store information for its slots. One memory bank holds the tracking control parameters (Doppler shift and code chipping rate DDS phase increments) returned by the tracking loops after each accumulation. A second memory bank holds all of the internal register values for each piece of channel hardware (C/A upsampler, carrier generator DDS, and sample counter) for each slot. The final memory bank holds the in-phase and quadrature accumulator values for the early, prompt, and late subchannels for each slot.
+Figure REF shows the hardware implementation of a slotted channel unit, excluding pipelining required for calculation timing and memory data retrieval. A slotted channel contains three memory banks used to store information for its slots. One memory bank holds the tracking control parameters (Doppler shift and code chipping rate DDS phase increments) returned by the tracking loops after each accumulation. A second memory bank holds all of the internal register values for each piece of channel hardware (C/A upsampler, carrier generator DDS, and sample counter) for each slot. The final memory bank holds the in-phase and quadrature accumulator values for the early, prompt, and late subchannels for each slot.
 
 \subsection{Direct Digital Synthesis}
 \label{sec:dds}
@@ -281,7 +281,7 @@ Because the satellite is moving with respect to the receiver, the chipping rate 
 \Delta f_{aid} = \frac{\omega_{df,k+1} f_{C/A}}{2 \pi f_{L1}}
 \end{equation*}
 
-Converting the contribution to a DDS phase increment, and noting that the Doppler shift reported by the carrier tracking loops is a carrier DDS phase increment (see Section \ref{FLL}), results in an aiding contribution of
+Converting the contribution to a DDS phase increment, and noting that the Doppler shift reported by the carrier tracking loops is a carrier DDS phase increment (see Section \ref{sec:fll}), results in an aiding contribution of
 
 \begin{equation*}
 \Delta \phi_{aid} = \Delta\phi_{df,k+1} \frac{f_{C/A}}{2 \pi f_{L1}} \frac{2^{N_{C/A}}}{f_s} \frac{2 \pi f_s}{2^{N_{Carrier}}}
@@ -404,8 +404,7 @@ Bit lock occurs when an empirically-found statistical bit transition rate thresh
 
 Since data bits transition at a slower rate than bit values are reported, the bit stream must be downsampled before it can be processed. Moving window counts are kept for each possible transition bin, where the number of bins is equal to the tracking accumulation period divided by the C/A bit rate, and the bin with the greatest count value is assumed to be the correct stream transition point. The data stream is then downsampled from that point, resulting in a data stream at the transmitted rate. Until bit lock is obtained, the data stream for a given satellite cannot be downsampled properly, and therefore cannot be decoded.
 
-%FIXME Reference GPS IF.
-The final indicator, frame lock, is used to indicate when the start of a C/A code subframe has been located. This is done by searching for the subframe preamble (a fixed sequence of bits defined in the GPS interface specification) in two or more consecutive subframes. If the preamble is located in the data stream, separated by exactly one subframe (300 bits), the beginning of the frame has been located and the contained data can now be decoded.
+The final indicator, frame lock, is used to indicate when the start of a C/A code subframe has been located. This is done by searching for the subframe preamble (a fixed sequence of bits defined in the GPS interface specification) in two or more consecutive subframes. If the preamble is located in the data stream, separated by exactly one subframe (300 bits), the beginning of the frame has been located and the contained data can now be decoded \cite{navstar}.
 
 \subsection{Observables Extraction}
 As discussed in Section \ref{sec:observables}, GPS receivers typically report three observable values: pseudorange, Doppler shift, and carrier phase. These values are updated with each tracking update.
@@ -414,8 +413,7 @@ Pseudorange, or code phase range, represents the distance to the satellite from 
 
 Doppler shift represents the rate of change of the range from the receiver to the satellite. Doppler shift is tracked directly by the carrier tracking loops (FLL and PLL), and can simply be reported when a new value becomes available. Doppler shift can be used to determine receiver velocity to a good degree of accuracy. In this receiver, Doppler shift is reported as a DDS phase increment, and must be converted to a more user-friendly unit (either Hz or rad/s) prior to use.
 
-%FIXME Reference http://www.trimble.com/gps/sub_phases.shtml
-Like pseudorange, carrier phase also represents the distance to the satellite. Pseudorange, which is calculated based on the start of the pseudorandom code, can have a resolution only as good as a fraction of the size of a C/A code chip in meters (generally around 3-6 meters). Carrier phase, on the other hand, is referenced on transitions that are much closer together, resulting in a ranging error on the order of the L1 wavelength (approximately 0.19 meters). Carrier phase is determined by recording the number of carrier cycles between accumulations.
+Like pseudorange, carrier phase also represents the distance to the satellite. Pseudorange, which is calculated based on the start of the pseudorandom code, can have a resolution only as good as a fraction of the size of a C/A code chip in meters (generally around 3-6 meters) \cite{trimble}. Carrier phase, on the other hand, is referenced on transitions that are much closer together, resulting in a ranging error on the order of the L1 wavelength (approximately 0.19 meters). Carrier phase is determined by recording the number of carrier cycles between accumulations.
 
 \subsection{Clock Domain Synchronization}
 Clock domain synchronization involves synchronizing digital data and control signals across hardware boundaries where two clocks with different frequencies exist. In the case of this receiver, it was necessary to synchronize the incoming sample data with the high-speed system clock. Without this step, the setup and hold times for the receiver hardware cannot be guaranteed and will cause unexpected results. For instance, if an incoming data bit is high is not synchronized the output could take on any of three states: high, low, or metastable (a voltage between the CMOS high and low voltage thresholds).
@@ -427,7 +425,6 @@ Clock domain synchronization involves synchronizing digital data and control sig
 \label{img:synchronizer}
 \end{figure}
 
-%FIXME Reference 230 book.
 A \emph{synchronizer} is a device designed to eliminate the output metastability that occurs when the input of a flip-flop is not asserted for a long enough time before the clock edge to meet the setup requirement. Figure \ref{img:synchronizer} shows the schematic for a single-bit synchronizer. The input signal (in the source clock domain) is connected to a flip-flop clocked on the destination clock. The output of that flip-flop can take on any state, as described previously. The output is then fed to the input of a second flip-flop, again clocked on the destination clock. Because the output is asserted, in whatever state it takes, for a whole cycle, the setup requirement of the second flip-flop is met and the result will always be stable.
 
 This method works well when synchronizing individual signals, however when multiple signals or multi-bit signals are required it faces data incoherence issues. Because the intermediate wire can be metastable, the voltage level of which depends on the exact setup time and physical parameters of the circuit, the output of the synchronizer might lag an input change by an additional cycle. The different lengths of signal routing paths for multi-signal synchronization means that some signals might lag others  by one system clock cycle.
@@ -439,8 +436,7 @@ This method works well when synchronizing individual signals, however when multi
 \label{img:mux synchronizer}
 \end{figure}
 
-%FIXME Reference http://www.embedded.com/columns/technicalinsights/205202134?_requestid=744
-The solution to this problem, shown in Figure \ref{img:mux synchronizer}, is to use a \emph{mux-recirculation synchronizer}. Rather than send each signal through a separate dual flip-flop synchronizer, a mux-recirculation synchronizer synchronizes a single enable signal, then uses that signal to enable flip-flops to capture the other incoming bits. In the case of the receiver, the enable signal is the incoming sample clock, which is then strobed for one system clock cycle to provide a latch enable signal for the sample data bits. The downside to this technique is that it requires the incoming data to be stable for at least three system clock cycles to capture the data signals. This may not be possible in some applications.
+The solution to this problem, shown in Figure \ref{img:mux synchronizer}, is to use a \emph{mux-recirculation synchronizer} \cite{verma}. Rather than send each signal through a separate dual flip-flop synchronizer, a mux-recirculation synchronizer synchronizes a single enable signal, then uses that signal to enable flip-flops to capture the other incoming bits. In the case of the receiver, the enable signal is the incoming sample clock, which is then strobed for one system clock cycle to provide a latch enable signal for the sample data bits. The downside to this technique is that it requires the incoming data to be stable for at least three system clock cycles to capture the data signals. This may not be possible in some applications.
 
 \section{Tools and Testing}
 \label{sec:tools}
@@ -456,6 +452,7 @@ Finally, defparser can be used to find overlapping macro names, warning the user
 A future goal for defparser is the ability to generate dependancy files for a supplied input file. Such files could then be included in a project make flow, causing header files to be recompiled automatically whenever a required source file is changed.
 
 \subsection{Verilog Preprocessor}
+%FIXME Insert description here.
 
 \subsection{High-Speed Ethernet Data Feed}
 In designing the hardware receiver it quickly became clear that a system was needed to provide repeatable testing capabilities for development. Developing and debugging the individual components of the receiver from a live, uncontrollable, and noise-affected front-end data source was not feasible. The sample rate used in the hardware receiver, required due to the C/A code chipping rate, necessitated the design of a high-speed hardware data feed system. The bandwidth required by the sample data rate is
@@ -529,13 +526,16 @@ This project is to be completed in two parts. The first part includes the major 
 
 The receiver hardware was developed primarily by Adam Shapiro, with assistance from Tom Chatt, in the Fall of 2009. The completion of the receiver and addition of features will be completed by Tom Chatt, with assistance from Adam Shapiro, in the Spring of 2010.
 
-\section{References}
-
 \section{Acknowledgments}
 We would like to thank Professor Bruce Land for his endless support and advice. His help in the development of the receiver has been invaluable, and his unending knowledge and stories have kept us well educated, focused, and very entertained.
 
 We would also like to thank Professor Paul Kintner, Brady O'Hanlon, and the Cornell GNSS Research Group for their help and support.
 
 Finally, we would like to thank the Cornell Department of Electrical and Computer Engineering for a terrific education and all of the opportunities to learn and grow it provided.
+
+\bibliographystyle{plain}
+\bibliography{hw_gps_receiver}
+\nocite{misre}
+\nocite{wakerly}
 
 \end{document}

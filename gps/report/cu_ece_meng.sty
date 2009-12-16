@@ -1,0 +1,123 @@
+%%
+%% Cornell University ECE MEng Report Cover Page for LaTeX, cu_ece_meng.sty
+%% Copyright (C) 2009 Adam Shapiro (ams348@cornell.edu)
+%%
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either version 1.3
+%% of this license or (at your option) any later version.
+%% The latest version of this license is in
+%%   http://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of LaTeX
+%% version 2005/12/01 or later.
+%%
+%% --------------------------------------------------------------------------------
+%%
+%% This file was modified from the Advanced Cover Page for LaTeX package
+%% developed by Georges-Etienne Legendre <http://legege.com>, and released
+%% under the LaTeX Project Public License, version 1.3.
+%% Copyright (C) 2005-2006 Georges-Etienne Legendre <http://legege.com>
+%%
+%% --------------------------------------------------------------------------------
+%%
+%% This LaTeX package allows to easily create cover pages for MEng reports.
+%%
+%% How to use this package?
+%% 1) Import the package. 
+%%    \usepackage{cu_ece_meng}
+%% 2) Use the following declarations to complete your cover page:
+%%    \title{}, \author{}, \advisor{}, \date{}
+%% 3) Use the command \maketitle to generate the cover page.
+%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cu_ece_meng}[2009/12/16 v1.0 Cornell University ECE MEng Report Cover Page]
+
+\def\ACP@advisor{}
+
+\def\advisor#1{\gdef\ACP@advisor{#1}}
+
+\newcommand{\AdvancedCoverPageFontTitle}{\LARGE\sffamily\bfseries}
+\newcommand{\AdvancedCoverPageFontText}{\large\sffamily\bfseries}
+
+\renewcommand*{\maketitle}{%
+  \begin{titlepage}
+	  \begin{center}
+	   \vfil\par\vskip 2em
+
+	    \noindent
+	    \AdvancedCoverPageFontTitle
+	    \MakeUppercase{\@title}
+	    \par
+	    \vfill
+	    
+	    \AdvancedCoverPageFontText
+	    
+	    \noindent
+	    A Design Project Report \\
+	    Presented to the Engineering Division of the Graduate School \\
+	    of Cornell University \\
+	    in Partial Fulfillment of the Requirements for the Degree of \\
+	    Master of Engineering (Electrical)
+	    \par\vfill
+
+	   \noindent
+	   by \\
+	   \@author
+	   \par\vskip 1em
+	      
+	   \noindent
+	   Project Advisor: \ACP@advisor
+	   \par
+
+	    \ifx\@date\@empty\else
+	      \vskip 1em\noindent
+	      Degree Date: \@date
+	      \par
+	    \fi
+	  \end{center}\par
+  \end{titlepage}
+  
+  \global\let\ACP@advisor\@empty
+
+  \global\let\AdvancedCoverPageFontTitle\relax
+  \global\let\AdvancedCoverPageFontText\relax
+
+  \global\let\maketitle\relax
+}
+
+\renewenvironment{abstract}{
+   \newpage
+   \begin{center}
+   
+   \large\sffamily
+   \textbf{Abstract}
+   \par
+   \vskip 2em
+   
+   \large\sffamily
+   Master of Electrical Engineering Program \\ \vskip 0.5em
+   Cornell University \\ \vskip 0.5em
+   Design Project Report
+   \end{center}
+   
+   \begin{flushleft}
+   \large\sffamily
+   
+   \textbf{Project Title:} \@title
+   \par
+   
+   \textbf{Author:} \@author
+   \par
+   
+   \textbf{Abstract:}
+   \par
+   \end{flushleft}
+}{
+   \vfill
+   
+   \begin{flushleft}
+   Report Approved by \\ \vskip 0.3em
+   Project Advisor: \hskip 20em Date:
+   \end{flushleft}
+   
+   \newpage
+}

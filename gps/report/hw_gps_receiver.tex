@@ -234,7 +234,16 @@ In the following subsections, the I and Q values are considered as a vector in t
 
 \subsubsection{Square Root}
 \label{sec:square root}
-%FIXME Insert description.
+%FIXME Insert citation.  The algorithm is taken from the page at http://www.embedded.com/98/9802fe2.htm.  Citation must be inserted both here and in the bibliography!
+To calculate the square roots required by the tracking loops, a module was developed to calculate a fixed-point integer approximation to the square root of an input number using an iterative algorithm requiring only bit-shifting, addition, and bitwise logical operations. The iterative algorithm implemented is based on the Friden algorithm, dating back to mechanical calculators, and follows pseudocode taken from !!!!REFERENCE!!!!. Rather than using a Newton-Rapshon scheme to calculate the square root, which requires division and an unknown number of iterations to converge to the required precision, the Friden-based algorithm uses a binary-adapted "sum of the odd integers" approach to estimate the square root of an input number in a number of iterations approximately equal to the bit width of the input number. It relies on the fact that the $n$th partial sum $S_n$ of the sequence
+\begin{equation*}
+s = {1, 3, 5, 7, ..., 2k + 1}, 0 \leq k \leq \infty
+\end{equation*}
+can be written as
+\begin{equation*}
+S_n = \sum_{k = 0}^{n-1}2k+1 = p^2
+\end{equation*}
+where p is a positive integer. By iteratively subtracting multiples of elements of the sequence $s$ and comparing the divisor and remainder, successive digits of the square root can be computed using bit shifts instead of multiplication and division.
 
 \subsubsection{Delay-Locked Loop (DLL)}
 The delay-locked loop tracks the PRN code for a given satellite by maximizing the vector magnitude (signal strength) of the prompt subchannel with respect to the early and late subchannels. The DLL is a first-order proportional controller, which adjusts the code chipping rate based on the difference between the early and late accumulations. When the local code replica exactly matches the transmitted code, the early and late codes will have the same vector magnitude.
@@ -453,6 +462,11 @@ A future goal for defparser is the ability to generate dependancy files for a su
 
 \subsection{Verilog Preprocessor}
 %FIXME Insert description here.
+The Verilog Preprocessor is a set of Python scripts used as a means to perfom code generation and in-line arithmetic for code generalization beyond the ability of the Verilog language. Due to the effort to keep Verilog code as general as possible, there were many instances in which code generation was required that could not be performed using Verilog \texttt{generate} statements and other built-in options. The preprocessor allows a developer to use the full power of the Python programming language to perform these operations. The developer simply writes a Verilog module as per usual, but has the option to insert Python code at any time using a series of predefined delimiters: \verb|<?| and \verb|?>| for begin and end, respectively. When the preprocessor script is executed on this file, the Python code within these delimiters is executed in a Python environment, and the code surrounded by the delimiters as well as the delimiters themselves are replaced by the output of the Python code in the output file. This affords many opportunities to the user which are not available in the Verilog language; for example, a developer might use the preprocessor to instantiate module A rather than module B, depending on the value of a defined header macro. This would be very difficult to do cleanly in Verilog code alone, but can be implemented using a simple if statement in the preprocessor.
+
+In addition to executing Python code and printing an output file, the preprocessor parses the input file to locate any defined macros or header files. All header files are parsed recursively, moving "up the tree" until a top-level header file is reached, and all defined macros are stored in a dictionary object at runtime. This allows the developer to use predefined Verilog macros as variables in embedded Python code, which is useful for such tasks as controlling program flow via if/else statements or setting the number of iterations a loop is to perform.  
+
+Future goals for the preprocessor include support for concise Python code insertion (for example, abbreviating print statements for common expressions such as wire or input declarations) and improved parsing of module instantiation, to support recursive preprocessing of source files. These improvements will both streamline preprocessor code creation and ease the insertion of the preprocessor into project make flow.
 
 \subsection{High-Speed Ethernet Data Feed}
 In designing the hardware receiver it quickly became clear that a system was needed to provide repeatable testing capabilities for development. Developing and debugging the individual components of the receiver from a live, uncontrollable, and noise-affected front-end data source was not feasible. The sample rate used in the hardware receiver, required due to the C/A code chipping rate, necessitated the design of a high-speed hardware data feed system. The bandwidth required by the sample data rate is

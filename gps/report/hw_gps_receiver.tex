@@ -26,6 +26,8 @@ designs are either intended only for a specific use and therefore too difficult 
 The design consists of two major components, implemented on separate Altera Cyclone II FPGAs in Verilog. The primary component is a hardware GPS receiver, capable of receiving, tracking, and processing multiple satellite transmissions of the L1 civilian GPS signal in real time. The secondary component is a combined navigation controller and graphics processing unit designed to calculate a navigation solution in real-time and provide a human-readable graphical interface. Once completed, this freely available general purpose receiver should prove useful to the Cornell GNSS Research Group as well as the satellite navigation research community as a whole.
 \end{abstract}
 
+\tableofcontents
+
 \section*{Executive Summary}
 This project involved the design and development of an open source GPS receiver on an FPGA. The receiver was developed in such a way as to be completely customizable, allowing a user to easily reconfigure it for most applications involving currently-available civilian GPS technology. In addition, the receiver was designed with further development in mind by standardizing interfaces so that new algorithms, designs, and hardware modules could be quickly integrated into the existing platform.
 
@@ -43,7 +45,7 @@ Commercial and academic GPS receivers are often designed in software for ease of
 Presented here is a discussion of the design and development of the hardware GPS receiver developed for this project. Basic concepts of GPS navigation and signal tracking are reviewed, followed by an enumeration of several issues and challenges involved in such a design, as well as the strategies developed to address those issues. Finally, preliminary receiver results and future goals for the project are discussed, as well as a description of the tools and procedures developed to aid in the production of such a complex system on an FPGA in Verilog.
 
 \subsection{Design Alternatives}
-The initial attempt at building this receiver produced tracking channels in which hardware was dedicated to a single satellite at a time. Additionally, the multipliers required to calculate vector magnitudes were contained within each channel instead of within the tracking loops, further reducing the amount of shared resources. This design, while fully functional, was extremely inefficient. A single channel, capable of tracking only one satellite, took approximately 3,500 logic elements and a number of multipliers to implement. This design severely limited the extendibility of the receiver. The large number of logic elements dedicated to each channel meant that the receiver would only be able to support a maximum of no more than 8 parallel channels.
+The initial attempt at building this receiver produced tracking channels in which hardware was dedicated to a single satellite at a time. Additionally, the multipliers required to calculate vector magnitudes were contained within each channel instead of within the tracking loops, further reducing the amount of shared resources. This design, while fully functional, was extremely inefficient. A single channel, capable of tracking only one satellite, took approximately 3,500 FPGA logic elements (where each element consists of a single flip-flop, a 4-input logic lookup table, and an arithmetic carry chain) and a number of hardware multipliers to implement. This design severely limited the extendibility of the receiver. The large number of logic elements dedicated to each channel meant that the receiver would only be able to support a maximum 8 parallel channels.
 
 An original project design iteration involved including hardware for a navigation controller and graphical interface on the same FPGA as the receiver. This plan was quickly changed however, in favor of a data and observables packaging system. Continuing the generic design methodology, by packaging the data into a standardized format, the receiver is able to be connected to any compliant navigation controller, or directly connected to a computer, for use.
 
@@ -123,7 +125,7 @@ Methods for determining the receiver location and velocity, as well as the curre
 This section discusses the implementation details of the hardware receiver. The receiver has been developed in conjunction with Cornell Electrical and Computer Engineering department's GPS courses (ECE 4150 and ECE 5840), microcontroller and embedded design courses (ECE 4760 and ECE 5760), and the Cornell GNSS Research Group.
 
 \subsection{Receiver Overview}
-This project involved developing a modular GPS receiver in Verilog for an Altera Cyclone II FPGA. The receiver was designed to contain all necessary functionality in hardware to acquire and track satellites, and package observables and extracted satellite data in an easily consumable form for navigation. The hardware is additionally outfitted with a Maxim MAX2741 GPS L1 front-end module with a built-in 3-bit analog-to-digital converter.
+This project involved developing a modular GPS receiver in Verilog for an Altera Cyclone II FPGA. The receiver was designed to contain all necessary functionality in hardware to acquire and track satellites, and package observables and extracted satellite data in an easily consumable form for navigation. The hardware is additionally outfitted with a Maxim MAX2741 GPS L1 front-end module with a built-in 3-bit analog-to-digital converter. \cite{maxim}
 
 \begin{figure}
 \centering
@@ -132,7 +134,7 @@ This project involved developing a modular GPS receiver in Verilog for an Altera
 \label{img:overview}
 \end{figure}
 
-The hardware receiver high-level design is shown in Figure \ref{img:overview}. The system consists of a set of slotted channels, each capable of tracking multiple satellites, a set of tracking loops shared among all channels, a set of acquisition units and accompanying channel initialization hardware, a Nios II CPU acting as a receiver back-end and control interface, and data extraction and signal lock detection/indication hardware. An external RF front-end with initial filtering, demodulation stages, and analog-to-digital converter (ADC) can be attached to the receiver via external I/O pins.
+The hardware receiver high-level design is shown in Figure \ref{img:overview}. The system consists of a set of channels, each capable of tracking multiple satellites in parallel, a set of tracking loops shared among all channels, a set of acquisition units and accompanying channel initialization hardware, a Nios II CPU acting as a receiver back-end and control interface, and data extraction and signal lock detection/indication hardware. An external RF front-end with initial filtering, demodulation stages, and analog-to-digital converter (ADC) can be attached to the receiver via external I/O pins.
 
 All of the hardware for this project was designed to be as generically modular as possible. Receiver functionality was divided among a set of independent modules, and standard interfaces were defined to pass required information between them. In this way, a given functional hardware module could be easily replaced with another without requiring significant modification. This also involved developing a set of tools for automatic code generation, so that the receiver could be reconfigured quickly and easily by changing a small set of global parameters at the top level. This allows the receiver to be quickly modified for different applications, as well as for use with different RF front-ends. The tools developed for this project are discussed in Section \ref{sec:tools}.
 
@@ -563,16 +565,23 @@ By sharing the largest hardware component, the tracking loops, across all hardwa
 The modular design of the system makes it very easy to change as needed to accommodate new designs, hardware, and application-specific parameters. By carefully and meticulously using Verilog macros and parameters, most all of the hardware can be entirely reconfigured by modifying a small set of globally-defined constants in a single header file. Similarly, precision of fixed-point calculations used in the tracking loops can be easily changed as needed, simply by changing the desired fractional width definition constants.
 
 \subsection{Issues}
-The acquisition unit currently uses a fixed memory bank, as opposed to swapping between two memory banks to refresh stale data. Because of this, code and Doppler drift accumulate during the acquisition process and make it more difficult to initialize tracking after long searches. This is particularly true for weaker signal strength satellites, including low-eleveation satellites. Plans are in place to implement memory bank switching in the near future, enabling proper real-time acquisition.
+The acquisition unit currently uses a fixed memory bank, as opposed to swapping between two memory banks to refresh stale data. Because of this, code and Doppler drift accumulate during the acquisition process and make it more difficult to initialize tracking after long searches. This is particularly true for weaker signal strength satellites, including low-eleveation satellites. Plans are in place to implement memory bank switching in another MEng project in the near future (see Section \ref{sec:future goals}), enabling proper real-time acquisition.
 
 The receiver does not currently contain lock indication or data extraction functionality. These functions have been planned however, and will be added to the hardware in the near future.
 
 Due to time constraints, not all hardware was able to be optimized to run at the target system clock speed of 200 MHz. The results of this are increased acquisition time and slightly decreased tracking resolution. The time to completion for acquisition of a single PRN is currently approximately 2.5 minutes when an early-termination does not occur. Tracking updates take approximately twice as long to complete, with respect to number of samples missed, than originally intended. This additional delay, however, results in a total loss of approximately 23 samples, or 0.13\% of the total accumulation size.
 
-%FIXME Insert a figure of this.
-A noticeable limit cycle, manifested as high-frequency Doppler shift jitter, exists when tracking carrier using the hardware FLL. Using generated data with no noise injection and a constant Doppler shift, the tracked Doppler shift varies by about $\pm 0.2$ Hz peak to peak in steady state. This limit cycle is likely a result of three factors: the nonlinearity introduced by the small-angle approximation used in Equation \ref{eqn:fll rotation angle}, truncation error due to the fixed-point calculations, and transport delay introduced by the computation time required by the tracking loops.
+\begin{figure}
+\centering
+\includegraphics[width=6in]{50hz_w_limit_cycle.png}
+\caption{Carrier tracking limit cycle with a $\pm 0.1$ Hz oscillation.}
+\label{img:limit cycle}
+\end{figure}
+
+Figure \ref{img:limit cycle} shows a noticeable limit cycle, manifested as high-frequency Doppler shift jitter, that exists when tracking carrier using the hardware FLL. Using generated data with no noise injection and a constant Doppler shift, the tracked Doppler shift varies by up to about $\pm 0.2$ Hz peak to peak in steady state. This limit cycle is likely a result of three factors: the nonlinearity introduced by the small-angle approximation used in Equation \ref{eqn:fll rotation angle}, truncation error due to the fixed-point calculations, and transport delay introduced by the computation time required by the tracking loops.
 
 \section{Future Goals}
+\label{sec:future goals}
 This project is to be completed in two parts. The first part includes the major functional components of the receiver itself as described in this paper. The second part includes completion of the receiver, including data extraction and decoding, observables extraction, and the addition of a number of features including, but not limited to, WAAS navigational corrections, warm-start acquisition, a Kalman filter-based navigation solution implemented in C, and a graphical user interface.
 
 The receiver hardware was developed primarily by Adam Shapiro, with assistance from Tom Chatt, in the Fall of 2009. The completion of the receiver and addition of features will be completed by Tom Chatt, with assistance from Adam Shapiro, in the Spring of 2010.

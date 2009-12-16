@@ -13,7 +13,8 @@
 \title{FPGA-based Real-time GPS Receiver}
 \author{Adam M. Shapiro}
 \advisor{Bruce R. Land}
-\date{January, 2009}
+\degreemonth{January}
+\degreeyear{2009}
 
 \begin{document}
 \maketitle
@@ -26,8 +27,6 @@ designs are either intended only for a specific use and therefore too difficult 
 The design consists of two major components, implemented on separate Altera Cyclone II FPGAs in Verilog. The primary component is a hardware GPS receiver, capable of receiving, tracking, and processing multiple satellite transmissions of the L1 civilian GPS signal in real time. The secondary component is a combined navigation controller and graphics processing unit designed to calculate a navigation solution in real-time and provide a human-readable graphical interface. Once completed, this freely available general purpose receiver should prove useful to the Cornell GNSS Research Group as well as the satellite navigation research community as a whole.
 \end{abstract}
 
-\tableofcontents
-
 \section*{Executive Summary}
 This project involved the design and development of an open source GPS receiver on an FPGA. The receiver was developed in such a way as to be completely customizable, allowing a user to easily reconfigure it for most applications involving currently-available civilian GPS technology. In addition, the receiver was designed with further development in mind by standardizing interfaces so that new algorithms, designs, and hardware modules could be quickly integrated into the existing platform.
 
@@ -36,6 +35,10 @@ The GPS receiver was developed and tested in the Verilog hardware description la
 In addition to the development of the hardware receiver, a significant portion of this project involved the creation of a system for quickly developing large-scale embedded systems projects. A methodology and set of guidelines were developed that aid in the quick production of clean, understandable, functional code. The guidelines set forth rules for hardware development, coding style, and testing methods, all of which aid the system integration process and greatly reduce development time.  A set of software tools was developed which enable quick generation of reusable, reconfigurable Verilog hardware. The tools have been tested in the development of the hardware receiver, as well as in external projects, and have proven to be an extremely useful and valuable resource.
 
 All of the hardware, software, and tools developed for this project have been released to the public domain under the GNU General Public License, version 2.
+
+\newpage
+\tableofcontents
+\newpage
 
 \section{Introduction}
 The expansion of the open-source software community has prompted many researchers to look for publicly available solutions before turning to more costly alternatives, often with remarkable success. However, the satellite navigation community seems to suffer from a dearth of quality open-source code. This is in part due to the fact that most satellite navigation research is carried out by government or commercial organizations, which are often reluctant to release design data under public license. In an attempt to make a valuable contribution to the open-source resources available to the Global Positioning System (GPS) community, we have been working with the Cornell Global Navigation Satellite Systems (GNSS) research group to develop and build a mobile GPS receiver.
@@ -550,7 +553,7 @@ Even more remarkable, the high sampling rate and subsequent high code upsampling
 
 \begin{figure}
 \centering
-\includegraphics[width=6in]{real_prn1_iq_bits.png}
+\includegraphics[width=5.5in]{real_prn1_iq_bits.png}
 \caption{I/Q plot of a real GPS signal depicting visible bit transitions.}
 \label{img:iq bits}
 \end{figure}
@@ -592,6 +595,9 @@ I would like to thank Professor Bruce Land for his endless support and advice. H
 I would also like to thank Professor Paul Kintner, Professor Mark Psiaki, Brady O'Hanlon, and the Cornell GNSS Research Group for their help and support.
 
 Finally, I would like to thank the Cornell University Department of Electrical and Computer Engineering for a terrific education and all of the opportunities to learn and grow it provided.
+
+\section{Appendix}
+All source code, tools, and documentation for this project are available on the web at the following URL: \url{http://cu-hw-gps.googlecode.com}. This project is open to the public, and is licensed under the GNU General Public License, version 2.
 
 \bibliographystyle{plain}
 \bibliography{hw_gps_receiver}

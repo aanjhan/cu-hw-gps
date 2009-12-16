@@ -19,26 +19,31 @@
 %%
 %% --------------------------------------------------------------------------------
 %%
-%% This LaTeX package allows to easily create cover pages for MEng reports.
+%% This LaTeX package allows to easily create cover pages for Cornell ECE MEng reports.
 %%
 %% How to use this package?
 %% 1) Import the package. 
 %%    \usepackage{cu_ece_meng}
 %% 2) Use the following declarations to complete your cover page:
-%%    \title{}, \author{}, \advisor{}, \date{}
-%% 3) Use the command \maketitle to generate the cover page.
+%%    \title{}, \author{}, \advisor{}, \degreemonth{}, \degreeyear{}
+%% 3) Use the command \maketitle to generate a cover page.
+%% 4) Generate a project abstract page using the abstract environment.
+%%    \begin{abstract} \end{abstract}
 %%
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{cu_ece_meng}[2009/12/16 v1.0 Cornell University ECE MEng Report Cover Page]
 
 \def\ACP@advisor{}
-
+\def\ACP@degreemonth{}
+\def\ACP@degreeyear{}
 \def\advisor#1{\gdef\ACP@advisor{#1}}
+\def\degreemonth#1{\gdef\ACP@degreemonth{#1}}
+\def\degreeyear#1{\gdef\ACP@degreeyear{#1}}
 
 \newcommand{\AdvancedCoverPageFontTitle}{\LARGE\sffamily\bfseries}
 \newcommand{\AdvancedCoverPageFontText}{\large\sffamily\bfseries}
 
-\renewcommand*{\maketitle}{%
+\renewcommand*{\maketitle}{
   \begin{titlepage}
 	  \begin{center}
 	   \vfil\par\vskip 2em
@@ -70,13 +75,15 @@
 
 	    \ifx\@date\@empty\else
 	      \vskip 1em\noindent
-	      Degree Date: \@date
+	      Degree Date: \ACP@degreemonth, \ACP@degreeyear
 	      \par
 	    \fi
 	  \end{center}\par
   \end{titlepage}
   
   \global\let\ACP@advisor\@empty
+  \global\let\ACP@degreemonth\@empty
+  \global\let\ACP@degreeyear\@empty
 
   \global\let\AdvancedCoverPageFontTitle\relax
   \global\let\AdvancedCoverPageFontText\relax

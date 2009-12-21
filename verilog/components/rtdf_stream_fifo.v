@@ -1,4 +1,4 @@
-// This file is part of the Cornell University GPS Hardware Receiver Project.
+// This file is part of the Cornell University Hardware GPS Receiver Project.
 // Copyright (C) 2009 - Adam Shapiro (ams348@cornell.edu)
 //                      Tom Chatt (tjc42@cornell.edu)
 //
@@ -20,38 +20,18 @@
 `timescale 1 ps / 1 ps
 // synopsys translate_on
 module rtdf_stream_fifo (
-	sclr,
-	data,
-	rdclk,
-	rdreq,
-	wrclk,
-	wrreq,
-	q,
-	rdempty,
-	wrfull,
-	wrusedw);
+    input              sclr,
+    input [15:0]       data,
+    input              rdclk,
+    input              rdreq,
+    input              wrclk,
+    input              wrreq,
+    output wire [15:0] q,
+    output wire        rdempty,
+    output wire        wrfull,
+    output wire [8:0]  wrusedw);
 
    parameter DEPTH = 16;
-
-   input        sclr;
-   input [15:0] data;
-   input        rdclk;
-   input        rdreq;
-   input        wrclk;
-   input        wrreq;
-   output [15:0] q;
-   output        rdempty;
-   output        wrfull;
-   output [8:0]  wrusedw;
-
-   wire          sub_wire0;
-   wire [8:0]    sub_wire1;
-   wire          sub_wire2;
-   wire [15:0]   sub_wire3;
-   wire          rdempty = sub_wire0;
-   wire [8:0]    wrusedw = sub_wire1[8:0];
-   wire          wrfull = sub_wire2;
-   wire [15:0]   q = sub_wire3[15:0];
 
    dcfifo dcfifo_component(.wrclk (wrclk),
 			   .rdreq (rdreq),
@@ -59,10 +39,10 @@ module rtdf_stream_fifo (
 			   .rdclk (rdclk),
 			   .wrreq (wrreq),
 			   .data (data),
-			   .rdempty (sub_wire0),
-			   .wrusedw (sub_wire1),
-			   .wrfull (sub_wire2),
-			   .q (sub_wire3)
+			   .rdempty (rdempty),
+			   .wrusedw (wrusedw),
+			   .wrfull (wrfull),
+			   .q (q)
 			   // synopsys translate_off
 			   ,
 			   .rdfull (),

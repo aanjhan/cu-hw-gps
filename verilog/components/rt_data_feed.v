@@ -1,4 +1,4 @@
-// This file is part of the Cornell University GPS Hardware Receiver Project.
+// This file is part of the Cornell University Hardware GPS Receiver Project.
 // Copyright (C) 2009 - Adam Shapiro (ams348@cornell.edu)
 //                      Tom Chatt (tjc42@cornell.edu)
 //
@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-
 `undef DEBUG
 //`define DEBUG
 `include "debug.vh"

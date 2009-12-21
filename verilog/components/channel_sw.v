@@ -1,3 +1,20 @@
+// This file is part of the Cornell University Hardware GPS Receiver Project.
+// Copyright (C) 2009 - Adam Shapiro (ams348@cornell.edu)
+//                      Tom Chatt (tjc42@cornell.edu)
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 `include "global.vh"
 `include "channel.vh"
 `include "channel__ca_upsampler.vh"
@@ -221,6 +238,7 @@ module channel_sw(
    // Pipeline Stage 2:
    //   --Update carrier DDS.
    //   --Update code DDS.
+   //   --Prefetch accumulator values.
    //////////////////////////////
 
    //Decode state memory output.
@@ -253,6 +271,9 @@ module channel_sw(
    assign tau_prime = control_data_out[52:38];
    assign ca_dphi = control_data_out[37:17];
    assign doppler_dphi = control_data_out[16:0];
+
+   //Fetch accumulator values.
+   assign acc_mem_rd_addr = slot_km2;
 
    //Flag accumulation completion when enough
    //samples have been accumulated.
@@ -499,7 +520,6 @@ module channel_sw(
    // Pipeline Stage 4:
    //   --Wipe-off code.
    //   --Accumulate result.
-   //   --Take I/Q absolute values.
    /////////////////////////////////////////////
 
    //Decode accumulator memory output.

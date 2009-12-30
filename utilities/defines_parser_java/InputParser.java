@@ -14,10 +14,13 @@ import Exceptions.*;
 
 public class InputParser
 {
-    public enum FileType { CSV, XML };
+    public enum InputType { CSV, XML };
+    public enum Directive { INCLUDE, UNKNOWN };
     
     private boolean useStdin;
+    private InputStream inStream;
     private String file;
+    private InputType type;
     
     private static final Pattern fileName = Pattern.compile("^((.*\\/)?([^\\/]*))\\.([^.]+)$");
     private static final Pattern comment = Pattern.compile("^ *(//.*)?$");
@@ -38,6 +41,55 @@ public class InputParser
         this.file=file;
     }
     
+    private BufferedReader OpenStream(){ return OpenStream(false); }
+    private BufferedReader OpenStream(boolean errorOnFail)
+    {
+        if(file.equals("-"))useStdin=true;
+
+        type=InputType.CSV;
+        if(useStdin)
+        {
+            inStream=System.in;
+            file="";
+        }
+        else
+        {
+            Matcher m=fileName.matcher(file);
+            if(m.matches())
+            {
+                if(m.group(4).equals("xml"))type=InputType.XML;
+            }
+
+            try
+            {
+                inStream=new FileInputStream(file);
+            }
+            catch(Exception e)
+            {
+                if(errorOnFail)ErrorReporter.Error("unable to open file '"+file+"'.");
+                else ErrorReporter.Warning("unable to open file '"+file+"'.");
+                return null;
+            }
+        }
+        
+        return new BufferedReader(new InputStreamReader(inStream));
+    }
+    
+    private void Cleanup()
+    {
+        if(!useStdin)
+        {
+            try
+            {
+                inStream.close();
+            }
+            catch (IOException e)
+            {
+                ErrorReporter.Warning("unable to close file '"+file+"'.");
+            }
+        }
+    }
+    
     public int Parse(HashMap<String,MacroEntry> vars,
                      ArrayList<String> verilog)
     {
@@ -48,66 +100,30 @@ public class InputParser
                      ArrayList<String> verilog,
                      boolean print)
     {
-        if(file.equals("-"))useStdin=true;
-
-        FileType type=FileType.CSV;
-        InputStream in;
-        if(useStdin)
+        BufferedReader inReader=OpenStream(false);
+        
+        if(inReader!=null)
         {
-            in=System.in;
-            file="";
+        	try
+        	{
+        		switch(type)
+        		{
+        		case XML: ParseXML(inReader,file,vars,verilog,print); break;
+        		default: ParseCSV(inReader,file,vars,verilog,print); break;
+        		}
+        	}
+        	catch(IOException e)
+        	{
+        		ErrorReporter.Error(file,"IO error parsing file.");
+        	}
         }
-        else
-        {
-            Matcher m=fileName.matcher(file);
-            if(m.matches())
-            {
-                if(m.group(4).equals("xml"))type=FileType.XML;
-            }
+        
+        Cleanup();
 
-            try
-            {
-                in=new FileInputStream(file);
-            }
-            catch(Exception e)
-            {
-                InputErrors.PrintWarning("unable to open file '"+file+"', ignoring.");
-                return 0;
-            }
-        }
-        BufferedReader inReader=new BufferedReader(new InputStreamReader(in));
-
-        int errorCount;
-        try
-        {
-            switch(type)
-            {
-            case XML: errorCount=ParseXML(inReader,file,vars,verilog,print); break;
-            default: errorCount=ParseCSV(inReader,file,vars,verilog,print); break;
-            }
-        }
-        catch(IOException e)
-        {
-            InputErrors.PrintError(file,"IO error parsing file.");
-            errorCount=1;
-        }
-
-        if(!useStdin)
-        {
-            try
-            {
-                in.close();
-            }
-            catch (IOException e)
-            {
-                InputErrors.PrintWarning("unable to close file '"+file+"'.");
-            }
-        }
-
-        return errorCount;
+        return ErrorReporter.ErrorCount();
     }
 
-    public int ParseCSV(BufferedReader in,
+    public void ParseCSV(BufferedReader in,
                         String currentFile,
                         HashMap<String,MacroEntry> vars,
                         ArrayList<String> verilog,
@@ -116,26 +132,24 @@ public class InputParser
         String line;
         Matcher m;
         int lineCount=0;
-        int errorCount=0;
         
         while((line=in.readLine())!=null)
         {
             lineCount++;
             if(comment.matcher(line).matches())continue;
+            else if((m=directive.matcher(line)).matches())
+            {
+                ExecDirective(m.group(1),m.group(3),currentFile,lineCount,vars,verilog,print);
+                continue;
+            }
             else if((m=verilogDirective.matcher(line)).matches())
             {
                 if(print)verilog.add(m.group(1));
                 continue;
             }
-            else if((m=directive.matcher(line)).matches())
-            {
-                errorCount+=EvalDirective(m.group(1),m.group(3),currentFile,lineCount,vars,verilog,print);
-                continue;
-            }
             else if(!(m=csvLine.matcher(line)).matches())
             {
-                InputErrors.PrintError(currentFile,lineCount,"unrecognized input format.");
-                errorCount++;
+                ErrorReporter.Error(currentFile,lineCount,"unrecognized input format.");
                 continue;
             }
             
@@ -148,8 +162,7 @@ public class InputParser
                 {
                     if(!vars.containsKey(variable))
                     {
-                        InputErrors.PrintError(currentFile,lineCount,"undefined variable '"+variable+"'.");
-                        errorCount++;
+                        ErrorReporter.Error(currentFile,lineCount,"undefined variable '"+variable+"'.");
                     }
                     else if(!vars.get(variable).print)vars.get(variable).print=print;
                     continue;
@@ -164,10 +177,12 @@ public class InputParser
                 if(vars.containsKey(variable) &&
                    (!FileCompare(currentPath,vars.get(variable).file) ||
                     vars.get(variable).line!=lineCount))
-                    InputErrors.PrintWarning(currentFile,lineCount,"duplicate declaration of variable '"+variable+
+                {
+                    ErrorReporter.Warning(currentFile,lineCount,"duplicate declaration of variable '"+variable+
                                              "' in '"+currentPath+"'.\n"+
                                              "originally defined in '"+vars.get(variable).file+
                                              "', line "+String.valueOf(vars.get(variable).line)+".");
+                }
                 
                 MacroEntry entry=new MacroEntry();
                 entry.expression=expression;
@@ -184,25 +199,71 @@ public class InputParser
             catch(ParserError e)
             {
                 e.Embed(true);
-                InputErrors.PrintError(currentFile,lineCount,e.getMessage());
+                ErrorReporter.Error(currentFile,lineCount,e.getMessage());
                 vars.remove(variable);
-                errorCount++;
             }
         }
-
-        return errorCount;
     }
 
-    public int ParseXML(BufferedReader in,
+    public void ParseXML(BufferedReader in,
                         String currentFile,
                         HashMap<String,MacroEntry> vars,
                         ArrayList<String> verilog,
                         boolean print)
     {
-        return 0;
+        ErrorReporter.Error("XML files currently unsupported.");
+    }
+    
+    public ArrayList<String> ListDependencies()
+    {
+        BufferedReader inReader=OpenStream(false);
+        
+        if(inReader==null)return null;
+        
+        ArrayList<String> deps=new ArrayList<String>();
+        String line;
+        Matcher m;
+        int lineCount=0;
+        try
+        {
+        	while((line=inReader.readLine())!=null)
+        	{
+        		lineCount++;
+        		
+        		if(comment.matcher(line).matches())continue;
+        		else if((m=directive.matcher(line)).matches())
+        		{
+        			if(EvalDirective(m.group(1),m.group(3))==Directive.INCLUDE);
+
+                    m=Pattern.compile("^(!)?\"([\\/\\w.]+)\"$").matcher(m.group(3));
+                    if(!m.matches())
+                    {
+                        ErrorReporter.Warning(file,
+                        		lineCount,
+                                               "invalid include directive.");
+                    }
+                    else deps.add(m.group(2));
+        			continue;
+        		}
+        	}
+        }
+        catch(IOException e)
+        {
+        	ErrorReporter.Error(e.getMessage());
+        }
+        
+        Cleanup();
+        
+    	return deps;
     }
 
-    public int EvalDirective(String directive,
+    public Directive EvalDirective(String directive, String parameter)
+    {
+        if(directive.equals("include"))return Directive.INCLUDE;
+        else return Directive.UNKNOWN;
+    }
+
+    public void ExecDirective(String directive,
                              String parameter,
                              String currentFile,
                              int currentLine,
@@ -210,15 +271,16 @@ public class InputParser
                              ArrayList<String> verilog,
                              boolean print)
     {
-        if(directive.equals("include"))
+    	Directive dir=EvalDirective(directive,parameter);
+        if(dir==Directive.INCLUDE)
         {
             Matcher m=Pattern.compile("^(!)?\"([\\/\\w.]+)\"$").matcher(parameter);
             if(!m.matches())
             {
-                InputErrors.PrintError(currentFile,
+                ErrorReporter.Error(currentFile,
                                        currentLine,
                                        "invalid include directive.");
-                return 1;
+                return;
             }
 
             if(print)print=m.start(1)<0;
@@ -226,10 +288,10 @@ public class InputParser
             m=fileName.matcher(currentFile);
             if(!m.matches())
             {
-                InputErrors.PrintError(currentFile,
+                ErrorReporter.Error(currentFile,
                                        currentLine,
                                        "invalid file name \""+currentFile+"\".");
-                return 1;
+                return;
             }
             else if(m.start(2)>=0)file=m.group(2)+file;
             try
@@ -239,28 +301,28 @@ public class InputParser
             }
             catch(Exception e)
             {
-                InputErrors.PrintError(currentFile,
+                ErrorReporter.Error(currentFile,
                                        currentLine,
                                        "unable to open included file \""+file+"\".");
-                return 1;
+                return;
             }
 
+            int errorCount=ErrorReporter.ErrorCount();
             InputParser inParser=new InputParser(file);
-            int errorCount=inParser.Parse(vars,verilog,print);
+            inParser.Parse(vars,verilog,print);
+            errorCount=ErrorReporter.ErrorCount()-errorCount;
             if(errorCount>0)
             {
-                InputErrors.PrintError(currentFile,
+                ErrorReporter.Error(currentFile,
                                        currentLine,
                                        String.valueOf(errorCount)+" error"+(errorCount>0 ? "s" : "")+" from included file '"+file+"'.");
             }
-            return errorCount;
         }
         else
         {
-            InputErrors.PrintError(currentFile,
+            ErrorReporter.Error(currentFile,
                                    currentLine,
                                    "unknown directive '"+directive+"'.");
-            return 1;
         }
     }
     
